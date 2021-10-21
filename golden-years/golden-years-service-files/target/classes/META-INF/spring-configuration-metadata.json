@@ -1,0 +1,37 @@
+{
+  "groups": [
+    {
+      "name": "file",
+      "type": "cn.qingweico.files.resource.FileResource",
+      "sourceType": "cn.qingweico.files.resource.FileResource"
+    }
+  ],
+  "properties": [
+    {
+      "name": "file.bucket-name",
+      "type": "java.lang.String",
+      "sourceType": "cn.qingweico.files.resource.FileResource"
+    },
+    {
+      "name": "file.endpoint",
+      "type": "java.lang.String",
+      "sourceType": "cn.qingweico.files.resource.FileResource"
+    },
+    {
+      "name": "file.fs-host",
+      "type": "java.lang.String",
+      "sourceType": "cn.qingweico.files.resource.FileResource"
+    },
+    {
+      "name": "file.object-name",
+      "type": "java.lang.String",
+      "sourceType": "cn.qingweico.files.resource.FileResource"
+    },
+    {
+      "name": "file.oss-host",
+      "type": "java.lang.String",
+      "sourceType": "cn.qingweico.files.resource.FileResource"
+    }
+  ],
+  "hints": []
+}

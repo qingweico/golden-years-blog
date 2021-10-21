@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="golden-years-common" />
+        <module name="golden-years-service-user" />
+        <module name="golden-years-service-admin" />
+        <module name="golden-years-service-files" />
+        <module name="golden-years-service-api" />
+        <module name="mybatis-generator-database" />
+        <module name="golden-years-gateway" />
+        <module name="golden-years-service-article" />
+        <module name="golden-years-service-article-static" />
+        <module name="golden-years-model" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="golden-years-service-search" target="1.8" />
+      <module name="springcloud-eureka" target="1.8" />
+      <module name="springcloud-eureka-cluster" target="1.8" />
+      <module name="springcloud-zuul-server" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="golden-years-common" options="-parameters" />
+      <module name="golden-years-gateway" options="-parameters" />
+      <module name="golden-years-model" options="-parameters" />
+      <module name="golden-years-service-admin" options="-parameters" />
+      <module name="golden-years-service-api" options="-parameters" />
+      <module name="golden-years-service-article" options="-parameters" />
+      <module name="golden-years-service-article-static" options="-parameters" />
+      <module name="golden-years-service-files" options="-parameters" />
+      <module name="golden-years-service-search" options="-parameters" />
+      <module name="golden-years-service-user" options="-parameters" />
+      <module name="springcloud-eureka" options="-parameters" />
+      <module name="springcloud-eureka-cluster" options="-parameters" />
+      <module name="springcloud-zuul-server" options="-parameters" />
+    </option>
+  </component>
+</project>

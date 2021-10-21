@@ -1,0 +1,6 @@
+/workspaces/idea_lee/imooc-news/mybatis-generator-database/src/main/java/com/imooc/my/mapper/MyMapper.java
+/workspaces/idea_lee/imooc-news/mybatis-generator-database/src/main/java/com/imooc/pojo/Category.java
+/workspaces/idea_lee/imooc-news/mybatis-generator-database/src/main/java/com/imooc/admin/mapper/CategoryMapper.java
+/workspaces/idea_lee/imooc-news/mybatis-generator-database/src/main/java/com/imooc/mybatis/utils/UserGenerator.java
+/workspaces/idea_lee/imooc-news/mybatis-generator-database/src/main/java/com/imooc/mybatis/utils/AdminGenerator.java
+/workspaces/idea_lee/imooc-news/mybatis-generator-database/src/main/java/com/imooc/mybatis/utils/ArticleGenerator.java

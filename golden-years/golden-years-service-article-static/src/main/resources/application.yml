@@ -1,0 +1,44 @@
+############################################################
+#
+# article 静态化微服务
+# web访问端口号 dev: 8005
+#
+############################################################
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-swallow-size: -1  # tomcat默认大小2M,超过2M的文件不会被捕获,需要调整此处大小为100MB或者-1即可
+
+############################################################
+#
+# 配置项目信息   数据源的相关配置
+#
+############################################################
+spring:
+  application:
+    name: service-article
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  profiles:
+    active: dev
+  data:
+    mongodb:
+      uri: mongodb://root:root@119.29.35.129:27017
+      database: golden-years
+  freemarker:
+    charset: UTF-8
+    content-type: text/html
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+  rabbitmq:
+    host: 119.29.35.129
+    port: 5672
+    username: admin
+    password: admin
+    virtual-host: golden-years
+
+# 定义freemarker生成的html位置
+freemarker:
+  html:
+    article: D:\Tomcat 9.0\webapps\ROOT\golden-years-ui\portal\article

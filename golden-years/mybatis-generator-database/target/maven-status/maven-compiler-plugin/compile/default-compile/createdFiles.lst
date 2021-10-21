@@ -1,0 +1,5 @@
+com/imooc/admin/mapper/CategoryMapper.class
+com/imooc/mybatis/utils/UserGenerator.class
+com/imooc/pojo/Category.class
+com/imooc/mybatis/utils/AdminGenerator.class
+com/imooc/my/mapper/MyMapper.class
