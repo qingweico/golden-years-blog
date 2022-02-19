@@ -1,8 +1,0 @@
-server:
-  port: 8003
-spring:
-  redis:
-    database: 0
-    host: 119.29.35.129
-    port: 6379
-    password: 990712
