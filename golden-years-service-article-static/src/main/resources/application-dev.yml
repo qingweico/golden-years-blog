@@ -1,0 +1,7 @@
+server:
+  port: 8005
+
+# 在dev环境中开启mybatis的日志打印
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

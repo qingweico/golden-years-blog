@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>cn.qingweico</groupId>
+	<artifactId>golden-years</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<modules>
+		<module>golden-years-common</module>
+		<module>golden-years-model</module>
+		<module>golden-years-service-api</module>
+		<module>golden-years-service-user</module>
+		<module>golden-years-service-files</module>
+		<module>golden-years-service-admin</module>
+		<module>golden-years-service-article</module>
+		<module>golden-years-service-article-static</module>
+		<module>golden-years-gateway</module>
+	</modules>
+	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.5.RELEASE</version>
+		<relativePath/>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+
+		<mysql-connector-java.version>8.0.19</mysql-connector-java.version>
+		<mongodb-driver.version>3.11.1</mongodb-driver.version>
+		<mybatis-spring-boot-starter.version>2.1.0</mybatis-spring-boot-starter.version>
+		<mapper-spring-boot-starter.version>2.1.5</mapper-spring-boot-starter.version>
+		<pagehelper-spring-boot-starter.version>1.2.12</pagehelper-spring-boot-starter.version>
+		<spring-boot-starter-freemarker>2.2.5.RELEASE</spring-boot-starter-freemarker>
+		<okhttp.version>4.2.2</okhttp.version>
+		<lombok.version>1.18.10</lombok.version>
+		<jackson.version>2.10.2</jackson.version>
+		<commons-codec.version>1.11</commons-codec.version>
+		<commons-lang3.version>3.4</commons-lang3.version>
+		<commons-fileupload.version>1.4</commons-fileupload.version>
+		<google-guava.version>28.2-jre</google-guava.version>
+		<druid.version>1.1.8</druid.version>
+		<jjwt.version>0.7.0</jjwt.version>
+		<swagger.starter.version>3.0.0</swagger.starter.version>
+		<fastdfs.version>1.27.2</fastdfs.version>
+		<oshi.version>3.9.1</oshi.version>
+		<slf4j.version>1.7.21</slf4j.version>
+		<joda-time.version>2.10.6</joda-time.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- SpringCloud 依赖 -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>Hoxton.SR3</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<!-- SpringCloud Alibaba 依赖 -->
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-alibaba-dependencies</artifactId>
+				<version>2.2.6.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<!-- Java 编译 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -1,0 +1,69 @@
+############################################################
+#
+# 网关微服务
+# web访问端口号 dev: 7000
+#
+############################################################
+server:
+  port: 7000
+  tomcat:
+    uri-encoding: UTF-8
+    max-swallow-size: -1  # tomcat默认大小2M,超过2M的文件不会被捕获,需要调整此处大小为100MB或者-1即可
+
+############################################################
+#
+# 配置项目信息   数据源的相关配置
+#
+############################################################
+spring:
+  application:
+    name: service-gateway
+  redis:
+    database: 0
+    host: 119.29.35.129
+    port: 6379
+    password: 990712
+    timeout: 3000
+    jedis:
+      pool:
+        # 控制一个pool可分配多少个jedis实例
+        max-active: 100
+        # 连接池中最多可空闲maxIdle个连接 这里取值为20 表示即使没有数据库连接时依然可以保持20空闲的连接
+        max-idle: 20
+        # 最大等待时间:当没有可用连接时, 连接池等待连接被归还的最大时间(以毫秒计数), 超过时间则抛出异常
+        max-wait: 3000
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user-route
+          uri: lb://service-user
+          predicates:
+            - Path=/user/**, /appUser/**, /fans/**, /passport/**
+        - id: admin-route
+          uri: lb://service-admin
+          predicates:
+            - Path=/admin/**, /category/**, /friendLink/**, /Kaptcha
+        - id: article-route
+          uri: lb://service-article
+          predicates:
+            - Path=/article/**, /portal/article/**, /comment/**
+        - id: files-route
+          uri: lb://service-files
+          predicates:
+            - Path=/fs/**
+    nacos:
+      discovery:
+        server-addr: 119.29.35.129:8848
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+# ip请求限制的参数配置
+blackIp:
+  continueCounts: ${counts:10}     # ip连续请求的次数
+  timeInterval: ${interval:1}      # ip判断的事件间隔, 单位: 秒
+  limitTimes: ${times:15}          # 限制的事件, 单位: 秒

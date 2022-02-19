@@ -1,0 +1,45 @@
+############################################################
+#
+# 文件微服务
+# web访问端口号 dev: 8002
+#
+############################################################
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-swallow-size: -1  # tomcat默认大小2M, 超过2M的文件不会被捕获, 需要调整此处大小为100MB或者-1即可
+
+############################################################
+#
+# 配置项目信息
+#
+############################################################
+spring:
+  application:
+    name: service-files
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+  data:
+    mongodb:
+      uri: mongodb://root:root@119.29.35.129:27017
+      database: golden-years
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 119.29.35.129:8848
+############################################################
+#
+#  fastDFS配置信息
+#
+############################################################
+fdfs:
+  connect-timeout: 300
+  so-timeout: 300
+  tracker-list: 119.29.35.129:22122
