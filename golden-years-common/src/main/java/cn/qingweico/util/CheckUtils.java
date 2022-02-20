@@ -4,6 +4,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ *
+ * /^((https|http|ftp|rtsp|mms)?:\/\/)[^\s]+/
+ * /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/
  * @author zqw
  * @date 2021/11/6
  */
