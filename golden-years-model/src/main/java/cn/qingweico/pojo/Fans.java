@@ -3,20 +3,22 @@ package cn.qingweico.pojo;
 import lombok.Data;
 
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * @author zqw
  * @date 2021/9/13
  */
 @Data
+@Table(name = "t_fans")
 public class Fans {
     @Id
     private String id;
 
     /**
-     * 博主id
+     * 关注的作者
      */
-    private String writerId;
+    private String author;
 
     /**
      * 粉丝用户id

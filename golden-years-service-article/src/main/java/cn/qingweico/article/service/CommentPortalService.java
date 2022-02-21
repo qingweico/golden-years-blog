@@ -5,8 +5,8 @@ import cn.qingweico.util.PagedGridResult;
 /**
  * 主页评论服务
  *
- * @author:qiming
- * @date: 2021/9/13
+ * @author zqw
+ * @date 2021/9/13
  */
 public interface CommentPortalService {
 

@@ -7,8 +7,8 @@ import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * @author:qiming
- * @date: 2021/9/10
+ * @author zqw
+ * @date 2021/9/10
  */
 @Configuration
 public class CloudConfig {

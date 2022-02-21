@@ -13,8 +13,6 @@ const app = {
         commentList: [],
         // 用户标签字典 列表
         userTagDictList: [],
-        // WebConfig网站配置
-        webConfigData: {},
         // 登录消息, 用于控制登录弹框
         loginMessage: "",
     },
@@ -31,16 +29,6 @@ const app = {
         // 传入自定义参数
         [SET_USER_TAG](state, userTagDictList) {
             state.userTagDictList = userTagDictList
-        },
-
-        // 设置WebConfig
-        [SET_WEB_CONFIG_DATA](state, webConfigData) {
-            state.webConfigData = webConfigData
-        },
-
-        // 设置消息
-        [SET_LOGIN_MESSAGE](state, loginMessage) {
-            state.loginMessage = loginMessage
         },
     },
 

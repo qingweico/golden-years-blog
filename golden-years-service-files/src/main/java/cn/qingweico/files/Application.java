@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
- * @author:qiming
- * @date: 2021/9/8
+ * @author zqw
+ * @date 2021/9/8
  */
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = {"cn.qingweico", "org.n3r.idworker"})

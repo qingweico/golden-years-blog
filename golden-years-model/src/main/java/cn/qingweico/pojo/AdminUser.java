@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -11,6 +12,7 @@ import java.util.Date;
  * @date 2021/09/06
  */
 @Data
+@Table(name = "t_admin")
 public class AdminUser {
     @Id
     private String id;

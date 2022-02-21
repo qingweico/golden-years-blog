@@ -12,7 +12,7 @@ import cn.qingweico.exception.GraceException;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.bo.NewArticleBO;
-import cn.qingweico.pojo.eo.ArticleEO;
+import cn.qingweico.pojo.eo.ArticleEo;
 import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -34,8 +34,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
 @Service
 public class ArticleServiceImpl extends BaseService implements ArticleService {
@@ -47,20 +47,20 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private Sid sid;
 
     @Resource
-    private AliTextReviewUtils aliTextReviewUtils;
-
-    @Resource
     private ElasticsearchTemplate elasticsearchTemplate;
 
     @Resource
-    public GridFSBucket gridFSBucket;
+    public GridFSBucket gridFsBucket;
 
-    @Transactional
+    private static final Integer ARTICLE_SUMMARY = 100;
+
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void createArticle(NewArticleBO newArticleBO) {
 
         String articleId = sid.nextShort();
         Article article = new Article();
+        String summary = getArticleSummary(article);
         BeanUtils.copyProperties(newArticleBO, article);
 
         article.setId(articleId);
@@ -69,15 +69,16 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
         article.setCommentCounts(0);
         article.setReadCounts(0);
+        article.setCollectCounts(0);
         article.setIsDelete(YesOrNo.NO.type);
-
+        article.setSummary(summary);
         article.setCreateTime(new Date());
         article.setUpdateTime(new Date());
 
         if (article.getIsAppoint().equals(ArticleAppointType.TIMING.type)) {
-            article.setPublishTime(newArticleBO.getPublishTime());
+            article.setCreateTime(newArticleBO.getCreateTime());
             // 发送延迟消息到mq队列
-            Date willPublishTime = newArticleBO.getPublishTime();
+            Date willPublishTime = newArticleBO.getCreateTime();
             Date now = new Date();
 
             long delay = willPublishTime.getTime() - now.getTime();
@@ -92,40 +93,24 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                     articleId,
                     messagePostProcessor);
         } else if (article.getIsAppoint().equals(ArticleAppointType.IMMEDIATELY.type)) {
-            article.setPublishTime(new Date());
+            article.setCreateTime(new Date());
         }
 
         int res = articleMapper.insert(article);
         if (res != 1) {
             GraceException.display(ResponseStatusEnum.ARTICLE_CREATE_ERROR);
         }
-        updateArticleStatus(articleId, ArticleReviewStatus.WAITING_MANUAL.type);
-
-//        // 通过阿里智能AI实现对文章文本检测(自动审核)
-//        String reviewTextResult = aliTextReviewUtils.reviewTextContent(newArticleBO.getContent());
-//
-//        // 修改当前的文章状态 ---> 审核通过
-//        if (ArticleReviewLevel.PASS.type.equalsIgnoreCase(reviewTextResult)) {
-//            updateArticleStatus(id, ArticleReviewStatus.SUCCESS.type);
-//        }
-//        // 修改当前的文章状态 ---> 需要人工审核
-//        else if (ArticleReviewLevel.REVIEW.type.equalsIgnoreCase(reviewTextResult)) {
-//            updateArticleStatus(id, ArticleReviewStatus.WAITING_MANUAL.type);
-//        }
-//        // 修改当前的文章状态 ---> 审核不通过
-//        else if (ArticleReviewLevel.BLOCK.type.equalsIgnoreCase(reviewTextResult)) {
-//            updateArticleStatus(id, ArticleReviewStatus.FAILED.type);
-//        }
+        updateArticleStatus(articleId, ArticleReviewStatus.REVIEWING.type);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void timedPublishArticle() {
         articleMapper.timedPublishArticle();
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void timelyPublishArticle(String articleId) {
         Article article = new Article();
@@ -147,7 +132,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
 
-        criteria.andEqualTo("publishUserId", userId);
+        criteria.andEqualTo("author", userId);
         if (StringUtils.isNotBlank(keyword)) {
             criteria.andLike("title", "%" + keyword + "%");
         }
@@ -157,22 +142,21 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
         criteria.andEqualTo("isDelete", YesOrNo.NO.type);
         // 12 ---> REVIEWING + WAITING_MANUAL
-        if (status != null && status == 12) {
-            criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type)
-                    .orEqualTo("articleStatus", ArticleReviewStatus.WAITING_MANUAL.type);
+        if (status != null && status.equals(ArticleReviewStatus.REVIEWING.type)) {
+            criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type);
         }
         if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo("publishTime", startDate);
+            criteria.andGreaterThanOrEqualTo("createTime", startDate);
         }
         if (endDate != null) {
-            criteria.andLessThanOrEqualTo("publishTime", endDate);
+            criteria.andLessThanOrEqualTo("createTime", endDate);
         }
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, page);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void updateArticleStatus(String articleId, Integer pendingStatus) {
         Example example = new Example(Article.class);
@@ -187,21 +171,15 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
             GraceException.display(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
         }
 
-        // 如果审核通过 则查询article相关的字段并放入es中
+        // 如果审核通过, 则查询article相关的字段并放入es中
         if (ArticleReviewStatus.SUCCESS.type.equals(pendingStatus)) {
             Article result = articleMapper.selectByPrimaryKey(articleId);
             if (ArticleAppointType.IMMEDIATELY.type.equals(result.getIsAppoint())) {
-                String brief;
-                String contentText = filterHTMLTag(result.getContent());
-                if (contentText.length() <= 100) {
-                    brief = contentText;
-                } else {
-                    brief = contentText.substring(0, 100);
-                }
-                ArticleEO articleEO = new ArticleEO();
-                BeanUtils.copyProperties(result, articleEO);
-                articleEO.setBrief(brief);
-                IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleEO).build();
+                String summary = getArticleSummary(result);
+                ArticleEo articleEo = new ArticleEo();
+                BeanUtils.copyProperties(result, articleEo);
+                articleEo.setSummary(summary);
+                IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleEo).build();
                 elasticsearchTemplate.index(indexQuery);
             }
         }
@@ -216,10 +194,8 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         if (ArticleReviewStatus.isArticleStatusValid(status)) {
             criteria.andEqualTo("articleStatus", status);
         }
-        // 12 ---> REVIEWING + WAITING_MANUAL
-        if (status != null && status == 12) {
-            criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type)
-                    .orEqualTo("articleStatus", ArticleReviewStatus.WAITING_MANUAL.type);
+        if (status != null && status.equals(ArticleReviewStatus.REVIEWING.type)) {
+            criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type);
         }
         criteria.andEqualTo("isDelete", deleteStatus);
 
@@ -228,22 +204,22 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         return setterPagedGrid(list, page);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void deleteArticle(String articleId) {
         articleMapper.deleteByPrimaryKey(articleId);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void reReview(String articleId) {
         Example example = new Example(Article.class);
         Article article = new Article();
-        article.setArticleStatus(ArticleReviewStatus.WAITING_MANUAL.type);
+        article.setArticleStatus(ArticleReviewStatus.SUCCESS.type);
         articleMapper.updateByExampleSelective(article, example);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void withdrawDelete(String articleId) {
         Example articleExample = new Example(Article.class);
@@ -253,7 +229,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         articleMapper.updateByExampleSelective(article, articleExample);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void deleteArticle(String userId, String articleId) {
         Example articleExample = makeExampleCriteria(userId, articleId);
@@ -266,11 +242,11 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         if (result != 1) {
             GraceException.display(ResponseStatusEnum.ARTICLE_DELETE_ERROR);
         }
-        // 删除已通过审核的文章 还需删除gridFs和es中的数据
+        // 删除已通过审核的文章, 还需删除gridFs和es中的数据
         Integer articleStatus = articleMapper.selectByPrimaryKey(articleId).getArticleStatus();
         if (ArticleReviewStatus.SUCCESS.type.equals(articleStatus)) {
             deleteArticleHtmlForGridFs(articleId);
-            elasticsearchTemplate.delete(ArticleEO.class, articleId);
+            elasticsearchTemplate.delete(ArticleEo.class, articleId);
         }
     }
 
@@ -280,7 +256,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         String articleMongoId = article.getMongoFileId();
 
         // 删除GridFs上文章的html文件
-        gridFSBucket.delete(new ObjectId(articleMongoId));
+        gridFsBucket.delete(new ObjectId(articleMongoId));
 
         // 删除消费端的文章html文件
         doDeleteArticleHtmlByMq(articleId);
@@ -291,7 +267,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 "article.delete.do", articleId);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void withdrawArticle(String userId, String articleId) {
         Example articleExample = makeExampleCriteria(userId, articleId);
@@ -303,13 +279,13 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         if (result != 1) {
             GraceException.display(ResponseStatusEnum.ARTICLE_WITHDRAW_ERROR);
         }
-        elasticsearchTemplate.delete(ArticleEO.class, articleId);
+        elasticsearchTemplate.delete(ArticleEo.class, articleId);
 
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void updateArticleToGridFS(String articleId, String articleMongoId) {
+    public void updateArticleToGridFs(String articleId, String articleMongoId) {
         Article article = new Article();
         article.setId(articleId);
         article.setMongoFileId(articleMongoId);
@@ -325,7 +301,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         return articleExample;
     }
 
-    private String filterHTMLTag(String html) {
+    private String filterHtmlTag(String html) {
         if (html == null || "".equals(html)) {
             return "";
         }
@@ -336,5 +312,16 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         html = html.replaceAll("\\s+", " ");
 
         return html;
+    }
+
+    private String getArticleSummary(Article article) {
+        String summary;
+        String contentText = filterHtmlTag(article.getContent());
+        if (contentText.length() <= ARTICLE_SUMMARY) {
+            summary = contentText;
+        } else {
+            summary = contentText.substring(0, ARTICLE_SUMMARY);
+        }
+        return summary;
     }
 }

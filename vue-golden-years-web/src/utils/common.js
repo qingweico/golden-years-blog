@@ -5,9 +5,7 @@ import {TurndownService} from 'turndown'
 //                      全局状态码
 //*********************************************************
 const Code = {
-  // 默认页大小
-  SUCCESS: "success",
-  // 默认页码
+  SUCCESS: "200",
   ERROR: "error",
 }
 

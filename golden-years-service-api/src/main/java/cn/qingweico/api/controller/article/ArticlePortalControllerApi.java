@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author:qiming
- * @date: 2021/9/12
+ * @author zqw
+ * @date 2021/9/12
  */
 @Api(value = "主页文章相关的接口定义", tags = {"主页文章相关的接口定义"})
 @RequestMapping("/portal/article")
@@ -34,23 +34,23 @@ public interface ArticlePortalControllerApi {
                              @RequestParam Integer pageSize);
 
     @ApiOperation(value = "首页查询分类列表", notes = "首页查询分类列表", httpMethod = "GET")
-    @GetMapping("/getCategoryList")
+    @GetMapping("category")
     GraceJsonResult getCategoryList();
 
 
     @ApiOperation(value = "首页查询热文列表", notes = "首页查询热文列表", httpMethod = "GET")
-    @GetMapping("hotList")
+    @GetMapping("hot")
     GraceJsonResult hotList();
 
-    @GetMapping("queryArticleListOfWriter")
+    @GetMapping("author/all")
     @ApiOperation(value = "查询作家发布的所有文章列表", notes = "查询作家发布的所有文章列表", httpMethod = "GET")
-    GraceJsonResult queryArticleListOfWriter(@RequestParam String writerId,
+    GraceJsonResult queryArticleListOfAuthor(@RequestParam String author,
                                              @RequestParam Integer page,
                                              @RequestParam Integer pageSize);
 
-    @GetMapping("queryGoodArticleListOfWriter")
+    @GetMapping("author/good")
     @ApiOperation(value = "作家页面查询近期佳文", notes = "作家页面查询近期佳文", httpMethod = "GET")
-    GraceJsonResult queryGoodArticleListOfWriter(@RequestParam String writerId);
+    GraceJsonResult queryGoodArticleListOfAuthor(@RequestParam String author);
 
     @GetMapping("detail")
     @ApiOperation(value = "文章详情", notes = "文章详情", httpMethod = "GET")

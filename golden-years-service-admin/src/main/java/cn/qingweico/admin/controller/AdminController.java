@@ -39,9 +39,9 @@ public class AdminController extends BaseController implements AdminControllerAp
     private FaceBase64Client client;
 
     @Override
-    public GraceJsonResult adminLogin(AdminLoginBO adminLoginBO,
-                                      HttpServletRequest req,
-                                      HttpServletResponse resp) {
+    public GraceJsonResult login(AdminLoginBO adminLoginBO,
+                                 HttpServletRequest req,
+                                 HttpServletResponse resp) {
         String actualVerificationCode = (String) req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
         if (!actualVerificationCode.equals(adminLoginBO.getVerifyCode())) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.VERIFICATION_CODE_ERROR);
@@ -60,15 +60,15 @@ public class AdminController extends BaseController implements AdminControllerAp
     }
 
     @Override
-    public GraceJsonResult adminIsExist(String username) {
+    public GraceJsonResult present(String username) {
         checkAdminExist(username);
         return GraceJsonResult.ok();
     }
 
     @Override
-    public GraceJsonResult addNewAdmin(NewAdminBO newAdminBO,
-                                       HttpServletRequest req,
-                                       HttpServletResponse resp) {
+    public GraceJsonResult add(NewAdminBO newAdminBO,
+                               HttpServletRequest req,
+                               HttpServletResponse resp) {
 
         // 判断BO中的用户名和密码不为空
 
@@ -98,7 +98,7 @@ public class AdminController extends BaseController implements AdminControllerAp
     }
 
     @Override
-    public GraceJsonResult getAdminList(Integer page, Integer pageSize) {
+    public GraceJsonResult list(Integer page, Integer pageSize) {
         if (page == null) {
             page = COMMON_START_PAGE;
         }
@@ -111,9 +111,9 @@ public class AdminController extends BaseController implements AdminControllerAp
     }
 
     @Override
-    public GraceJsonResult adminLogout(String adminId,
-                                       HttpServletRequest req,
-                                       HttpServletResponse resp) {
+    public GraceJsonResult logout(String adminId,
+                                  HttpServletRequest req,
+                                  HttpServletResponse resp) {
         redisOperator.del(REDIS_ADMIN_TOKEN + ":" + adminId);
         setCookie(req, resp, "admin_token", "", COOKIE_DELETE);
         setCookie(req, resp, "admin_name", "", COOKIE_DELETE);
@@ -122,9 +122,9 @@ public class AdminController extends BaseController implements AdminControllerAp
     }
 
     @Override
-    public GraceJsonResult adminFaceLogin(AdminLoginBO adminLoginBO,
-                                          HttpServletRequest req,
-                                          HttpServletResponse resp) {
+    public GraceJsonResult face(AdminLoginBO adminLoginBO,
+                                HttpServletRequest req,
+                                HttpServletResponse resp) {
         // 判断用户名和faceId不为空
         if (StringUtils.isBlank(adminLoginBO.getUsername())) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_USERNAME_NULL_ERROR);

@@ -14,8 +14,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 
 /**
- * @author:qiming
- * @date: 2021/9/5
+ * @author zqw
+ * @date 2021/9/5
  */
 @Configuration
 @EnableSwagger2
@@ -29,7 +29,6 @@ public class Swagger3Config {
                 .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .paths(PathSelectors.any())
                 .build();
-
     }
 
     private ApiInfo apiInfo() {
@@ -48,5 +47,4 @@ public class Swagger3Config {
                 .termsOfServiceUrl("https://blog.qingweico.cn")
                 .build();
     }
-
 }

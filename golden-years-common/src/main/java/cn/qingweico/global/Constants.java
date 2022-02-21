@@ -1,5 +1,7 @@
 package cn.qingweico.global;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * 系统全局常量
  *
@@ -32,9 +34,9 @@ public class Constants {
     /**
      * 文件名后缀-img
      */
-    public final static String FILE_SUFFIX_WEBP="webp";
-    public final static String FILE_SUFFIX_TIF="tif";
-    public final static String FILE_SUFFIX_BMP="bmp";
+    public final static String FILE_SUFFIX_WEBP = "webp";
+    public final static String FILE_SUFFIX_TIF = "tif";
+    public final static String FILE_SUFFIX_BMP = "bmp";
     public final static String FILE_SUFFIX_GIF = "gif";
     public final static String FILE_SUFFIX_JPG = "jpg";
     public final static String FILE_SUFFIX_JPEG = "jpeg";
@@ -46,18 +48,18 @@ public class Constants {
     public final static String FILE_SUFFIX_XLS = "xls";
     public final static String FILE_SUFFIX_PDF = "pdf";
     public final static String FILE_SUFFIX_DOC = "doc";
-    public final static String FILE_SUFFIX_HLP="hlp";
-    public final static String FILE_SUFFIX_WPS="wps";
-    public final static String FILE_SUFFIX_RTF="rtf";
-    public final static String FILE_SUFFIX_HTML="html";
-    public final static String FILE_SUFFIX_MD="md";
+    public final static String FILE_SUFFIX_HLP = "hlp";
+    public final static String FILE_SUFFIX_WPS = "wps";
+    public final static String FILE_SUFFIX_RTF = "rtf";
+    public final static String FILE_SUFFIX_HTML = "html";
+    public final static String FILE_SUFFIX_MD = "md";
     public final static String FILE_SUFFIX_DOCX = "docx";
 
-    public final static String FILE_SUFFIX_SQL="sql";
-    public final static String FILE_SUFFIX_CSS="css";
-    public final static String FILE_SUFFIX_JS="js";
-    public final static String FILE_SUFFIX_VUE="vue";
-    public final static String FILE_SUFFIX_JAVA="java";
+    public final static String FILE_SUFFIX_SQL = "sql";
+    public final static String FILE_SUFFIX_CSS = "css";
+    public final static String FILE_SUFFIX_JS = "js";
+    public final static String FILE_SUFFIX_VUE = "vue";
+    public final static String FILE_SUFFIX_JAVA = "java";
 
     public final static String FILE_SUFFIX_RAR = "rar";
     public final static String FILE_SUFFIX_ZIP = "zip";
@@ -116,7 +118,7 @@ public class Constants {
     public final static int NUM_5000 = 5000;
 
     /**
-     * 字符串数字 0~11
+     * 字符串数字 0~10
      */
     public final static String STR_ZERO = "0";
     public final static String STR_ONE = "1";
@@ -129,8 +131,6 @@ public class Constants {
     public final static String STR_EIGHT = "8";
     public final static String STR_NINE = "9";
     public final static String STR_TEN = "10";
-    public final static String STR_ELEVEN = "11";
-    public final static String STR_500 = "500";
 
     /**
      * 日期 + 时间
@@ -145,11 +145,8 @@ public class Constants {
 
 
     public static final int THIRTY_TWO = 32;
-
-    // 默认文件路径分隔符
     public static final String PATH_SEPARATOR = "/";
-
-    // 异常类型
     public static final String DELIMITER_TO = "@";
     public static final String DELIMITER_COLON = ":";
+    public static final String NULL = null;
 }

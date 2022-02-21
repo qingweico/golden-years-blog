@@ -11,15 +11,18 @@ import java.util.List;
 /**
  * 主页文章服务
  *
- * @author:qiming
- * @date: 2021/9/12
+ * @author zqw
+ * @date 2021/9/12
  */
 public interface ArticlePortalService {
 
     /**
      * 查询主页文章列表
-     *
-     * @return PagedGridResult
+     * @param keyword 查询关键字
+     * @param category 按照文章类别查询
+     * @param page 起始查询页面
+     * @param pageSize 每页查询的数量
+     * @return {@link PagedGridResult}
      */
     PagedGridResult queryPortalArticleList(String keyword,
                                            Integer category,
@@ -35,15 +38,21 @@ public interface ArticlePortalService {
 
     /**
      * 查询作家发布的所有文章列表
+     * @param author 作家id
+     * @param page 起始查询页面
+     * @param pageSize 每页查询的数量
+     * @return {@link PagedGridResult}
      */
-    PagedGridResult queryArticleListOfWriter(String writerId,
+    PagedGridResult queryArticleListOfAuthor(String author,
                                              Integer page,
                                              Integer pageSize);
 
     /**
-     * 查询作家页面近期佳文
+     * 查询作家主页近期佳文
+     * @param author 作家id
+     * @return  {@link PagedGridResult}
      */
-    PagedGridResult queryGoodArticleListOfWriter(String writerId);
+    PagedGridResult queryGoodArticleListOfAuthor(String author);
 
     /**
      * 文章详情

@@ -4,6 +4,7 @@ import cn.qingweico.exception.GraceException;
 import cn.qingweico.files.resource.FileResource;
 import cn.qingweico.files.service.UploaderService;
 import cn.qingweico.api.controller.files.FileUploaderControllerApi;
+import cn.qingweico.global.Constants;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.bo.NewAdminBO;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Decoder;
@@ -27,8 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author:qiming
- * @date: 2021/9/8
+ * @author zqw
+ * @date 2021/9/8
  */
 @RestController
 public class FileUploadController implements FileUploaderControllerApi {
@@ -42,14 +44,15 @@ public class FileUploadController implements FileUploaderControllerApi {
     @Resource
     private GridFSBucket gridFsBucket;
 
-    @Resource
-    private AliImageReviewUtil aliImageReviewUtil;
+    @Value("${pic.path}")
+    private String facePicPath;
+
     private static final Logger log = LoggerFactory.getLogger(FileUploadController.class);
 
 
     @Override
     public GraceJsonResult uploadFace(String userId, MultipartFile file) throws IOException {
-        String path = "";
+        String path;
 
         if (file != null) {
             // 获得上传文件名称
@@ -60,14 +63,13 @@ public class FileUploadController implements FileUploaderControllerApi {
                 // 获得文件扩展名
                 String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
                 // 判断文件扩展名类型
-                if (!fileExtension.equalsIgnoreCase("jpg") &&
-                        !fileExtension.equalsIgnoreCase("jpeg") &&
-                        !fileExtension.equalsIgnoreCase("png")) {
+                if (!fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPG) &&
+                        !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPEG) &&
+                        !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_PNG)) {
                     return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_FORMATTER_FAILED);
                 }
 
                 path = uploaderService.uploadFastDfs(file, fileExtension);
-                // path = uploaderService.uploadOss(file, userId, fileExtension);
             } else {
                 return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
             }
@@ -76,31 +78,15 @@ public class FileUploadController implements FileUploaderControllerApi {
         }
         log.info("path = {}", path);
 
-        String finalPath = "";
+        String finalPath;
         if (StringUtils.isNotBlank(path)) {
             finalPath = fileResource.getFsHost() + path;
-            //finalPath = fileResource.getOssHost() + path;
         } else {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
         }
-
-        return doAliImageReview(finalPath);
+        return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, finalPath);
     }
 
-    private GraceJsonResult doAliImageReview(String pendingImageUrl) {
-        boolean res = false;
-        try {
-            res = aliImageReviewUtil.reviewImage(pendingImageUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if(!res) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_CONTENT_ILLEGAL);
-        }
-        else {
-            return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, pendingImageUrl);
-        }
-    }
 
     @Override
     public GraceJsonResult uploadToGridFs(NewAdminBO newAdminBO) throws IOException {
@@ -112,7 +98,7 @@ public class FileUploadController implements FileUploaderControllerApi {
         // 转换为输入流
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         // 上传到gridFS中
-        ObjectId id = gridFsBucket.uploadFromStream(newAdminBO.getUsername() + ".png", inputStream);
+        ObjectId id = gridFsBucket.uploadFromStream(newAdminBO.getUsername() + Constants.FILE_SUFFIX_PNG, inputStream);
         // 获得文件在gridFS中的主键id
         String fileId = id.toString();
         return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, fileId);
@@ -121,7 +107,7 @@ public class FileUploadController implements FileUploaderControllerApi {
     @Override
     public void readInGridFs(String faceId, HttpServletResponse resp) throws IOException {
 
-        if (StringUtils.isBlank(faceId) || "null".equalsIgnoreCase(faceId)) {
+        if (StringUtils.isBlank(faceId)) {
             GraceException.display(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
         }
 
@@ -151,7 +137,7 @@ public class FileUploadController implements FileUploaderControllerApi {
 
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
-                String path = "";
+                String path;
 
                 if (file != null) {
                     // 获得上传文件名称
@@ -162,9 +148,9 @@ public class FileUploadController implements FileUploaderControllerApi {
                         // 获得文件扩展名
                         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
                         // 判断文件扩展名类型
-                        if (!fileExtension.equalsIgnoreCase("jpg") &&
-                                !fileExtension.equalsIgnoreCase("jpeg") &&
-                                !fileExtension.equalsIgnoreCase("png")) {
+                        if (!fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPG) &&
+                                !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPEG) &&
+                                !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_PNG)) {
                             continue;
                         }
                         // 执行文件上传
@@ -180,12 +166,10 @@ public class FileUploadController implements FileUploaderControllerApi {
                 String finalPath = "";
                 if (StringUtils.isNotBlank(path)) {
                     finalPath = fileResource.getFsHost() + path;
-                    //finalPath = fileResource.getOssHost() + path;
                 }
                 imageUrlList.add(finalPath);
             }
         }
-
         return GraceJsonResult.ok(imageUrlList);
     }
 
@@ -200,25 +184,13 @@ public class FileUploadController implements FileUploaderControllerApi {
             GraceException.display(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
         }
         String fileName = gridFs.getFilename();
-        System.out.println(fileName);
-
-        // 获取文件流 保存到本地或者服务器的临时目录
-        File file = new File("E:\\facePic\\");
-
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-
-        File myFile = new File("E:\\facePic\\" + fileName);
+        // 获取文件流; 保存到本地或者服务器的临时目录
+        File picFile = new File(facePicPath + fileName);
         // 创建文件输出流
-        OutputStream os = new FileOutputStream(myFile);
-
+        OutputStream os = new FileOutputStream(picFile);
         // 下载到服务器或者本地
         gridFsBucket.downloadToStream(new ObjectId(faceId), os);
-
-        return myFile;
-
-
+        return picFile;
     }
 }
 

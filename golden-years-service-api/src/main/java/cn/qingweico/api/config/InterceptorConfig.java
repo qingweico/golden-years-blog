@@ -9,8 +9,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.validation.constraints.NotNull;
 
 /**
- * @author:qiming
- * @date: 2021/9/6
+ * @author zqw
+ * @date 2021/9/6
  */
 @Configuration
 public class InterceptorConfig implements WebMvcConfigurer {

@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author:qiming
- * @date: 2021/9/7
+ * @author zqw
+ * @date 2021/9/7
  */
 @Aspect
 public class ServiceLogAspect {
@@ -40,7 +40,5 @@ public class ServiceLogAspect {
             log.info("当前执行用时: {}", cost);
         }
         return proceed;
-
     }
-
 }

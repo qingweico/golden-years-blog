@@ -2,7 +2,7 @@ package cn.qingweico.article.controller;
 
 import cn.qingweico.api.config.RabbitMqConfig;
 import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.pojo.eo.ArticleEO;
+import cn.qingweico.pojo.eo.ArticleEo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +14,8 @@ import javax.annotation.Resource;
 import java.util.Date;
 
 /**
- * @author:qiming
- * @date: 2021/9/14
+ * @author zqw
+ * @date 2021/9/14
  */
 @RestController
 @RequestMapping("producer")
@@ -44,7 +44,7 @@ public class ProducerController {
 
    @GetMapping("delete/{articleId}")
    public GraceJsonResult delete(@PathVariable("articleId") String articleId) {
-      elasticsearchTemplate.delete(ArticleEO.class, articleId);
+      elasticsearchTemplate.delete(ArticleEo.class, articleId);
       return GraceJsonResult.ok();
    }
 }

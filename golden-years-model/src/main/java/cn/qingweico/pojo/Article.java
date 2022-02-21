@@ -3,6 +3,7 @@ package cn.qingweico.pojo;
 import lombok.Data;
 
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -10,6 +11,7 @@ import java.util.Date;
  * @date 2021/9/11
  */
 @Data
+@Table(name = "t_article")
 public class Article {
    @Id
    private String id;
@@ -52,14 +54,14 @@ public class Article {
    private Integer articleStatus;
 
    /**
-    * 文章发布者id
+    * 文章作者
     */
-   private String publishUserId;
+   private String author;
 
    /**
-    * 文章发布时间(也是预约发布的时间)
+    * 文章概括
     */
-   private Date publishTime;
+   private String summary;
 
    /**
     * 用户累计点击阅读数(喜欢数)(点赞) - 放redis

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 /**
- * @author:qiming
- * @date: 2021/9/13
+ * @author zqw
+ * @date 2021/9/13
  */
 @Repository
 public interface CommentsMapper extends MyMapper<Comments> {

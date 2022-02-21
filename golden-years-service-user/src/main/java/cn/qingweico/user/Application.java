@@ -9,8 +9,8 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
 import tk.mybatis.spring.annotation.MapperScan;
 
 /**
- * @author:qiming
- * @date: 2021/9/5
+ * @author zqw
+ * @date 2021/9/5
  */
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class,
         MongoDataAutoConfiguration.class})

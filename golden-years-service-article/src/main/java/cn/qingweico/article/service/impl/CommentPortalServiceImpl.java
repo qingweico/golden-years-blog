@@ -17,8 +17,8 @@ import javax.annotation.Resource;
 import java.util.*;
 
 /**
- * @author:qiming
- * @date: 2021/9/13
+ * @author zqw
+ * @date 2021/9/13
  */
 @Service
 public class CommentPortalServiceImpl extends BaseService implements CommentPortalService {
@@ -33,7 +33,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     @Resource
     private Sid sid;
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void publishComment(String articleId,
                                String fatherCommentId,
@@ -46,7 +46,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
 
         Comments comments = new Comments();
         comments.setId(sid.nextShort());
-        comments.setWriterId(articleDetailVO.getPublishUserId());
+        comments.setAuthor(articleDetailVO.getAuthor());
         comments.setArticleCover(articleDetailVO.getCover());
         comments.setArticleTitle(articleDetailVO.getTitle());
 
@@ -68,7 +68,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     public PagedGridResult queryArticleComments(String articleId,
                                                 Integer page,
                                                 Integer pageSize) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(1);
         map.put("articleId", articleId);
         PageHelper.startPage(page, pageSize);
         List<CommentsVO> commentList = commentsMapper.queryArticleCommentList(map);
@@ -76,20 +76,20 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     }
 
     @Override
-    public PagedGridResult queryWriterComments(String writerId,
+    public PagedGridResult queryWriterComments(String author,
                                                Integer page,
                                                Integer pageSize) {
         Comments comments = new Comments();
-        comments.setWriterId(writerId);
+        comments.setAuthor(author);
         PageHelper.startPage(page, pageSize);
         List<Comments> res = commentsMapper.select(comments);
         return setterPagedGrid(res, page);
     }
 
    @Override
-   public void delete(String writerId, String commentId) {
+   public void delete(String author, String commentId) {
       Comments comments = new Comments();
-      comments.setWriterId(writerId);
+      comments.setAuthor(author);
       comments.setId(commentId);
       commentsMapper.delete(comments);
    }

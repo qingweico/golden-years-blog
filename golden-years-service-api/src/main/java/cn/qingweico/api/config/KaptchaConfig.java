@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author:qiming
- * @date: 2021/9/23
+ * @author zqw
+ * @date 2021/9/23
  */
 @Configuration
 public class KaptchaConfig {
@@ -29,6 +29,5 @@ public class KaptchaConfig {
         servletRegistrationBean.addInitParameter("kaptcha.noise.color", "black");
         servletRegistrationBean.addInitParameter("kaptcha.textproducer.font.names", "Courier");
         return servletRegistrationBean;
-
     }
 }

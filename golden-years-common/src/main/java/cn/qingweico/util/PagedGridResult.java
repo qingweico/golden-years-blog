@@ -15,11 +15,11 @@ public class PagedGridResult {
     /**
      * 当前页数
      */
-    private int page;
+    private int currentPage;
     /**
      * 总页数
      */
-    private long total;
+    private long totalPage;
     /**
      * 总记录数
      */

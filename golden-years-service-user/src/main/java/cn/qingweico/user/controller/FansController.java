@@ -24,7 +24,7 @@ public class FansController extends BaseController implements FansControllerApi 
 
     @Override
     public GraceJsonResult isMeFollowThisWriter(String writerId, String fanId) {
-        boolean res = fanService.isMeFollowThisWriter(writerId, fanId);
+        boolean res = fanService.isMeFollowThisAuthor(writerId, fanId);
         return GraceJsonResult.ok(res);
     }
 

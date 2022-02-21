@@ -22,7 +22,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -36,8 +35,8 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 
 /**
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
 @RestController
 public class ArticleController extends BaseController implements ArticleControllerApi {
@@ -145,7 +144,7 @@ public class ArticleController extends BaseController implements ArticleControll
         // 审核成功 生成文章详情页静态html
         if (ArticleReviewStatus.SUCCESS.type.equals(pendingStatus)) {
 
-            // 将生成的文章详情静态html上传至GridFS 并返回articleMongoId
+            // 将生成的文章详情静态html上传至GridFS, 并返回articleMongoId
             String articleMongoId = null;
             try {
                 articleMongoId = createArticleHtmlToGridFs(articleId);
@@ -153,7 +152,7 @@ public class ArticleController extends BaseController implements ArticleControll
                 e.printStackTrace();
             }
             // 关联文章与GridFS中的静态文件
-            articleService.updateArticleToGridFS(articleId, articleMongoId);
+            articleService.updateArticleToGridFs(articleId, articleMongoId);
 
             // 发送消息到mq队列 让监听mq队列的消费者下载html
             doDownloadArticleHtmlByMq(articleId, articleMongoId);
@@ -196,7 +195,6 @@ public class ArticleController extends BaseController implements ArticleControll
                 articleId + "," + articleMongoId);
     }
 
-    @Transactional
     @Override
     public GraceJsonResult delete(String userId, String articleId) {
         articleService.deleteArticle(userId, articleId);
@@ -204,7 +202,6 @@ public class ArticleController extends BaseController implements ArticleControll
 
     }
 
-    @Transactional
     @Override
     public GraceJsonResult withdraw(String userId, String articleId) {
         articleService.withdrawArticle(userId, articleId);
@@ -221,7 +218,7 @@ public class ArticleController extends BaseController implements ArticleControll
 
         // 获得文章的详情数据
         ArticleDetailVO detailVO = getArticleDetail(articleId);
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(1);
         map.put("articleDetail", detailVO);
 
         String htmlContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, map);

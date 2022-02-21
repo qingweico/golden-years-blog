@@ -5,8 +5,8 @@ import cn.qingweico.pojo.Category;
 import org.springframework.stereotype.Repository;
 
 /**
- * @author:qiming
- * @date: 2021/10/21
+ * @author zqw
+ * @date 2021/10/21
  */
 @Repository
 public interface CategoryMapper extends MyMapper<Category> {

@@ -11,6 +11,7 @@ import java.util.Date;
  */
 
 @Data
+@Table(name = "t_user_login_log")
 public class UserLoginLog {
     @Id
     private String id;

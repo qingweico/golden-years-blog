@@ -3,16 +3,14 @@ package cn.qingweico.api.service;
 import cn.qingweico.util.PagedGridResult;
 import cn.qingweico.util.RedisOperator;
 import com.github.pagehelper.PageInfo;
-import com.mongodb.client.gridfs.GridFSBucket;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * @author:qiming
- * @date: 2021/9/10
+ * @author zqw
+ * @date 2021/9/10
  */
 public class BaseService {
 
@@ -34,9 +32,9 @@ public class BaseService {
         PageInfo<?> pageList = new PageInfo<>(list);
         PagedGridResult gridResult = new PagedGridResult();
         gridResult.setRows(list);
-        gridResult.setPage(page);
+        gridResult.setCurrentPage(page);
         gridResult.setRecords(pageList.getTotal());
-        gridResult.setTotal(pageList.getPages());
+        gridResult.setTotalPage(pageList.getPages());
         return gridResult;
     }
 }

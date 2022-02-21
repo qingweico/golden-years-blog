@@ -12,6 +12,7 @@ import javax.persistence.*;
  */
 
 @Data
+@Table(name = "t_comment")
 public class Comments {
     @Id
     private String id;
@@ -19,7 +20,7 @@ public class Comments {
     /**
      * 评论的文章与文章作者的关联id
      */
-    private String writerId;
+    private String author;
 
     /**
      * 如果是回复留言, 则本条为子留言, 需要关联查询

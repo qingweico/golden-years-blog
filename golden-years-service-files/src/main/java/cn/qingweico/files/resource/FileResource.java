@@ -5,8 +5,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 /**
- * @author:qiming
- * @date: 2021/9/22
+ * @author zqw
+ * @date 2021/9/22
  */
 @Component
 @PropertySource("classpath:file-${spring.profiles.active}.properties")

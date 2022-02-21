@@ -14,8 +14,8 @@ import javax.annotation.Resource;
 import java.util.*;
 
 /**
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
 @RestController
 public class AppsUserController extends BaseController implements AppsUserControllerApi {

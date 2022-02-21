@@ -13,7 +13,6 @@ import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -21,8 +20,8 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * @author:qiming
- * @date: 2021/9/12
+ * @author zqw
+ * @date 2021/9/12
  */
 @Service
 public class ArticlePortalServiceImpl extends BaseService implements ArticlePortalService {
@@ -63,24 +62,24 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedGridResult queryArticleListOfWriter(String writerId,
+    public PagedGridResult queryArticleListOfAuthor(String author,
                                                     Integer page,
                                                     Integer pageSize) {
 
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo("publishUserId", writerId);
+        criteria.andEqualTo("author", author);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, page);
     }
 
     @Override
-    public PagedGridResult queryGoodArticleListOfWriter(String writerId) {
+    public PagedGridResult queryGoodArticleListOfAuthor(String author) {
         Example example = new Example(Article.class);
-        example.orderBy("publishTime").desc();
+        example.orderBy("createTime").desc();
         Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo("publishUserId", writerId);
+        criteria.andEqualTo("author", author);
         PageHelper.startPage(1, 5);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, 1);
@@ -115,7 +114,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     private Example.Criteria setDefaultArticleExample(Example example) {
-        example.orderBy("publishTime").desc();
+        example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
 
         criteria.andEqualTo("isDelete", YesOrNo.NO.type);

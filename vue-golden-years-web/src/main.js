@@ -5,17 +5,29 @@ import store from './store'
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 import {Button} from 'ant-design-vue';
-Vue.config.productionTip = false
+
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/en' // lang i18n
-Vue.use(ElementUI, { locale })
+import prototype from './utils/prototype'
+
+import "../assets/iconfont/iconfont.css";
+import '../static/css/ckeditor.css';
+import '../static/css/index.css';
+
+Vue.config.productionTip = false
+Vue.use(prototype)
+Vue.use(ElementUI, {locale})
 Vue.use(Antd);
 Vue.use(Button);
-// 引入公共JS
-import '../static/css/index.css';
+Vue.directive('highlight', function (el) {
+    let blocks = el.querySelectorAll('pre code');
+    blocks.forEach((block) => {
+        hljs.highlightBlock(block)
+    })
+})
 new Vue({
-  router,
-  store,
-  render: h => h(App)
+    router,
+    store,
+    render: h => h(App)
 }).$mount('#app')

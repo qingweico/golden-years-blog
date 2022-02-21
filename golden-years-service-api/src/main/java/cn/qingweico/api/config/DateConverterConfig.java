@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * 请求路径url中的参数进行时间日期类型的转换, 字符串 -> 日期Date
  *
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
 
 @Configuration

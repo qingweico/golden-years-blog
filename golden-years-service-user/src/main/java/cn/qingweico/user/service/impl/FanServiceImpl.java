@@ -4,7 +4,7 @@ import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.pojo.AppUser;
 import cn.qingweico.pojo.Fans;
-import cn.qingweico.pojo.eo.FansEO;
+import cn.qingweico.pojo.eo.FansEo;
 import cn.qingweico.pojo.vo.FansCountsVO;
 import cn.qingweico.pojo.vo.RegionRatioVO;
 import cn.qingweico.user.mapper.FansMapper;
@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author:qiming
- * @date: 2021/9/12
+ * @author zqw
+ * @date 2021/9/12
  */
 @Service
 public class FanServiceImpl extends BaseService implements FanService {
@@ -56,23 +56,23 @@ public class FanServiceImpl extends BaseService implements FanService {
     private ElasticsearchTemplate elasticsearchTemplate;
 
     @Override
-    public boolean isMeFollowThisWriter(String writerId, String fanId) {
+    public boolean isMeFollowThisAuthor(String authorId, String fanId) {
 
         Fans fans = new Fans();
-        fans.setWriterId(writerId);
+        fans.setAuthor(authorId);
         fans.setFanId(fanId);
         int count = fansMapper.selectCount(fans);
         return count > 0;
     }
 
     @Override
-    public void follow(String writerId, String fanId) {
+    public void follow(String authorId, String fanId) {
 
         // 获得粉丝信息
         AppUser fansInfo = userService.queryUserById(fanId);
         Fans fan = new Fans();
         fan.setId(sid.nextShort());
-        fan.setWriterId(writerId);
+        fan.setAuthor(authorId);
         fan.setFanId(fanId);
 
         fan.setFanNickname(fansInfo.getNickname());
@@ -83,25 +83,25 @@ public class FanServiceImpl extends BaseService implements FanService {
 
         // redis 作家粉丝累增
 
-        redisOperator.increment(REDIS_WRITER_FANS_COUNTS + ":" + writerId, 1);
+        redisOperator.increment(REDIS_WRITER_FANS_COUNTS + ":" + authorId, 1);
 
         // redis 当前用户的(我的)关注数累增
 
         redisOperator.increment(REDIS_MY_FOLLOW_COUNTS + ":" + fanId, 1);
 
         // 保存粉丝关系到es中
-        FansEO fanEO = new FansEO();
-        BeanUtils.copyProperties(fan, fanEO);
+        FansEo fanEo = new FansEo();
+        BeanUtils.copyProperties(fan, fanEo);
         IndexQuery indexQuery = new IndexQueryBuilder()
-                .withObject(fanEO)
+                .withObject(fanEo)
                 .build();
         elasticsearchTemplate.index(indexQuery);
     }
 
     @Override
-    public void unfollow(String writerId, String fanId) {
+    public void unfollow(String authorId, String fanId) {
         Fans fan = new Fans();
-        fan.setWriterId(writerId);
+        fan.setAuthor(authorId);
         fan.setFanId(fanId);
 
 
@@ -109,7 +109,7 @@ public class FanServiceImpl extends BaseService implements FanService {
 
         // redis 作家粉丝累减
 
-        redisOperator.decrement(REDIS_WRITER_FANS_COUNTS + ":" + writerId, 1);
+        redisOperator.decrement(REDIS_WRITER_FANS_COUNTS + ":" + authorId, 1);
 
         // redis 当前用户的(我的)关注数累减
 
@@ -117,17 +117,17 @@ public class FanServiceImpl extends BaseService implements FanService {
 
         // 删除es中的粉丝关系
         DeleteQuery deleteQuery = new DeleteQuery();
-        deleteQuery.setQuery(QueryBuilders.termQuery("writerId", writerId));
+        deleteQuery.setQuery(QueryBuilders.termQuery("authorId", authorId));
         deleteQuery.setQuery(QueryBuilders.termQuery("fanId", fanId));
-        elasticsearchTemplate.delete(deleteQuery, FansEO.class);
+        elasticsearchTemplate.delete(deleteQuery, FansEo.class);
 
     }
 
     @Override
-    public PagedGridResult getMyFansList(String writerId, Integer page, Integer pageSize) {
+    public PagedGridResult getMyFansList(String authorId, Integer page, Integer pageSize) {
 
         Fans fan = new Fans();
-        fan.setWriterId(writerId);
+        fan.setAuthor(authorId);
         List<Fans> fansList = fansMapper.select(fan);
         PageHelper.startPage(page, pageSize);
         return setterPagedGrid(fansList, page);
@@ -140,23 +140,23 @@ public class FanServiceImpl extends BaseService implements FanService {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termsQuery("writerId", writerId))
+                .withQuery(QueryBuilders.termsQuery("authorId", writerId))
                 .withPageable(pageable)
                 .build();
 
-        AggregatedPage<FansEO> pagedFans = elasticsearchTemplate.queryForPage(searchQuery, FansEO.class);
+        AggregatedPage<FansEo> pagedFans = elasticsearchTemplate.queryForPage(searchQuery, FansEo.class);
         PagedGridResult gridResult = new PagedGridResult();
         gridResult.setRows(pagedFans.getContent());
-        gridResult.setTotal(pagedFans.getTotalPages());
+        gridResult.setTotalPage(pagedFans.getTotalPages());
         gridResult.setRecords(pagedFans.getTotalElements());
-        gridResult.setPage(page + 1);
+        gridResult.setCurrentPage(page + 1);
         return gridResult;
     }
 
     @Override
-    public Integer queryFansCounts(String writerId, Sex sex) {
+    public Integer queryFansCounts(String authorId, Sex sex) {
         Fans fans = new Fans();
-        fans.setWriterId(writerId);
+        fans.setAuthor(authorId);
         fans.setSex(sex.type);
         fansMapper.select(fans);
 
@@ -164,13 +164,13 @@ public class FanServiceImpl extends BaseService implements FanService {
     }
 
     @Override
-    public FansCountsVO queryFansCountsViaEs(String writerId) {
+    public FansCountsVO queryFansCountsViaEs(String authorId) {
 
         TermsAggregationBuilder termBuilder = AggregationBuilders.terms("sex_counts")
                 .field("sex");
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("writerId", writerId))
+                .withQuery(QueryBuilders.termQuery("authorId", authorId))
                 .addAggregation(termBuilder)
                 .build();
 
@@ -199,7 +199,7 @@ public class FanServiceImpl extends BaseService implements FanService {
         return fansCountsVO;
     }
 
-    public static final String[] regions = {
+    public static final String[] REGIONS = {
             "北京", "天津", "上海", "重庆", "河北",
             "山西", "辽宁", "吉林", "黑龙江", "江苏",
             "浙江", "安徽", "福建", "江西", "山东",
@@ -210,11 +210,11 @@ public class FanServiceImpl extends BaseService implements FanService {
     };
 
     @Override
-    public List<RegionRatioVO> queryRatioByRegion(String writerId) {
+    public List<RegionRatioVO> queryRatioByRegion(String authorId) {
         List<RegionRatioVO> regionRatioVOList = new ArrayList<>();
         Fans fans = new Fans();
-        fans.setWriterId(writerId);
-        for (String region : regions) {
+        fans.setAuthor(authorId);
+        for (String region : REGIONS) {
             fans.setProvince(region);
             int count = fansMapper.selectCount(fans);
             RegionRatioVO regionRatioVO = new RegionRatioVO();
@@ -227,12 +227,12 @@ public class FanServiceImpl extends BaseService implements FanService {
     }
 
     @Override
-    public List<RegionRatioVO> queryRatioByRegionViaEs(String writerId) {
+    public List<RegionRatioVO> queryRatioByRegionViaEs(String authorId) {
         TermsAggregationBuilder termBuilder = AggregationBuilders.terms("region_counts")
                 .field("province");
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("writerId", writerId))
+                .withQuery(QueryBuilders.termQuery("authorId", authorId))
                 .addAggregation(termBuilder)
                 .build();
 

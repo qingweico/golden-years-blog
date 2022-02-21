@@ -13,8 +13,8 @@ import javax.validation.Valid;
 import java.util.Date;
 
 /**
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
 @Api(value = "文章发布相关的接口定义", tags = {"文章发布相关的接口定义"})
 @RequestMapping("article")

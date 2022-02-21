@@ -100,12 +100,12 @@
     <router-view/>
   </div>
 
-  <!--  <footer>-->
-  <!--    <p>-->
-  <!--      Copyright <a href="https://gitee.com/moxi159753/mogu_blog_v2"> &nbsp;流金岁月&nbsp;</a>-->
-  <!--      <a href="https://beian.miit.gov.cn/"></a>-->
-  <!--    </p>-->
-  <!--  </footer>-->
+    <footer>
+      <p>
+        Copyright <a href="https://www.qingweico.cn"> &nbsp;流金岁月&nbsp;</a>
+        <a href="https://beian.miit.gov.cn/"></a>
+      </p>
+    </footer>
 
   <div>
     <a
@@ -122,6 +122,7 @@
 
 
 import LoginBox from "../components/LoginBox";
+import index from "./index.vue";
 
 import {mapMutations} from 'vuex';
 
@@ -206,6 +207,7 @@ export default {
     this.setSize()
     // 获取浏览器类型
     this.getBrowser()
+    console.log(process.env);
   },
   methods: {
     //拿到vuex中的写的方法

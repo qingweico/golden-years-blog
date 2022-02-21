@@ -10,6 +10,7 @@ import javax.persistence.*;
  * @date 2021/09/06
  */
 @Data
+@Table(name = "t_user")
 public class AppUser {
     @Id
     private String id;

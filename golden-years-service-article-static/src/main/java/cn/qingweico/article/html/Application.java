@@ -7,8 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import tk.mybatis.spring.annotation.MapperScan;
 
 /**
- * @author:qiming
- * @date: 2021/9/14
+ * @author zqw
+ * @date 2021/9/14
  */
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @ComponentScan(basePackages = {"cn.qingweico", "org.n3r.idworker"})

@@ -7,8 +7,8 @@ import java.io.IOException;
 /**
  * 文件上传服务
  *
- * @author:qiming
- * @date: 2021/9/8
+ * @author zqw
+ * @date 2021/9/8
  */
 public interface UploaderService {
     /**

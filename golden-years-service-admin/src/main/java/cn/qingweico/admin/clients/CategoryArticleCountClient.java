@@ -12,8 +12,8 @@ import java.util.List;
 @FeignClient(value = "service-article", path = "/portal/article")
 public interface CategoryArticleCountClient {
     /**
-     *
-     * @return
+     * 查询每个类别的文章数量
+     * @return List<Integer>
      */
     @GetMapping("queryEachCategoryCount")
     List<Integer> queryEachCategoryCount();

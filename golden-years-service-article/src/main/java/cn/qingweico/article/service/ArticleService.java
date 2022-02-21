@@ -8,8 +8,8 @@ import java.util.Date;
 /**
  * 用户和管理员相关的文章服务
  *
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
 public interface ArticleService {
 
@@ -27,7 +27,7 @@ public interface ArticleService {
     void timedPublishArticle();
 
     /**
-     * 修改文章的状态为及时发布
+     * 修改文章的状态为立即发布
      *
      * @param articleId 文章id
      */
@@ -72,7 +72,7 @@ public interface ArticleService {
      * @param articleId      文章id
      * @param articleMongoId 上传至mongodb中文章的mongoid
      */
-    void updateArticleToGridFS(String articleId, String articleMongoId);
+    void updateArticleToGridFs(String articleId, String articleMongoId);
 
     /**
      * 管理员查询所有的文章列表
@@ -99,6 +99,4 @@ public interface ArticleService {
      * 管理员撤回用户对文章的删除
      */
     void withdrawDelete(String articleId);
-
-
 }

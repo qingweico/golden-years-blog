@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * @author:qiming
- * @date: 2021/9/15
+ * @author zqw
+ * @date 2021/9/15
  */
 @Component
 public class RabbitMqDelayConsumer {

@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author:qiming
- * @date: 2021/9/8
+ * @author zqw
+ * @date 2021/9/8
  */
 @Service
 public class UploadServiceImpl implements UploaderService {
@@ -59,9 +59,7 @@ public class UploadServiceImpl implements UploaderService {
         ossClient.putObject(fileResource.getBucketName(),
                 myObjectName,
                 inputStream);
-
         ossClient.shutdown();
-
         return myObjectName;
     }
 }

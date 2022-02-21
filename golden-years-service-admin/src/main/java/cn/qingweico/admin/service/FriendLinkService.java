@@ -1,6 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.mo.FriendLinkMO;
+import cn.qingweico.pojo.mo.FriendLinkMo;
 
 import java.util.List;
 
@@ -15,14 +15,14 @@ public interface FriendLinkService {
      *
      * @param friendLinkMo FriendLinkMO
      */
-    void saveOrUpdateFriendLink(FriendLinkMO friendLinkMo);
+    void saveOrUpdateFriendLink(FriendLinkMo friendLinkMo);
 
     /**
      * 查询所有的友情链接
      *
      * @return 友情链接列表
      */
-    List<FriendLinkMO> queryAllFriendLinkList();
+    List<FriendLinkMo> queryAllFriendLinkList();
 
     /**
      * 根据友情链接id删除友情链接
@@ -37,6 +37,6 @@ public interface FriendLinkService {
      * @param isDelete 友情链接的可用状态
      * @return 友情链接列表
      */
-    List<FriendLinkMO> queryAllFriendLinkList(Integer isDelete);
+    List<FriendLinkMo> queryAllFriendLinkList(Integer isDelete);
 
 }

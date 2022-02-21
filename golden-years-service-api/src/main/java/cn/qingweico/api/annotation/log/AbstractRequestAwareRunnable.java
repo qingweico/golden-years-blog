@@ -5,8 +5,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * 异步记录日志
- * @author:qiming
- * @date: 2021/11/10
+ * @author zqw
+ * @date 2021/11/10
  */
 public abstract class AbstractRequestAwareRunnable implements Runnable {
    private final RequestAttributes requestAttributes;

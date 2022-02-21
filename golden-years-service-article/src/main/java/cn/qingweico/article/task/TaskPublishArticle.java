@@ -6,13 +6,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import javax.annotation.Resource;
 
 /**
+ * {@code @Configuration  @EnableScheduling}
  * 定时发表文章
  *
- * @author:qiming
- * @date: 2021/9/11
+ * @author zqw
+ * @date 2021/9/11
  */
-//@Configuration
-//@EnableScheduling
 public class TaskPublishArticle {
 
     @Resource

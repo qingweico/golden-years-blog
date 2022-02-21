@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="FansMapper" >
-  <resultMap id="BaseResultMap" type="Fans" >
-    <!--
-      WARNING - @mbg.generated
-    -->
+  <resultMap id="BaseResultMap" type="cn.qingweico.pojo.Fans" >
     <id column="id" property="id" jdbcType="VARCHAR" />
-    <result column="writer_id" property="writerId" jdbcType="VARCHAR" />
+    <result column="author" property="author" jdbcType="VARCHAR" />
     <result column="fan_id" property="fanId" jdbcType="VARCHAR" />
     <result column="face" property="face" jdbcType="VARCHAR" />
     <result column="fan_nickname" property="fanNickname" jdbcType="VARCHAR" />

@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author:qiming
- * @date: 2021/9/14
+ * @author zqw
+ * @date 2021/9/14
  */
 @Configuration
 public class RabbitMqConfig {

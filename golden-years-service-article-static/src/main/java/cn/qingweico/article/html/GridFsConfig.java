@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author:qiming
- * @date: 2021/9/10
+ * @author zqw
+ * @date 2021/9/10
  */
 @Configuration
 public class GridFsConfig {

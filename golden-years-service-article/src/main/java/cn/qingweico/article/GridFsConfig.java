@@ -9,18 +9,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author:qiming
- * @date: 2021/9/10
+ * @author zqw
+ * @date 2021/9/10
  */
 @Configuration
-public class GridFSConfig {
+public class GridFsConfig {
 
    @Value("${spring.data.mongodb.database}")
    private String mongodb;
 
 
    @Bean
-   public GridFSBucket getGridFSBucket(MongoClient mongoClient) {
+   public GridFSBucket getGridFsBucket(MongoClient mongoClient) {
       MongoDatabase mongodbDatabase = mongoClient.getDatabase(mongodb);
       return GridFSBuckets.create(mongodbDatabase);
    }
