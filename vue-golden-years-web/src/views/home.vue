@@ -3,7 +3,7 @@
   <body>
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>流金岁月</title>
     <meta name="keywords">
     <meta name="description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +16,7 @@
     <nav>
       <div class="logo">
         <router-link to="/">
-          <a href="javascript:void(0);"></a>
+          <a href="javascript:void(0);">流金岁月博客</a>
         </router-link>
       </div>
 
@@ -45,18 +45,12 @@
         </li>
 
         <li>
-          <router-link to="/tag">
-            <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">标签</a>
-          </router-link>
-        </li>
-        <li>
           <router-link to="/ssr">
             <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">订阅</a>
           </router-link>
         </li>
-
       </ul>
-
+      <el-button type="primary" icon="el-icon-edit" @click="goWritingCenter">创作中心</el-button>
       <div class="searchbox">
         <div id="search_bar" :class="(showSearch || keyword.length > 0)?'search_bar search_open':'search_bar'">
           <input
@@ -67,14 +61,13 @@
               name="keyboard"
               v-model="keyword"
               v-on:keyup.enter="search">
-          <p class="search_ico" @click="clickSearchIco" :style="(browserFlag === 1)?'':'top:17px'">
+          <p class="search_ico" @click="clickSearchIco">
             <span></span>
           </p>
         </div>
       </div>
 
       <el-dropdown @command="handleCommand" class="userInfoAvatar">
-
         <span class="el-dropdown-link">
           <el-badge class="item" :hidden="!isLogin">
             <img v-if="!isLogin" src="../../static/images/defaultAvatar.png" alt="">
@@ -87,25 +80,22 @@
 
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="login" v-show="!isLogin">登录</el-dropdown-item>
-          <el-dropdown-item command="goUserInfo" v-show="isLogin">个人中心</el-dropdown-item>
-          <el-dropdown-item command="logout" v-show="isLogin">退出登录</el-dropdown-item>
+          <el-dropdown-item command="goUserHomePage" v-show="!isLogin">个人中心</el-dropdown-item>
+          <el-dropdown-item command="logout" v-show="!isLogin">退出登录</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
+
     </nav>
   </header>
   <LoginBox v-if="showLogin" @closeLoginBox="closeLoginBox"></LoginBox>
-
-
   <div>
     <router-view/>
   </div>
 
-    <footer>
-      <p>
-        Copyright <a href="https://www.qingweico.cn"> &nbsp;流金岁月&nbsp;</a>
-        <a href="https://beian.miit.gov.cn/"></a>
-      </p>
-    </footer>
+  <footer>
+     <p> 豫ICP备2020030311号</p>
+      <p>Copyright © 2020 - 2022 流金岁月 All Rights Reserved</p>
+  </footer>
 
   <div>
     <a
@@ -125,6 +115,7 @@ import LoginBox from "../components/LoginBox";
 import index from "./index.vue";
 
 import {mapMutations} from 'vuex';
+import router from "@/router";
 
 
 export default {
@@ -152,7 +143,6 @@ export default {
       // 控制web端导航的隐藏和显示
       isVisible: true,
       isLogin: false,
-      browserFlag: 1,
       // 显示登录框
       showLogin: false,
       // 用户信息
@@ -196,6 +186,11 @@ export default {
     }
   },
   watch: {
+    watch: {
+      $route(to, from) {
+        this.getCurrentPageTitle()
+      }
+    },
     // 判断登录状态位是否改变; 用于控制弹框
     '$store.state.app.loginMessage': function (newFlag, oldFlag) {
       this.showLogin = true
@@ -203,11 +198,10 @@ export default {
   },
   created() {
 
-    this.getKeyword()
-    this.setSize()
-    // 获取浏览器类型
-    this.getBrowser()
-    console.log(process.env);
+    this.getKeyword();
+    this.setSize();
+    // 获取浏览器类型: navigator.userAgent
+    this.getCurrentPageTitle();
   },
   methods: {
     //拿到vuex中的写的方法
@@ -224,6 +218,9 @@ export default {
         return;
       }
       this.$router.push({path: "/list", query: {keyword: this.keyword}});
+    },
+    getCurrentPageTitle() {
+      this.saveTitle = window.location.pathname;
     },
 
     setSize() {
@@ -244,42 +241,15 @@ export default {
       }
     },
     // 跳转到文章详情
-    goToInfo(uid) {
+    goToDetail(blogId) {
       let routeData = this.$router.resolve({
-        path: "/info",
-        query: {blogUid: uid}
+        path: "/detail",
+        query: {blogId: blogId}
       });
       window.open(routeData.href, '_blank');
     },
-
-
-    // 跳转到资源详情
-    goSource: function (comment) {
-      let source = comment.source
-      switch (source) {
-        case "MESSAGE_BOARD": {
-          let routeData = this.$router.resolve({
-            path: "/messageBoard"
-          });
-          window.open(routeData.href, '_blank');
-        }
-          break;
-        case "BLOG_INFO": {
-          let routeData = this.$router.resolve({
-            path: "/info",
-            query: {blogUid: comment.blogUid}
-          });
-          window.open(routeData.href, '_blank');
-        }
-          break;
-        case "ABOUT": {
-          let routeData = this.$router.resolve({
-            path: "/about"
-          });
-          window.open(routeData.href, '_blank');
-        }
-          break;
-      }
+    goWritingCenter() {
+      this.$router.push("/center");
     },
 
 
@@ -298,69 +268,6 @@ export default {
     },
 
     submitForm: function (type) {
-      switch (type) {
-        case "editUser": {
-          this.$refs.userInfo.validate((valid) => {
-            if (!valid) {
-              console.log("校验失败")
-            } else {
-              editUser(this.userInfo).then(response => {
-                if (response.code === this.$ECode.SUCCESS) {
-                  this.$message({
-                    type: "success",
-                    message: response.data
-                  })
-                } else {
-                  this.$message({
-                    type: "error",
-                    message: response.data
-                  })
-                }
-              });
-            }
-          })
-        }
-          break;
-
-        case "changePwd": {
-          let newPwd = this.userInfo.newPwd
-          let newPwd2 = this.userInfo.newPwd2
-          let oldPwd = this.userInfo.oldPwd
-          if (newPwd !== newPwd2) {
-            this.$message({
-              type: "error",
-              message: "两次密码不一致"
-            })
-            return
-          }
-          if (newPwd === oldPwd) {
-            this.$message({
-              type: "error",
-              message: "新旧密码相同"
-            })
-            return
-          }
-          let params = new URLSearchParams()
-          params.append("oldPwd", oldPwd)
-          params.append("newPwd", newPwd)
-          updateUserPwd(params).then(response => {
-            if (response.code === this.$ECode.SUCCESS) {
-              this.$message({
-                type: "success",
-                message: response.data
-              })
-            } else {
-              this.$message({
-                type: "error",
-                message: response.data
-              })
-            }
-            // 重置表单
-            this.$refs.userInfoForm.resetFields()
-          })
-        }
-          break;
-      }
     },
 
     getKeyword: function () {
@@ -381,20 +288,21 @@ export default {
      */
     getUrlVars: function () {
       const vars = {};
-      let parts = window.location.href.replace(
+      window.location.href.replace(
           /[?&]+([^=&]+)=([^&#]*)/gi,
           function (m, key, value) {
             vars[key] = value;
           }
       );
       return vars;
-    },
+    }
+    ,
     clickSearchIco: function () {
       if (this.keyword !== "") {
         this.search();
       }
       this.showSearch = !this.showSearch;
-      //获取焦点
+      // 获取焦点
       this.$refs.searchInput.focus();
     },
     openHead: function () {
@@ -418,41 +326,35 @@ export default {
           this.userLogin();
         }
           break;
-        case "goUserInfo" : {
-          // 打开抽屉
-
+        case "goUserHomePage" : {
+         this.goUserHomePage();
         }
           break;
       }
     },
+    userLogout() {
+    },
+    goUserHomePage() {
+      let routeData = this.$router.resolve({
+        path: "/homepage",
+        query: {id: this.userInfo.id}
+      });
+      window.open(routeData.href, '_self');
+    },
     closeLoginBox: function () {
       this.showLogin = false;
-    },
-    // 获取浏览器类型
-    getBrowser() {
-      let sBrowser, sUsrAg = navigator.userAgent;
-      if (sUsrAg.indexOf("Firefox") > -1) {
-        sBrowser = "Mozilla Firefox";
-        this.browserFlag = 2;
-        // "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
-      } else if (sUsrAg.indexOf("Chrome") > -1) {
-        sBrowser = "Google Chrome or Chromium";
-        this.browserFlag = 1;
-        // "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/66.0.3359.181
-        // Chrome/66.0.3359.181 Safari/537.36"
-      }
-
     },
   }
 };
 </script>
 
-
 <style scoped>
-.el-tag {
-  height: 25px;
-  line-height: 25px;
-  margin-left: 6px;
+nav .logo {
+  color: #006cff;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 60px;
 }
 
 #starlist li .title {
@@ -495,5 +397,12 @@ export default {
 
 .uploadImgBody :hover {
   border: dashed 1px #00ccff;
+}
+footer {
+  height: 60px;
+  width: 100%;
+  position: absolute;
+  bottom:2px;
+  margin-bottom: -10px;
 }
 </style>

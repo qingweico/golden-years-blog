@@ -1,39 +1,36 @@
 <template>
   <article>
-
     <div class="blank"></div>
-
     <!--blog context begin-->
-    <div class="blogsbox">
+    <div class="blogs_box">
       <div
           v-for="item in newBlogData"
           :key="item.id"
           class="blogs"
           data-scroll-reveal="enter bottom over 1s"
       >
-        <h3 class="blogtitle">
+        <h3 class="blog_title">
           <a href="javascript:void(0);" @click="goToDetail(item)">{{ item.title }}</a>
         </h3>
 
-        <span class="blogpic">
+        <span class="blog_pic">
           <a href="javascript:void(0);" @click="goToDetail(item)" title>
             <img v-if="item.articleCover" :src="item.articleCover" alt>
           </a>
         </span>
 
-        <p class="blogtext">{{ item.summary }}</p>
-        <div class="bloginfo">
+        <p class="blog_summary">{{ item.summary }}</p>
+        <div class="blog_info">
           <ul>
 
             <li class="author">
               <span class="iconfont">&#xe60f;</span>
               <a href="javascript:void(0);" @click="goToAuthor(item.author)">{{ item.author }}</a>
             </li>
-            <li class="lmname" v-if="item.categoryId">
+            <li class="category_name" v-if="item.categoryId">
               <span class="iconfont">&#xe603;</span>
-              <a
-                  href="javascript:void(0);"
-                  @click="goToList(item.categoryId)"
+              <a href="javascript:void(0);"
+                 @click="goToBlogListGroupByCategory(item.categoryId)"
               >{{ item.categoryId }}</a>
             </li>
             <li class="view">
@@ -61,7 +58,7 @@
             <div></div>
           </div>
         </div>
-        <span v-if="isEnd">我也是有底线的~</span>
+        <span v-if="isEnd">我也是有底线的</span>
       </div>
     </div>
     <!--blog context end-->
@@ -131,6 +128,7 @@ export default {
         }
         that.loadingInstance.close();
       }, function () {
+        that.isEnd = true;
         that.loadingInstance.close();
       });
     },
@@ -160,15 +158,15 @@ export default {
         that.loading = false;
       });
     }
+  },
+  goToAuthor() {
+  },
+  goToBlogListGroupByCategory() {
   }
 };
 </script>
 
 <style>
-.el-loading-mask {
-  z-index: 2002;
-}
-
 .isEnd {
   float: left;
   width: 100%;

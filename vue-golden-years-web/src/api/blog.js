@@ -25,3 +25,13 @@ export function getBlogPraiseCountByUid (params) {
     params
   })
 }
+export function uploadBlogCover (params) {
+  return request({
+    url: process.env.WEB_API + '/fs/uploadSomeFiles',
+    method: 'post',
+    params,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

@@ -14,7 +14,7 @@
     <div class="infosbox">
       <div class="newsview">
         <h3 class="news_title" v-if="blogData.title">{{ blogData.title }}</h3>
-        <div class="bloginfo" v-if="blogData.categoryId">
+        <div class="blog_info" v-if="blogData.categoryId">
           <ul>
             <li class="author">
               <span class="iconfont">&#xe60f;</span>
@@ -77,7 +77,7 @@
   </article>
 </template>
 <script>
-import {getBlogById} from "@/api/blogContent";
+import {getBlogById} from "@/api/blog";
 import CommentList from "../components/CommentList";
 import CommentBox from "../components/CommentBox";
 import {addComment, getCommentList} from "@/api/comment";

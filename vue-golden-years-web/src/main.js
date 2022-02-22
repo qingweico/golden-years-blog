@@ -8,7 +8,6 @@ import {Button} from 'ant-design-vue';
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import locale from 'element-ui/lib/locale/lang/en' // lang i18n
 import prototype from './utils/prototype'
 
 import "../assets/iconfont/iconfont.css";
@@ -17,7 +16,7 @@ import '../static/css/index.css';
 
 Vue.config.productionTip = false
 Vue.use(prototype)
-Vue.use(ElementUI, {locale})
+Vue.use(ElementUI)
 Vue.use(Antd);
 Vue.use(Button);
 Vue.directive('highlight', function (el) {
