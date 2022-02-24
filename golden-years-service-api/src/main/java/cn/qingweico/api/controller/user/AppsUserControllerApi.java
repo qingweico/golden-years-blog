@@ -11,20 +11,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Date;
 
 /**
- * @author:qiming
- * @date: 2021/9/10
+ * @author zqw
+ * @date 2021/9/10
  */
 @Api(value = "用户管理相关的接口定义", tags = {"用户管理相关的接口定义"})
 @RequestMapping("user")
 public interface AppsUserControllerApi {
     @ApiOperation(value = "查询网站的所有注册用户", notes = "查询网站的所有注册用户", httpMethod = "POST")
-    @GetMapping("/queryAll")
-    GraceJsonResult queryAll(@RequestParam String nickname,
-                             @RequestParam Integer status,
-                             @RequestParam Date startDate,
-                             @RequestParam Date endDate,
-                             @RequestParam Integer page,
-                             @RequestParam Integer pagSize);
+    @GetMapping("/query")
+    GraceJsonResult query(@RequestParam String nickname,
+                          @RequestParam Integer status,
+                          @RequestParam Date startDate,
+                          @RequestParam Date endDate,
+                          @RequestParam Integer page,
+                          @RequestParam Integer pagSize);
 
     @ApiOperation(value = "查看用户详情", notes = "查看用户详情", httpMethod = "POST")
     @PostMapping("/detail")

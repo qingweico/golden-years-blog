@@ -41,7 +41,7 @@ public enum ResponseStatusEnum {
     MOBILE_ERROR(504, false, "短信发送失败,请稍后重试!"),
     SMS_NEED_WAIT_ERROR(505, false, "短信发送太快啦~请稍后再试!"),
     SMS_CODE_ERROR(506, false, "验证码过期或不匹配,请稍后再试!"),
-    USER_FROZEN(507, false, "用户已被冻结,请联系管理员!"),
+    USER_FROZEN(507, false, "用户已被冻结!"),
     USER_UPDATE_ERROR(508, false, "用户信息更新失败,请联系管理员!"),
     USER_INACTIVE_ERROR(509, false, "请前往[账号设置]修改信息激活后再进行后续操作!"),
     FILE_UPLOAD_NULL_ERROR(510, false, "文件不能为空,请选择一个文件再上传!"),
@@ -52,7 +52,7 @@ public enum ResponseStatusEnum {
     USER_STATUS_ERROR(516, false, "用户状态参数出错!"),
     USER_NOT_EXIST_ERROR(517, false, "用户不存在!"),
     INCORRECT_INFORMATION(518, false, "请检查您的信息!"),
-    AUTH_FAIL(519, false, "认证信息错误或者密码错误!"),
+    AUTH_FAIL(519, false, "用户不存在或者密码错误!"),
     ILLEGAL_MOBILE_NUMBER_FORMAT(520, false, "手机号码格式错误!"),
 
 
@@ -84,7 +84,7 @@ public enum ResponseStatusEnum {
 
     // 创作中心 58x
     ARTICLE_COVER_NOT_EXIST_ERROR(580, false, "文章封面不存在,请选择一个!"),
-    ARTICLE_CATEGORY_NOT_EXIST_ERROR(581, false, "请选择正确的文章领域!"),
+    ARTICLE_CATEGORY_NOT_EXIST_ERROR(581, false, "请选择正确的文章类别!"),
     ARTICLE_CREATE_ERROR(582, false, "创建文章失败,请重试!"),
     ARTICLE_QUERY_PARAMS_ERROR(583, false, "文章列表查询参数错误!"),
     ARTICLE_DELETE_ERROR(584, false, "文章删除失败!"),

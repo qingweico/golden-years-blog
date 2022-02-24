@@ -36,7 +36,7 @@
             @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
-          <svg-icon icon-class="eye"/>
+          <svg-icon :icon-class="iconClass"/>
         </span>
       </el-form-item>
 
@@ -78,14 +78,15 @@
 </template>
 
 <script>
-import {isvalidUsername} from "@/utils/validate";
-import {getWebSiteName} from '@/api/login'
-
 export default {
   name: "Login",
   data() {
     const validateUsername = (rule, value, callback) => {
-      callback();
+      if (value.length === 0) {
+        callback(new Error("请输入用户名"));
+      } else {
+        callback();
+      }
     };
     const validatePass = (rule, value, callback) => {
       if (value.length < 6) {
@@ -108,6 +109,7 @@ export default {
       },
       loading: false,
       pwdType: "password",
+      iconClass: "eye",
       redirect: undefined,
     };
   },
@@ -116,7 +118,7 @@ export default {
     this.$refs.userNameInput.focus()
   },
   created() {
-
+  console.log(process.env);
   },
   methods: {
     inputFocus: function () {
@@ -127,8 +129,10 @@ export default {
     showPwd() {
       if (this.pwdType === "password") {
         this.pwdType = "";
+        this.iconClass = "eye-open";
       } else {
         this.pwdType = "password";
+        this.iconClass = "eye";
       }
     },
     handleLogin() {
@@ -143,6 +147,9 @@ export default {
                 } else {
                   this.$message.error(response.data);
                 }
+                this.loading = false;
+              }, () => {
+                this.$message.error('网络超时');
                 this.loading = false;
               })
               .catch(() => {

@@ -1,5 +1,6 @@
 package cn.qingweico.api.interceptor;
 
+import cn.qingweico.global.RedisConf;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,6 @@ public class AdminTokenInterceptor extends BaseInterceptor implements HandlerInt
         String adminUserId = request.getHeader("adminUserId");
         String adminUserToken = request.getHeader("adminUserToken");
 
-        return verifyUserIdAndToken(adminUserId, adminUserToken, REDIS_ADMIN_TOKEN);
+        return verifyUserIdAndToken(adminUserId, adminUserToken, RedisConf.REDIS_ADMIN_TOKEN);
     }
 }

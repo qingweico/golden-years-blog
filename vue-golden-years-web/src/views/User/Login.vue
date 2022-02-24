@@ -1,132 +1,95 @@
 <template>
   <div class="main">
     <a-form-model class="user-layout-login" @keyup.enter.native="handleSubmit">
-      <a-tabs :activeKey="customActiveKey" :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"  @change="handleTabClick">
+      <a-tabs :activeKey="customActiveKey" :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
+              @change="handleTabClick">
         <a-tab-pane key="tab1" tab="账号密码登录">
-          <login-account ref="alogin" @validateFail="validateFail" @success="requestSuccess" @fail="requestFailed"></login-account>
+          <login-account ref="acc_login" @validateFail="validateFail" @success="requestSuccess"
+                         @fail="requestFailed"></login-account>
         </a-tab-pane>
 
-        <a-tab-pane key="tab2" tab="手机号登录">
-          <login-phone ref="plogin" @validateFail="validateFail" @success="requestSuccess" @fail="requestFailed"></login-phone>
+        <a-tab-pane key="tab2" tab="手机号登录/注册">
+          <login-phone ref="phone_login" @validateFail="validateFail" @success="requestSuccess"
+                       @fail="requestFailed"></login-phone>
         </a-tab-pane>
       </a-tabs>
 
       <a-form-model-item>
-        <a-checkbox @change="handleRememberMeChange" default-checked>自动登录</a-checkbox>
-        <router-link :to="{ name: 'alteration'}" class="forge-password" style="float: right;">
-          忘记密码
-        </router-link>
-        <router-link :to="{ name: 'register'}" class="forge-password" style="float: right;margin-right: 10px" >
-          注册账户
+        <a-checkbox @change="handleRememberMeChange" default-checked>记住我</a-checkbox>
+        <router-link to="/" class="forge-password" style="float: right;margin-right: 10px">
+          返回主页
         </router-link>
       </a-form-model-item>
 
       <a-form-item style="margin-top:24px">
-        <a-button size="large"  type="primary"  htmlType="submit"  class="login-button"  :loading="loginBtn"  @click.stop.prevent="handleSubmit" :disabled="loginBtn">确定
+        <a-button size="large" type="primary" htmlType="submit" class="login-button" :loading="loginBtn"
+                  @click.stop.prevent="handleSubmit" :disabled="loginBtn">确定
         </a-button>
       </a-form-item>
 
     </a-form-model>
-
-    <two-step-captcha v-if="requiredTwoStepCaptcha" :visible="stepCaptchaVisible" @success="stepCaptchaSuccess" @cancel="stepCaptchaCancel"></two-step-captcha>
-<!--    <login-select-tenant ref="loginSelect" @success="loginSelectOk"></login-select-tenant>-->
-<!--    <third-login ref="thirdLogin"></third-login>-->
   </div>
 </template>
 
 <script>
 import LoginAccount from './LoginAccount'
 import LoginPhone from './LoginPhone'
-import { timeFix } from '@/utils/util'
+import {timeFix} from '@/utils/util'
+import {Message} from "element-ui";
+
 export default {
   components: {
     LoginAccount,
     LoginPhone,
   },
-  data () {
+  data() {
     return {
       customActiveKey: 'tab1',
-      rememberMe: true,
       loginBtn: false,
-      requiredTwoStepCaptcha: false,
-      stepCaptchaVisible: false,
-      encryptedString:{
-        key:"",
-        iv:"",
-      },
     }
   },
   created() {
-    this.getRouterData();
     this.rememberMe = true
   },
-  methods:{
-    handleTabClick(key){
-      this.customActiveKey = key
+  methods: {
+    handleTabClick(key) {
+      this.customActiveKey = key;
+      this.loginBtn = false;
     },
-    handleRememberMeChange(e){
+    handleRememberMeChange(e) {
       this.rememberMe = e.target.checked
     },
-    /**跳转到登录页面的参数-账号获取*/
-    getRouterData(){
-      this.$nextTick(() => {
-        let temp = this.$route.params.username || this.$route.query.username || ''
-        if (temp) {
-          this.$refs.alogin.acceptUsername(temp)
-        }
-      })
-    },
 
-    //登录
-    handleSubmit () {
+    // 登录
+    handleSubmit() {
       this.loginBtn = true;
       if (this.customActiveKey === 'tab1') {
         // 使用账户密码登录
-        this.$refs.alogin.handleLogin(this.rememberMe)
+        this.$refs.acc_login.handleLogin()
       } else {
-        //手机号码登录
-        this.$refs.plogin.handleLogin(this.rememberMe)
+        // 手机号码登录
+        this.$refs.phone_login.handleLogin()
       }
     },
     // 校验失败
-    validateFail(){
+    validateFail() {
       this.loginBtn = false;
     },
     // 登录后台成功
-    requestSuccess(loginResult){
-      this.$refs.loginSelect.show(loginResult)
+    requestSuccess(loginResult) {
+      this.$message.success(loginResult.msg);
+      location.replace("/#/?token=" + loginResult.data);
     },
-    //登录后台失败
-    requestFailed (err) {
-      let description = ((err.response || {}).data || {}).message || err.message || "请求出现错误，请稍后再试"
-      this.$notification[ 'error' ]({
+    // 登录后台失败
+    requestFailed(msg) {
+      this.$notification['error']({
         message: '登录失败',
-        description: description,
+        description: msg,
         duration: 4,
       });
-      //账户密码登录错误后更新验证码
-      if(this.customActiveKey === 'tab1' && description.indexOf('密码错误')>0){
-        this.$refs.alogin.handleChangeCheckCode()
-      }
       this.loginBtn = false;
     },
-    loginSelectOk(){
-      this.loginSuccess()
-    },
-    //登录成功
-    loginSuccess () {
-      this.$router.push({ path: "/dashboard/analysis" }).catch(()=>{
-        console.log('登录跳转首页出错,这个错误从哪里来的')
-      })
-      this.$notification.success({
-        message: '欢迎',
-        description: `${timeFix()}，欢迎回来`,
-      });
-    },
 
-    stepCaptchaSuccess () {
-      this.loginSuccess()
-    },
   }
 
 }
@@ -136,6 +99,7 @@ export default {
   label {
     font-size: 14px;
   }
+
   .getCaptcha {
     display: block;
     width: 100%;
@@ -160,7 +124,7 @@ export default {
 
     .item-icon {
       font-size: 24px;
-      color: rgba(0,0,0,.2);
+      color: rgba(0, 0, 0, .2);
       margin-left: 16px;
       vertical-align: middle;
       cursor: pointer;
@@ -175,10 +139,5 @@ export default {
       float: right;
     }
   }
-}
-</style>
-<style>
-.valid-error .ant-select-selection__placeholder{
-  color: #f5222d;
 }
 </style>

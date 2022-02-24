@@ -49,47 +49,7 @@ export default {
     }
   },
   created() {
-    var that = this;
-    this.$store.dispatch("GetMenu").then(response => {
-      if (response.code == this.$ECode.SUCCESS) {
-        var parentList = response.data.parentList;
-        var sonList = response.data.sonList;
-        var items = [];
-        if (
-            parentList &&
-            parentList.length > 0 &&
-            sonList &&
-            sonList.length > 0
-        ) {
-          for (var index = 0; index < parentList.length; index++) {
-            var newObject = {parent: parentList[index]};
-            var sonItem = [];
-
-            for (var index1 = 0; index1 < sonList.length; index1++) {
-              if (sonList[index1].parentUid == parentList[index].uid) {
-                sonItem.push(sonList[index1]);
-              }
-            }
-            //对子目录进行排序
-            for (var a = 0; a < sonItem.length; a++) {
-              for (var b = 0; b < sonItem.length - a - 1; b++) {
-                var tag = false;
-                if (sonItem[b].sort < sonItem[b + 1].sort) {
-                  var temp = sonItem[b];
-                  sonItem[b] = sonItem[b + 1];
-                  sonItem[b + 1] = temp;
-                  tag = true;
-                }
-              }
-            }
-            //加入
-            newObject.sonItem = sonItem;
-            items.push(newObject);
-          }
-        }
-        that.items = items;
-      }
-    });
+    this.items = {};
   },
   methods: {
     handleClickOutside() {

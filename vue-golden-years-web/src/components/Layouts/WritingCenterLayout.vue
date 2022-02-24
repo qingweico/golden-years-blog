@@ -1,19 +1,29 @@
 <template>
   <body>
   <div id="mainPage" class="mainBody">
-
     <div id="whiteHeader" class="white-header">
       <div class="head_wrapper">
         <router-link to="/">
           <a class="logo">博客首页</a>
         </router-link>
         <div class="right-me-info">
-          <div>
-            <el-avatar icon="el-icon-user-solid" :size="40"/>
+          <div class="pic">
+            <el-avatar :src="userInfo.face" :size="40"/>
           </div>
-          <span class="me-nickname">{{ userInfo.nickname }}</span>
+          <el-dropdown>
+            <span class="el-dropdown-link" style="font-weight: 300">消息</span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>评论</el-dropdown-item>
+              <el-dropdown-item>点赞</el-dropdown-item>
+              <el-dropdown-item>关注</el-dropdown-item>
+              <el-dropdown-item>私信</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </div>
+
+
       </div>
+
     </div>
 
     <!-- 页面容器 -->
@@ -94,11 +104,13 @@
 </template>
 
 <script>
-import Login from "@/views/User/Login";
+import {mapGetters, mapMutations} from "vuex";
+import {delCookie, getCookie} from "@/utils/cookie";
+import {authVerify} from "@/api/user";
+
 
 export default {
   name: "WritingCenterLayout",
-  components: {Login},
   data() {
     return {
       userInfo: {},
@@ -112,11 +124,38 @@ export default {
   },
   created() {
     this.getCurrentPageTitle();
+    this.userInfo = this.getUserInfo();
+    this.getToken();
   },
 
   methods: {
+    ...mapGetters(['getUserInfo']),
+    ...mapMutations(['setUserInfo', 'setLoginState']),
     getCurrentPageTitle() {
       this.saveTitle = window.location.pathname;
+    },
+    getToken() {
+      let token = getCookie("token");
+      if (token !== undefined) {
+        authVerify(token).then(response => {
+          if (response.data.success) {
+            this.isLogin = true;
+            this.userInfo = response.data.data;
+            this.setUserInfo(this.userInfo)
+          } else {
+            this.isLogin = false;
+            delCookie("token");
+            this.$message.error(response.data.msg);
+            this.$router.push('/');
+          }
+          this.setLoginState(this.isLogin);
+        });
+      } else {
+        this.isLogin = false;
+        this.setLoginState(this.isLogin);
+        this.$message.error("会话失效!");
+        this.$router.push('/');
+      }
     },
   }
 }
@@ -172,18 +211,8 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-.me-face {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  align-self: center;
-}
-
-.me-nickname {
-  margin-left: 10px;
-  color: gray;
-  align-self: center;
+.right-me-info .pic{
+ margin-right: 30px;
 }
 
 .container {
@@ -235,17 +264,14 @@ ol, ul {
   height: 40px;
   line-height: 40px;
 }
-.menu-item a:hover{
-  color: red;
-}
-.menu-item .title{
+
+.menu-item a:hover {
   color: red;
 }
 
-.menu-item-default:hover {
-  color: #c9394a;
+.menu-item .title {
+  color: red;
 }
-
 .shadow {
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.05);
   margin-bottom: 10px;

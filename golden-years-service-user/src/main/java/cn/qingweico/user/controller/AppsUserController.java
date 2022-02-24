@@ -1,6 +1,8 @@
 package cn.qingweico.user.controller;
 
 import cn.qingweico.enums.UserStatus;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.user.service.AppUserService;
 import cn.qingweico.api.controller.user.AppsUserControllerApi;
@@ -27,18 +29,18 @@ public class AppsUserController extends BaseController implements AppsUserContro
     private UserService userService;
 
     @Override
-    public GraceJsonResult queryAll(String nickname,
-                                    Integer status,
-                                    Date startDate,
-                                    Date endDate,
-                                    Integer page,
-                                    Integer pageSize) {
+    public GraceJsonResult query(String nickname,
+                                 Integer status,
+                                 Date startDate,
+                                 Date endDate,
+                                 Integer page,
+                                 Integer pageSize) {
 
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
         PagedGridResult pagedGridResult = appUserService.queryAllUserList(nickname,
                 status,
@@ -63,7 +65,7 @@ public class AppsUserController extends BaseController implements AppsUserContro
         appUserService.freezeUserOrNot(userId, doStatus);
 
         // 刷新用户状态
-        redisOperator.del(REDIS_USER_INFO + ":" + userId);
+        redisOperator.del(RedisConf.REDIS_USER_INFO + ":" + userId);
 
         if (doStatus.equals(UserStatus.FROZEN.type)) {
             return new GraceJsonResult(ResponseStatusEnum.FREEZE_SUCCESS);

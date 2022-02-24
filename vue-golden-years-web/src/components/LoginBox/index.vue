@@ -15,8 +15,9 @@
       <el-form :label-position="labelPosition" :rules="loginRules" :model="loginForm" ref="loginForm">
 
         <div class="passwordLogin" v-if="showPasswordLogin">
-          <el-form-item label="用户名" prop="userName">
-            <el-input v-model="loginForm.userName" placeholder="请输入用户名或邮箱" :disabled="loginType.password"></el-input>
+          <el-form-item label="用户名" prop="authName">
+            <el-input v-model="loginForm.authName" placeholder="请输入用户名或邮箱或手机号"
+                      :disabled="loginType.password"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
             <el-input type="password" v-model="loginForm.password" placeholder="请输入密码"
@@ -30,12 +31,6 @@
 
 
         <el-row class="elRow">
-          <el-tooltip content="码云" placement="bottom">
-            <el-button type="danger" circle @click="goAuth('gitee')" :disabled="loginType.gitee">
-              <span class="iconfont">&#xe602;</span>
-            </el-button>
-          </el-tooltip>
-
           <el-tooltip content="Github" placement="bottom">
             <el-button type="info" circle @click="goAuth('github')" :disabled="loginType.github">
               <span class="iconfont">&#xe64a;</span>
@@ -53,11 +48,17 @@
               <span class="iconfont">&#xe66f;</span>
             </el-button>
           </el-tooltip>
+          <el-tooltip content="微博" placement="bottom">
+            <el-button type="danger" circle @click="goAuth('weibo')" :disabled="loginType.weibo">
+              <span class="iconfont">&#xe6f5;</span>
+            </el-button>
+          </el-tooltip>
+
 
         </el-row>
         <div class="loginTip">目前登录方式支持
           <span v-if="!loginType.password"> 账号密码 </span>
-          <span v-if="!loginType.gitee"> 码云 </span>
+          <span v-if="!loginType.weibo"> 微博 </span>
           <span v-if="!loginType.github"> Github </span>
           <span v-if="!loginType.qq"> QQ </span>
           <span v-if="!loginType.wechat"> 微信 </span>
@@ -85,9 +86,9 @@
 
 <script>
 import {Loading} from 'element-ui';
-import {mapMutations} from "vuex";
 import router from "@/router";
 import {localLogin} from "@/api/user";
+import {Message} from "element-ui"
 
 export default {
   name: "share",
@@ -98,7 +99,6 @@ export default {
         fullscreen: true,
         lock: true
       },
-      web_api: process.env.WEB_API,
       showPasswordLogin: true,
       // 显示登录页面
       showLogin: true,
@@ -107,26 +107,27 @@ export default {
       dialog: false,
       labelPosition: "right",
       loginForm: {
-        userName: "",
+        authName: "",
         password: ""
       },
       // 登录类别
       loginType: {
         password: false,
+        weibo: true,
         github: true,
         qq: true,
         wechat: true
       },
       loginRules: {
-        userName: [
+        authName: [
           {required: true, message: '请输入用户名', trigger: 'blur'},
-          {min: 5, message: "用户名长度大于等于 2 个字符", trigger: "blur"},
-          {max: 20, message: "用户名长度不能大于 20 个字符", trigger: "blur"}
+          {min: 2, message: "用户名长度大于等于 2 个字符", trigger: "blur"},
+          {max: 10, message: "用户名长度不能大于 10 个字符", trigger: "blur"}
         ],
         password: [
           {required: true, message: "请输入密码", trigger: "blur"},
-          {min: 5, message: "密码长度需要大于等于 5 个字符", trigger: "blur"},
-          {max: 20, message: "密码长度不能大于 20 个字符", trigger: "blur"}
+          {min: 6, message: "密码长度需要大于等于 6 个字符", trigger: "blur"},
+          {max: 18, message: "密码长度不能大于 18 个字符", trigger: "blur"}
         ]
       },
     };
@@ -135,41 +136,29 @@ export default {
   created() {
   },
   methods: {
-    ...mapMutations(['setUserInfo', 'setLoginState']),
     startLogin: function () {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           let params = {};
-          params.userName = this.loginForm.userName;
-          params.passWord = this.loginForm.password;
-          params.isRememberMe = 1;
+          params.auth = this.loginForm.authName;
+          params.password = this.loginForm.password;
           localLogin(params).then(response => {
             if (response.data.success) {
               // 跳转到首页
-              location.replace("/")
+              Message.success(response.data.msg);
+              location.replace("/#/?token=" + response.data.data);
               window.location.reload()
             } else {
-              this.$message({
-                type: "error",
-                message: response.data
-              })
+              Message.error(response.data.msg);
             }
+          }, () => {
+            Message.error("网络错误!");
           });
         }
       });
     },
-
-    goLogin: function () {
-      this.showLogin = true;
-    },
     goRegister: function () {
       router.replace("/user");
-    },
-
-    userInfoStatus: function () {
-      getUserLoginStatus().then(response => {
-        console.log("获取用户状态", response)
-      });
     },
 
     goAuth: function (source) {
@@ -178,14 +167,6 @@ export default {
         text: '加载中……',
         background: 'rgba(0, 0, 0, 0.7)'
       })
-      let params = new URLSearchParams();
-      params.append("source", source);
-      login(params).then(response => {
-        if (response.success) {
-          let token = response.data.token;
-          window.location.href = response.data.url
-        }
-      });
     },
     closeLogin: function () {
       this.$emit("closeLoginBox", "");

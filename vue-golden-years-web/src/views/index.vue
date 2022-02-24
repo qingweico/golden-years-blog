@@ -50,7 +50,7 @@
       </div>
 
       <div class="isEnd">
-        <div class="loadContent" @click="loadContent" v-if="!isEnd&&!loading">点击加载更多</div>
+        <div class="loadContent" @click="loadContent" v-if="!isEnd&&!loading&&!newBlogData">点击加载更多</div>
         <div class="lds-css ng-scope" v-if="!isEnd&&loading">
           <div style="width:100%;height:100%" class="lds-facebook">
             <div></div>
@@ -96,7 +96,7 @@ export default {
   },
   created() {
     // 获取最新博客
-    this.newBlogList();
+   //  this.newBlogList();
   },
   methods: {
     // 跳转到文章详情

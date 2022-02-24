@@ -9,7 +9,7 @@
             <svg-icon icon-class="eye" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">今日IP数: </div>
+            <div class="card-panel-text">IP数: </div>
             <count-to class="card-panel-num" :startVal="0" :endVal="visitAddTotal" :duration="3200"></count-to>
           </div>
         </div>
@@ -51,67 +51,52 @@
       </el-col>
     </el-row>
 
-    <!--文章贡献度-->
-    <el-row>
-      <CalendarChart></CalendarChart>
-    </el-row>
+<!--    &lt;!&ndash;文章贡献度&ndash;&gt;-->
+<!--    <el-row>-->
+<!--      <CalendarChart></CalendarChart>-->
+<!--    </el-row>-->
 
-    <!-- 分类图-->
-    <el-row :gutter="32">
-      <el-col :xs="24" :sm="24" :lg="8">
-        <div class="chart-wrapper">
-          <pie-chart
-            ref="blogSortPie"
-            @clickPie="clickBlogSortPie"
-            v-if="showPieBlogSortChart"
-            :value="blogCountByBlogSort"
-            :tagName="blogSortNameArray"
-          ></pie-chart>
-        </div>
-      </el-col>
+<!--    &lt;!&ndash; 分类图&ndash;&gt;-->
+<!--    <el-row :gutter="32">-->
+<!--      <el-col :xs="24" :sm="24" :lg="8">-->
+<!--        <div class="chart-wrapper">-->
+<!--          <pie-chart-->
+<!--            ref="blogSortPie"-->
+<!--            @clickPie="clickBlogSortPie"-->
+<!--            v-if="showPieBlogSortChart"-->
+<!--            :value="blogCountByBlogSort"-->
+<!--            :tagName="blogSortNameArray"-->
+<!--          ></pie-chart>-->
+<!--        </div>-->
+<!--      </el-col>-->
 
-      <el-col :xs="24" :sm="24" :lg="8">
-        <div class="chart-wrapper">
-          <pie-chart
-            v-if="showPieChart"
-            @clickPie="clickBlogTagPie"
-            :value="blogCountByTag"
-            :tagName="tagNameArray"
-          ></pie-chart>
-        </div>
-      </el-col>
+<!--      <el-col :xs="24" :sm="24" :lg="8">-->
+<!--        <div class="chart-wrapper">-->
+<!--          <pie-chart-->
+<!--            v-if="showPieChart"-->
+<!--            @clickPie="clickBlogTagPie"-->
+<!--            :value="blogCountByTag"-->
+<!--            :tagName="tagNameArray"-->
+<!--          ></pie-chart>-->
+<!--        </div>-->
+<!--      </el-col>-->
 
-      <el-col
-        :xs="{span: 24}"
-        :sm="{span: 12}"
-        :md="{span: 12}"
-        :lg="{span: 6}"
-        :xl="{span: 6}"
-        style="margin-bottom:30px;"
-      >
-        <div class="chart-wrapper" v-permission="'/todo/getList'">
-          <todo-list></todo-list>
-        </div>
-      </el-col>
-    </el-row>
+<!--      <el-col-->
+<!--        :xs="{span: 24}"-->
+<!--        :sm="{span: 12}"-->
+<!--        :md="{span: 12}"-->
+<!--        :lg="{span: 6}"-->
+<!--        :xl="{span: 6}"-->
+<!--        style="margin-bottom:30px;"-->
+<!--      >-->
+<!--      </el-col>-->
+<!--    </el-row>-->
 
-    <!--访问量统计-->
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <line-chart v-if="showLineChart" :chart-data="lineChartData"></line-chart>
-    </el-row>
+<!--    &lt;!&ndash;访问量统计&ndash;&gt;-->
+<!--    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">-->
+<!--      <line-chart v-if="showLineChart" :chart-data="lineChartData"></line-chart>-->
+<!--    </el-row>-->
 
-    <!--仪表盘弹框通知-->
-    <el-dialog
-      title="通知"
-      :visible.sync="notificationDialogVisible"
-      v-if="systemConfig.openDashboardNotification == 1"
-      width="50%"
-      :closeOnClickModal="false"
-      :closeOnPressEscape="false"
-      :before-close="closeNotificationDialogVisible"
-      center>
-      <span v-html="systemConfig.dashboardNotification"></span>
-    </el-dialog>
 
   </div>
 </template>
@@ -125,9 +110,7 @@ import {
   getBlogCountByTag,
   getBlogCountByBlogSort
 } from "@/api/index";
-import GithubCorner from "@/components/GithubCorner";
 import PieChart from "@/components/PieChart";
-import TodoList from "@/components/TodoList";
 import BarChart from "@/components/BarChart";
 import LineChart from "@/components/LineChart";
 import CalendarChart from "@/components/CalendarChart";
@@ -140,9 +123,7 @@ export default {
     ...mapGetters(["name", "roles"])
   },
   components: {
-    GithubCorner,
     PieChart,
-    TodoList,
     BarChart,
     CountTo,
     LineChart,
@@ -162,8 +143,7 @@ export default {
       tagNameArray: [],
       blogSortNameArray: [],
       lineChartData: {},
-      systemConfig: {}, // 系统配置
-      notificationDialogVisible: this.$store.state.app.openNotificationDialogVisible
+      systemConfig: {},
     };
   },
   created() {

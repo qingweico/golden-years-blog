@@ -19,8 +19,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author:qiming
- * @date: 2021/9/22
+ * @author zqw
+ * @date 2021/9/22
  */
 @Service
 public class LoginLogServiceImpl extends BaseService implements LoginLogService {
@@ -82,7 +82,6 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         Example loginLogExample = new Example(UserLoginLog.class);
         Example.Criteria criteria = loginLogExample.createCriteria();
         Calendar c = Calendar.getInstance();
-
         c.setTime(new Date());
         c.add(Calendar.MONTH, -1);
         criteria.andLessThanOrEqualTo("loginTime", c.getTime());

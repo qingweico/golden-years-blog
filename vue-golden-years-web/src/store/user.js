@@ -12,8 +12,8 @@ const app = {
         // 类似于计算属性
         getUserPhoto(state) {
             if (state.isLogin) {
-                if (state.userInfo.photoUrl) {
-                    return state.userInfo.photoUrl
+                if (state.userInfo.face) {
+                    return state.userInfo.face
                 } else {
                     // 用户没有设定头像, 使用默认头像
                     return "https://gitee.com/moxi159753/wx_picture/raw/master/picture/favicon.png";
@@ -22,7 +22,14 @@ const app = {
                 // 用户未登录, 使用defaultAvatar
                 return "../../static/images/defaultAvatar.png"
             }
+        },
+        getUserInfo(state) {
+            if (state.isLogin) {
+                return state.userInfo
+            }
+            return null;
         }
+
     },
     // 如果我们需要更改store中的状态, 一定要通过mutations来进行操作
     mutations: {

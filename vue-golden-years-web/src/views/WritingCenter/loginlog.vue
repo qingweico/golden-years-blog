@@ -17,27 +17,77 @@
             <th>浏览器</th>
             <th>操作系统</th>
           </tr>
-
           <tr class="log-single-line" v-for="(loginLog) in logList">
-            <td>{{ formatData(loginLog.loginTime) }}</td>
+            <td>{{ loginLog.loginTime }}</td>
             <td>{{ loginLog.loginLocation }}</td>
             <td>{{ loginLog.ipaddr }}</td>
             <td>{{ loginLog.browser }}</td>
             <td>{{ loginLog.os }}</td>
           </tr>
         </table>
+        <!--分页-->
+        <div class="block">
+          <el-pagination
+              @current-change="handleCurrentChange"
+              :current-page.sync="currentPage"
+              :page-size="pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="total">
+          </el-pagination>
+        </div>
       </div>
     </div>
+
+
   </div>
 </template>
-
 <script>
+import {getLoginLogList} from '@/api/user'
+import {mapGetters} from "vuex";
+
 export default {
   name: "loginlog",
   data() {
     return {
-      logList: []
+      logList: [],
+      userId: "",
+      currentPage: 1,
+      pageSize: 10,
+      total: 0,
+      totalPage: 0
+
     }
+  },
+  methods: {
+    ...mapGetters(['getUserInfo']),
+
+    queryLoginLogList() {
+      let params = new URLSearchParams();
+      params.append("userId", this.userId);
+      params.append("page", this.currentPage);
+      params.append("pageSize", this.pageSize);
+      getLoginLogList(params).then(response => {
+        if (response.data.success) {
+          let content = response.data.data;
+          this.logList = content.rows;
+          this.total = content.records;
+          this.totalPage = content.totalPage;
+          this.currentPage = content.currentPage;
+        } else {
+          this.$message.warning(response.data.msg);
+        }
+      }, () => {
+        this.$message.error("网络超时");
+      })
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.queryLoginLogList();
+    },
+  },
+  created() {
+    this.userId = this.getUserInfo().userId;
+    this.queryLoginLogList();
   }
 }
 </script>
@@ -61,6 +111,7 @@ export default {
 }
 
 .log-list-wrapper {
+
   margin-top: 15px;
   background-color: #fff;
   padding: 20px 25px;
@@ -99,5 +150,10 @@ export default {
 
 .log-single-line:hover {
   background-color: #f4f4f4;
+}
+.block {
+  text-align: center;
+  margin-top:20px;
+  margin-bottom:20px;
 }
 </style>

@@ -1,5 +1,6 @@
 package cn.qingweico.api.interceptor;
 
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.util.IpUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -28,7 +29,7 @@ public class ArticleReadInterceptor extends BaseInterceptor implements HandlerIn
 
         String articleId = request.getParameter("articleId");
         String visitIp = IpUtils.getRequestIp(request);
-        return !redisOperator.keyIsExist(REDIS_ARTICLE_ALREADY_READ + ":"  + articleId + ":" + visitIp);
+        return !redisOperator.keyIsExist(RedisConf.REDIS_ARTICLE_ALREADY_READ + ":"  + articleId + ":" + visitIp);
     }
 
 }

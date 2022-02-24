@@ -8,13 +8,22 @@
           <el-input
               clearable
               class="filter-item"
-              style="width: 150px;  margin-left: 10px;"
+              style="width: 130px;  margin-left: 10px;"
               v-model="queryParams.keyword"
-              placeholder="请输入博客名"
+              placeholder="博客标题"
               @keyup.enter.native="handleFind"
           ></el-input>
-          <el-select v-model="blogStatusType" clearable placeholder="文章状态" style="width:110px; margin-left: 10px;">
-            <el-option key="0" value="全部"></el-option>
+          <el-input
+              clearable
+              class="filter-item"
+              style="width: 130px;  margin-left: 10px;"
+              v-model="queryParams.keyword"
+              placeholder="文章类别 "
+              @keyup.enter.native="handleFind"
+          ></el-input>
+          <el-select v-model="queryParams.blogStatusType" clearable placeholder="文章状态"
+                     style="width:130px; margin-left: 10px;">
+            <el-option key="0" value="全部" checked></el-option>
             <el-option key="1" value="审核中"></el-option>
             <el-option key="2" value="已发布"></el-option>
             <el-option key="3" value="未通过"></el-option>
@@ -28,7 +37,7 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              align="right" style="margin-left: 10px;">
+              align="right" style="width: 400px; margin-left: 10px;">
           </el-date-picker>
 
           <el-button style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search"
@@ -40,11 +49,9 @@
     <!--文章结果展示-->
     <div id="article-list-wrapper" class="article-list-wrapper">
       <div class="article-list">
-
         <div class="every-article" v-for="(article, index) in articleList" :key="index">
           <img :src="article.articleCover" style="width: 175px; height: 125px;"
                v-show="article.articleType === 1" alt="cover"/>
-
           <div class="main-content">
             <div class="basic-info">
               <span><a href="javascript:void(0);" target="_blank" class="article-link">{{ article.title }}</a></span>
@@ -89,8 +96,6 @@ export default {
   name: "manage",
   data() {
     return {
-      // 查询的文章状态,默认0:全部
-      blogStatusType: 0,
       startDateStr: "",
       endDateStr: "",
       queryParams: {},

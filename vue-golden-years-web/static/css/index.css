@@ -143,14 +143,14 @@ nav {
     padding: 0 5px
 }
 
-#starlist {
+#star_list {
     float: left;
     margin-left: 50px;
     overflow: hidden;
     max-width: 1000px;
 }
 
-#starlist li {
+#star_list li {
     float: left;
     display: block;
     font-size: 16px;
@@ -222,51 +222,51 @@ nav {
     width: 140px;
 }
 
-#starlist li a {
+#star_list li a {
     color: #71777c
 }
 
-#starlist .el-dropdown-link {
+#star_list .el-dropdown-link {
     cursor: pointer;
     font-size: 16px;
 }
 
-#starlist li:hover ul {
+#star_list li:hover ul {
     display: block;
 }
 
-#starlist li:hover.menu:before {
+#star_list li:hover.menu:before {
     display: none
 }
 
-#starlist .sub li a {
+#star_list .sub li a {
     color: #404040;
 }
 
-#starlist .sub li {
+#star_list .sub li {
     line-height: 24px;
     margin: 10px 0;
     text-align: left;
 }
 
-#starlist li a:hover, #starlist #selected {
+#star_list li a:hover, #star_list #selected {
     color: #00A7EB;
 }
 
-#starlist .el-dropdown-link:hover {
+#star_list .el-dropdown-link:hover {
     color: #00A7EB;
 }
 
-#starlist li.selected > a {
+#star_list li.selected > a {
     color: #00A7EB;
 }
 
-#starlist .sub li a:hover {
+#star_list .sub li a:hover {
     color: #000;
     position: relative
 }
 
-#starlist .sub li a:hover:after {
+#star_list .sub li a:hover:after {
     position: absolute;
     content: "";
     background: #000;
@@ -277,7 +277,7 @@ nav {
 }
 
 /*search*/
-.searchbox {
+.search_box {
     position: absolute;
     right: 0;
     top: 0
@@ -2025,7 +2025,7 @@ h1.t_nav {
 
 
 @media screen and (min-width: 1023px) {
-    #starlist {
+    #star_list {
         height: 60px;
     }
 }
@@ -2042,7 +2042,7 @@ h1.t_nav {
         position: relative
     }
 
-    #starlist {
+    #star_list {
         height: 0px;
         display: none;
         background: rgba(0, 0, 0, .5);
@@ -2050,7 +2050,7 @@ h1.t_nav {
         margin-left: 0;
     }
 
-    #starlist li {
+    #star_list li {
         display: block;
         padding: 0 0 0 0;
         width: 60%;
@@ -2065,16 +2065,16 @@ h1.t_nav {
         position: static;
     }
 
-    #starlist .sub li {
+    #star_list .sub li {
         border-bottom: none;
     }
 
-    #starlist li a {
+    #star_list li a {
         color: #333;
     }
 
     /*#starlist .el-dropdown-link { color: #333;}*/
-    #starlist .sub li {
+    #star_list .sub li {
         width: 100%;
         text-align: center
     }
@@ -2090,11 +2090,11 @@ h1.t_nav {
         left: 10px;
     }
 
-    #starlist li:last-child {
+    #star_list li:last-child {
         padding-bottom: 100%
     }
 
-    #starlist .sub li:last-child {
+    #star_list .sub li:last-child {
         padding-bottom: 0
     }
 
@@ -2192,14 +2192,14 @@ h1.t_nav {
         position: relative
     }
 
-    #starlist {
+    #star_list {
         display: none;
         background: rgba(0, 0, 0, .5);
         width: 100%;
         margin-left: 0;
     }
 
-    #starlist li {
+    #star_list li {
         display: block;
         padding: 0 0 0 0;
         width: 60%;
@@ -2214,19 +2214,19 @@ h1.t_nav {
         position: static;
     }
 
-    #starlist .sub li {
+    #star_list .sub li {
         border-bottom: none;
     }
 
-    #starlist li a {
+    #star_list li a {
         color: #333;
     }
 
-    #starlist .el-dropdown-link {
+    #star_list .el-dropdown-link {
         color: #333;
     }
 
-    #starlist .sub li {
+    #star_list .sub li {
         width: 100%;
         text-align: center
     }
@@ -2242,11 +2242,11 @@ h1.t_nav {
         left: 10px
     }
 
-    #starlist li:last-child {
+    #star_list li:last-child {
         padding-bottom: 100%
     }
 
-    #starlist .sub li:last-child {
+    #star_list .sub li:last-child {
         padding-bottom: 0
     }
 
@@ -2421,14 +2421,14 @@ h1.t_nav {
         position: relative
     }
 
-    #starlist {
+    #star_list {
         display: none;
         background: rgba(0, 0, 0, .5);
         width: 100%;
         margin-left: 0;
     }
 
-    #starlist li {
+    #star_list li {
         display: block;
         padding: 0 0 0 0;
         width: 60%;
@@ -2443,19 +2443,19 @@ h1.t_nav {
         position: static;
     }
 
-    #starlist .sub li {
+    #star_list .sub li {
         border-bottom: none;
     }
 
-    #starlist li a {
+    #star_list li a {
         color: #333;
     }
 
-    #starlist .el-dropdown-link {
+    #star_list .el-dropdown-link {
         color: #333;
     }
 
-    #starlist .sub li {
+    #star_list .sub li {
         width: 100%;
         text-align: center
     }
@@ -2472,11 +2472,11 @@ h1.t_nav {
         background: #000
     }
 
-    #starlist li:last-child {
+    #star_list li:last-child {
         padding-bottom: 100%
     }
 
-    #starlist .sub li:last-child {
+    #star_list .sub li:last-child {
         padding-bottom: 0
     }
 

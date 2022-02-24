@@ -51,11 +51,11 @@
         </div>
       </div>
 
-<!--      <el-form>-->
-<!--      <el-form-item label="内容" :label-width="'120'" prop="content">-->
-<!--        <MarkdownEditor :content="articleContent" ref="editor" :height="465"></MarkdownEditor>-->
-<!--      </el-form-item>-->
-<!--      </el-form>-->
+      <el-form>
+      <el-form-item label="内容"  prop="content">
+        <MarkdownEditor :content="articleContent" ref="editor" :height="465"></MarkdownEditor>
+      </el-form-item>
+      </el-form>
     </div>
 
     <div class="publish-bottom">
@@ -99,7 +99,8 @@ export default {
       coverStyle: "",
       articleContent: "",
       categoryList: [],
-      timingDate: ""
+      timingDate: "",
+      formLabelWidth: "120px",
     }
   },
   methods: {

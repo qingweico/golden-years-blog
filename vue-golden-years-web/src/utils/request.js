@@ -5,28 +5,28 @@ import {getCookie} from "@/utils/cookie";
 const service = axios.create({
     // api 的 base_url
     baseURL: '',
-    // 请求超时时间 10秒
-    timeout: 10000
+    // 请求超时时间 5秒
+    timeout: 5000
 })
 
-// service.defaults.headers.common['Authorization'] = getCookie("token")
-//
-// // request拦截器
-// service.interceptors.request.use(
-//     config => {
-//         if (getCookie("token") !== undefined) {
-//             // 让每个请求携带自定义token 请根据实际情况自行修改
-//             config.headers.Authorization = getCookie("token")
-//         }
-//         return config
-//     },
-//     error => {
-//         // Do something with request error
-//         console.log(error) // for debug
-//         Promise.reject(error).then(r => {
-//         });
-//     }
-// )
+service.defaults.headers.common['Authorization'] = getCookie("token")
+
+// request拦截器
+service.interceptors.request.use(
+    config => {
+        if (getCookie("token") !== undefined) {
+            // 让每个请求携带自定义token 请根据实际情况自行修改
+            config.headers.Authorization = getCookie("token")
+        }
+        return config
+    },
+    error => {
+        // Do something with request error
+        console.log(error) // for debug
+        Promise.reject(error).then(r => {
+        });
+    }
+)
 
 // response 拦截器
 // service.interceptors.response.use(

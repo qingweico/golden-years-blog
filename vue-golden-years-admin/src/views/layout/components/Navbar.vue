@@ -15,13 +15,6 @@
           <Website id="website" class="right-menu-item" />
         </el-tooltip>
 
-        <el-tooltip content="Gitee源码" effect="dark" placement="bottom">
-          <MoGuGit id="mogu-git" class="right-menu-item" />
-        </el-tooltip>
-
-        <el-tooltip content="文档地址" effect="dark" placement="bottom">
-          <MoGuDoc id="mogu-doc" class="right-menu-item" />
-        </el-tooltip>
 
         <el-tooltip effect="dark" content="全屏" placement="bottom">
           <screenfull class="screenfull right-menu-item"></screenfull>
@@ -59,9 +52,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import Hamburger from "@/components/Hamburger";
 import Screenfull from "@/components/Screenfull";
 import ThemePicker from "@/components/ThemePicker";
-import MoGuGit from '@/components/MoGu/Git'
-import MoGuDoc from '@/components/MoGu/Doc'
-import Website from '@/components/MoGu/Website'
+import Website from '@/components/Website'
 
 export default {
   components: {
@@ -69,8 +60,6 @@ export default {
     Breadcrumb,
     Hamburger,
     ThemePicker,
-    MoGuGit,
-    MoGuDoc,
     Website
   },
   data() {
@@ -107,7 +96,7 @@ export default {
 .navbar {
   height: 50px;
   line-height: 50px;
-  border-radius: 0px !important;
+  border-radius: 0 !important;
   .hamburger-container {
     line-height: 58px;
     height: 50px;

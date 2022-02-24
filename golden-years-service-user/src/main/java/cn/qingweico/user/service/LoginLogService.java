@@ -5,8 +5,8 @@ import cn.qingweico.util.PagedGridResult;
 /**
  * 用户登陆日志
  *
- * @author:qiming
- * @date: 2021/9/22
+ * @author zqw
+ * @date 2021/9/22
  */
 public interface LoginLogService {
 
@@ -21,6 +21,8 @@ public interface LoginLogService {
      * 查询用户的登陆日志列表
      *
      * @param userId 用户id
+     * @param page 起始分页数(从1开始)
+     * @param pageSize 每页的数量
      * @return PagedGridResult
      */
     PagedGridResult getLoginLogList(String userId, Integer page, Integer pageSize);

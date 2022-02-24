@@ -1,8 +1,6 @@
 import {
     SET_COMMENT_LIST,
-    SET_WEB_CONFIG_DATA,
     SET_USER_TAG,
-    SET_LOGIN_MESSAGE
 }
     from "./mutation-types";
 

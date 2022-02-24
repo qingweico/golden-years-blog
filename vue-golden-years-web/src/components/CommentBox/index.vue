@@ -186,7 +186,7 @@ export default {
 
 
 <style>
-@import "~@/assets/../../assets/css/emoji.css";
+@import "../../../assets/css/emoji.css";
 
 .el-popover {
   height: 135px;

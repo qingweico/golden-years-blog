@@ -43,18 +43,18 @@ export default {
   },
   methods: {
     goTo: function(child) {
-      if(child.isJumpExternalUrl == 1) {
+      if(child.isJumpExternalUrl === 1) {
         window.open(child.url)
       } else {
         this.$router.push({path: child.url})
       }
     },
     hasOneShowingChildren(children) {
-      return (children.isShow == 1)
+      return (children.isShow === 1)
     },
     // 检测父菜单是否隐藏
     checkShowOrHidden(item) {
-      return (item.parent.isShow == 1)
+      return (item.parent.isShow === 1)
     }
   }
 }

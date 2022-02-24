@@ -24,7 +24,7 @@
         <span class="navicon"></span>
       </h2>
 
-      <ul id="starlist" :style="showHead?'display: block':''">
+      <ul id="star_list" :style="showHead?'display: block':''">
         <li>
           <router-link to="/">
             <a href="javascript:void(0);" :class="[saveTitle === '/' ? 'title' : '']">首页</a>
@@ -51,7 +51,7 @@
         </li>
       </ul>
       <el-button type="primary" icon="el-icon-edit" @click="goWritingCenter">创作中心</el-button>
-      <div class="searchbox">
+      <div class="search_box">
         <div id="search_bar" :class="(showSearch || keyword.length > 0)?'search_bar search_open':'search_bar'">
           <input
               ref="searchInput"
@@ -71,17 +71,17 @@
         <span class="el-dropdown-link">
           <el-badge class="item" :hidden="!isLogin">
             <img v-if="!isLogin" src="../../static/images/defaultAvatar.png" alt="">
-            <img v-if="isLogin && userInfo.photoUrl !== undefined" :src="userInfo.photoUrl"
+            <img v-if="isLogin && userInfo.face !== undefined" :src="userInfo.face"
                  onerror="onerror = null; src = defaultAvatar" alt="">
-            <img v-if="isLogin && userInfo.photoUrl === undefined"
+            <img v-if="isLogin && userInfo.face === undefined"
                  :src="defaultAvatar" alt="">
           </el-badge>
         </span>
 
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="login" v-show="!isLogin">登录</el-dropdown-item>
-          <el-dropdown-item command="goUserHomePage" v-show="!isLogin">个人中心</el-dropdown-item>
-          <el-dropdown-item command="logout" v-show="!isLogin">退出登录</el-dropdown-item>
+          <el-dropdown-item command="goUserHomePage" v-show="isLogin">个人中心</el-dropdown-item>
+          <el-dropdown-item command="logout" v-show="isLogin">退出登录</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
 
@@ -93,8 +93,8 @@
   </div>
 
   <footer>
-     <p> 豫ICP备2020030311号</p>
-      <p>Copyright © 2020 - 2022 流金岁月 All Rights Reserved</p>
+    <p> 豫ICP备2020030311号</p>
+    <p>Copyright © 2020 - 2022 流金岁月 All Rights Reserved</p>
   </footer>
 
   <div>
@@ -112,11 +112,10 @@
 
 
 import LoginBox from "../components/LoginBox";
-import index from "./index.vue";
-
 import {mapMutations} from 'vuex';
-import router from "@/router";
-
+import {delCookie, getCookie, setCookie} from "@/utils/cookie";
+import {authVerify, deleteUserAccessToken} from "@/api/user";
+import {timeAgo} from "@/utils/web";
 
 export default {
   name: "index",
@@ -131,7 +130,8 @@ export default {
       activeName: "0",
       imageCropperShow: false,
       imageCropperKey: 0,
-      webSite: process.env.VUE_MOGU_WEB,
+      // 默认头像
+      defaultAvatar: this.$SysConf.defaultAvatar,
 
       saveTitle: "",
       keyword: "",
@@ -172,7 +172,6 @@ export default {
     let after = 0;
     window.addEventListener("scroll", function () {
       let scrollTop = document.documentElement.scrollTop;
-      let scrollHeight = document.documentElement.scrollHeight;
       that.isCdTopVisible = scrollTop > offset;
       that.isVisible = scrollTop <= after;
       after = scrollTop;
@@ -200,12 +199,13 @@ export default {
 
     this.getKeyword();
     this.setSize();
+    this.getToken();
     // 获取浏览器类型: navigator.userAgent
     this.getCurrentPageTitle();
   },
   methods: {
     //拿到vuex中的写的方法
-    ...mapMutations(['setUserInfo', 'setLoginState', 'setWebConfigData']),
+    ...mapMutations(['setUserInfo', 'setLoginState']),
     // 搜索
     search: function () {
       if (this.keyword === "" || this.keyword.trim() === "") {
@@ -249,6 +249,10 @@ export default {
       window.open(routeData.href, '_blank');
     },
     goWritingCenter() {
+      if (!this.isLogin) {
+        this.showLogin = true;
+        return;
+      }
       this.$router.push("/center");
     },
 
@@ -279,6 +283,33 @@ export default {
       ) {
       } else {
         this.keyword = tempValue;
+      }
+    },
+    getToken: function () {
+      let token = this.getUrlVars()["token"];
+      // 判断url中是否含有token
+      if (token !== undefined) {
+        // 设置token七天过期
+        setCookie("token", token, 7)
+      } else {
+        // 从cookie中获取token
+        token = getCookie("token")
+      }
+      if (token !== null) {
+        authVerify(token).then(response => {
+          if (response.data.success) {
+            this.isLogin = true;
+            this.userInfo = response.data.data;
+            this.setUserInfo(this.userInfo)
+          } else {
+            this.isLogin = false;
+            delCookie("token");
+          }
+          this.setLoginState(this.isLogin);
+        });
+      } else {
+        this.isLogin = false;
+        this.setLoginState(this.isLogin);
       }
     },
 
@@ -327,12 +358,28 @@ export default {
         }
           break;
         case "goUserHomePage" : {
-         this.goUserHomePage();
+          this.goUserHomePage();
         }
           break;
       }
     },
     userLogout() {
+      deleteUserAccessToken(getCookie("token"));
+      delCookie("token");
+      let url = window.parent.location.href;
+      let haveToken = url.indexOf("?token")
+      if (haveToken !== -1) {
+        let list = url.split("?token");
+        this.isLogin = false;
+        window.location.href = list[0]
+        let userInfo = {};
+        this.setUserInfo(userInfo);
+        this.$message.success('已退出');
+      } else {
+        this.$message.success('已退出');
+        window.location.reload()
+      }
+
     },
     goUserHomePage() {
       let routeData = this.$router.resolve({
@@ -357,7 +404,7 @@ nav .logo {
   line-height: 60px;
 }
 
-#starlist li .title {
+#star_list li .title {
   color: #00a7eb;
 }
 
@@ -383,7 +430,7 @@ nav .logo {
     top: 0;
   }
 
-  .searchbox {
+  .search_box {
     position: absolute;
     right: 50px;
     top: 0
@@ -398,11 +445,12 @@ nav .logo {
 .uploadImgBody :hover {
   border: dashed 1px #00ccff;
 }
+
 footer {
   height: 60px;
   width: 100%;
   position: absolute;
-  bottom:2px;
+  bottom: 2px;
   margin-bottom: -10px;
 }
 </style>

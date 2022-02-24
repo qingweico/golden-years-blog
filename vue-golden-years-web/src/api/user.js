@@ -14,7 +14,7 @@ export function login(params) {
 
 export function authVerify(params) {
   return request({
-    url: process.env.WEB_API + '/oauth/verify/' + params,
+    url: process.env.USER_API + '/auth/verify/' + params,
     method: 'get',
   })
 }
@@ -33,35 +33,47 @@ export function editUser(params) {
  */
 export function updateUserPwd(params) {
   return request({
-    url: process.env.WEB_API + '/oauth/updateUserPwd',
+    url: process.env.USER_API + '/oauth/updateUserPwd',
     method: 'post',
     data: params
   })
 }
 
-
-export function replyBlogLink(params) {
+/**
+ * 更新用户信息
+ * @param params
+ */
+export function updateUserInfo(params) {
   return request({
-    url: process.env.WEB_API + '/oauth/replyBlogLink',
+    url: process.env.USER_API + '/user/updateUserInfo',
     method: 'post',
     data: params
   })
 }
-
 export function deleteUserAccessToken(params) {
   return request({
-    url: process.env.WEB_API + '/oauth/delete/' + params,
-    method: 'post',
+    url: process.env.VUE_APP_BASE_API + '/auth/delete/' + params,
+    method: 'get',
   })
 }
-
+/**
+ * 获取用户登陆日志
+ * @param params
+ */
+export function getLoginLogList(params) {
+  return request({
+    url: process.env.USER_API + '/user/getLoginLogList',
+    method: 'get',
+    params
+  })
+}
 /**
  * 本地登录
  * @param params
  */
 export function localLogin(params) {
   return request({
-    url: process.env.WEB_API + '/user/login',
+    url: process.env.USER_API + '/auth/passwd',
     method: 'post',
     data: params
   })

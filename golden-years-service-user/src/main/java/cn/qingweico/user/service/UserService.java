@@ -37,6 +37,7 @@ public interface UserService {
 
     /**
      * 通过用户名或者手机号或者用户邮箱查询用户信息
+     * @param auth 用户名 | 手机号 | 用户邮箱
      * @return AppUser
      */
     AppUser queryUserByAuth(String auth);

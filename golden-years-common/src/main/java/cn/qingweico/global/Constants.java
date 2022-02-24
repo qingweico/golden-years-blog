@@ -1,7 +1,5 @@
 package cn.qingweico.global;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * 系统全局常量
  *
@@ -96,7 +94,7 @@ public class Constants {
 
 
     /**
-     * 数字 0~11
+     * 数字 0~10
      */
     public final static int NUM_ZERO = 0;
     public final static int NUM_ONE = 1;
@@ -109,7 +107,6 @@ public class Constants {
     public final static int NUM_EIGHT = 8;
     public final static int NUM_NINE = 9;
     public final static int NUM_TEN = 10;
-    public final static int NUM_ELEVEN = 11;
     public final static int NUM_TWENTY = 20;
     public final static int NUM_32 = 32;
     public final static int NUM_500 = 500;
@@ -143,10 +140,9 @@ public class Constants {
 
     public final static String DATE_FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 
-
-    public static final int THIRTY_TWO = 32;
     public static final String PATH_SEPARATOR = "/";
     public static final String DELIMITER_TO = "@";
     public static final String DELIMITER_COLON = ":";
-    public static final String NULL = null;
+    public static final Integer COMMON_START_PAGE = 1;
+    public static final Integer COMMON_PAGE_SIZE = 5;
 }

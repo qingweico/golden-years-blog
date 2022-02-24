@@ -1,6 +1,7 @@
 package cn.qingweico.api.interceptor;
 
 import cn.qingweico.enums.UserStatus;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.AppUser;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.result.ResponseStatusEnum;
@@ -30,7 +31,7 @@ public class UserActiveInterceptor extends BaseInterceptor implements HandlerInt
 
         String userId = request.getHeader("headUserId");
         AppUser user;
-        String jsonUser = redisOperator.get(REDIS_USER_INFO + ":" + userId);
+        String jsonUser = redisOperator.get(RedisConf.REDIS_USER_INFO + ":" + userId);
         if (StringUtils.isNotBlank(jsonUser)) {
             user = JsonUtils.jsonToPojo(jsonUser, AppUser.class);
         } else {

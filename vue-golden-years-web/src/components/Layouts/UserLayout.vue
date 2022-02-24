@@ -4,7 +4,6 @@
       <div class="top">
         <div class="header">
           <a href="/">
-<!--            <img src="~@/assets/logo.svg" class="logo" alt="logo">-->
             <span class="title">流金岁月博客</span>
           </a>
         </div>
@@ -15,9 +14,6 @@
 
       <div class="footer">
         <div class="links">
-          <a href="" target="_blank">帮助</a>
-          <a href="" target="_blank">隐私</a>
-          <a href="" target="_blank">条款</a>
         </div>
         <div class="copyright">
           Copyright &copy; 2019 <a href="https://www.qingweico.cn" target="_blank">流金岁月</a>

@@ -63,7 +63,10 @@
         <div class="every-line">
           <div class="pre-label">所在城市</div>
           <div style="position: relative;">
-            <input id="city-picker" name="city" data-toggle="city-picker" readonly type="text" class="pick-city">
+            <el-input id="city-picker"
+                      name="city-picker"
+                      data-toggle="city-picker"
+                      class="pick-city"></el-input>
           </div>
         </div>
         <div class="every-line">
@@ -77,46 +80,44 @@
                       maxlength="20"></el-input>
           </div>
         </div>
-        </div>
-        <div class="submit-wrapper">
-          <button class="submit-btn" @click="handleSubmit">提交信息</button>
-        </div>
       </div>
-
+      <div class="submit-wrapper">
+        <button class="submit-btn" @click="handleSubmit">提交信息</button>
+      </div>
     </div>
+  </div>
 
 </template>
 
 <script>
-import $ from 'jquery'
-// import city from 'city-picker/cityPicker'
 import 'city-picker/cityPicker.css'
+import {mapGetters} from "vuex";
+import {updateUserInfo} from "@/api/user";
 
 export default {
   name: "account",
   data() {
     return {
-      userAccountInfo: {
-        face: "https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"
-      }
+      userAccountInfo: {},
     }
   },
   created() {
-    this.getUserAccountInfo();
+    this.userAccountInfo = this.getUserInfo();
+
   },
   methods: {
+    ...mapGetters(['getUserInfo']),
     uploadFace() {
     },
     handleSubmit() {
+      let userAccountInfo = this.userAccountInfo;
+      updateUserInfo(userAccountInfo).then((response) => {
+        if (response.data.success) {
+
+        }
+      });
     },
-    getUserAccountInfo() {
-      // 初始化城市组件
-      // $('#city-picker').citypicker({
-      //   province: '江苏省',
-      //   city: '常州市',
-      //   district: '溧阳市'
-      // });
-    },
+
     // 鼠标移动到上传组件上发生css变化
     mouseOver() {
       $("#user-face").css({"background-color": "#f0efef", "border": "1px dashed #a7a7a7"});
@@ -215,26 +216,23 @@ export default {
   background-color: #666;
   width: 120px;
   height: 35px;
-  border-bottom: 1.2px solid #e8e8e8;
-  border-left: 1.2px solid #e8e8e8;
-  border-right: 1.2px solid #e8e8e8;
+  border-bottom: 1px solid #e8e8e8;
+  border-left: 1px solid #e8e8e8;
+  border-right: 1px solid #e8e8e8;
   opacity: 0;
-
   text-align: center;
   vertical-align: middle;
   line-height: 36px;
-
   position: relative;
   top: 86px;
-  left: -122px;
-
+  left: -120px;
   z-index: 6;
 }
 
-/* .choose-face:hover {
-    opacity: 0.6;
-    cursor: pointer;
-} */
+.choose-face:hover {
+  opacity: 0.6;
+  cursor: pointer;
+}
 
 .upload-suggest {
   width: 450px;

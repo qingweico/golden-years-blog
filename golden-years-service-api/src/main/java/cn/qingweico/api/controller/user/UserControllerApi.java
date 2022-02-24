@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 /**
- * @author:qiming
- * @date: 2021/9/5
+ * @author zqw
+ * @date 2021/9/5
  */
 @Api(value = "用户信息相关的接口定义", tags = {"用户信息相关的接口定义"})
 @RequestMapping("user")
@@ -33,7 +33,7 @@ public interface UserControllerApi {
    @GetMapping("/queryByIds")
    GraceJsonResult queryByIds(@RequestParam String userIds);
 
-   @ApiOperation(value = "查询用户的登陆日志列表", notes = "查询用户的登陆日志列表", httpMethod = "POST")
-   @PostMapping("/getLoginLogList")
+   @ApiOperation(value = "查询用户的登陆日志列表", notes = "查询用户的登陆日志列表", httpMethod = "GET")
+   @GetMapping("/getLoginLogList")
    GraceJsonResult getLoginLogList(String userId, Integer page, Integer pageSize);
 }

@@ -3,6 +3,8 @@ package cn.qingweico.user.controller;
 import cn.qingweico.api.controller.BaseController;
 import cn.qingweico.api.controller.user.UserControllerApi;
 import cn.qingweico.enums.UserStatus;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.AppUser;
@@ -65,8 +67,8 @@ public class UserController extends BaseController implements UserControllerApi 
 
 
         // 从redis中查询用户的粉丝数和关注数
-        Integer myFollowCounts = getCountsFromRedis(REDIS_MY_FOLLOW_COUNTS + ":" + userId);
-        Integer myFanCounts = getCountsFromRedis(REDIS_WRITER_FANS_COUNTS + ":" + userId);
+        Integer myFollowCounts = getCountsFromRedis(RedisConf.REDIS_MY_FOLLOW_COUNTS + ":" + userId);
+        Integer myFanCounts = getCountsFromRedis(RedisConf.REDIS_AUTHOR_FANS_COUNTS + ":" + userId);
 
         userVO.setMyFansCounts(myFanCounts);
         userVO.setMyFollowCounts(myFollowCounts);
@@ -110,10 +112,10 @@ public class UserController extends BaseController implements UserControllerApi 
                                            Integer pageSize) {
 
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
         PagedGridResult res = loginLogService.getLoginLogList(userId, page, pageSize);
 
@@ -123,13 +125,13 @@ public class UserController extends BaseController implements UserControllerApi 
     private AppUser getUser(String userId) {
         AppUser user;
         // 缓存用户信息
-        String jsonUser = redisOperator.get(REDIS_USER_INFO + ":" + userId);
+        String jsonUser = redisOperator.get(RedisConf.REDIS_USER_INFO + ":" + userId);
         if (StringUtils.isNotBlank(jsonUser)) {
             user = JsonUtils.jsonToPojo(jsonUser, AppUser.class);
         } else {
             user = userService.queryUserById(userId);
             log.info("查询数据库啦!");
-            redisOperator.set(REDIS_USER_INFO + ":" + userId, JsonUtils.objectToJson(user));
+            redisOperator.set(RedisConf.REDIS_USER_INFO + ":" + userId, JsonUtils.objectToJson(user));
         }
         return user;
     }

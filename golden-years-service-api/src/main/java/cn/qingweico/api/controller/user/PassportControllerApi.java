@@ -3,6 +3,7 @@ package cn.qingweico.api.controller.user;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.pojo.bo.PasswordAuthBO;
 import cn.qingweico.pojo.bo.RegistLoginBO;
+import cn.qingweico.util.JwtUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
- * @author:qiming
- * @date: 2021/9/5
+ * @author zqw
+ * @date 2021/9/5
  */
 @Api(value = "用户注册登陆相关的接口定义", tags = {"用户注册登陆相关的接口定义"})
 @RequestMapping("auth")
@@ -36,8 +37,8 @@ public interface PassportControllerApi {
      * @param resp HttpServletResponse
      * @return GraceJsonResult
      */
-    @ApiOperation(value = "一键注册登陆", notes = "一键注册登陆", httpMethod = "POST")
-    @PostMapping("/freePwdAuth")
+    @ApiOperation(value = "手机号码登陆", notes = "手机号码登陆", httpMethod = "POST")
+    @PostMapping("/mobile")
     GraceJsonResult freePwdAuth(@RequestBody @Valid RegistLoginBO registBO,
                             HttpServletRequest req,
                             HttpServletResponse resp);
@@ -50,21 +51,27 @@ public interface PassportControllerApi {
      * @return GraceJsonResult
      */
     @ApiOperation(value = "密码认证登陆", notes = "密码认证登陆", httpMethod = "POST")
-    @PostMapping("/withPwdAuth")
+    @PostMapping("/passwd")
     GraceJsonResult withPwdAuth(@RequestBody @Valid PasswordAuthBO passwordAuthBO,
                             HttpServletRequest req,
                             HttpServletResponse resp);
 
+
     /**
-     * 用户退出登陆
-     * @param userId 用户id
-     * @param req HttpServletRequest
-     * @param resp HttpServletResponse
+     * 验证jwt
+     * @param token jsonWebToken
      * @return GraceJsonResult
      */
-    @ApiOperation(value = "用户退出登陆", notes = "用户退出登陆", httpMethod = "POST")
-    @PostMapping("/logout")
-    GraceJsonResult logout(String userId,
-                           HttpServletRequest req,
-                           HttpServletResponse resp);
+    @ApiOperation(value = "验证jwt", notes = "验证jwt", httpMethod = "GET")
+    @GetMapping("/verify/{token}")
+    GraceJsonResult authVerify(@PathVariable ("token")String token);
+
+    /**
+     * 删除用户token
+     * @param token jsonWebToken
+     * @return GraceJsonResult
+     */
+    @ApiOperation(value = "删除用户token", notes = "删除用户token", httpMethod = "GET")
+    @GetMapping("/delete/{token}")
+    GraceJsonResult deleteUserAccessToken(@PathVariable ("token")String token);
 }

@@ -121,12 +121,6 @@ public class GraceJsonResult {
         this.data = data;
     }
 
-    public GraceJsonResult(ResponseStatusEnum responseStatus, String msg) {
-        this.status = responseStatus.status();
-        this.msg = msg;
-        this.success = responseStatus.success();
-    }
-
     public GraceJsonResult() {
     }
 

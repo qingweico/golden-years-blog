@@ -3,6 +3,7 @@ package cn.qingweico.user.controller;
 import cn.qingweico.api.controller.BaseController;
 import cn.qingweico.api.controller.user.FansControllerApi;
 import cn.qingweico.enums.Sex;
+import cn.qingweico.global.Constants;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.vo.FansCountsVO;
@@ -51,10 +52,10 @@ public class FansController extends BaseController implements FansControllerApi 
                                     Integer page,
                                     Integer pageSize) {
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
 
         return GraceJsonResult.ok(fanService.getMyFansListViaEs(writerId, page, pageSize));
