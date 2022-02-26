@@ -4,13 +4,14 @@ import cn.qingweico.global.RedisConf;
 import cn.qingweico.util.IpUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
 /**
- * @author:qiming
- * @date: 2021/9/13
+ * @author zqw
+ * @date 2021/9/13
  */
 public class ArticleReadInterceptor extends BaseInterceptor implements HandlerInterceptor {
 
@@ -24,8 +25,8 @@ public class ArticleReadInterceptor extends BaseInterceptor implements HandlerIn
      */
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request,
-                             @NotNull HttpServletResponse response,
-                             @NotNull Object handler) {
+                             @Nonnull HttpServletResponse response,
+                             @Nonnull Object handler) {
 
         String articleId = request.getParameter("articleId");
         String visitIp = IpUtils.getRequestIp(request);

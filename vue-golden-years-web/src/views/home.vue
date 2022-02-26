@@ -116,6 +116,7 @@ import {mapMutations} from 'vuex';
 import {delCookie, getCookie, setCookie} from "@/utils/cookie";
 import {authVerify, deleteUserAccessToken} from "@/api/user";
 import {timeAgo} from "@/utils/web";
+import {Message} from "element-ui";
 
 export default {
   name: "index",
@@ -286,15 +287,7 @@ export default {
       }
     },
     getToken: function () {
-      let token = this.getUrlVars()["token"];
-      // 判断url中是否含有token
-      if (token !== undefined) {
-        // 设置token七天过期
-        setCookie("token", token, 7)
-      } else {
-        // 从cookie中获取token
-        token = getCookie("token")
-      }
+      let token = getCookie("token")
       if (token !== null) {
         authVerify(token).then(response => {
           if (response.data.success) {

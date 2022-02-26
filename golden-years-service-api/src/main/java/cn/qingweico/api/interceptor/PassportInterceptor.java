@@ -7,13 +7,14 @@ import cn.qingweico.util.RedisOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
 /**
- * @author:qiming
- * @date: 2021/9/6
+ * @author zqw
+ * @date 2021/9/6
  */
 public class PassportInterceptor implements HandlerInterceptor {
 
@@ -21,7 +22,9 @@ public class PassportInterceptor implements HandlerInterceptor {
    private RedisOperator redisOperator;
 
    @Override
-   public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
+   public boolean preHandle(@Nonnull HttpServletRequest request,
+                            @Nonnull HttpServletResponse response,
+                            @Nonnull Object handler) {
       // 获取用户的ip
       String userIp = IpUtils.getRequestIp(request);
       boolean keyIsExist = redisOperator.keyIsExist("ip:" + userIp);

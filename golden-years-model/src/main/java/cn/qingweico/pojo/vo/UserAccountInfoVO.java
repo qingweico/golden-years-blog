@@ -14,7 +14,7 @@ public class UserAccountInfoVO {
     private String mobile;
     private String nickname;
     private String face;
-    private String realname;
+    private String realName;
     private String email;
     private Integer sex;
     private Date birthday;

@@ -1,143 +1,317 @@
 <template>
-  <div class="main">
-    <a-form-model class="user-layout-login" @keyup.enter.native="handleSubmit">
-      <a-tabs :activeKey="customActiveKey" :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
-              @change="handleTabClick">
-        <a-tab-pane key="tab1" tab="账号密码登录">
-          <login-account ref="acc_login" @validateFail="validateFail" @success="requestSuccess"
-                         @fail="requestFailed"></login-account>
-        </a-tab-pane>
+  <div class="login-container">
+    <h3 class="title">流金岁月博客登陆</h3>
+    <el-tabs value="acc_login" @tab-click="handleClick" stretch>
+      <el-tab-pane label="账户登陆" name="acc_login">
+        <el-form
+            ref="accountLoginForm"
+            :model="accountLoginForm"
+            :rules="accountLoginRules"
+            auto-complete="on"
+            label-position="left">
+          <el-form-item prop="username">
+            <el-input
+                v-model="accountLoginForm.username"
+                ref="userNameInput"
+                name="username"
+                type="text"
+                auto-complete="on"
+                placeholder="请输入登录名"
+                @keyup.enter.native="handleSubmit">
+              <i slot="prefix" class="el-icon-user"></i>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input
+                v-model="accountLoginForm.password"
+                name="password"
+                auto-complete="on"
+                placeholder="请输入密码"
+                show-password
+                @keyup.enter.native="handleSubmit">
+              <i slot="prefix" class="el-icon-lock"></i>
+            </el-input>
+          </el-form-item>
+          <el-checkbox v-model="accountLoginForm.isRememberMe" style="margin:0 0 25px 0;"><span>七天免登录</span>
+          </el-checkbox>
+          <router-link to="/">
+            <a>返回首页</a>
+          </router-link>
 
-        <a-tab-pane key="tab2" tab="手机号登录/注册">
-          <login-phone ref="phone_login" @validateFail="validateFail" @success="requestSuccess"
-                       @fail="requestFailed"></login-phone>
-        </a-tab-pane>
-      </a-tabs>
 
-      <a-form-model-item>
-        <a-checkbox @change="handleRememberMeChange" default-checked>记住我</a-checkbox>
-        <router-link to="/" class="forge-password" style="float: right;margin-right: 10px">
-          返回主页
-        </router-link>
-      </a-form-model-item>
+          <el-form-item>
+            <el-button
+                :loading="loading"
+                type="primary"
+                style="width:100%;"
+                @click.native.prevent="handleSubmit">登 录
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+      <el-tab-pane label="手机号登陆/注册" name="phone_login">
+        <el-form
+            ref="phoneLoginForm"
+            :model="phoneLoginForm"
+            :rules="phoneLoginRules"
+            auto-complete="on"
+            label-position="left">
+          <el-form-item prop="phone">
+            <el-input placeholder="请输入手机号" name="phone" v-model="phoneLoginForm.phone">
+              <i slot="prefix" class="el-icon-phone"></i>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="smsCode">
+            <el-row :gutter="24">
+              <el-col :span="16">
+                <el-input placeholder="6位数字验证码" oninput="value = value.replace(/[^\d]/g,'')"
+                          maxlength="6" name="smsCode" v-model="phoneLoginForm.smsCode">
+                  <i slot="prefix" class="el-icon-tickets"></i>
+                </el-input>
+              </el-col>
+              <el-col :span="2">
+                <el-button @click="onSendSms" :disabled="sendDisabled" class="primary">{{ sendCodeBtn }}</el-button>
+              </el-col>
+            </el-row>
+          </el-form-item>
+          <el-form-item>
+            <el-button
+                :loading="loading"
+                type="primary"
+                style="width:100%;"
+                @click.native.prevent="handleSubmit"
+            >登 录
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
 
-      <a-form-item style="margin-top:24px">
-        <a-button size="large" type="primary" htmlType="submit" class="login-button" :loading="loginBtn"
-                  @click.stop.prevent="handleSubmit" :disabled="loginBtn">确定
-        </a-button>
-      </a-form-item>
-
-    </a-form-model>
+    </el-tabs>
   </div>
 </template>
 
 <script>
-import LoginAccount from './LoginAccount'
-import LoginPhone from './LoginPhone'
-import {timeFix} from '@/utils/util'
-import {Message} from "element-ui";
+
+
+import {getSmsCode, localLogin, phoneLogin} from "@/api/user";
+import {setCookie} from "@/utils/cookie";
 
 export default {
-  components: {
-    LoginAccount,
-    LoginPhone,
-  },
+  components: {},
+  name: 'login',
   data() {
+    const validateUsername = (rule, value, callback) => {
+      if (value.length === 0) {
+        callback(new Error("请输入用户名"));
+      } else {
+        callback();
+      }
+    };
+    const validatePass = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error("密码不能小于6位"));
+      } else {
+        callback();
+      }
+    };
+    // 校验手机号
+    const validateMobile = (rule, value, callback) => {
+          if (!value || new RegExp(/^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/).test(value)) {
+            callback();
+          } else {
+            callback(new Error("您的手机号码格式不正确!"));
+          }
+        }
+    ;
     return {
-      customActiveKey: 'tab1',
-      loginBtn: false,
+      activeName: 'acc_login',
+      accountLoginForm: {
+        username: "",
+        password: "",
+        isRememberMe: false,
+      },
+      phoneLoginForm: {
+        phone: '',
+        smsCode: "",
+      },
+      accountLoginRules: {
+        username: [
+          {required: true, trigger: "blur", validator: validateUsername}
+        ],
+        password: [{required: true, trigger: "blur", validator: validatePass}]
+      },
+      phoneLoginRules: {
+        phone: [
+          {required: true, message: '请输入手机号码!', trigger: "blur"},
+          {validator: validateMobile}
+        ],
+        smsCode: [{
+          required: true, message: '请输入验证码!', trigger: "blur", maxLength: 6
+        }]
+      },
+      loading: false,
+      sending: false,
+      sendDisabled: false,
+      time: 60,
+      sendCodeBtn: "发送验证码"
+
     }
   },
+  beforeDestroy() {
+
+  },
   created() {
-    this.rememberMe = true
+    this.rememberMe = true;
   },
   methods: {
-    handleTabClick(key) {
-      this.customActiveKey = key;
-      this.loginBtn = false;
+    handleClick(tab) {
+      this.activeName = tab.name;
     },
     handleRememberMeChange(e) {
       this.rememberMe = e.target.checked
     },
+    // 发送验证码
+    onSendSms() {
+      // 校验手机号码
+      this.$refs.phoneLoginForm.validateField('phone', errorMessage => {
+        if (errorMessage) {
+          this.$message.error(errorMessage);
+        } else {
+          let mobile = this.phoneLoginForm.phone;
+          getSmsCode(mobile).then((response) => {
+            if (response.data.success) {
+              let timer = setInterval(() => {
+                this.time--;
+                this.sendCodeBtn = `${this.time}s后重新发送`;
+                this.sendDisabled = true;
+                if (this.time === 0) {
+                  this.sendDisabled = false;
+                  this.sendCodeBtn = "发送验证码";
+                  this.time = 60;
+                  clearTimeout(timer);
+                }
+              }, 1000);
+              this.$message.success("短信已发送至您手机,请查看");
+              this.$notify.success({
+                title: '验证码',
+                message: response.data.data,
+                offset: 100
+              });
+            } else {
+              this.$message.error(response.data.msg);
+            }
+          }, () => {
+            this.$message.error("网络错误!");
+          })
+
+        }
+      })
+    },
 
     // 登录
     handleSubmit() {
-      this.loginBtn = true;
-      if (this.customActiveKey === 'tab1') {
-        // 使用账户密码登录
-        this.$refs.acc_login.handleLogin()
+      if (this.activeName === 'acc_login') {
+        this.accountLogin();
+      } else if (this.activeName === 'phone_login') {
+        this.phoneLogin();
       } else {
-        // 手机号码登录
-        this.$refs.phone_login.handleLogin()
+        this.$message.error("error");
       }
     },
-    // 校验失败
-    validateFail() {
-      this.loginBtn = false;
+    accountLogin() {
+      this.$refs.accountLoginForm.validate((valid) => {
+        if (valid) {
+          let params = {};
+          params.auth = this.accountLoginForm.username;
+          params.password = this.accountLoginForm.password;
+          localLogin(params).then(response => {
+            if (response.data.success) {
+              // 跳转到首页
+              let token = response.data.data;
+              this.$message.success(response.data.msg);
+              setCookie("token", token, 7);
+              this.$router.push('/');
+            } else {
+              this.$message.error(response.data.msg);
+            }
+          }, () => {
+            this.$message.error("网络错误!");
+          });
+        }
+      })
     },
-    // 登录后台成功
-    requestSuccess(loginResult) {
-      this.$message.success(loginResult.msg);
-      location.replace("/#/?token=" + loginResult.data);
-    },
-    // 登录后台失败
-    requestFailed(msg) {
-      this.$notification['error']({
-        message: '登录失败',
-        description: msg,
-        duration: 4,
-      });
-      this.loginBtn = false;
-    },
-
-  }
+    phoneLogin() {
+      this.$refs.phoneLoginForm.validate((valid) => {
+        if (valid) {
+          let params = {};
+          params.mobile = this.phoneLoginForm.phone;
+          params.smsCode = this.phoneLoginForm.smsCode;
+          phoneLogin(params).then(response => {
+            if (response.data.success) {
+              let userStatus = response.data.data.userStatus;
+              let token = response.data.data.token;
+              if (userStatus === 0) {
+                // 用户未激活
+                this.$confirm('是否完善您的个人信息', '确认信息', {
+                  distinguishCancelAndClose: true,
+                  confirmButtonText: '等会再说',
+                  cancelButtonText: '完善个人信息'
+                }).then(() => {
+                  // 直接去向首页
+                  setCookie("token", token, 7);
+                  this.$router.push('/');
+                }).catch(() => {
+                  // 储存token
+                  setCookie("token", token, 7);
+                  // 去向个人中心完善信息
+                  this.$router.push('/center/account');
+                });
+              } else if (userStatus === 1) {
+                // 用户已激活
+                this.$message.success(response.data.msg);
+                setCookie("token", token, 7);
+                this.$router.push('/');
+              }
+            } else {
+              this.$message.error(response.data.msg);
+            }
+          }, () => {
+            this.$message.error("网络错误!");
+          });
+        }
+      })
+    }
+  },
+  mounted() {
+    this.$refs.userNameInput.focus()
+  },
 
 }
 </script>
-<style lang="less" scoped>
-.user-layout-login {
-  label {
-    font-size: 14px;
+<style rel="stylesheet/scss" lang="scss">
+$dark_gray: #889aa4;
+$light_gray: #eee;
+.login-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+
+  .el-tabs {
+    width: 420px;
+    max-width: 100%;
+    margin: 60px auto;
   }
 
-  .getCaptcha {
-    display: block;
-    width: 100%;
-    height: 40px;
+  .title {
+    font-size: 26px;
+    color: $dark_gray;
+    margin: 60px auto 20px;
+    text-align: center;
+    font-weight: bold;
   }
 
-  .forge-password {
-    font-size: 14px;
-  }
 
-  button.login-button {
-    padding: 0 15px;
-    font-size: 16px;
-    height: 40px;
-    width: 100%;
-  }
-
-  .user-login-other {
-    text-align: left;
-    margin-top: 24px;
-    line-height: 22px;
-
-    .item-icon {
-      font-size: 24px;
-      color: rgba(0, 0, 0, .2);
-      margin-left: 16px;
-      vertical-align: middle;
-      cursor: pointer;
-      transition: color .3s;
-
-      &:hover {
-        color: #1890ff;
-      }
-    }
-
-    .register {
-      float: right;
-    }
-  }
 }
 </style>

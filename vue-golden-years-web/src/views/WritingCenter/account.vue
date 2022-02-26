@@ -36,7 +36,7 @@
         <div class="every-line">
           <div class="pre-label">真实姓名</div>
           <div class="info-words">
-            <el-input id="realname" name="realname" v-model="userAccountInfo.realname" placeholder="请输入真实姓名"
+            <el-input id="realname" name="realname" v-model="userAccountInfo.realName" placeholder="请输入真实姓名"
                       maxlength="8"></el-input>
           </div>
         </div>
@@ -92,7 +92,7 @@
 <script>
 import 'city-picker/cityPicker.css'
 import {mapGetters} from "vuex";
-import {updateUserInfo} from "@/api/user";
+import {updateUserInfo, uploadFace} from "@/api/user";
 
 export default {
   name: "account",
@@ -107,13 +107,41 @@ export default {
   },
   methods: {
     ...mapGetters(['getUserInfo']),
+    // 上传头像
     uploadFace() {
+
+      let f = document.getElementById('inputPic').files[0];
+
+
+      //创建一个form对象
+      let multiForm = new FormData();
+      // append 向form表单添加数据
+      multiForm.append('file', f, f.name);
+      uploadFace(multiForm).then((response) => {
+        if (response.data.success) {
+          this.$notify.success({
+            title: '提示',
+            message: response.data.msg,
+            offset: 100
+          });
+          this.userAccountInfo.face = response.data.data;
+        } else {
+          this.$message.error(response.data.msg);
+        }
+      }, () => {
+        this.$message.error('网络超时');
+      });
     },
     handleSubmit() {
       let userAccountInfo = this.userAccountInfo;
+      userAccountInfo.province = "河南省";
+      userAccountInfo.city = "信阳市";
+      userAccountInfo.district = "固始县";
       updateUserInfo(userAccountInfo).then((response) => {
         if (response.data.success) {
-
+          this.$message.success(response.data.msg);
+        } else {
+          this.$message.error(response.data.msg);
         }
       });
     },

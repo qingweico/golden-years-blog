@@ -1,30 +1,14 @@
 import request from '../utils/request'
 
 /**
- * 第三方登录
+ * 验证用户 token
  * @param params
  */
-export function login(params) {
-  return request({
-    url: process.env.WEB_API + '/oauth/render',
-    method: 'post',
-    params
-  })
-}
-
 export function authVerify(params) {
-  return request({
-    url: process.env.USER_API + '/auth/verify/' + params,
-    method: 'get',
-  })
-}
-
-export function editUser(params) {
-  return request({
-    url: process.env.WEB_API + '/oauth/editUser',
-    method: 'post',
-    data: params
-  })
+    return request({
+        url: process.env.USER_API + '/auth/verify/' + params,
+        method: 'get',
+    })
 }
 
 /**
@@ -32,11 +16,11 @@ export function editUser(params) {
  * @param params
  */
 export function updateUserPwd(params) {
-  return request({
-    url: process.env.USER_API + '/oauth/updateUserPwd',
-    method: 'post',
-    data: params
-  })
+    return request({
+        url: process.env.USER_API + '/user/updateUserPwd',
+        method: 'post',
+        data: params
+    })
 }
 
 /**
@@ -44,57 +28,80 @@ export function updateUserPwd(params) {
  * @param params
  */
 export function updateUserInfo(params) {
-  return request({
-    url: process.env.USER_API + '/user/updateUserInfo',
-    method: 'post',
-    data: params
-  })
+    return request({
+        url: process.env.USER_API + '/user/updateUserInfo',
+        method: 'post',
+        data: params
+    })
 }
+
+/**
+ * 手机号登陆
+ * @param params
+ */
+export function uploadFace(params) {
+    return request({
+        url: process.env.PIC_API + '/fs/uploadFace',
+        headers: {'Content-Type': 'multipart/form-data',},
+        method: 'post',
+        data: params
+    })
+}
+
+/**
+ * 删除用户 token
+ * @param params
+ */
 export function deleteUserAccessToken(params) {
-  return request({
-    url: process.env.VUE_APP_BASE_API + '/auth/delete/' + params,
-    method: 'get',
-  })
+    return request({
+        url: process.env.USER_API + '/auth/delete/' + params,
+        method: 'get',
+    })
 }
+
 /**
  * 获取用户登陆日志
  * @param params
  */
 export function getLoginLogList(params) {
-  return request({
-    url: process.env.USER_API + '/user/getLoginLogList',
-    method: 'get',
-    params
-  })
+    return request({
+        url: process.env.USER_API + '/user/getLoginLogList',
+        method: 'get',
+        params
+    })
 }
+
 /**
- * 本地登录
+ * 账户密码登录
  * @param params
  */
 export function localLogin(params) {
-  return request({
-    url: process.env.USER_API + '/auth/passwd',
-    method: 'post',
-    data: params
-  })
+    return request({
+        url: process.env.USER_API + '/auth/passwd',
+        method: 'post',
+        data: params
+    })
 }
 
 /**
- * 本地注册
+ * 手机号登陆
  * @param params
  */
-export function localRegister(params) {
-  return request({
-    url: process.env.WEB_API + '/login/register',
-    method: 'post',
-    data: params
-  })
+export function phoneLogin(params) {
+    return request({
+        url: process.env.USER_API + '/auth/mobile',
+        method: 'post',
+        data: params
+    })
 }
 
-export function logout(params) {
-  return request({
-    url: process.env.WEB_API + '/user/logout',
-    method: 'post',
-    data: params
-  })
+/**
+ * 获取手机验证码
+ * @param params
+ */
+export function getSmsCode(params) {
+    return request({
+        url: process.env.USER_API + '/auth/getSmsCode/' + params,
+        method: 'get',
+    })
 }

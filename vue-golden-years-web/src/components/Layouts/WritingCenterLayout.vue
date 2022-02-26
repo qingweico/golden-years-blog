@@ -7,9 +7,11 @@
           <a class="logo">博客首页</a>
         </router-link>
         <div class="right-me-info">
-          <div class="pic">
-            <el-avatar :src="userInfo.face" :size="40"/>
-          </div>
+          <router-link :to="{path: '/homepage', query: {id: userInfo.id}}">
+            <div class="pic">
+              <el-avatar :src="userInfo.face" :size="40"/>
+            </div>
+          </router-link>
           <el-dropdown>
             <span class="el-dropdown-link" style="font-weight: 300">消息</span>
             <el-dropdown-menu slot="dropdown">
@@ -113,7 +115,9 @@ export default {
   name: "WritingCenterLayout",
   data() {
     return {
-      userInfo: {},
+      userInfo: {
+        face: '',
+      },
       saveTitle: ''
     }
   },
@@ -126,6 +130,7 @@ export default {
     this.getCurrentPageTitle();
     this.userInfo = this.getUserInfo();
     this.getToken();
+
   },
 
   methods: {
@@ -157,7 +162,10 @@ export default {
         this.$router.push('/');
       }
     },
-  }
+  },
+  mounted() {
+
+}
 }
 </script>
 

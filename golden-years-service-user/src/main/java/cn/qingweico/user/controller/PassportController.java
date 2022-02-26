@@ -57,10 +57,9 @@ public class PassportController extends BaseController implements PassportContro
 
         String random = (int) ((Math.random() * 9 + 1) * 100000) + "";
 
-        // 把验证码存入redis中, 用于后续验证
-        System.out.println("手机验证码:" + random);
-        redisOperator.set(RedisConf.MOBILE_CODE + ":" + mobile, random, 30 * 60);
-        return new GraceJsonResult(ResponseStatusEnum.SMS_SEND_SUCCESS);
+        // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
+        redisOperator.set(RedisConf.MOBILE_CODE + ":" + mobile, random, 2 * 60);
+        return new GraceJsonResult(ResponseStatusEnum.SMS_SEND_SUCCESS, random);
     }
 
     @Override
@@ -72,7 +71,7 @@ public class PassportController extends BaseController implements PassportContro
 
         String mobile = registBO.getMobile();
         String smsCode = registBO.getSmsCode();
-        // 校验验证码是否匹配
+        // 校验手机验证码是否匹配
         String redisSmsCode = redisOperator.get(RedisConf.MOBILE_CODE + ":" + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SMS_CODE_ERROR);
@@ -80,21 +79,25 @@ public class PassportController extends BaseController implements PassportContro
 
         // 查询数据库, 判断用户是否注册
         AppUser user = userService.queryMobileIsExist(mobile);
-        if (user != null && UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
+        if (user == null) {
+            // 如果用户没有注册过, 则为null, 需要注册信息入库
+            user = userService.createUser(mobile);
+        } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
             // 如果用户不为空且状态为冻结则禁止该用户登陆
             return GraceJsonResult.errorCustom(ResponseStatusEnum.USER_FROZEN);
-        } else if (user == null) {
-            // 如果用户没有注册过 则为null 需要注册信息入库
-            user = userService.createUser(mobile);
         }
-        // doSaveUserAuthToken(user);
+        String jsonWebToken = JwtUtils.createJwt(user.getId());
+        doSaveUserAuthToken(user, jsonWebToken);
         int userStatus = user.getActiveStatus();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
         redisOperator.del(RedisConf.MOBILE_CODE + ":" + mobile);
+        HashMap<String, Object> map = new HashMap<>(2);
+        map.put("token", jsonWebToken);
+        map.put("userStatus", user.getActiveStatus());
         if (userStatus == UserStatus.INACTIVE.type) {
-            return new GraceJsonResult(ResponseStatusEnum.WELCOME, user.getActiveStatus());
+            return new GraceJsonResult(ResponseStatusEnum.WELCOME, map);
         } else if (userStatus == UserStatus.ACTIVE.type) {
-            return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, user.getActiveStatus());
+            return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, map);
         }
         return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);
     }

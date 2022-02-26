@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/home.vue'
-import UserLayout from "@/components/Layouts/UserLayout";
 import WritingCenterLayout from "@/components/Layouts/WritingCenterLayout";
 
 Vue.use(VueRouter)
@@ -18,17 +17,9 @@ const routes = [
         ]
     },
     {
-        path: '/user',
-        component: UserLayout,
-        redirect: '/user/login',
-        hidden: true,
-        children: [
-            {
-                path: 'login',
-                name: 'login',
-                component: () => import(/* webpackChunkName: "user" */ '@/views/User/Login')
-            }
-        ]
+        path: '/login',
+        name: 'login',
+        component: () => import(/* webpackChunkName: "user" */ '@/views/User/Login'),
     },
     {
         path: '/center',

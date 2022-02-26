@@ -14,8 +14,8 @@ service.defaults.headers.common['Authorization'] = getCookie("token")
 // request拦截器
 service.interceptors.request.use(
     config => {
-        if (getCookie("token") !== undefined) {
-            // 让每个请求携带自定义token 请根据实际情况自行修改
+        if (getCookie("token") !== null) {
+            // 让每个请求携带自定义token
             config.headers.Authorization = getCookie("token")
         }
         return config

@@ -3,13 +3,13 @@ package cn.qingweico.api.interceptor;
 import cn.qingweico.global.RedisConf;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 
 /**
- * @author:qiming
- * @date: 2021/9/9
+ * @author zqw
+ * @date 2021/9/9
  */
 public class AdminTokenInterceptor extends BaseInterceptor implements HandlerInterceptor {
 
@@ -23,12 +23,11 @@ public class AdminTokenInterceptor extends BaseInterceptor implements HandlerInt
      */
     @Override
     public boolean preHandle(HttpServletRequest request,
-                             @NotNull HttpServletResponse response,
-                             @NotNull Object handler) {
+                             @Nonnull HttpServletResponse response,
+                             @Nonnull Object handler) {
 
-        String adminUserId = request.getHeader("adminUserId");
-        String adminUserToken = request.getHeader("adminUserToken");
+        String token = request.getHeader("token");
 
-        return verifyUserIdAndToken(adminUserId, adminUserToken, RedisConf.REDIS_ADMIN_TOKEN);
+        return verifyUserToken(token, RedisConf.REDIS_ADMIN_TOKEN);
     }
 }

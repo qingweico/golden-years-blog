@@ -142,7 +142,7 @@ export default {
           this.$store
               .dispatch("Login", this.loginForm)
               .then(response => {
-                if (response.code == this.$ECode.SUCCESS) {
+                if (response.data.success) {
                   this.$router.push({path: this.redirect || "/"});
                 } else {
                   this.$message.error(response.data);

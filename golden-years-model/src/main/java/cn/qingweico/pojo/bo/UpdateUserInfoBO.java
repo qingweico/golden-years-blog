@@ -24,7 +24,7 @@ public class UpdateUserInfoBO {
     private String face;
 
     @NotBlank(message = "真实姓名不能为空")
-    private String realname;
+    private String realName;
 
     @Email
     @NotBlank(message = "邮件不能为空")

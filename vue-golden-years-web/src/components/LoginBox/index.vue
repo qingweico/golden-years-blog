@@ -89,6 +89,7 @@ import {Loading} from 'element-ui';
 import router from "@/router";
 import {localLogin} from "@/api/user";
 import {Message} from "element-ui"
+import {setCookie} from "@/utils/cookie";
 
 export default {
   name: "share",
@@ -145,8 +146,10 @@ export default {
           localLogin(params).then(response => {
             if (response.data.success) {
               // 跳转到首页
+              let token = response.data.data;
+              setCookie("token", token, 7);
               Message.success(response.data.msg);
-              location.replace("/#/?token=" + response.data.data);
+              this.$router.replace('/');
               window.location.reload()
             } else {
               Message.error(response.data.msg);
@@ -158,7 +161,7 @@ export default {
       });
     },
     goRegister: function () {
-      router.replace("/user");
+      router.replace("/login");
     },
 
     goAuth: function (source) {

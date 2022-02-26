@@ -74,7 +74,7 @@ export default {
           this.totalPage = content.totalPage;
           this.currentPage = content.currentPage;
         } else {
-          this.$message.warning(response.data.msg);
+          this.$message.error(response.data.msg);
         }
       }, () => {
         this.$message.error("网络超时");

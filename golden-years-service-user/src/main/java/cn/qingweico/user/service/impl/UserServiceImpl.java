@@ -16,6 +16,7 @@ import org.n3r.idworker.Sid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -23,23 +24,21 @@ import tk.mybatis.mapper.entity.Example;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author:qiming
- * @date: 2021/9/6
+ * @author zqw
+ * @date 2021/9/6
  */
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
 
 
     private final static String[] FACE = {
-            "https://pic.imgdb.cn/item/614341bb2ab3f51d918d7585.jpg",
-            "https://pic.imgdb.cn/item/614341bb2ab3f51d918d758d.jpg",
-            "https://pic.imgdb.cn/item/614341bb2ab3f51d918d7599.jpg"
+            "https://cdn.qingweico.cn/blog/274080b281e5f0d31b7390207d78f591.jpeg",
+            "https://cdn.qingweico.cn/blog/a21f7fc6328bcb72d1a0d9647b3b93c9.jpg",
+            "https://cdn.qingweico.cn/blog/0f6087e207dd169cbe300863110f98d0.jpeg"
     };
     @Resource
     private AppUserMapper userMapper;
@@ -58,7 +57,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         return userMapper.selectOneByExample(userExample);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public AppUser createUser(String mobile) {
 
@@ -83,8 +82,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         return userMapper.selectByPrimaryKey(userId);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
+    @Async("taskExecutor")
     public void updateUserInfo(UpdateUserInfoBO updateUserInfoBO) {
 
         String userId = updateUserInfoBO.getId();
@@ -97,23 +97,17 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 保证缓存数据双写一致性
         Lock lock = new ReentrantLock();
-
         CountDownLatch updateCacheLatch = new CountDownLatch(1);
-
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        executor.execute(() -> {
-            try {
-                lock.lock();
-                int res = userMapper.updateByPrimaryKeySelective(userInfo);
-                if (res != 1) {
-                    GraceException.display(ResponseStatusEnum.USER_UPDATE_ERROR);
-                }
-                updateCacheLatch.countDown();
-            } finally {
-                lock.unlock();
+        lock.lock();
+        try {
+            int res = userMapper.updateByPrimaryKeySelective(userInfo);
+            if (res != 1) {
+                GraceException.display(ResponseStatusEnum.USER_UPDATE_ERROR);
             }
-        });
-        executor.shutdown();
+        } finally {
+            lock.unlock();
+            updateCacheLatch.countDown();
+        }
         try {
             updateCacheLatch.await();
         } catch (InterruptedException e) {
@@ -121,7 +115,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 查询数据库中最新的数据放入缓存中
         AppUser user = queryUserById(userId);
-        log.info("updateUserInfo ------> 缓存已更新");
+        log.info("updateUserInfo: 缓存已更新");
         redisOperator.set(REDIS_USER_INFO + ":" + userId, JsonUtils.objectToJson(user));
     }
 
