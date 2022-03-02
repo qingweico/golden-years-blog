@@ -9,7 +9,9 @@ import cn.qingweico.util.PagedGridResult;
 import cn.qingweico.util.ServletReqUtils;
 import com.github.pagehelper.PageHelper;
 import eu.bitwalker.useragentutils.UserAgent;
+import lombok.extern.slf4j.Slf4j;
 import org.n3r.idworker.Sid;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -22,6 +24,7 @@ import java.util.List;
  * @author zqw
  * @date 2021/9/22
  */
+@Slf4j
 @Service
 public class LoginLogServiceImpl extends BaseService implements LoginLogService {
 
@@ -32,6 +35,7 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
     private Sid sid;
 
     @Override
+    @Async("taskExecutor")
     public void saveUserLoginLog(String userId) {
         final UserAgent userAgent = UserAgent.parseUserAgentString(ServletReqUtils.getRequest().getHeader("User-Agent"));
         String[] str = AddressUtil.getRealAddress().split(",");
@@ -54,6 +58,7 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         userLoginLog.setBrowser(browser);
         userLoginLog.setLoginTime(timestamp);
         userLoginLogMapper.insert(userLoginLog);
+        log.info("saveUserLoginLog...");
     }
 
     @Override

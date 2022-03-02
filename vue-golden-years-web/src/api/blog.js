@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getBlogById (params) {
   return request({
-    url: process.env.VUE_APP_BASE_API + '/portal/article/detail',
+    url: process.env.ARTICLE_API + '/portal/article/detail',
     method: 'get',
     params
   })

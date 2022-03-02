@@ -65,7 +65,7 @@ public class AppsUserController extends BaseController implements AppsUserContro
         appUserService.freezeUserOrNot(userId, doStatus);
 
         // 刷新用户状态
-        redisOperator.del(RedisConf.REDIS_USER_INFO + ":" + userId);
+        redisOperator.del(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId);
 
         if (doStatus.equals(UserStatus.FROZEN.type)) {
             return new GraceJsonResult(ResponseStatusEnum.FREEZE_SUCCESS);

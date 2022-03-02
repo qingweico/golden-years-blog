@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author:qiming
- * @date: 2021/9/5
+ * @author zqw
+ * @date 2021/9/5
  */
 @RestController
 public class UserController extends BaseController implements UserControllerApi {
@@ -67,8 +67,8 @@ public class UserController extends BaseController implements UserControllerApi 
 
 
         // 从redis中查询用户的粉丝数和关注数
-        Integer myFollowCounts = getCountsFromRedis(RedisConf.REDIS_MY_FOLLOW_COUNTS + ":" + userId);
-        Integer myFanCounts = getCountsFromRedis(RedisConf.REDIS_AUTHOR_FANS_COUNTS + ":" + userId);
+        Integer myFollowCounts = getCountsFromRedis(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + userId);
+        Integer myFanCounts = getCountsFromRedis(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + userId);
 
         userVO.setMyFansCounts(myFanCounts);
         userVO.setMyFollowCounts(myFollowCounts);
@@ -125,13 +125,13 @@ public class UserController extends BaseController implements UserControllerApi 
     private AppUser getUser(String userId) {
         AppUser user;
         // 缓存用户信息
-        String jsonUser = redisOperator.get(RedisConf.REDIS_USER_INFO + ":" + userId);
+        String jsonUser = redisOperator.get(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId);
         if (StringUtils.isNotBlank(jsonUser)) {
             user = JsonUtils.jsonToPojo(jsonUser, AppUser.class);
         } else {
             user = userService.queryUserById(userId);
-            log.info("查询数据库啦!");
-            redisOperator.set(RedisConf.REDIS_USER_INFO + ":" + userId, JsonUtils.objectToJson(user));
+            log.info("查询数据库!");
+            redisOperator.set(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
         }
         return user;
     }

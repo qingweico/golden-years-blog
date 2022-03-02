@@ -10,7 +10,7 @@ export function getBlogByLevel (params) {
 
 export function getNewBlog (params) {
   return request({
-    url: process.env.VUE_APP_BASE_API + '/portal/article/list',
+    url: process.env.ARTICLE_API + '/portal/article/list',
     method: 'get',
     params
   })

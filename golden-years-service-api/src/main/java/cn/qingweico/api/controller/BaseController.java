@@ -24,9 +24,6 @@ public class BaseController {
     @Resource
     public ElasticsearchTemplate elasticsearchTemplate;
 
-
-
-
     public Integer getCountsFromRedis(String key) {
         String counts = redisOperator.get(key);
         if (StringUtils.isBlank(counts)) {

@@ -11,8 +11,8 @@
          class="n2"
       >{{ blogData.categoryId ? blogData.categoryId : "" }}</a>
     </h1>
-    <div class="infosbox">
-      <div class="newsview">
+    <div class="infos_box">
+      <div class="news_view">
         <h3 class="news_title" v-if="blogData.title">{{ blogData.title }}</h3>
         <div class="blog_info" v-if="blogData.categoryId">
           <ul>
@@ -156,7 +156,7 @@ export default {
       params.append("articleId", this.blogId);
     }
     getBlogById(params).then(response => {
-      console.log("获取博客信息", response.data)
+      console.log(response.data);
       if (!response.data.success) {
         this.blogData = response.data.data;
         this.blogId = response.data.data.id

@@ -34,11 +34,6 @@
           </el-form-item>
           <el-checkbox v-model="accountLoginForm.isRememberMe" style="margin:0 0 25px 0;"><span>七天免登录</span>
           </el-checkbox>
-          <router-link to="/">
-            <a>返回首页</a>
-          </router-link>
-
-
           <el-form-item>
             <el-button
                 :loading="loading"

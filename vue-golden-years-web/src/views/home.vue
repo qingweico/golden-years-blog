@@ -30,11 +30,14 @@
             <a href="javascript:void(0);" :class="[saveTitle === '/' ? 'title' : '']">首页</a>
           </router-link>
         </li>
-
-
         <li>
-          <router-link to="/classify">
+          <router-link to="/classify" v-if="isLogin">
             <a href="javascript:void(0);" :class="[saveTitle === '/classify' ? 'title' : '']">分类</a>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/time"  v-if="isLogin">
+            <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">时间轴</a>
           </router-link>
         </li>
 
@@ -49,8 +52,11 @@
             <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">订阅</a>
           </router-link>
         </li>
+
+        <li>
+          <el-button type="primary" icon="el-icon-edit" @click="goWritingCenter">创作中心</el-button>
+        </li>
       </ul>
-      <el-button type="primary" icon="el-icon-edit" @click="goWritingCenter">创作中心</el-button>
       <div class="search_box">
         <div id="search_bar" :class="(showSearch || keyword.length > 0)?'search_bar search_open':'search_bar'">
           <input

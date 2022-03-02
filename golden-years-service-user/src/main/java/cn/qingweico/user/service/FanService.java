@@ -105,7 +105,7 @@ public interface FanService {
     /**
      * 被动更新粉丝信息 ---> 点击粉丝头像时
      *
-     * @param relationId 相关作者id
+     * @param relationId 粉丝信息相关主键id
      * @param fanId      粉丝id
      */
     void passive(String relationId, String fanId);

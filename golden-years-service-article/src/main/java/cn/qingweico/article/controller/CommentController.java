@@ -3,6 +3,8 @@ package cn.qingweico.article.controller;
 import cn.qingweico.api.controller.BaseController;
 import cn.qingweico.api.controller.article.CommentControllerApi;
 import cn.qingweico.article.service.CommentPortalService;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.pojo.bo.CommentReplyBO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
@@ -36,7 +38,7 @@ public class CommentController extends BaseController implements CommentControll
 
         UserBasicInfoVO userVO = articlePortalController.getUserBasicInfoList(set).get(0);
         // 获得发表评论的用户昵称
-        String nickname = userVO.getNickname();
+        String nickname = userVO.getNickName();
         // 获得发表评论的用户头像
         String face = userVO.getFace();
 
@@ -53,7 +55,7 @@ public class CommentController extends BaseController implements CommentControll
 
     @Override
     public GraceJsonResult getCounts(String articleId) {
-        int commentCounts = getCountsFromRedis(REDIS_ARTICLE_COMMENT_COUNTS + ":" + articleId);
+        int commentCounts = getCountsFromRedis(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + Constants.SYMBOL_COLON + articleId);
         return GraceJsonResult.ok(commentCounts);
     }
 
@@ -62,10 +64,10 @@ public class CommentController extends BaseController implements CommentControll
                                 Integer page,
                                 Integer pageSize) {
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
         PagedGridResult res = commentPortalService.queryArticleComments(articleId,
                 page,
@@ -74,22 +76,22 @@ public class CommentController extends BaseController implements CommentControll
     }
 
     @Override
-    public GraceJsonResult userCommentList(String writerId, Integer page, Integer pageSize) {
+    public GraceJsonResult userCommentList(String articleId, Integer page, Integer pageSize) {
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
-        PagedGridResult res = commentPortalService.queryWriterComments(writerId,
+        PagedGridResult res = commentPortalService.queryWriterComments(articleId,
                 page,
                 pageSize);
         return GraceJsonResult.ok(res);
     }
 
     @Override
-    public GraceJsonResult deleteComment(String writerId, String commentId) {
-        commentPortalService.delete(writerId, commentId);
+    public GraceJsonResult deleteComment(String articleId, String commentId) {
+        commentPortalService.delete(articleId, commentId);
         return GraceJsonResult.ok();
     }
 }

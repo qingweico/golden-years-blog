@@ -20,7 +20,9 @@ import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.JwtUtils;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -35,6 +37,7 @@ import java.util.UUID;
  * @author zqw
  * @date 2021/9/5
  */
+@Slf4j
 @RestController
 public class PassportController extends BaseController implements PassportControllerApi {
 
@@ -52,7 +55,7 @@ public class PassportController extends BaseController implements PassportContro
         String userIp = IpUtils.getRequestIp(request);
 
         // 根据用户的ip进行限制, 限制用户在60s内只能获得一次验证码
-        redisOperator.setnx60s("ip:" + userIp, userIp);
+        redisOperator.setnx60s("ip" + Constants.SYMBOL_COLON + userIp, userIp);
 
 
         String random = (int) ((Math.random() * 9 + 1) * 100000) + "";
@@ -90,7 +93,7 @@ public class PassportController extends BaseController implements PassportContro
         doSaveUserAuthToken(user, jsonWebToken);
         int userStatus = user.getActiveStatus();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
-        redisOperator.del(RedisConf.MOBILE_CODE + ":" + mobile);
+        redisOperator.del(RedisConf.MOBILE_CODE + Constants.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put("token", jsonWebToken);
         map.put("userStatus", user.getActiveStatus());
@@ -176,6 +179,7 @@ public class PassportController extends BaseController implements PassportContro
         redisOperator.del(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId);
         return GraceJsonResult.ok();
     }
+
 
     public void doSaveUserAuthToken(AppUser user, String token) {
         // 保存token以及userInfo到redis中

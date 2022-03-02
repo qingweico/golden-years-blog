@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class UserBasicInfoVO {
    private String id;
-   private String nickname;
+   private String nickName;
    private String face;
    private Integer activeStatus;
    private Integer myFollowCounts;

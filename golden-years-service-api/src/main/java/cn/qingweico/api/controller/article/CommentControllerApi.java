@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 /**
- * @author:qiming
+ * @author zqw
  * @date: 2021/9/13
  */
 @Api(value = "文章评论相关的接口定义", tags = {"文章评论相关的接口定义"})
@@ -32,14 +32,14 @@ public interface CommentControllerApi {
 
     @ApiOperation(value = "作者查看我的评论管理列表", notes = "查看我的评论管理列表", httpMethod = "POST")
     @PostMapping("/user/list")
-    GraceJsonResult userCommentList(@RequestParam String writerId,
+    GraceJsonResult userCommentList(@RequestParam String articleId,
                                     @RequestParam Integer page,
                                     @RequestParam Integer pageSize);
 
 
     @ApiOperation(value = "作者删除评论", notes = "作者删除评论", httpMethod = "POST")
     @PostMapping("/user/delete")
-    GraceJsonResult deleteComment(@RequestParam String writerId,
+    GraceJsonResult deleteComment(@RequestParam String articleId,
                                   @RequestParam String commentId);
 
 

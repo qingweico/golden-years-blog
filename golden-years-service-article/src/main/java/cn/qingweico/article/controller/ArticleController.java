@@ -7,6 +7,8 @@ import cn.qingweico.article.service.ArticleService;
 import cn.qingweico.enums.ArticleCoverType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Category;
@@ -60,7 +62,7 @@ public class ArticleController extends BaseController implements ArticleControll
         }
 
         // 判断分类Id是否存在 (从缓存中取出数据)
-        String categoryJson = redisOperator.get(REDIS_ALL_CATEGORY);
+        String categoryJson = redisOperator.get(RedisConf.REDIS_ALL_CATEGORY);
         List<Category> categories = JsonUtils.jsonToList(categoryJson, Category.class);
         if (categories == null) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);
@@ -90,11 +92,11 @@ public class ArticleController extends BaseController implements ArticleControll
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_QUERY_PARAMS_ERROR);
         }
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
 
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
 
         PagedGridResult res = articleService.queryMyArticles(userId,
@@ -113,11 +115,11 @@ public class ArticleController extends BaseController implements ArticleControll
                                     Integer pageSize,
                                     Integer deleteStatus) {
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
 
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
         PagedGridResult res = articleService.queryAll(status, page, pageSize, deleteStatus);
 

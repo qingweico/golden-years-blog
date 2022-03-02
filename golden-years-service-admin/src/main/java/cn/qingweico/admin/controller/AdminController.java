@@ -72,7 +72,7 @@ public class AdminController extends BaseController implements AdminControllerAp
 
         // 判断BO中的用户名和密码不为空
 
-        // 若BO中base64不为空 则代表人脸识别登陆 否则需要用户名和密码
+        // 若BO中base64不为空, 则代表人脸识别登陆, 否则需要用户名和密码
         if (StringUtils.isBlank(newAdminBO.getImg64())) {
             if (StringUtils.isBlank(newAdminBO.getPassword()) ||
                     StringUtils.isBlank(newAdminBO.getConfirmPassword())) {
@@ -100,10 +100,10 @@ public class AdminController extends BaseController implements AdminControllerAp
     @Override
     public GraceJsonResult list(Integer page, Integer pageSize) {
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
         PagedGridResult res = adminUserService.queryAdminList(page, pageSize);
 

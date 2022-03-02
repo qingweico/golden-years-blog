@@ -4,6 +4,8 @@ import cn.qingweico.api.controller.BaseController;
 import cn.qingweico.api.controller.article.ArticlePortalControllerApi;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticlePortalService;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Article;
@@ -164,11 +166,11 @@ public class ArticlePortalController extends BaseController implements ArticlePo
                                     Integer page,
                                     Integer pageSize) {
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
 
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
         PagedGridResult res = articlePortalService.queryPortalArticleList(keyword,
                 category,
@@ -180,12 +182,12 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     @Override
     public GraceJsonResult getCategoryList() {
         // 缓存
-        String categoriesJson = redisOperator.get(REDIS_ALL_CATEGORY);
+        String categoriesJson = redisOperator.get(RedisConf.REDIS_ALL_CATEGORY);
 
         List<Category> categories;
         if (StringUtils.isBlank(categoriesJson)) {
             categories = articlePortalService.queryCategoryList();
-            redisOperator.set(REDIS_ALL_CATEGORY, JsonUtils.objectToJson(categories));
+            redisOperator.set(RedisConf.REDIS_ALL_CATEGORY, JsonUtils.objectToJson(categories));
             log.info("类别信息已存入缓存");
         } else {
             categories = JsonUtils.jsonToList(categoriesJson, Category.class);
@@ -212,11 +214,11 @@ public class ArticlePortalController extends BaseController implements ArticlePo
                                                     Integer pageSize) {
 
         if (page == null) {
-            page = COMMON_START_PAGE;
+            page = Constants.COMMON_START_PAGE;
         }
 
         if (pageSize == null) {
-            pageSize = COMMON_PAGE_SIZE;
+            pageSize = Constants.COMMON_PAGE_SIZE;
         }
 
         PagedGridResult gridResult = articlePortalService.queryArticleListOfAuthor(writerId, page, pageSize);
@@ -239,10 +241,10 @@ public class ArticlePortalController extends BaseController implements ArticlePo
         set.add(articleVO.getAuthor());
         List<UserBasicInfoVO> authorList = getUserBasicInfoList(set);
         if (!authorList.isEmpty()) {
-            articleVO.setAuthorName(authorList.get(0).getNickname());
+            articleVO.setAuthorName(authorList.get(0).getNickName());
             articleVO.setAuthorFace(authorList.get(0).getFace());
         }
-        articleVO.setReadCounts(getCountsFromRedis(REDIS_ARTICLE_READ_COUNTS + ":" + articleId));
+        articleVO.setReadCounts(getCountsFromRedis(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId));
         if (authorList.size() == 0) {
             return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR, articleVO);
         } else {
@@ -253,15 +255,15 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     @Override
     public GraceJsonResult readArticle(String articleId, HttpServletRequest req) {
         String visitIp = IpUtils.getRequestIp(req);
-        redisOperator.setnx60s(REDIS_ARTICLE_ALREADY_READ + ":" + articleId + ":" + visitIp, visitIp);
-        redisOperator.increment(REDIS_ARTICLE_READ_COUNTS + ":" + articleId, 1);
+        redisOperator.setnx60s(RedisConf.REDIS_ARTICLE_ALREADY_READ + Constants.SYMBOL_COLON + articleId + Constants.SYMBOL_COLON + visitIp, visitIp);
+        redisOperator.increment(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId, 1);
         return GraceJsonResult.ok();
     }
 
 
     @Override
     public Integer readCounts(String articleId, HttpServletRequest req) {
-        return getCountsFromRedis(REDIS_ARTICLE_READ_COUNTS + ":" + articleId);
+        return getCountsFromRedis(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId);
     }
 
     private UserBasicInfoVO getAuthorInfoIfPresent(String author,
@@ -284,7 +286,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
         List<String> idList = new ArrayList<>();
         for (Article article : rows) {
             idSet.add(article.getAuthor());
-            idList.add(REDIS_ARTICLE_READ_COUNTS + ":" + article.getId());
+            idList.add(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + article.getId());
         }
         // redis mget
         List<String> readCountsRedisList = redisOperator.mget(idList);
@@ -309,8 +311,10 @@ public class ArticlePortalController extends BaseController implements ArticlePo
         gridResult.setRows(indexArticleList);
         return gridResult;
     }
+
     @Resource
     private UserBaseInfoClient client;
+
     public List<UserBasicInfoVO> getUserBasicInfoList(Set<?> idSet) {
         List<UserBasicInfoVO> userBasicInfoVOList;
         GraceJsonResult result = client.getUserBasicInfoList(JsonUtils.objectToJson(idSet));

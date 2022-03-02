@@ -14,8 +14,8 @@ import javax.annotation.Resource;
 
 
 /**
- * @author:qiming
- * @date: 2021/9/12
+ * @author zqw
+ * @date 2021/9/12
  */
 @RestController
 public class FansController extends BaseController implements FansControllerApi {
@@ -24,7 +24,7 @@ public class FansController extends BaseController implements FansControllerApi 
     private FanService fanService;
 
     @Override
-    public GraceJsonResult isMeFollowThisWriter(String writerId, String fanId) {
+    public GraceJsonResult isMeFollowThisAuthor(String writerId, String fanId) {
         boolean res = fanService.isMeFollowThisAuthor(writerId, fanId);
         return GraceJsonResult.ok(res);
     }
