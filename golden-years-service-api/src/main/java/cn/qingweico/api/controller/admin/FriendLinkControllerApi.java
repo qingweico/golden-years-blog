@@ -12,24 +12,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 
 /**
- * @author:qiming
- * @date: 2021/9/9
+ * @author zqw
+ * @date 2021/9/9
  */
 @Api(value = "首页友情链接", tags = {"首页友情链接"})
-@RequestMapping("friendLink")
+@RequestMapping("fl")
 public interface FriendLinkControllerApi {
+   /**
+    * 新增或者修改友情链接
+    * @param saveFriendLinkBO SaveFriendLinkBO
+    * @return GraceJsonResult
+    */
    @ApiOperation(value = "新增或者修改友情链接", notes = "新增或者修改友情链接", httpMethod = "POST")
-   @PostMapping("/saveOrUpdateFriendLink")
+   @PostMapping("/saveOrUpdate")
    GraceJsonResult saveOrUpdateFriendLink(@RequestBody @Valid SaveFriendLinkBO saveFriendLinkBO);
 
+   /**
+    * 查询友情链接列表
+    * @return GraceJsonResult
+    */
    @ApiOperation(value = "查询友情链接列表", notes = "查询友情链接列表", httpMethod = "POST")
-   @PostMapping("/getFriendLinkList")
+   @PostMapping("/list")
    GraceJsonResult getFriendLinkList();
 
+   /**
+    * 删除友情链接
+    * @param linkId 友情链接id
+    * @return GraceJsonResult
+    */
    @ApiOperation(value = "删除友情链接", notes = "删除友情链接", httpMethod = "POST")
    @PostMapping("/delete")
    GraceJsonResult delete(String linkId);
 
+   /**
+    * 首页友情链接列表
+    * @return GraceJsonResult
+    */
    @ApiOperation(value = "首页友情链接列表", notes = "查询友情链接列表", httpMethod = "GET")
    @GetMapping("/portal/list")
    GraceJsonResult getIndexFriendLinkList();

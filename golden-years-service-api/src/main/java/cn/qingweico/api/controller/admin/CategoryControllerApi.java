@@ -19,10 +19,19 @@ import javax.validation.Valid;
 @RequestMapping("category")
 public interface CategoryControllerApi {
 
+    /**
+     * 查询分类列表
+     * @return GraceJsonResult
+     */
     @ApiOperation(value = "查询分类列表", notes = "查询分类列表", httpMethod = "GET")
     @GetMapping("/getCategoryList")
     GraceJsonResult getCategoryList();
 
+    /**
+     * 新增或者修改文章分类
+     * @param saveCategoryBO SaveCategoryBO
+     * @return GraceJsonResult
+     */
     @ApiOperation(value = "新增或者修改文章分类", notes = "新增或者修改文章分类", httpMethod = "POST")
     @PostMapping("/saveOrUpdateCategory")
     GraceJsonResult saveOrUpdateCategory(@RequestBody @Valid SaveCategoryBO saveCategoryBO);

@@ -46,12 +46,6 @@
                 </router-link>
               </li>
               <li class="menu-item">
-                <router-link to="/center/newly">
-                  <a href="javascript:void(0);"
-                     :class="[saveTitle === '/center/newly' ? 'title' : '']">发布文章</a>
-                </router-link>
-              </li>
-              <li class="menu-item">
                 <router-link to="/center/comment">
                   <a href="javascript:void(0);"
                      :class="[saveTitle === '/center/comment' ? 'title' : '']">评论管理</a>
@@ -141,7 +135,7 @@ export default {
     },
     getToken() {
       let token = getCookie("token");
-      if (token !== undefined) {
+      if (token !== null) {
         authVerify(token).then(response => {
           if (response.data.success) {
             this.isLogin = true;

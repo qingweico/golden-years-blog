@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package cn.qingweico.my.mapper;
+package cn.qingweico.mapper;
 
 import tk.mybatis.mapper.common.Mapper;
 import tk.mybatis.mapper.common.MySqlMapper;

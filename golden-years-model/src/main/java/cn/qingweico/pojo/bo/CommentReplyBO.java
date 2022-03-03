@@ -22,6 +22,6 @@ public class CommentReplyBO {
     private String commentUserId;
 
     @NotBlank(message = "留言内容不能为空")
-    @Length(max = 50, message = "文章内容长度不能超过50")
+    @Length(max = 1024, message = "留言内容长度不能超过1024")
     private String content;
 }

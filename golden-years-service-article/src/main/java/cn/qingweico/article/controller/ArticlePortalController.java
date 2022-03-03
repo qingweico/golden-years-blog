@@ -192,6 +192,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
         } else {
             categories = JsonUtils.jsonToList(categoriesJson, Category.class);
         }
+        // 查询每个类别下文章的数量
         ArrayList<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : categories) {
             CategoryVO categoryVO = new CategoryVO();
@@ -209,7 +210,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     @Override
-    public GraceJsonResult queryArticleListOfAuthor(String authorId,
+    public GraceJsonResult queryArticleListByAuthorId(String authorId,
                                                     Integer page,
                                                     Integer pageSize) {
 

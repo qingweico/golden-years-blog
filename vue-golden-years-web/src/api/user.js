@@ -36,7 +36,7 @@ export function updateUserInfo(params) {
 }
 
 /**
- * 手机号登陆
+ * 用户头像上传
  * @param params
  */
 export function uploadFace(params) {

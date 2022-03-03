@@ -1,3 +1,4 @@
+
 <template>
   <div class="app-container">
     <textarea id="editor" rows="10" cols="80"></textarea>
@@ -12,26 +13,26 @@ export default {
   mounted() {
     let that = this;
     // 配置ckeditor插件
-    // CKEDITOR.plugins.addExternal('codesnippet', '../static/ckeditor/plugins/codesnippet/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('panelbutton', '/static/ckeditor/plugins/panelbutton/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('floatpanel', '/static/ckeditor/plugins/floatpanel/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('colorbutton', '/static/ckeditor/plugins/colorbutton/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('markdown', '/static/ckeditor/plugins/markdown/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('colordialog', '/static/ckeditor/plugins/colordialog/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('dialog', '/static/ckeditor/plugins/dialog/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('dialogui', '/static/ckeditor/plugins/dialogui/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('smiley', '/static/ckeditor/plugins/smiley/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('widget', '/static/ckeditor/plugins/widget/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('lineutils', '/static/ckeditor/plugins/lineutils/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('eqneditor', '/static/ckeditor/plugins/eqneditor/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('justify', '/static/ckeditor/plugins/justify/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('tableresize', '/static/ckeditor/plugins/tableresize/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('wordcount', '/static/ckeditor/plugins/wordcount/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('notification', '/static/ckeditor/plugins/notification/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('video', '/static/ckeditor/plugins/video/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('fakeobjects', '/static/ckeditor/plugins/fakeobjects/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('liststyle', '/static/ckeditor/plugins/liststyle/', 'plugin.js');
-    // CKEDITOR.plugins.addExternal('pasteUploadImage', '/static/ckeditor/plugins/pasteUploadImage/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('codesnippet', '/static/ckeditor/plugins/codesnippet/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('panelbutton', '/static/ckeditor/plugins/panelbutton/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('floatpanel', '/static/ckeditor/plugins/floatpanel/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('colorbutton', '/static/ckeditor/plugins/colorbutton/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('markdown', '/static/ckeditor/plugins/markdown/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('colordialog', '/static/ckeditor/plugins/colordialog/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('dialog', '/static/ckeditor/plugins/dialog/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('dialogui', '/static/ckeditor/plugins/dialogui/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('smiley', '/static/ckeditor/plugins/smiley/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('widget', '/static/ckeditor/plugins/widget/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('lineutils', '/static/ckeditor/plugins/lineutils/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('eqneditor', '/static/ckeditor/plugins/eqneditor/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('justify', '/static/ckeditor/plugins/justify/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('tableresize', '/static/ckeditor/plugins/tableresize/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('wordcount', '/static/ckeditor/plugins/wordcount/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('notification', '/static/ckeditor/plugins/notification/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('video', '/static/ckeditor/plugins/video/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('fakeobjects', '/static/ckeditor/plugins/fakeobjects/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('liststyle', '/static/ckeditor/plugins/liststyle/', 'plugin.js');
+    CKEDITOR.plugins.addExternal('pasteUploadImage', '/static/ckeditor/plugins/pasteUploadImage/', 'plugin.js');
     CKEDITOR.replace('editor',
         {
           height: this.height,
@@ -44,7 +45,6 @@ export default {
           // pasteUploadFileApi: process.env.PICTURE_API + '/file/ckeditorUploadCopyFile?token=' + getToken(),
           extraPlugins: 'codesnippet,panelbutton,floatpanel,colorbutton,markdown,colordialog,dialog,dialogui,smiley,widget,lineutils,eqneditor,justify,tableresize,wordcount,notification,video,fakeobjects,liststyle,pasteUploadImage'
         });
-
     this.editor = CKEDITOR.instances.editor;
     //初始化内容
     this.editor.setData(this.content);

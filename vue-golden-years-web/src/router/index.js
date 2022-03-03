@@ -32,11 +32,6 @@ const routes = [
                 component: () => import(/* webpackChunkName: "user" */ '@/views/WritingCenter/manage')
             },
             {
-                path: 'newly',
-                name: 'newly',
-                component: () => import(/* webpackChunkName: "user" */ '@/views/WritingCenter/newly')
-            },
-            {
                 path: 'comment',
                 name: 'comment',
                 component: () => import(/* webpackChunkName: "user" */ '@/views/WritingCenter/comment')

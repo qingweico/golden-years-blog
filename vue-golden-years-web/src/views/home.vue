@@ -122,7 +122,6 @@ import {mapMutations} from 'vuex';
 import {delCookie, getCookie, setCookie} from "@/utils/cookie";
 import {authVerify, deleteUserAccessToken} from "@/api/user";
 import {timeAgo} from "@/utils/web";
-import {Message} from "element-ui";
 
 export default {
   name: "index",

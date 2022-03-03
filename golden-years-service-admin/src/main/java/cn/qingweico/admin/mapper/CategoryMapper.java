@@ -1,6 +1,6 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.my.mapper.MyMapper;
+import cn.qingweico.mapper.MyMapper;
 import cn.qingweico.pojo.Category;
 import org.springframework.stereotype.Repository;
 

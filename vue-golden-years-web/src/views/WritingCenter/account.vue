@@ -109,10 +109,7 @@ export default {
     ...mapGetters(['getUserInfo']),
     // 上传头像
     uploadFace() {
-
       let f = document.getElementById('inputPic').files[0];
-
-
       //创建一个form对象
       let multiForm = new FormData();
       // append 向form表单添加数据

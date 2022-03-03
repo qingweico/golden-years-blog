@@ -24,7 +24,7 @@ public class NewArticleBO {
    @NotBlank(message = "文章内容不能为空")
    private String content;
 
-   @NotNull(message = "请选择文章领域")
+   @NotNull(message = "请选择文章类别")
    private Integer categoryId;
 
    @NotNull(message = "请选择正确的文章封面类型")
@@ -42,5 +42,5 @@ public class NewArticleBO {
    private Date createTime;
 
    @NotBlank(message = "用户未登录")
-   private String author;
+   private String authorId;
 }

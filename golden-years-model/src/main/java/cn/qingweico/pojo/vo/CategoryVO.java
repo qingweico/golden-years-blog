@@ -10,6 +10,5 @@ import lombok.Data;
 public class CategoryVO {
     private Integer id;
     private String name;
-    private String tagColor;
     private Integer eachCategoryArticleCount;
 }
