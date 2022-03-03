@@ -11,7 +11,6 @@ import cn.qingweico.pojo.AppUser;
 import cn.qingweico.pojo.bo.PasswordAuthBO;
 import cn.qingweico.pojo.bo.RegistLoginBO;
 import cn.qingweico.user.handler.DefaultHandler;
-import cn.qingweico.user.service.AppUserService;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.CheckUtils;
@@ -22,14 +21,12 @@ import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * 主页用户登陆接口
@@ -61,7 +58,7 @@ public class PassportController extends BaseController implements PassportContro
         String random = (int) ((Math.random() * 9 + 1) * 100000) + "";
 
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
-        redisOperator.set(RedisConf.MOBILE_CODE + ":" + mobile, random, 2 * 60);
+        redisOperator.set(RedisConf.MOBILE_SMS_CODE + ":" + mobile, random, 2 * 60);
         return new GraceJsonResult(ResponseStatusEnum.SMS_SEND_SUCCESS, random);
     }
 
@@ -75,7 +72,7 @@ public class PassportController extends BaseController implements PassportContro
         String mobile = registBO.getMobile();
         String smsCode = registBO.getSmsCode();
         // 校验手机验证码是否匹配
-        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_CODE + ":" + mobile);
+        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + ":" + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SMS_CODE_ERROR);
         }
@@ -93,7 +90,7 @@ public class PassportController extends BaseController implements PassportContro
         doSaveUserAuthToken(user, jsonWebToken);
         int userStatus = user.getActiveStatus();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
-        redisOperator.del(RedisConf.MOBILE_CODE + Constants.SYMBOL_COLON + mobile);
+        redisOperator.del(RedisConf.MOBILE_SMS_CODE + Constants.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put("token", jsonWebToken);
         map.put("userStatus", user.getActiveStatus());

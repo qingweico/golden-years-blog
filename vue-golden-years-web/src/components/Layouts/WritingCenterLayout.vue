@@ -238,7 +238,7 @@ body {
 
 .menu-list {
   background-color: white;
-  width: 200px;
+  width: 150px;
   padding: 15px 35px;
 }
 

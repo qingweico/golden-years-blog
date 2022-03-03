@@ -28,10 +28,10 @@ public interface ArticlePortalControllerApi {
 
     @ApiOperation(value = "首页查询文章列表", notes = "首页查询文章列表", httpMethod = "GET")
     @GetMapping("list")
-    GraceJsonResult queryAll(@RequestParam String keyword,
-                             @RequestParam Integer category,
-                             @RequestParam Integer page,
-                             @RequestParam Integer pageSize);
+    GraceJsonResult query(@RequestParam String keyword,
+                          @RequestParam Integer category,
+                          @RequestParam Integer page,
+                          @RequestParam Integer pageSize);
 
     @ApiOperation(value = "首页查询分类列表", notes = "首页查询分类列表", httpMethod = "GET")
     @GetMapping("category")
@@ -44,7 +44,7 @@ public interface ArticlePortalControllerApi {
 
     @GetMapping("author/all")
     @ApiOperation(value = "查询作家发布的所有文章列表", notes = "查询作家发布的所有文章列表", httpMethod = "GET")
-    GraceJsonResult queryArticleListOfAuthor(@RequestParam String author,
+    GraceJsonResult queryArticleListOfAuthor(@RequestParam String authorId,
                                              @RequestParam Integer page,
                                              @RequestParam Integer pageSize);
 

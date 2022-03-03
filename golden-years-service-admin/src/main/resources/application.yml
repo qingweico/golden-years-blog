@@ -95,6 +95,3 @@ mapper:
 pagehelper:
   helperDialect: mysql
   supportMethodsArguments: true
-# cookie domain
-website:
-  domain-name: qingweico.cn

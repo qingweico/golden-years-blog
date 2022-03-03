@@ -12,16 +12,11 @@ import java.util.Date;
 public class IndexArticleVO {
     private String id;
     private String title;
-    private Integer categoryId;
-    private Integer articleType;
+    private String categoryId;
     private String articleCover;
-    private Integer isAppoint;
-    private Integer articleStatus;
     private String author;
     private Integer readCounts;
     private Integer commentCounts;
-    private String mongoFileId;
-    private Integer isDelete;
     private Date createTime;
     private Date updateTime;
     private String summary;

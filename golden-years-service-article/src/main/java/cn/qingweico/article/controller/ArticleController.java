@@ -62,7 +62,7 @@ public class ArticleController extends BaseController implements ArticleControll
         }
 
         // 判断分类Id是否存在 (从缓存中取出数据)
-        String categoryJson = redisOperator.get(RedisConf.REDIS_ALL_CATEGORY);
+        String categoryJson = redisOperator.get(RedisConf.REDIS_ARTICLE_CATEGORY);
         List<Category> categories = JsonUtils.jsonToList(categoryJson, Category.class);
         if (categories == null) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);

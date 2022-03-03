@@ -444,12 +444,4 @@ nav .logo {
 .uploadImgBody :hover {
   border: dashed 1px #00ccff;
 }
-
-footer {
-  height: 60px;
-  width: 100%;
-  position: absolute;
-  bottom: 2px;
-  margin-bottom: -10px;
-}
 </style>

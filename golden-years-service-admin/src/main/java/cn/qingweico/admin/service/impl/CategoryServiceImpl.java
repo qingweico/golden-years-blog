@@ -4,6 +4,7 @@ import cn.qingweico.admin.mapper.CategoryMapper;
 import cn.qingweico.admin.service.CategoryService;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Category;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
         }
 
         // 更新缓存
-        redisOperator.del(REDIS_ALL_CATEGORY);
+        redisOperator.del(RedisConf.REDIS_ARTICLE_CATEGORY);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
             GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
         // 更新缓存
-        redisOperator.del(REDIS_ALL_CATEGORY);
+        redisOperator.del(RedisConf.REDIS_ARTICLE_CATEGORY);
     }
 
     @Override

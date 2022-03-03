@@ -21,7 +21,7 @@
         <emoji-panel class="emojiPanel" @emojiClick="appendEmoji"></emoji-panel>
 
         <div class="emoji-panel-btn p2" @click="showEmojiPanel" slot="reference">
-          <img src="assets/img/face_logo.png"/>
+          <img src="assets/img/face_logo.png" alt=""/>
         </div>
       </el-popover>
       <span class="allow p2" v-if="isShowAvatar">还能输入{{ count }}个字符</span>

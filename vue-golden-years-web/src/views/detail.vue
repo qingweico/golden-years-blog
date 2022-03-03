@@ -14,11 +14,11 @@
     <div class="infos_box">
       <div class="news_view">
         <h3 class="news_title" v-if="blogData.title">{{ blogData.title }}</h3>
-        <div class="blog_info" v-if="blogData.categoryId">
+        <div class="blog_info" v-if="true">
           <ul>
             <li class="author">
               <span class="iconfont">&#xe60f;</span>
-              <a href="javascript:void(0);" @click="goToAuthor(blogData.author)">{{ blogData.author }}</a>
+              <a href="javascript:void(0);" @click="goToAuthor(blogData.author)">{{ blogData.authorName }}</a>
             </li>
             <li class="lmname">
               <span class="iconfont">&#xe603;</span>
@@ -33,7 +33,7 @@
             </li>
             <li class="view">
               <span class="iconfont">&#xe8c7;</span>
-              {{ blogData.clickCount }}
+              {{ blogData.readCounts }}
             </li>
             <li class="like">
               <span class="iconfont">&#xe663;</span>
@@ -156,7 +156,7 @@ export default {
       params.append("articleId", this.blogId);
     }
     getBlogById(params).then(response => {
-      console.log(response.data);
+      console.log(response.data.data.categoryId);
       if (!response.data.success) {
         this.blogData = response.data.data;
         this.blogId = response.data.data.id

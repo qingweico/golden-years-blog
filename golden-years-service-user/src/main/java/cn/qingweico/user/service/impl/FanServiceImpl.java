@@ -2,6 +2,8 @@ package cn.qingweico.user.service.impl;
 
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.AppUser;
 import cn.qingweico.pojo.Fans;
 import cn.qingweico.pojo.eo.FansEo;
@@ -81,13 +83,13 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setProvince(fansInfo.getProvince());
         fansMapper.insert(fan);
 
-        // redis 作家粉丝累增
+        // redis 作者粉丝累增
 
-        redisOperator.increment(REDIS_WRITER_FANS_COUNTS + ":" + authorId, 1);
+        redisOperator.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + authorId, 1);
 
         // redis 当前用户的(我的)关注数累增
 
-        redisOperator.increment(REDIS_MY_FOLLOW_COUNTS + ":" + fanId, 1);
+        redisOperator.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + fanId, 1);
 
         // 保存粉丝关系到es中
         FansEo fanEo = new FansEo();
@@ -109,11 +111,11 @@ public class FanServiceImpl extends BaseService implements FanService {
 
         // redis 作家粉丝累减
 
-        redisOperator.decrement(REDIS_WRITER_FANS_COUNTS + ":" + authorId, 1);
+        redisOperator.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS +  Constants.SYMBOL_COLON + authorId, 1);
 
         // redis 当前用户的(我的)关注数累减
 
-        redisOperator.decrement(REDIS_MY_FOLLOW_COUNTS + ":" + fanId, 1);
+        redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS +  Constants.SYMBOL_COLON + fanId, 1);
 
         // 删除es中的粉丝关系
         DeleteQuery deleteQuery = new DeleteQuery();

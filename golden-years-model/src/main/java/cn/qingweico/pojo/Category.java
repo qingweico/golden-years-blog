@@ -22,7 +22,7 @@ public class Category {
    private String name;
 
    /**
-    * 标签颜色
+    * 类别描述
     */
-   private String tagColor;
+   private String description;
 }

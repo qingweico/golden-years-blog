@@ -35,7 +35,6 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
     private Sid sid;
 
     @Override
-    @Async("taskExecutor")
     public void saveUserLoginLog(String userId) {
         final UserAgent userAgent = UserAgent.parseUserAgentString(ServletReqUtils.getRequest().getHeader("User-Agent"));
         String[] str = AddressUtil.getRealAddress().split(",");

@@ -161,10 +161,10 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     @Override
-    public GraceJsonResult queryAll(String keyword,
-                                    Integer category,
-                                    Integer page,
-                                    Integer pageSize) {
+    public GraceJsonResult query(String keyword,
+                                 Integer category,
+                                 Integer page,
+                                 Integer pageSize) {
         if (page == null) {
             page = Constants.COMMON_START_PAGE;
         }
@@ -182,12 +182,12 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     @Override
     public GraceJsonResult getCategoryList() {
         // 缓存
-        String categoriesJson = redisOperator.get(RedisConf.REDIS_ALL_CATEGORY);
+        String categoriesJson = redisOperator.get(RedisConf.REDIS_ARTICLE_CATEGORY);
 
         List<Category> categories;
         if (StringUtils.isBlank(categoriesJson)) {
             categories = articlePortalService.queryCategoryList();
-            redisOperator.set(RedisConf.REDIS_ALL_CATEGORY, JsonUtils.objectToJson(categories));
+            redisOperator.set(RedisConf.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
             log.info("类别信息已存入缓存");
         } else {
             categories = JsonUtils.jsonToList(categoriesJson, Category.class);
@@ -209,7 +209,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     @Override
-    public GraceJsonResult queryArticleListOfAuthor(String writerId,
+    public GraceJsonResult queryArticleListOfAuthor(String authorId,
                                                     Integer page,
                                                     Integer pageSize) {
 
@@ -221,7 +221,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
             pageSize = Constants.COMMON_PAGE_SIZE;
         }
 
-        PagedGridResult gridResult = articlePortalService.queryArticleListOfAuthor(writerId, page, pageSize);
+        PagedGridResult gridResult = articlePortalService.queryArticleListOfAuthor(authorId, page, pageSize);
         return GraceJsonResult.ok(rebuildArticleGrid(gridResult));
     }
 
@@ -241,7 +241,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
         set.add(articleVO.getAuthor());
         List<UserBasicInfoVO> authorList = getUserBasicInfoList(set);
         if (!authorList.isEmpty()) {
-            articleVO.setAuthorName(authorList.get(0).getNickName());
+            articleVO.setAuthorName(authorList.get(0).getNickname());
             articleVO.setAuthorFace(authorList.get(0).getFace());
         }
         articleVO.setReadCounts(getCountsFromRedis(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId));

@@ -38,7 +38,7 @@ public class CommentController extends BaseController implements CommentControll
 
         UserBasicInfoVO userVO = articlePortalController.getUserBasicInfoList(set).get(0);
         // 获得发表评论的用户昵称
-        String nickname = userVO.getNickName();
+        String nickname = userVO.getNickname();
         // 获得发表评论的用户头像
         String face = userVO.getFace();
 

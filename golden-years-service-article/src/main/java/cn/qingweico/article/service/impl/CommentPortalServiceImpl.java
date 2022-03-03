@@ -39,7 +39,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
                                String fatherCommentId,
                                String content,
                                String userId,
-                               String nickName,
+                               String nickname,
                                String face) {
 
         ArticleDetailVO articleDetailVO = articlePortalService.queryDetail(articleId);
@@ -52,7 +52,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
 
         comments.setArticleId(articleId);
         comments.setCommentUserId(userId);
-        comments.setCommentUserNickname(nickName);
+        comments.setCommentUserNickname(nickname);
         comments.setContent(content);
         comments.setFatherId(fatherCommentId);
         comments.setCreateTime(new Date());

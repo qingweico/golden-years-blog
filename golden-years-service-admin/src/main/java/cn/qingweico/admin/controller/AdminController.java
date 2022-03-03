@@ -6,6 +6,8 @@ import cn.qingweico.api.controller.BaseController;
 import cn.qingweico.api.controller.admin.AdminControllerApi;
 import cn.qingweico.enums.FaceVerifyType;
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.AdminUser;
@@ -13,7 +15,6 @@ import cn.qingweico.pojo.bo.AdminLoginBO;
 import cn.qingweico.pojo.bo.NewAdminBO;
 import cn.qingweico.util.FaceVerifyUtils;
 import cn.qingweico.util.PagedGridResult;
-import com.google.code.kaptcha.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,10 +43,10 @@ public class AdminController extends BaseController implements AdminControllerAp
     public GraceJsonResult login(AdminLoginBO adminLoginBO,
                                  HttpServletRequest req,
                                  HttpServletResponse resp) {
-        String actualVerificationCode = (String) req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
-        if (!actualVerificationCode.equals(adminLoginBO.getVerifyCode())) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.VERIFICATION_CODE_ERROR);
-        }
+//        String actualVerificationCode = (String) req.getSession().getAttribute(Constants.KAPTCHA_SESSION_KEY);
+//        if (!actualVerificationCode.equals(adminLoginBO.getVerifyCode())) {
+//            return GraceJsonResult.errorCustom(ResponseStatusEnum.VERIFICATION_CODE_ERROR);
+//        }
         AdminUser admin = adminUserService.queryAdminByUsername(adminLoginBO.getUsername());
         if (admin == null) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
@@ -114,10 +115,7 @@ public class AdminController extends BaseController implements AdminControllerAp
     public GraceJsonResult logout(String adminId,
                                   HttpServletRequest req,
                                   HttpServletResponse resp) {
-        redisOperator.del(REDIS_ADMIN_TOKEN + ":" + adminId);
-        setCookie(req, resp, "admin_token", "", COOKIE_DELETE);
-        setCookie(req, resp, "admin_name", "", COOKIE_DELETE);
-        setCookie(req, resp, "admin_id", "", COOKIE_DELETE);
+        redisOperator.del(RedisConf.REDIS_ADMIN_TOKEN + Constants.DELIMITER_COLON + adminId);
         return GraceJsonResult.ok();
     }
 
@@ -178,11 +176,6 @@ public class AdminController extends BaseController implements AdminControllerAp
                                  HttpServletResponse resp) {
         // 保存token到redis中
         String token = UUID.randomUUID().toString();
-        redisOperator.set(REDIS_ADMIN_TOKEN + ":" + admin.getId(), token);
-
-        // 保存admin登陆基本token信息到cookie中
-        setCookie(req, resp, "admin_token", token, COOKIE_EXPIRE);
-        setCookie(req, resp, "admin_id", admin.getId(), COOKIE_EXPIRE);
-        setCookie(req, resp, "admin_name", admin.getUsername(), COOKIE_EXPIRE);
+        redisOperator.set(RedisConf.REDIS_ADMIN_TOKEN + Constants.SYMBOL_COLON + admin.getId(), token);
     }
 }

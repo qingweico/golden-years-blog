@@ -1,96 +1,162 @@
 <template>
-  <div id="editor" class="editor-container">
+<!--  <div id="editor" class="editor-container">-->
 
-    <div class="article-title-wrapper">
-      <input class="article-title" placeholder="请输入文字标题(6-30长度)" v-model="articleTitle"
-             maxlength="30"/>
-    </div>
+<!--    <div class="article-title-wrapper">-->
+<!--      <input class="article-title" placeholder="请输入文字标题(6-30长度)" v-model="articleTitle"-->
+<!--             maxlength="30"/>-->
+<!--    </div>-->
 
-    <div class="other-info">
-      <div class="cover-wrapper">
-        <div class="cover">文章类别</div>
-        <div class="choose-type">
+<!--    <div class="other-info">-->
+<!--      <div class="cover-wrapper">-->
+<!--        <div class="cover">文章类别</div>-->
+<!--        <div class="choose-type">-->
 
-          <label>
-            <select v-model="articleCategory">
-              <option :value="category.id" v-for="(category, index) in categoryList" v-key="index">{{
-                  category.name
-                }}
-              </option>
-            </select>
-          </label>
+<!--          <label>-->
+<!--            <select v-model="articleCategory">-->
+<!--              <option :value="category.id" v-for="(category, index) in categoryList" v-key="index">{{-->
+<!--                  category.name-->
+<!--                }}-->
+<!--              </option>-->
+<!--            </select>-->
+<!--          </label>-->
 
-        </div>
-      </div>
-      <div class="cover-wrapper">
-        <div class="cover">文章封面</div>
-        <div class="choose-type">
-          <div><label>
-            <input type="radio" name="articleType" v-model="articleType" value="1" checked/>
-          </label><span
-              class="choose-words">单封面</span></div>
-          <div style="margin-left: 30px;"><label>
-            <input type="radio" v-model="articleType" value="2"
-                   name="articleType"/>
-          </label><span class="choose-words">无封面</span>
-          </div>
-        </div>
-      </div>
-      <div class="cover-wrapper" v-show="articleType === '1'">
-        <div class="cover"></div>
-        <div class="choose-cover">
-          <div class="uploader-comp">
-            <div id="block-choose" class="block-choose" :style="coverStyle">
-              <img src="@/assets/icon-go-upload.png" style="width: 20px; height: 20px; align-self: center;"
-                   v-show="articleCover === '' || articleCover === null" alt=""/>
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="cover-wrapper">-->
+<!--        <div class="cover">文章封面</div>-->
+<!--        <div class="choose-type">-->
+<!--          <div><label>-->
+<!--            <input type="radio" name="articleType" v-model="articleType" value="1" checked/>-->
+<!--          </label><span-->
+<!--              class="choose-words">单封面</span></div>-->
+<!--          <div style="margin-left: 30px;"><label>-->
+<!--            <input type="radio" v-model="articleType" value="2"-->
+<!--                   name="articleType"/>-->
+<!--          </label><span class="choose-words">无封面</span>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="cover-wrapper" v-show="articleType === '1'">-->
+<!--        <div class="cover"></div>-->
+<!--        <div class="choose-cover">-->
+<!--          <div class="uploader-comp">-->
+<!--            <div id="block-choose" class="block-choose" :style="coverStyle">-->
+<!--              <img src="@/assets/icon-go-upload.png" style="width: 20px; height: 20px; align-self: center;"-->
+<!--                   v-show="articleCover === '' || articleCover === null" alt=""/>-->
+<!--            </div>-->
+<!--            <input type="file" @change="uploadCover" @mouseover="mouseOver" @mouseout="mouseOut"-->
+<!--                   id="inputPic" class="inputPic" accept="image/jpeg,image/jpg,image/png">-->
+<!--          </div>-->
+<!--          <div style="margin-top: 10px; color: #9b9d9e;">请上传JPG、JPEG、PNG格式的封面图</div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <el-form>-->
+<!--      <el-form-item label="内容"  prop="content">-->
+<!--        <MarkdownEditor :content="articleContent" ref="editor" :height="465"></MarkdownEditor>-->
+<!--      </el-form-item>-->
+<!--      </el-form>-->
+<!--    </div>-->
+
+<!--    <div class="publish-bottom">-->
+<!--      <div class="buttons">-->
+<!--        <button class="white-btn" type="button" @click="goBack">返回</button>-->
+<!--        <button class="white-btn" type="button" @click="preview">预览</button>-->
+<!--        <button class="white-btn" type="button" @click="doTiming">{{ appointWords }}</button>-->
+<!--        <el-date-picker-->
+<!--            v-model="timingDate"-->
+<!--            type="datetime"-->
+<!--            id="choose-date"-->
+<!--            class="timing-date-picker"-->
+<!--            v-show="isAppoint ===  1"-->
+<!--            placeholder="定时日期">-->
+<!--        </el-date-picker>-->
+<!--        <button class="red-btn" type="button" @click="publish">发布文章</button>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  </div>-->
+  <el-dialog
+      :visible.sync="dialogFormVisible"
+      :before-close="closeDialog"
+      fullscreen
+  >
+    <el-form :model="form" :rules="rules" ref="form">
+
+      <el-row>
+        <el-col :span="16">
+          <el-form-item label="标题" :label-width="formLabelWidth" prop="title">
+            <el-input v-model="form.articleTitle" auto-complete="off" @input="contentChange"></el-input>
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="8">
+          <el-form-item label="文章封面" :label-width="formLabelWidth">
+            <div class="imgBody" v-if="form.photoList">
+              <img
+                  @mouseover="icon = true"
+                  @mouseout="icon = false"
+                  style="display:inline; width: 195px;height: 105px;"
+               alt="" src="">
             </div>
-            <input type="file" @change="uploadCover" @mouseover="mouseOver" @mouseout="mouseOut"
-                   id="inputPic" class="inputPic" accept="image/jpeg,image/jpg,image/png">
-          </div>
-          <div style="margin-top: 10px; color: #9b9d9e;">请上传JPG、JPEG、PNG格式的封面图</div>
-        </div>
-      </div>
+            <div v-else class="uploadImgBody">
+              <i class="el-icon-plus avatar-uploader-icon"></i>
+            </div>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
-      <el-form>
-      <el-form-item label="内容"  prop="content">
-        <MarkdownEditor :content="articleContent" ref="editor" :height="465"></MarkdownEditor>
+      <el-row>
+        <el-col :span="6.5">
+          <el-form-item label="分类" :label-width="formLabelWidth" prop="articleCategory">
+            <el-select
+                @input="contentChange"
+                v-model="form.articleCategory"
+                size="small"
+                placeholder="请选择"
+                style="width:150px"
+            >
+              <el-option
+                  v-for="item in articleCategoryList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+      </el-row>
+
+
+      <el-form-item label="内容" :label-width="formLabelWidth" prop="content">
+        <CKEditor ref="editor" :content="form.content" @contentChange="contentChange" :height="360"></CKEditor>
+<!--        <MarkdownEditor :content="form.content" ref="editor" :height="465"></MarkdownEditor>-->
       </el-form-item>
-      </el-form>
-    </div>
 
-    <div class="publish-bottom">
-      <div class="buttons">
-        <button class="white-btn" type="button" @click="goBack">返回</button>
-        <button class="white-btn" type="button" @click="preview">预览</button>
-        <button class="white-btn" type="button" @click="doTiming">{{ appointWords }}</button>
-        <el-date-picker
-            v-model="timingDate"
-            type="datetime"
-            id="choose-date"
-            class="timing-date-picker"
-            v-show="isAppoint ===  1"
-            placeholder="定时日期">
-        </el-date-picker>
-        <button class="red-btn" type="button" @click="publish">发布文章</button>
-      </div>
-    </div>
-  </div>
+      <el-form-item style="float: right; margin-right: 20px;">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
 
 <script>
 import MarkdownEditor from "@/components/MarkdownEditor";
+import CKEditor from "@/components/CKEditor";
 import {uploadBlogCover} from "@/api/blog";
-import $ from 'jquery';
-
 export default {
   name: "newly",
   components: {
     MarkdownEditor,
+    CKEditor
   },
   data() {
     return {
-      articleTitle: "",
-      articleCategory: "",
+      articleCategoryList: [],
       articleType: '1',
       articleCover: "",
       isAppoint: 0,
@@ -100,13 +166,57 @@ export default {
       articleContent: "",
       categoryList: [],
       timingDate: "",
+      dialogFormVisible: true,
+      closeDialog: false,
       formLabelWidth: "120px",
+      CKEditorData: "",
+      form: {
+        articleTitle: null,
+        articleCategory: "",
+        content: null,
+        isPublish: null,
+        author: null,
+      },
+      rules: {
+        articleTitle: [
+          {required: true, message: '标题不能为空', trigger: 'blur'}
+        ],
+        articleCategory: [
+          {required: true, message: '分类不能为空', trigger: 'blur'}
+        ],
+        content: [
+          {required: true, message: '内容不能为空', trigger: 'blur'}
+        ],
+      }
     }
+  },
+  created() {
+    this.$nextTick(() => {
+      //DOM现在更新了
+      this.$refs.editor.initData(); //设置富文本内容
+    });
   },
   methods: {
     goBack() {
       window.history.go(-1);
     },
+    // 内容改变，触发监听
+    contentChange: function() {
+      console.log("内容改变")
+      const that = this;
+      // if(that.changeCount > 1) {
+      //   that.isChange = true;
+      //   that.form.content = that.$refs.editor.getData(); //获取CKEditor中的内容
+      //   that.form.tagUid = that.tagValue.join(",");
+      //   console.log("开始备份2", that.$refs.editor.getData())
+      //   console.log("开始备份2", that.tagValue)
+      //   console.log("开始备份3", that.form)
+      //   // 将内容设置到 WebStorage中
+      //   window.LS.set("form", JSON.stringify(that.form));
+      // }
+      // this.changeCount = this.changeCount + 1;
+    },
+    submitForm(){},
     preview() {
     },
     doTiming() {

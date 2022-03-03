@@ -4,6 +4,8 @@ import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.AppUser;
 import cn.qingweico.pojo.bo.UpdateUserInfoBO;
@@ -116,7 +118,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 查询数据库中最新的数据放入缓存中
         AppUser user = queryUserById(userId);
         log.info("updateUserInfo: 缓存已更新");
-        redisOperator.set(REDIS_USER_INFO + ":" + userId, JsonUtils.objectToJson(user));
+        redisOperator.set(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
     }
 
     @Override

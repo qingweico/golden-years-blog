@@ -93,14 +93,9 @@ export default {
     },
     //获取data
     getData: function () {
-      // let text = localStorage.getItem('vditorvditor')
-      // 返回的文本
-      // return this.$commonUtil.markdownToHtml(text);
-      // console.log("获取转换后的文本", this.$commonUtil.markdownToHtml(localStorage.getItem('vditorvditor')))
       return this.vditor.getHTML();
     },
     setData: function (data) {
-      // console.log("将html转", this.vditor.html2md(data))
       const that = this;
       this.$nextTick(() => {
         //DOM现在更新了

@@ -23,7 +23,12 @@ export function getBlogByTime (params) {
     params
   })
 }
-
+export function getBlogCategory () {
+  return request({
+    url: process.env.ADMIN_API + '/category/getCategoryList',
+    method: 'get',
+  })
+}
 export function getHotBlog (params) {
   return request({
     url: process.env.WEB_API + '/index/getHotBlog',

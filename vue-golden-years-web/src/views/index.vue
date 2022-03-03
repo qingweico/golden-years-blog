@@ -1,4 +1,4 @@
-<template>
+  <template>
   <article>
     <div class="blank"></div>
     <!--blog context begin-->
@@ -19,27 +19,30 @@
           </a>
         </span>
 
-        <p class="blog_summary">{{ item.summary }}</p>
+        <p class="blog_summary">{{ item.summary }} ...</p>
         <div class="blog_info">
           <ul>
 
-            <li class="author">
+            <li class="author" v-if="item.authorVO">
               <span class="iconfont">&#xe60f;</span>
-              <a href="javascript:void(0);" @click="goToAuthor(item.author)">{{ item.author }}</a>
+              <a href="javascript:void(0);" @click="goToAuthor(item.author)">{{ item.authorVO.nickname }}</a>
             </li>
             <li class="category_name" v-if="item.categoryId">
               <span class="iconfont">&#xe603;</span>
               <a href="javascript:void(0);"
-                 @click="goToBlogListGroupByCategory(item.categoryId)"
-              >{{ item.categoryId }}</a>
+              > {{getBlogCategoryNameById(item.categoryId)}}</a>
             </li>
             <li class="view">
               <span class="iconfont">&#xe8c7;</span>
               <span>{{ item.readCounts }}</span>
             </li>
-            <li class="like">
+            <li class="collect">
               <span class="iconfont">&#xe663;</span>
               {{ item.readCounts }}
+            </li>
+            <li class="comments">
+              <span class="iconfont">&#xe663;</span>
+              {{ item.commentCounts }}
             </li>
             <li class="createTime">
               <span class="iconfont">&#xe606;</span>
@@ -69,7 +72,7 @@
 
 <script>
 import {Loading} from 'element-ui';
-import {getNewBlog} from "@/api";
+import {getBlogCategory, getNewBlog} from "@/api";
 
 export default {
   name: "index",
@@ -81,6 +84,7 @@ export default {
       newBlogData: [],
       keyword: "",
       category: "",
+      categoryList:[],
       currentPage: 1,
       pageSize: 10,
       total: 0,
@@ -97,6 +101,8 @@ export default {
   created() {
     // 获取最新博客
     this.newBlogList();
+    this.getBlogCategory();
+
   },
   methods: {
     // 跳转到文章详情
@@ -121,6 +127,7 @@ export default {
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getNewBlog(params).then(response => {
+        console.log(response.data);
         if (response.data.success) {
           that.newBlogData = response.data.data.rows;
           that.total = response.data.data.records;
@@ -157,12 +164,38 @@ export default {
         }
         that.loading = false;
       });
+    },
+    // 获得所有文章类别
+    getBlogCategory() {
+      getBlogCategory().then((response) => {
+        if(response.data.success) {
+          this.categoryList = response.data.data;
+        }else {
+          this.$message.error(response.data.msg);
+        }
+      }, () => {
+        this.$message.error('网络超时');
+      });
+    },
+    getBlogCategoryNameById(categoryId) {
+      let categoryList = this.categoryList;
+      for (let i = 0; i < categoryList.length; i++) {
+        if (categoryId === categoryList[i].id) {
+          return categoryList[i].name;
+        }
+      }
+    },
+    goToAuthor(authorId) {
+      let routeData = this.$router.resolve({
+        path: "/homepage",
+        query: {id: authorId}
+      });
+      window.open(routeData.href, '_self');
+    },
+    goToBlogListGroupByCategory() {
     }
   },
-  goToAuthor() {
-  },
-  goToBlogListGroupByCategory() {
-  }
+
 };
 </script>
 

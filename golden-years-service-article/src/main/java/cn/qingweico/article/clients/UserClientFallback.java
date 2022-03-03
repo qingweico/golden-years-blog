@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 
 /**
- * @author:qiming
- * @date: 2021/10/19
+ * @author zqw
+ * @date 2021/10/19
  */
 @Component
 public class UserClientFallback implements UserBaseInfoClient {

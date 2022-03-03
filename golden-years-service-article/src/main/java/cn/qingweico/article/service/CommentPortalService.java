@@ -17,14 +17,14 @@ public interface CommentPortalService {
      * @param fatherCommentId 回复评论id
      * @param content         发表的内容
      * @param userId          发表评论的用户id
-     * @param nickName        发表评论的用户昵称
+     * @param nickname        发表评论的用户昵称
      * @param face            发表评论的用户头像
      */
     void publishComment(String articleId,
                         String fatherCommentId,
                         String content,
                         String userId,
-                        String nickName,
+                        String nickname,
                         String face);
 
 
