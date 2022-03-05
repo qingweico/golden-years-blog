@@ -1,4 +1,4 @@
-  <template>
+<template>
   <article>
     <div class="blank"></div>
     <!--blog context begin-->
@@ -30,7 +30,7 @@
             <li class="category_name" v-if="item.categoryId">
               <span class="iconfont">&#xe603;</span>
               <a href="javascript:void(0);"
-              > {{getBlogCategoryNameById(item.categoryId)}}</a>
+              > {{ getBlogCategoryNameById(item.categoryId) }}</a>
             </li>
             <li class="view">
               <span class="iconfont">&#xe8c7;</span>
@@ -55,10 +55,14 @@
       <div class="isEnd">
         <div class="loadContent" @click="loadContent" v-if="!isEnd&&!loading">点击加载更多</div>
         <div class="lds-css ng-scope" v-if="!isEnd&&loading">
-          <div style="width:100%;height:100%" class="lds-facebook">
-            <div></div>
-            <div></div>
-            <div></div>
+          <div class="load-container">
+            <div class="container">
+              <div class="boxLoading boxLoading1"></div>
+              <div class="boxLoading boxLoading2"></div>
+              <div class="boxLoading boxLoading3"></div>
+              <div class="boxLoading boxLoading4"></div>
+              <div class="boxLoading boxLoading5"></div>
+            </div>
           </div>
         </div>
         <span v-if="isEnd">我也是有底线的</span>
@@ -66,6 +70,12 @@
     </div>
     <!--blog context end-->
     <div class="sidebar">
+
+      <!--类别云-->
+      <CategoryCloud></CategoryCloud>
+
+      <!-- 友情链接-->
+      <Link></Link>
     </div>
   </article>
 </template>
@@ -73,10 +83,15 @@
 <script>
 import {Loading} from 'element-ui';
 import {getBlogCategory, getNewBlog} from "@/api";
+import Link from "@/components/Link";
+import CategoryCloud from "@/components/CategoryCloud";
 
 export default {
   name: "index",
-  components: {},
+  components: {
+    Link,
+    CategoryCloud
+  },
   data() {
     return {
       loadingInstance: null,
@@ -84,7 +99,7 @@ export default {
       newBlogData: [],
       keyword: "",
       category: "",
-      categoryList:[],
+      categoryList: [],
       currentPage: 1,
       pageSize: 10,
       total: 0,
@@ -168,9 +183,9 @@ export default {
     // 获得所有文章类别
     getBlogCategory() {
       getBlogCategory().then((response) => {
-        if(response.data.success) {
+        if (response.data.success) {
           this.categoryList = response.data.data;
-        }else {
+        } else {
           this.$message.error(response.data.msg);
         }
       }, () => {
@@ -199,7 +214,7 @@ export default {
 };
 </script>
 
-<style>
+<style rel="stylesheet/scss" lang="scss" scoped>
 .isEnd {
   float: left;
   width: 100%;
@@ -224,136 +239,71 @@ export default {
   background: rgba(0, 0, 0, 0.8);
 }
 
-@keyframes lds-facebook_1 {
-  0% {
-    top: 0;
-    height: 200px;
-  }
-  50% {
-    top: 80px;
-    height: 40px;
-  }
-  100% {
-    top: 80px;
-    height: 40px;
+.load-container {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .container {
+    width: 50px;
+    height: 60px;
+    text-align: center;
+    font-size: 10px;
+
+    .boxLoading {
+      background-color: #00adb5;
+      height: 100%;
+      width: 6px;
+      display: inline-block;
+
+      -webkit-animation: stretchdelay 1.2s infinite ease-in-out;
+      animation: stretchdelay 1.2s infinite ease-in-out;
+    }
+
+    .boxLoading2 {
+      -webkit-animation-delay: -1.1s;
+      animation-delay: -1.1s;
+    }
+
+    .boxLoading3 {
+      -webkit-animation-delay: -1.0s;
+      animation-delay: -1.0s;
+    }
+
+    .boxLoading4 {
+      -webkit-animation-delay: -0.9s;
+      animation-delay: -0.9s;
+    }
+
+    .boxLoading5 {
+      -webkit-animation-delay: -0.8s;
+      animation-delay: -0.8s;
+    }
+
   }
 }
 
-@-webkit-keyframes lds-facebook_1 {
-  0% {
-    top: 0;
-    height: 200px;
+@-webkit-keyframes stretchdelay {
+  0%, 40%, 100% {
+    -webkit-transform: scaleY(0.4)
   }
-  50% {
-    top: 80px;
-    height: 40px;
-  }
-  100% {
-    top: 80px;
-    height: 40px;
+  20% {
+    -webkit-transform: scaleY(1.0)
   }
 }
 
-@keyframes lds-facebook_2 {
-  0% {
-    top: 20px;
-    height: 160px;
+@keyframes stretchdelay {
+  0%, 40%, 100% {
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
   }
-  50% {
-    top: 80px;
-    height: 40px;
-  }
-  100% {
-    top: 80px;
-    height: 40px;
+  20% {
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
   }
 }
 
-@-webkit-keyframes lds-facebook_2 {
-  0% {
-    top: 20px;
-    height: 160px;
-  }
-  50% {
-    top: 80px;
-    height: 40px;
-  }
-  100% {
-    top: 80px;
-    height: 40px;
-  }
-}
-
-@keyframes lds-facebook_3 {
-  0% {
-    top: 40px;
-    height: 120px;
-  }
-  50% {
-    top: 80px;
-    height: 40px;
-  }
-  100% {
-    top: 80px;
-    height: 40px;
-  }
-}
-
-@-webkit-keyframes lds-facebook_3 {
-  0% {
-    top: 40px;
-    height: 120px;
-  }
-  50% {
-    top: 80px;
-    height: 40px;
-  }
-  100% {
-    top: 80px;
-    height: 40px;
-  }
-}
-
-.lds-facebook {
-  position: relative;
-}
-
-.lds-facebook div {
-  position: absolute;
-  width: 20px;
-}
-
-.lds-facebook div:nth-child(1) {
-  left: 40px;
-  background: #1d0e0b;
-  -webkit-animation: lds-facebook_1 1s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-  animation: lds-facebook_1 1s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-  -webkit-animation-delay: -0.2s;
-  animation-delay: -0.2s;
-}
-
-.lds-facebook div:nth-child(2) {
-  left: 90px;
-  background: #774023;
-  -webkit-animation: lds-facebook_2 1s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-  animation: lds-facebook_2 1s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-  -webkit-animation-delay: -0.1s;
-  animation-delay: -0.1s;
-}
-
-.lds-facebook div:nth-child(3) {
-  left: 140px;
-  background: #d88c51;
-  -webkit-animation: lds-facebook_3 1s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-  animation: lds-facebook_3 1s cubic-bezier(0, 0.5, 0.5, 1) infinite;
-}
-
-.lds-facebook {
-  width: 90px !important;
-  height: 90px !important;
-  -webkit-transform: translate(-45px, -45px) scale(0.45) translate(45px, 45px);
-  transform: translate(-45px, -45px) scale(0.45) translate(45px, 45px);
-}
 
 .iconfont {
   font-size: 15px;

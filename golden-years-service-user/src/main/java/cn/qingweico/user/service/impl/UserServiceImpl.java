@@ -86,7 +86,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    @Async("taskExecutor")
+    @Async("asyncTask")
     public void updateUserInfo(UpdateUserInfoBO updateUserInfoBO) {
 
         String userId = updateUserInfoBO.getId();

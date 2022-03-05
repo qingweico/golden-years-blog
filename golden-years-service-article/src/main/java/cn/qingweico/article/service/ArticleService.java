@@ -40,6 +40,7 @@ public interface ArticleService {
      */
     PagedGridResult queryMyArticles(String userId,
                                     String keyword,
+                                    Integer categoryId,
                                     Integer status,
                                     Date startDate,
                                     Date endDate,
@@ -83,7 +84,7 @@ public interface ArticleService {
      * @param deleteStatus 文章的逻辑状态(0:未删除 1: 已删除)
      * @return PagedGridResult
      */
-    PagedGridResult queryAll(Integer status, Integer page, Integer pageSize, Integer deleteStatus);
+    PagedGridResult query(Integer status, Integer page, Integer pageSize, Integer deleteStatus);
 
     /**
      * 管理员删除文章(delete sql)

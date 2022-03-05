@@ -82,7 +82,7 @@
         </div>
       </div>
       <div class="submit-wrapper">
-        <button class="submit-btn" @click="handleSubmit">提交信息</button>
+        <el-button type="primary" @click="handleSubmit" class="submit-btn" :loading="loading">提交信息</el-button>
       </div>
     </div>
   </div>
@@ -99,6 +99,7 @@ export default {
   data() {
     return {
       userAccountInfo: {},
+      loading: false,
     }
   },
   created() {
@@ -130,16 +131,23 @@ export default {
       });
     },
     handleSubmit() {
+      this.loading = true;
+      setTimeout(() => {
+      }, 2000);
       let userAccountInfo = this.userAccountInfo;
       userAccountInfo.province = "河南省";
       userAccountInfo.city = "信阳市";
       userAccountInfo.district = "固始县";
       updateUserInfo(userAccountInfo).then((response) => {
         if (response.data.success) {
+          this.loading = false;
           this.$message.success(response.data.msg);
         } else {
           this.$message.error(response.data.msg);
         }
+      }, () => {
+        this.loading = false;
+        this.$message.error('网络超时');
       });
     },
 

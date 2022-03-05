@@ -18,7 +18,7 @@ public enum ResponseStatusEnum {
     APPEND_SUCCESS(200, true, "添加成功!"),
     ALERT_SUCCESS(200, true, "修改成功!"),
     UPDATE_SUCCESS(200, true, "信息更新成功!"),
-    UPLOAD_SUCCESS(200, true, "头像上传成功!"),
+    UPLOAD_SUCCESS(200, true, "图片上传成功!"),
     SMS_SEND_SUCCESS(200, true, "短信验证码已发送!"),
     FREEZE_SUCCESS(200, true, "已冻结该用户!"),
     ACTIVATE_SUCCESS(200, true, "已激活该用户!"),
@@ -30,6 +30,7 @@ public enum ResponseStatusEnum {
     // article
     ARTICLE_REVIEW_PASS(200, true, "文章审核已通过!"),
     ARTICLE_REVIEW_FAIL(200, true, "文章审核未通过!"),
+    ARTICLE_PUBLISH_SUCCESS(200, true, "文章创建成功, 待审核通过后将在首页展示!"),
     ARTICLE_RE_REVIEW_PASS(200, true, "文章可以开始重新审核!"),
     DELETE_HAS_WITHDRAW(200, true, "删除已撤回!"),
 
@@ -39,7 +40,7 @@ public enum ResponseStatusEnum {
     TICKET_INVALID(502, false, "会话失效,请重新登录!"),
     NO_AUTH(503, false, "您的权限不足,无法继续操作!"),
     MOBILE_ERROR(504, false, "短信发送失败,请稍后重试!"),
-    SMS_NEED_WAIT_ERROR(505, false, "短信发送太快啦~请稍后再试!"),
+    SMS_NEED_WAIT_ERROR(505, false, "短信发送太快啦, 请稍后再试!"),
     SMS_CODE_ERROR(506, false, "验证码过期或不匹配,请稍后再试!"),
     USER_FROZEN(507, false, "用户已被冻结!"),
     USER_UPDATE_ERROR(508, false, "用户信息更新失败!"),
@@ -93,16 +94,16 @@ public enum ResponseStatusEnum {
     ARTICLE_ALREADY_READ_ERROR(586, false, "文章重复阅读!"),
     ARTICLE_NOT_EXIST(587, false, "文章不存在!"),
 
-    // 人脸识别错误代码 60X
-    FACE_VERIFY_TYPE_ERROR(600, false, "人脸比对验证类型不正确!"),
-    FACE_VERIFY_LOGIN_ERROR(601, false, "人脸登录失败!"),
 
     // 系统错误,未预期的错误 55x
     SYSTEM_ERROR(555, false, "系统繁忙,请稍后再试!"),
     SYSTEM_OPERATION_ERROR(556, false, "操作失败, 请重试!"),
     SYSTEM_RESPONSE_NO_INFO(557, false, ""),
     SYSTEM_REQUEST_REFUSE(588, false, "请求系统过于繁忙,请稍后再试!"),
-    REQUEST_PARAM_ERROR(600, false, "请求参数错误!");
+    REQUEST_PARAM_ERROR(600, false, "请求参数错误!"),
+    // 人脸识别错误代码 60X
+    FACE_VERIFY_TYPE_ERROR(600, false, "人脸比对验证类型不正确!"),
+    FACE_VERIFY_LOGIN_ERROR(601, false, "人脸登录失败!");
 
 
     /**

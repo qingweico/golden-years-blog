@@ -49,7 +49,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     }
 
     @Override
-    public boolean queryCategoryIsExist(String categoryName, String oldCategoryName) {
+    public boolean queryCategoryIsPresent(String categoryName, String oldCategoryName) {
 
         Example example = new Example(Category.class);
         Example.Criteria criteria = example.createCriteria();

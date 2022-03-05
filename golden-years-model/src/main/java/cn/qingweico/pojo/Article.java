@@ -54,9 +54,9 @@ public class Article {
    private Integer articleStatus;
 
    /**
-    * 文章作者
+    * 文章作者id
     */
-   private String author;
+   private String authorId;
 
    /**
     * 文章概括

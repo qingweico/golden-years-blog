@@ -1,6 +1,2 @@
-export const SET_COMMENT_LIST =  "setCommentList"
-export const SET_USER_TAG =  "setUserTag"
 export const SET_USER_INFO =  "setUserInfo"
 export const SET_LOGIN_STATE =  "setLoginState"
-export const INCREMENT =  "increment"
-export const DECREMENT =  "decrement"

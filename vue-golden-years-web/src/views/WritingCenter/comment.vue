@@ -6,19 +6,19 @@
       </div>
     </div>
 
-    <div class="comment-list-wrapper">
+    <div class="comment-list-wrapper" v-if="commentList.length">
 
       <div class="single-comment" v-for="(comment, index) in commentList" :key="index">
         <div class="comment-wrapper">
           <img :src="comment.commentUserFace" style="width: 40px; height: 40px; border-radius: 50%;" alt=""/>
           <div class="basic-wrapper">
             <div class="user-time">
-              <div>{{comment.commentUserNickname}}</div>
-<!--              <div class="publish-time">{{formatData(comment.createTime)}}</div>-->
+              <div>{{ comment.commentUserNickname }}</div>
+              <!--              <div class="publish-time">{{formatData(comment.createTime)}}</div>-->
             </div>
             <div class="comment-content" v-html="comment.content">
             </div>
-            <div class="operation-wrapper" @click="deleteComment(comment.id)">
+            <div class="operation-wrapper" @click="deleteComment(comment.id, comment.articleId)">
               <span class="delete-span" style="">删除</span>
             </div>
           </div>
@@ -26,25 +26,93 @@
 
         <div class="article-basic-info" v-show="comment.articleCover != null">
           <img class="cover" :style="'background-image: url(' + comment.articleCover + ')'" alt="" src=""/>
-          <div class="every-title">{{comment.articleTitle}}</div>
+          <div class="every-title">{{ comment.articleTitle }}</div>
         </div>
       </div>
+    </div>
+    <el-empty description="你暂时还没有发表任何评论" v-else style=" background-color: white;"></el-empty>
 
+
+    <!--分页-->
+    <div class="block paged" v-if="commentList.length">
+      <el-pagination
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-size="pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="totalPage">
+      </el-pagination>
     </div>
 
   </div>
 </template>
 
 <script>
+import {deleteComment, getCommentList} from "@/api/comment";
+import {mapGetters} from "vuex";
+import {withdrawBlog} from "@/api/blog";
+
 export default {
   name: "comment",
   data() {
     return {
-      commentList: []
+      commentList: [],
+      userInfo: {},
+      currentPage: 1,
+      pageSize: 10,
+      totalPage: 0,
+      records: 0,
     }
   },
+  created() {
+    this.userInfo = this.getUserInfo();
+    this.queryCommentList();
+  },
   methods: {
-    deleteComment() {}
+    ...mapGetters(['getUserInfo']),
+    deleteComment(commentId, articleId) {
+      this.$confirm('是否删除当前评论', '确认信息', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确认删除',
+        cancelButtonText: '取消'
+      }).then(() => {
+        let params = new URLSearchParams();
+        params.append("commentId", commentId);
+        params.append("userId", this.userInfo.id);
+        deleteComment(params).then((response) => {
+          if (response.data.success) {
+            this.$message.success(response.data.msg);
+            this.queryCommentList();
+          } else {
+            this.$message.error(response.data.msg);
+          }
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    queryCommentList() {
+      let params = new URLSearchParams();
+      params.append("userId", this.userInfo.id);
+      params.append("page", this.currentPage);
+      params.append("pageSize", this.pageSize);
+      getCommentList(params).then(res => {
+        console.log(res.data);
+        if (res.data.success) {
+          const grid = res.data.data;
+          this.commentList = grid.rows;
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.queryCommentList();
+    },
   }
 }
 </script>
@@ -53,10 +121,10 @@ export default {
 .main-page {
   width: 980px;
   margin-left: 20px;
-  background-color: white;
 }
 
 .title-box {
+  background-color: white;
   padding: 20px 0 10px 30px;
   border-bottom: 1px solid #e8e8e8;
 }
@@ -67,8 +135,9 @@ export default {
 }
 
 .comment-list-wrapper {
+  background-color: white;
   margin-top: 20px;
-  margin-left: 30px;
+
 }
 
 .single-comment {
@@ -91,6 +160,7 @@ export default {
 .basic-wrapper {
   margin-left: 20px;
 }
+
 .user-time {
   display: flex;
   flex-direction: row;
@@ -119,6 +189,7 @@ export default {
 .article-basic-info {
   margin-right: 30px;
 }
+
 .article-basic-info-null {
   margin-right: 30px;
   margin-bottom: 30px;
@@ -147,11 +218,18 @@ export default {
 }
 
 .delete-span {
-  color: gray;font-size: 14px;
+  color: gray;
+  font-size: 14px;
   cursor: pointer;
 }
+
 .delete-span:hover {
   color: rgb(205, 202, 202);
 }
 
+.paged {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 20px;
+}
 </style>

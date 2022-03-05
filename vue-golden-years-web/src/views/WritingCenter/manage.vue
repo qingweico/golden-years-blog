@@ -9,25 +9,29 @@
               clearable
               class="filter-item"
               style="width: 130px;  margin-left: 10px;"
-              v-model="queryParams.title"
+              v-model="queryParams.keyword"
               placeholder="博客标题"
               @keyup.enter.native="handleFind"
           ></el-input>
-          <el-input
-              clearable
-              class="filter-item"
-              style="width: 130px;  margin-left: 10px;"
+          <el-select
+              @input="contentChange"
               v-model="queryParams.categoryId"
-              placeholder="文章类别 "
-              @keyup.enter.native="handleFind"
-          ></el-input>
-          <el-select v-model="queryParams.articleType" clearable placeholder="文章状态"
+              placeholder="文章分类"
+              style="width:150px">
+            <el-option
+                v-for="item in articleCategoryList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            ></el-option>
+          </el-select>
+          <el-select v-model="queryParams.status" clearable placeholder="文章状态"
                      style="width:130px; margin-left: 10px;">
-            <el-option key="0" value="全部" checked></el-option>
-            <el-option key="1" value="审核中"></el-option>
-            <el-option key="2" value="已发布"></el-option>
-            <el-option key="3" value="未通过"></el-option>
-            <el-option key="4" value="已撤回"></el-option>
+            <el-option value="0" label="全部" checked></el-option>
+            <el-option value="1" label="审核中"></el-option>
+            <el-option value="2" label="已发布"></el-option>
+            <el-option value="3" label="未通过"></el-option>
+            <el-option value="4" label="已撤回"></el-option>
           </el-select>
 
           <el-date-picker
@@ -40,7 +44,7 @@
               align="right" style="width: 400px; margin-left: 10px;">
           </el-date-picker>
 
-          <el-button style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search"
+          <el-button style="margin-left: 10px;" class="filter-item" type="info" icon="el-icon-search"
                      @click="handleFind">查找
           </el-button>
         </el-form>
@@ -49,13 +53,7 @@
         <el-col :span="1.5">
           <el-button class="filter-item" type="primary" @click="handleAdd" icon="el-icon-edit">添加博客</el-button>
         </el-col>
-        <el-col :span="1.5">
-          <el-button class="filter-item" type="warning" icon="el-icon-s-flag">导出选中</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button class="filter-item" type="danger" icon="el-icon-delete">删除选中</el-button>
-        </el-col>
-        <el-col :span="14">
+        <el-col :span="20">
           <right-toolbar :showSearch.sync="showSearch" @queryTable="resetBlogList"></right-toolbar>
         </el-col>
 
@@ -64,6 +62,7 @@
 
     <!--添加博客开始-->
     <el-dialog
+        :title="navTitle"
         :visible.sync="dialogFormVisible" fullscreen>
       <el-form :model="form" :rules="rules" ref="form">
         <el-row>
@@ -81,16 +80,16 @@
               <div class="cover">文章封面</div>
               <div class="choose-type">
                 <div>
-                  <label><input type="radio" name="articleType" v-model="form.articleType" value="1" checked/></label>
+                  <label><input type="radio" name="articleType" v-model="form.articleType" value=1 checked/></label>
                   <span class="choose-words">单封面</span></div>
                 <div style="margin-left: 30px;">
-                  <label><input type="radio" v-model="form.articleType" value="2" name="articleType"/>
+                  <label><input type="radio" v-model="form.articleType" value=2 name="articleType"/>
                   </label>
                   <span class="choose-words">无封面</span>
                 </div>
               </div>
             </div>
-            <div class="cover-wrapper" v-show="form.articleType === '1'">
+            <div class="cover-wrapper" v-show="form.articleType == 1">
               <div class="cover"></div>
               <div class="choose-cover">
                 <div class="uploader-comp">
@@ -115,8 +114,7 @@
                   v-model="form.categoryId"
                   size="small"
                   placeholder="请选择"
-                  style="width:150px"
-              >
+                  style="width:150px">
                 <el-option
                     v-for="item in articleCategoryList"
                     :key="item.id"
@@ -130,16 +128,15 @@
 
         <el-row>
         </el-row>
-
-
         <el-form-item label="内容" :label-width="formLabelWidth" prop="content">
-          <CKEditor ref="editor" :content="form.content" @contentChange="contentChange" :height="360"></CKEditor>
+          <CKEditor ref="editor" :content="form.content" style="margin-bottom:30px" @contentChange="contentChange"
+                    :height="360"></CKEditor>
         </el-form-item>
         <div class="publish-bottom">
           <div class="buttons">
             <button class="white-btn" type="button" @click="dialogFormVisible = false">取消</button>
             <button class="white-btn" type="button" @click="preview">预览</button>
-            <button class="white-btn" type="button" @click="doTiming">{{ appointWords }}</button>
+            <button class="white-btn" type="button" v-if="!isEdit" @click="doTiming">{{ appointWords }}</button>
             <el-date-picker
                 v-model="form.createTime"
                 type="datetime"
@@ -148,7 +145,7 @@
                 v-show="isAppoint ===  1"
                 placeholder="定时日期">
             </el-date-picker>
-            <button class="submit-btn" type="button" @click="publish">发布文章</button>
+            <button class="submit-btn" type="button" @click="publish">{{ publishBtn }}</button>
           </div>
         </div>
       </el-form>
@@ -156,7 +153,7 @@
     <!--添加博客结束-->
 
     <!--文章结果展示-->
-    <div id="article-list-wrapper" class="article-list-wrapper">
+    <div id="article-list-wrapper" class="article-list-wrapper" v-if="articleList.length">
       <div class="article-list">
         <div class="every-article" v-for="(article, index) in articleList" :key="index">
           <img :src="article.articleCover" style="width: 175px; height: 125px;"
@@ -165,35 +162,46 @@
             <div class="basic-info">
               <span><a href="javascript:void(0);" target="_blank" class="article-link">{{ article.title }}</a></span>
               <span class="counts-wrapper">
-										<span>阅读 0 ⋅</span>
-										<span>评论 0 ⋅</span>
-									</span>
+										<span>阅读 {{ article.readCounts }}</span>
+										<span>评论 {{ article.commentCounts }}</span>
+                	<span>收藏 {{ article.collectCounts }}</span>
+              </span>
               <span class="status-reviewing article-status"
-                    v-show="article.articleStatus === 1 || article.articleStatus === 2">审核中</span>
+                    v-show="article.articleStatus === 1">审核中</span>
               <span class="status-published article-status"
-                    v-show="article.articleStatus === 3">已发布</span>
+                    v-show="article.articleStatus === 2">已发布</span>
               <span class="status-fail article-status"
-                    v-show="article.articleStatus === 4">审核未通过</span>
+                    v-show="article.articleStatus === 3">审核未通过</span>
               <span class="status-back article-status" v-show="article.articleStatus === 5">已撤回</span>
               <span class="publish-time">
 										<span v-show="article.isAppoint === 1">预计发布时间:</span>
-                <!--										{{ formatData(article.publishTime) }}-->
+                										{{ article.createTime }}
 									</span>
             </div>
-            <div class="operation">
-              <a href="javascript:void(0);" style="margin-top: 8px;" @click="withdraw(article.id)"
-                 v-show="article.articleStatus === 3">
-                <span class="oper-words">撤回</span>
-              </a>
-              <a href="javascript:void(0);" style="margin-top: 8px;"
-                 @click="deleteArticle(article.id)"
-                 v-show="article.articleStatus === 3 || article.articleStatus === 4">
-                <span class="oper-words">删除</span>
-              </a>
-            </div>
           </div>
+          <el-button type="text" icon="el-icon-edit" v-show="article.articleStatus === 2"
+                     @click="handleEdit(article)"></el-button>
+          <el-button type="text" icon="el-icon-refresh-left"
+                     v-show="article.articleStatus === 2 || article.articleStatus === 3"
+                     @click="withdraw((article.id))"></el-button>
+          <el-button type="text" icon="el-icon-delete"
+                     v-show="article.articleStatus === 2 || article.articleStatus === 3"
+                     @click="deleteArticle(article.id)"/>
         </div>
       </div>
+    </div>
+
+    <el-empty description="你还没有文章, 快去写一篇吧" v-else style="background-color: white;"></el-empty>
+
+    <!--分页-->
+    <div class="block paged">
+      <el-pagination
+          @current-change="handleCurrentChange"
+          :current-page.sync="queryParams.currentPage"
+          :page-size="queryParams.pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="records">
+      </el-pagination>
     </div>
 
   </div>
@@ -203,9 +211,8 @@
 <script>
 import {getCookie} from "@/utils/cookie";
 import RightToolbar from '@/components/RightToolbar'
-import MarkdownEditor from "@/components/MarkdownEditor";
 import CKEditor from "@/components/CKEditor";
-import {publish, uploadBlogCover} from "@/api/blog";
+import {deleteBlog, publish, queryArticleList, uploadBlogCover, withdrawBlog} from "@/api/blog";
 import {mapGetters} from "vuex";
 import {getBlogCategory} from "@/api";
 
@@ -213,20 +220,17 @@ export default {
   name: "manage",
   components: {
     RightToolbar,
-    MarkdownEditor,
     CKEditor
   },
   data() {
     return {
-      startDateStr: "",
-      endDateStr: "",
-      queryParams: {},
       articleList: [],
       showSearch: null,
       articleCategoryList: [],
-      userInfo: [],
+      userInfo: {},
       isAppoint: 0,
       appointWords: "定时发布",
+      isEdit: false,
       showUploadCover: true,
       coverStyle: "",
       timingDate: "",
@@ -234,15 +238,29 @@ export default {
       closeDialog: false,
       formLabelWidth: "120px",
       CKEditorData: "",
+      navTitle: "增加博客",
+      publishBtn: "发布文章",
+      // 查询我的文章
+      totalPage: 0,
+      records: 0,
+      queryParams: {
+        keyword: "",
+        categoryId: "",
+        status: "",
+        currentPage: 1,
+        pageSize: 5,
+        startDateStr: "",
+        endDateStr: "",
+      },
       form: {
         title: "",
         categoryId: "",
         content: "",
-        authorId: "",
-        articleType: "",
+        author: "",
+        articleType: "1",
         articleCover: "",
-        isAppoint: this.isAppoint,
-        createTime: this.timingDate
+        isAppoint: "",
+        createTime: "",
       },
       rules: {
         title: [
@@ -297,18 +315,116 @@ export default {
         this.$message.error(res.data.msg);
       }
     });
+    this.queryArticleList();
   },
   methods: {
     ...mapGetters(['getUserInfo']),
-    handleFind() {
+    withdraw(articleId) {
+      this.$confirm('是否撤回当前文章', '确认信息', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确认撤回',
+        cancelButtonText: '取消'
+      }).then(() => {
+        let params = new URLSearchParams();
+        params.append("articleId", articleId);
+        params.append("userId", this.userInfo.id);
+        withdrawBlog(params).then((response) => {
+          if (response.data.success) {
+            this.$message.success(response.data.msg);
+            this.queryArticleList();
+          } else {
+            this.$message.error(response.data.msg);
+          }
+        })
+      }).catch(() => {
+        /**取消action*/
+      })
+    },
 
+    deleteArticle(articleId) {
+      this.$confirm('是否删除当前文章', '确认信息', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确认删除',
+        cancelButtonText: '取消'
+      }).then(() => {
+        let params = new URLSearchParams();
+        params.append("articleId", articleId);
+        params.append("userId", this.userInfo.id);
+        deleteBlog(params).then((response) => {
+          if (response.data.success) {
+            this.$message.success(response.data.msg);
+            this.queryArticleList();
+          } else {
+            this.$message.error(response.data.msg);
+          }
+        })
+      }).catch(() => {
+        /**取消action*/
+      })
+    },
+    initQueryParams() {
+      return {
+        keyword: "",
+        categoryId: "",
+        status: "",
+        currentPage: 1,
+        pageSize: 5,
+        startDateStr: "",
+        endDateStr: "",
+      }
+    },
+    // 查询文章列表
+    queryArticleList() {
+      let queryParams = this.queryParams;
+      let params = new URLSearchParams();
+      params.append("userId", this.userInfo.id);
+      params.append("keyword", queryParams.keyword);
+      params.append("status", queryParams.status);
+      params.append("startDate", "");
+      params.append("endDate", "");
+      params.append("categoryId", queryParams.categoryId);
+      params.append("page", queryParams.currentPage);
+      params.append("pageSize", queryParams.pageSize);
+
+      queryArticleList(params).then(res => {
+        if (res.data.success) {
+          let content = res.data;
+          this.articleList = content.data.rows;
+          this.queryParams.currentPage = content.data.currentPage;
+          this.records = content.data.records;
+          this.totalPage = content.data.totalPage;
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.queryArticleList();
+    },
+    handleFind() {
+      this.queryArticleList();
     },
 
     handleAdd() {
+      this.navTitle = "增加博客";
       this.dialogFormVisible = true;
       this.$nextTick(() => {
-        //DOM现在更新了
         this.$refs.editor.initData(); //设置富文本内容
+      });
+    },
+    handleEdit(article) {
+      this.navTitle = "编辑博客";
+      this.publishBtn = "保存修改"
+      this.isEdit = true;
+      this.dialogFormVisible = true;
+      this.form.title = article.title;
+      this.form.categoryId = article.categoryId;
+      this.form.articleCover = article.articleCover;
+      this.form.articleType = article.articleType;
+      this.setPicCoverStyle(this.form.articleCover);
+      this.$nextTick(() => {
+        this.$refs.editor.setData(article.content);
       });
     },
     // 判断是否需要展开条件查询
@@ -317,15 +433,12 @@ export default {
       this.showSearch = showSearch !== "false";
     },
     resetBlogList: function () {
-      this.queryParams = {}
-      this.blogList();
+      this.queryParams = this.initQueryParams();
+      this.queryArticleList();
+      this.$message.success("刷新成功");
     },
-    blogList() {
-    },
-    // 内容改变，触发监听
+    // 内容改变, 触发监听
     contentChange: function () {
-    },
-    submitForm() {
     },
     preview() {
     },
@@ -345,19 +458,26 @@ export default {
       //获取CKEditor中的内容
       this.form.content = this.$refs.editor.getData();
       this.form.authorId = this.userInfo.id;
-          this.$refs.form.validate((valid) => {
-            if (valid) {
-              publish(this.form).then(response => {
-                if (response.data.success) {
-                  this.$message.success(response.data.message)
-                  this.dialogFormVisible = false;
-                  this.blogList();
-                } else {
-                  this.$message.success(response.data.message)
-                }
-              });
+      this.form.isAppoint = this.isAppoint;
+      this.form.createTime = this.timingDate;
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          publish(this.form).then(response => {
+            if (response.data.success) {
+              if (this.isEdit) {
+                this.$message.success("文章修改成功")
+              } else {
+                this.$message.success(response.data.msg)
+              }
+              this.dialogFormVisible = false;
+              this.queryArticleList();
+              this.form = {};
+            } else {
+              this.$message.error(response.data.msg)
             }
-          })
+          });
+        }
+      })
     },
     // 上传封面
     uploadCover() {
@@ -376,10 +496,12 @@ export default {
               message: '图片上传失败,请保证图片不能为空,并且符合 jpg/png/jpeg 的后缀格式!'
             });
           } else {
-            that.coverStyle = "background-image: url(" + that.form.articleCover + ");";
-            that.coverStyle += "background-repeat: no-repeat;";
-            that.coverStyle += "background-position: center center;";
-            that.coverStyle += "background-size: cover;";
+            this.$notify.success({
+              title: '提示',
+              message: response.data.msg
+            });
+            that.form.articleCover = response.data.data[0];
+            this.setPicCoverStyle(that.form.articleCover);
           }
         } else {
           this.$notify.info({
@@ -389,6 +511,13 @@ export default {
         }
       });
     },
+    setPicCoverStyle(url) {
+      this.coverStyle = "background-image: url(" + url + ");";
+      this.coverStyle += "background-repeat: no-repeat;";
+      this.coverStyle += "background-position: center center;";
+      this.coverStyle += "background-size: cover;";
+    },
+
     // 鼠标移动到上传组件上发生css变化
     mouseOver() {
       $("#block-choose").css({"background-color": "#f0efef", "border": "1px dashed #a7a7a7"});
@@ -397,7 +526,8 @@ export default {
     mouseOut() {
       $("#block-choose").css({"background-color": "#f7f7f7", "border": "1px dashed #d8d8d8"});
     },
-  },
+  }
+  ,
 
 }
 </script>
@@ -410,9 +540,9 @@ export default {
 
 .search-box {
   background-color: white;
-
   display: flex;
   flex-direction: column;
+  margin-bottom: 15px;
 }
 
 .status-wrapper {
@@ -583,6 +713,7 @@ export default {
   line-height: 40px;
   z-index: 88;
   background-color: white;
+  margin-top: 100px;
   border-top: 1px solid #dfdede;
   display: flex;
   flex-direction: row;
@@ -632,5 +763,11 @@ export default {
 .submit-btn:hover {
   /*background-color: #dd4456;*/
   /*border: 1px solid #dd4456;*/
+}
+
+.paged {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 20px;
 }
 </style>

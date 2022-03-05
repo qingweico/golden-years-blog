@@ -24,4 +24,13 @@ public class Tag {
      * 标签颜色
      */
     private String color;
+
+    /**
+     * 个人自定义标签 - 标签用户id标识
+     */
+    private String userId;
+    /**
+     * 系统标签 - 默认为1; 否则为用户自定义标签
+     */
+    private Integer sys;
 }

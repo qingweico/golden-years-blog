@@ -1,5 +1,7 @@
 package cn.qingweico.article.service.impl;
 
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.Comments;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.mapper.CommentsMapper;
@@ -46,8 +48,8 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
 
         Comments comments = new Comments();
         comments.setId(sid.nextShort());
-        comments.setAuthor(articleDetailVO.getAuthor());
-        comments.setArticleCover(articleDetailVO.getCover());
+        comments.setAuthor(articleDetailVO.getAuthorId());
+        comments.setArticleCover(articleDetailVO.getArticleCover());
         comments.setArticleTitle(articleDetailVO.getTitle());
 
         comments.setArticleId(articleId);
@@ -61,7 +63,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
         commentsMapper.insert(comments);
 
         // 评论数累加
-        redisOperator.increment(REDIS_ARTICLE_COMMENT_COUNTS + ":" + articleId, 1);
+        redisOperator.increment(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + Constants.SYMBOL_COLON + articleId, 1);
     }
 
     @Override
@@ -76,9 +78,9 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     }
 
     @Override
-    public PagedGridResult queryWriterComments(String author,
-                                               Integer page,
-                                               Integer pageSize) {
+    public PagedGridResult queryUserComments(String author,
+                                             Integer page,
+                                             Integer pageSize) {
         Comments comments = new Comments();
         comments.setAuthor(author);
         PageHelper.startPage(page, pageSize);
@@ -87,9 +89,9 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     }
 
    @Override
-   public void delete(String author, String commentId) {
+   public void delete(String userId, String commentId) {
       Comments comments = new Comments();
-      comments.setAuthor(author);
+      comments.setAuthor(userId);
       comments.setId(commentId);
       commentsMapper.delete(comments);
    }

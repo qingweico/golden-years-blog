@@ -6,38 +6,40 @@
     <h1 class="t_nav">
       <a href="/" class="n1">首页</a>
       <a href="javascript:void(0);"
-         v-if="blogData.categoryId"
-         @click="goToCategoryList(blogData.categoryId)"
+         v-if="articleDetail.categoryId"
+         @click="goToCategoryList(articleDetail.categoryId)"
          class="n2"
-      >{{ blogData.categoryId ? blogData.categoryId : "" }}</a>
+      >{{ articleDetail.categoryId ? getBlogCategoryNameById(articleDetail.categoryId) : "" }}</a>
     </h1>
     <div class="infos_box">
       <div class="news_view">
-        <h3 class="news_title" v-if="blogData.title">{{ blogData.title }}</h3>
+        <h3 class="news_title" v-if="articleDetail.title">{{ articleDetail.title }}</h3>
         <div class="blog_info" v-if="true">
           <ul>
             <li class="author">
               <span class="iconfont">&#xe60f;</span>
-              <a href="javascript:void(0);" @click="goToAuthor(blogData.author)">{{ blogData.authorName }}</a>
+              <a href="javascript:void(0);" @click="goToAuthor(articleDetail.authorId)">{{
+                  articleDetail.authorName
+                }}</a>
             </li>
-            <li class="lmname">
+            <li class="category">
               <span class="iconfont">&#xe603;</span>
               <a
                   href="javascript:void(0);"
-                  @click="goToSortList(blogData.categoryId)"
-              >{{ blogData.categoryId ? blogData.categoryId : "" }}</a>
+                  @click="goToSortList(articleDetail.categoryId)"
+              >{{ articleDetail.categoryId ? getBlogCategoryNameById(articleDetail.categoryId) : "" }}</a>
             </li>
             <li class="createTime">
               <span class="iconfont">&#xe606;</span>
-              {{ blogData.createTime }}
+              {{ articleDetail.createTime }}
             </li>
             <li class="view">
               <span class="iconfont">&#xe8c7;</span>
-              {{ blogData.readCounts }}
+              {{ articleDetail.readCounts }}
             </li>
             <li class="like">
               <span class="iconfont">&#xe663;</span>
-              {{ blogData.collectCount }}
+              {{ articleDetail.collectCounts }}
             </li>
           </ul>
         </div>
@@ -49,8 +51,6 @@
         >{{ blogContent }}
         </div>
       </div>
-
-
       <div class="news_pl">
         <h2>文章评论</h2>
         <ul>
@@ -60,9 +60,10 @@
               @submit-box="submitBox"
               :showCancel="showCancel"
           ></CommentBox>
+
           <div class="message_infos">
             <CommentList :comments="comments" :commentInfo="commentInfo"></CommentList>
-            <div class="noComment" v-if="comments.length === 0">还没有评论，快来抢沙发吧！</div>
+            <el-empty description="还没有评论，快来抢沙发吧!"  v-if="comments.length === 0"></el-empty>
           </div>
         </ul>
       </div>
@@ -70,8 +71,7 @@
     <div class="sidebar2" v-if="showSidebar">
       <side-catalog
           :class="vueCategory"
-          v-bind="catalogProps"
-      >
+          v-bind="catalogProps">
       </side-catalog>
     </div>
   </article>
@@ -80,11 +80,11 @@
 import {getBlogById} from "@/api/blog";
 import CommentList from "../components/CommentList";
 import CommentBox from "../components/CommentBox";
-import {addComment, getCommentList} from "@/api/comment";
+import {getCommentList} from "@/api/comment";
 import {Loading} from "element-ui";
 import Sticky from "@/components/Sticky";
-import $ from 'jquery'
 import SideCatalog from '@/components/VueSideCatalog'
+import {getBlogCategory} from "@/api";
 
 export default {
   name: "detail",
@@ -97,6 +97,7 @@ export default {
       // 是否显示侧边栏
       showSidebar: true,
       blogContent: "",
+      articleCategoryList: [],
       catalogProps: {
         // 内容容器selector(必需)
         container: '.ck-content',
@@ -117,7 +118,7 @@ export default {
       toInfo: {},
       userInfo: {},
       blogId: null,
-      blogData: {},
+      articleDetail: {},
       dialogPictureVisible: false,
       dialogImageUrl: "",
     };
@@ -156,15 +157,15 @@ export default {
       params.append("articleId", this.blogId);
     }
     getBlogById(params).then(response => {
-      console.log(response.data.data.categoryId);
-      if (!response.data.success) {
-        this.blogData = response.data.data;
-        this.blogId = response.data.data.id
-        document.title = response.data.data.title
-        this.getCommentDataList();
+      console.log(response.data);
+      if (response.data.success) {
+        this.articleDetail = response.data.data;
+        this.blogId = this.articleDetail.id
+        document.title = this.articleDetail.title
+       // this.getCommentList();
       }
       setTimeout(() => {
-        that.blogContent = response.data.data.content
+        that.blogContent = this.articleDetail.content
         that.loadingInstance.close();
       }, 200)
     });
@@ -180,7 +181,6 @@ export default {
       after = winScrollHeight;
       if (docHeight === winHeight + winScrollHeight) {
         if (that.comments.length >= that.total) {
-          console.log('已经到底了')
           return;
         }
         let params = {};
@@ -188,22 +188,22 @@ export default {
         params.blogUid = that.commentInfo.blogUid;
         params.currentPage = that.currentPage + 1
         params.pageSize = that.pageSize;
-        getCommentList(params).then(response => {
-          if (response.data.success) {
-            // that.comments = that.comments.concat(response.data.records);
-            // that.setCommentList(that.comments);
-            // that.currentPage = response.data.current;
-            // that.pageSize = response.data.size;
-            // that.total = response.data.total;
-          }
-        });
+        // getCommentList(params).then(response => {
+        //   if (response.data.success) {
+        //     that.comments = that.comments.concat(response.data.records);
+        //     that.setCommentList(that.comments);
+        //     that.currentPage = response.data.current;
+        //     that.pageSize = response.data.size;
+        //     that.total = response.data.total;
+        //   }
+        // });
       }
     })
 
     // 屏幕自适应
     window.onresize = () => {
       return (() => {
-        // 屏幕大于950px的时候，显示侧边栏
+        // 屏幕大于950px的时候, 显示侧边栏
         that.showSidebar = document.body.clientWidth > 950
       })()
     }
@@ -214,15 +214,33 @@ export default {
       text: "正在努力加载中~"
     });
     this.blogId = this.$route.query.blogId;
-    // 屏幕大于950px的时候，显示侧边栏
-    this.showSidebar = document.body.clientWidth > 950
+    // 屏幕大于950px的时候, 显示侧边栏
+    this.showSidebar = document.body.clientWidth > 950;
+    getBlogCategory().then(res => {
+      if (res.data.success) {
+        this.articleCategoryList = res.data.data;
+      } else {
+        this.$message.error(res.data.msg);
+      }
+    });
   },
   methods: {
     handleCurrentChange: function (val) {
       this.currentPage = val;
-      this.getCommentDataList();
+      this.getCommentList();
     },
-
+    getBlogCategoryNameById(categoryId) {
+      let categoryList = this.articleCategoryList;
+      for (let i = 0; i < categoryList.length; i++) {
+        if (categoryId === categoryList[i].id) {
+          return categoryList[i].name;
+        }
+      }
+    },
+    goToCategoryList() {
+    },
+    goToAuthor() {
+    },
     submitBox(e) {
       let params = {};
       params.blogUid = e.blogUid;
@@ -245,25 +263,25 @@ export default {
             offset: 100
           });
         }
-        this.getCommentDataList();
+        this.getCommentList();
       });
     },
-    getCommentDataList: function () {
-      let params = {};
-      params.source = this.commentInfo.source;
-      params.blogUid = this.commentInfo.blogUid;
-      params.currentPage = this.currentPage;
-      params.pageSize = this.pageSize;
-      getCommentList(params).then(response => {
-        if (response.data.success) {
-          // this.comments = response.data.records;
-          // this.setCommentList(this.comments);
-          // this.currentPage = response.data.current;
-          // this.pageSize = response.data.size;
-          // this.total = response.data.total
-        }
-      });
-    },
+    // getCommentList: function () {
+    //   let params = {};
+    //   params.source = this.commentInfo.source;
+    //   params.blogUid = this.commentInfo.blogUid;
+    //   params.currentPage = this.currentPage;
+    //   params.pageSize = this.pageSize;
+    //   getCommentList(params).then(response => {
+    //     if (response.data.success) {
+    //       // this.comments = response.data.records;
+    //       // this.setCommentList(this.comments);
+    //       // this.currentPage = response.data.current;
+    //       // this.pageSize = response.data.size;
+    //       // this.total = response.data.total
+    //     }
+    //   });
+    // },
     imageChange: function (e) {
       let type = e.target.localName;
       if (type === "img") {

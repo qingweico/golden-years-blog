@@ -1,13 +1,4 @@
 import request from '../utils/request'
-
-export function getBlogByLevel (params) {
-  return request({
-    url: process.env.WEB_API + '/index/getBlogByLevel',
-    method: 'get',
-    params
-  })
-}
-
 export function getNewBlog (params) {
   return request({
     url: process.env.ARTICLE_API + '/portal/article/list',
@@ -25,7 +16,13 @@ export function getBlogByTime (params) {
 }
 export function getBlogCategory () {
   return request({
-    url: process.env.ADMIN_API + '/category/getCategoryList',
+    url: process.env.ARTICLE_API + '/portal/article/getCategoryList',
+    method: 'get',
+  })
+}
+export function getBlogCategoryWithBlogAmount () {
+  return request({
+    url: process.env.ARTICLE_API + '/portal/article/category',
     method: 'get',
   })
 }
@@ -37,49 +34,9 @@ export function getHotBlog (params) {
   })
 }
 
-export function getHotTag (params) {
-  return request({
-    url: process.env.WEB_API + '/index/getHotTag',
-    method: 'get',
-    params
-  })
-}
-
 export function getLink (params) {
   return request({
-    url: process.env.WEB_API + '/index/getLink',
-    method: 'get',
-    params
-  })
-}
-
-export function addLinkCount (params) {
-  return request({
-    url: process.env.WEB_API + '/index/addLinkCount',
-    method: 'get',
-    params
-  })
-}
-
-export function getWebConfig (params) {
-  return request({
-    url: process.env.WEB_API + '/index/getWebConfig',
-    method: 'get',
-    params
-  })
-}
-
-export function getWebNavbar (params) {
-  return request({
-    url: process.env.WEB_API + '/index/getWebNavbar',
-    method: 'get',
-    params
-  })
-}
-
-export function recorderVisitPage (params) {
-  return request({
-    url: process.env.WEB_API + '/index/recorderVisitPage',
+    url: process.env.ADMIN_API + '/fl/portal/list',
     method: 'get',
     params
   })

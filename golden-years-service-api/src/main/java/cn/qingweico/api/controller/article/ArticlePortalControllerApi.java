@@ -49,13 +49,22 @@ public interface ArticlePortalControllerApi {
                           @RequestParam Integer pageSize);
 
     /**
+     * 首页查询每个类别下文章的数量
+     *
+     * @return GraceJsonResult
+     */
+    @ApiOperation(value = "首页查询每个类别下文章的数量", notes = "首页查询每个类别下文章的数量", httpMethod = "GET")
+    @GetMapping("category")
+    GraceJsonResult queryEachCategoryArticleCount();
+
+    /**
      * 首页查询分类列表
      *
      * @return GraceJsonResult
      */
     @ApiOperation(value = "首页查询分类列表", notes = "首页查询分类列表", httpMethod = "GET")
-    @GetMapping("category")
-    GraceJsonResult getCategoryList();
+    @GetMapping("getCategoryList")
+    GraceJsonResult categoryList();
 
 
     /**
@@ -68,7 +77,7 @@ public interface ArticlePortalControllerApi {
     GraceJsonResult hotList();
 
     /**
-     * (个人中心)查询作家发布的所有文章列表
+     * (个人中心)查询作者发布的所有文章列表
      *
      * @param authorId 作者id
      * @param page     起始分页
@@ -76,7 +85,7 @@ public interface ArticlePortalControllerApi {
      * @return GraceJsonResult
      */
     @GetMapping("/{id}")
-    @ApiOperation(value = "查询作家发布的所有文章列表", notes = "查询作家发布的所有文章列表", httpMethod = "GET")
+    @ApiOperation(value = "查询作者发布的所有文章列表", notes = "查询作者发布的所有文章列表", httpMethod = "GET")
     GraceJsonResult queryArticleListByAuthorId(@RequestParam @PathVariable("id") String authorId,
                                                @RequestParam Integer page,
                                                @RequestParam Integer pageSize);

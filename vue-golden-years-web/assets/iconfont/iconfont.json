@@ -1,6 +1,5 @@
 {
   "id": "1587051",
-  "name": "mogu_blog",
   "font_family": "iconfont",
   "css_prefix_text": "icon-",
   "description": "",
@@ -77,7 +76,7 @@
     },
     {
       "icon_id": "10558510",
-      "name": "码云 (1)",
+      "name": "码云(1)",
       "font_class": "mayun",
       "unicode": "e602",
       "unicode_decimal": 58882
@@ -88,6 +87,13 @@
       "font_class": "yanjing",
       "unicode": "e8c7",
       "unicode_decimal": 59591
+    },
+    {
+      "icon_id": "95579849",
+      "name": "收藏",
+      "font_class": "shoucang",
+      "unicode": "e8b9",
+      "unicode_decimal": 59577
     }
   ]
 }

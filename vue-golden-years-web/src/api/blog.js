@@ -24,3 +24,24 @@ export function publish(params) {
         data: params,
     })
 }
+export function queryArticleList(params) {
+    return request({
+        url: process.env.ARTICLE_API + '/article/user/query',
+        method: 'get',
+        params,
+    })
+}
+export function withdrawBlog(params) {
+    return request({
+        url: process.env.ARTICLE_API + '/article/user/withdraw',
+        method: 'get',
+        params,
+    })
+}
+export function deleteBlog(params) {
+    return request({
+        url: process.env.ARTICLE_API + '/article/user/delete',
+        method: 'get',
+        params,
+    })
+}

@@ -3,12 +3,14 @@ package cn.qingweico.article.controller;
 import cn.qingweico.api.config.RabbitMqConfig;
 import cn.qingweico.api.controller.BaseController;
 import cn.qingweico.api.controller.article.ArticleControllerApi;
+import cn.qingweico.article.clients.ArticleDetailClient;
 import cn.qingweico.article.service.ArticleService;
 import cn.qingweico.enums.ArticleCoverType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.global.Constants;
 import cn.qingweico.global.RedisConf;
+import cn.qingweico.pojo.vo.UserBasicInfoVO;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Category;
@@ -20,6 +22,7 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -40,6 +43,7 @@ import static java.util.stream.Collectors.toList;
  * @author zqw
  * @date 2021/9/11
  */
+@Slf4j
 @RestController
 public class ArticleController extends BaseController implements ArticleControllerApi {
 
@@ -75,17 +79,18 @@ public class ArticleController extends BaseController implements ArticleControll
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_CATEGORY_NOT_EXIST_ERROR);
         }
         articleService.createArticle(newArticleBO);
-        return GraceJsonResult.ok();
+        return new GraceJsonResult(ResponseStatusEnum.ARTICLE_PUBLISH_SUCCESS);
     }
 
     @Override
     public GraceJsonResult queryUserArticles(String userId,
-                                           String keyword,
-                                           Integer status,
-                                           Date startDate,
-                                           Date endDate,
-                                           Integer page,
-                                           Integer pageSize) {
+                                             String keyword,
+                                             Integer categoryId,
+                                             Integer status,
+                                             Date startDate,
+                                             Date endDate,
+                                             Integer page,
+                                             Integer pageSize) {
 
 
         if (StringUtils.isBlank(userId)) {
@@ -101,6 +106,7 @@ public class ArticleController extends BaseController implements ArticleControll
 
         PagedGridResult res = articleService.queryMyArticles(userId,
                 keyword,
+                categoryId,
                 status,
                 startDate,
                 endDate,
@@ -110,10 +116,10 @@ public class ArticleController extends BaseController implements ArticleControll
     }
 
     @Override
-    public GraceJsonResult queryAll(Integer status,
-                                    Integer page,
-                                    Integer pageSize,
-                                    Integer deleteStatus) {
+    public GraceJsonResult query(Integer status,
+                                 Integer page,
+                                 Integer pageSize,
+                                 Integer deleteStatus) {
         if (page == null) {
             page = Constants.COMMON_START_PAGE;
         }
@@ -121,7 +127,7 @@ public class ArticleController extends BaseController implements ArticleControll
         if (pageSize == null) {
             pageSize = Constants.COMMON_PAGE_SIZE;
         }
-        PagedGridResult res = articleService.queryAll(status, page, pageSize, deleteStatus);
+        PagedGridResult res = articleService.query(status, page, pageSize, deleteStatus);
 
         return GraceJsonResult.ok(res);
     }
@@ -156,7 +162,7 @@ public class ArticleController extends BaseController implements ArticleControll
             // 关联文章与GridFS中的静态文件
             articleService.updateArticleToGridFs(articleId, articleMongoId);
 
-            // 发送消息到mq队列 让监听mq队列的消费者下载html
+            // 发送消息到mq队列, 让监听mq队列的消费者下载html
             doDownloadArticleHtmlByMq(articleId, articleMongoId);
 
         }
@@ -219,23 +225,28 @@ public class ArticleController extends BaseController implements ArticleControll
         Template template = cfg.getTemplate("detail.ftl", "utf-8");
 
         // 获得文章的详情数据
-        ArticleDetailVO detailVO = getArticleDetail(articleId);
+        GraceJsonResult result = getArticleDetail(articleId);
+        if (!result.getSuccess()) {
+            log.error("文章详情获取失败");
+            return "";
+        }
+        String detailVoJson = JsonUtils.objectToJson(result.getData());
+        ArticleDetailVO detailVO = JsonUtils.jsonToPojo(detailVoJson, ArticleDetailVO.class);
         Map<String, Object> map = new HashMap<>(1);
         map.put("articleDetail", detailVO);
 
         String htmlContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, map);
 
         InputStream inputStream = IOUtils.toInputStream(htmlContent);
+        assert detailVO != null;
         ObjectId fileId = gridFsBucket.uploadFromStream(detailVO.getId() + ".html", inputStream);
         return fileId.toString();
     }
 
     @Resource
-    private RestTemplate restTemplate;
+    private ArticleDetailClient articleDetailClient;
 
-    // TODO
-    public ArticleDetailVO getArticleDetail(String articleId) {
-        String url = "http://service-article";
-        return restTemplate.getForObject(url + "/portal/article/detail?articleId=" + articleId, ArticleDetailVO.class);
+    public GraceJsonResult getArticleDetail(String articleId) {
+        return articleDetailClient.getArticleDetail(articleId);
     }
 }

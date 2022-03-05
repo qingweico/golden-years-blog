@@ -25,17 +25,18 @@
             <td>{{ loginLog.os }}</td>
           </tr>
         </table>
-        <!--分页-->
-        <div class="block">
-          <el-pagination
-              @current-change="handleCurrentChange"
-              :current-page.sync="currentPage"
-              :page-size="pageSize"
-              layout="total, prev, pager, next, jumper"
-              :total="total">
-          </el-pagination>
-        </div>
       </div>
+    </div>
+
+    <!--分页-->
+    <div class="block paged">
+      <el-pagination
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-size="pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="total">
+      </el-pagination>
     </div>
 
 
@@ -96,11 +97,11 @@ export default {
 .main-page {
   width: 980px;
   margin-left: 20px;
-  background-color: white;
   padding-bottom: 40px;
 }
 
 .title-box {
+  background-color: white;
   padding: 20px 0 10px 30px;
   border-bottom: 1px solid #e8e8e8;
 }
@@ -111,11 +112,9 @@ export default {
 }
 
 .log-list-wrapper {
-
   margin-top: 15px;
   background-color: #fff;
   padding: 20px 25px;
-  float: right;
 }
 
 .log-list span {
@@ -151,9 +150,9 @@ export default {
 .log-single-line:hover {
   background-color: #f4f4f4;
 }
-.block {
+.paged {
   text-align: center;
-  margin-top:20px;
+  margin-top:60px;
   margin-bottom:20px;
 }
 </style>

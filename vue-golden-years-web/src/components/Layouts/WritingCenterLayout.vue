@@ -7,7 +7,7 @@
           <a class="logo">博客首页</a>
         </router-link>
         <div class="right-me-info">
-          <router-link :to="{path: '/homepage', query: {id: userInfo.id}}">
+          <router-link :to="{path: '/homepage', query: {id: this.userInfo.id}}">
             <div class="pic">
               <el-avatar :src="userInfo.face" :size="40"/>
             </div>
@@ -111,6 +111,7 @@ export default {
     return {
       userInfo: {
         face: '',
+        id: ""
       },
       saveTitle: ''
     }
@@ -122,13 +123,12 @@ export default {
   },
   created() {
     this.getCurrentPageTitle();
-    this.userInfo = this.getUserInfo();
     this.getToken();
+    this.userInfo = this.getUserInfo();
 
   },
 
   methods: {
-    ...mapGetters(['getUserInfo']),
     ...mapMutations(['setUserInfo', 'setLoginState']),
     getCurrentPageTitle() {
       this.saveTitle = window.location.pathname;
@@ -159,7 +159,10 @@ export default {
   },
   mounted() {
 
-}
+  },
+  computed: {
+    ...mapGetters(['getUserInfo']),
+  },
 }
 </script>
 
@@ -213,8 +216,9 @@ body {
   align-items: center;
   justify-content: center;
 }
-.right-me-info .pic{
- margin-right: 30px;
+
+.right-me-info .pic {
+  margin-right: 30px;
 }
 
 .container {
@@ -274,6 +278,7 @@ ol, ul {
 .menu-item .title {
   color: red;
 }
+
 .shadow {
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.05);
   margin-bottom: 10px;

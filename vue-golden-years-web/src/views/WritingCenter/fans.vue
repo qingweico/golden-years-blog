@@ -6,8 +6,8 @@
       </div>
     </div>
 
-    <div class="all-fans-wrapper">
-      <div class="single-fan" v-for="(fan, fanIndex) in fansList" v-key="fanIndex">
+    <div class="all-fans-wrapper" v-if="fansList.length">
+      <div class="single-fan" v-for="(fan, fanIndex) in fansList" :key="fanIndex">
         <a target="_blank"
            class="fan-face"
            @click="passive(fan.id, fan.fanId)">
@@ -17,20 +17,77 @@
         <div class="fan-nickname">{{ fan.fanNickname }}</div>
       </div>
     </div>
+    <el-empty description="你还没有粉丝" v-else style="background-color: white;"></el-empty>
+
+    <!--分页-->
+    <div class="block paged" v-if="fansList.length">
+      <el-pagination
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-size="pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="totalPage">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
+import {passive, queryFansList} from "@/api/fans";
+import {mapGetters} from "vuex";
+
 export default {
   name: "fans",
   data() {
     return {
-      fansList: []
+      fansList: [],
+      currentPage: 1,
+      pageSize: 10,
+      records: 0,
+      totalPage: 0,
+      userInfo: {},
     }
   },
+  created() {
+    this.userInfo = this.getUserInfo();
+    this.queryFansList();
+
+  },
   methods: {
-    passive() {
-    }
+    ...mapGetters(['getUserInfo']),
+    passive(relationId, fanId) {
+      let params = {};
+      params.relationId = relationId;
+      params.fanId = fanId;
+      passive(params).then((response) => {
+        if (response.data.success) {
+
+        }
+      });
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.queryFansList();
+    },
+
+    queryFansList() {
+      let params = new URLSearchParams();
+      params.append("userId", this.userInfo.id);
+      params.append("page", this.currentPage);
+      params.append("pageSize", this.pageSize);
+      queryFansList(params).then(res => {
+        console.log(res.data)
+        if (res.data.success) {
+          let content = res.data;
+          this.fansList = content.data.rows;
+          this.records = content.data.records;
+          this.currentPage = content.data.currentPage;
+          this.totalPage = content.data.totalPage;
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
   }
 }
 </script>
@@ -39,11 +96,11 @@ export default {
 .main-page {
   width: 980px;
   margin-left: 20px;
-  background-color: white;
   padding-bottom: 40px;
 }
 
 .title-box {
+  background-color: white;
   padding: 20px 0 10px 30px;
   border-bottom: 1px solid #e8e8e8;
 }
@@ -54,6 +111,7 @@ export default {
 }
 
 .all-fans-wrapper {
+  background-color: white;
   padding: 20px 30px;
   display: flex;
   flex-direction: row;
@@ -90,5 +148,11 @@ export default {
   align-self: center;
   color: #555;
   font-size: 14px;
+}
+
+.paged {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 20px;
 }
 </style>

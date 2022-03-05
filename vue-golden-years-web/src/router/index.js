@@ -25,6 +25,7 @@ const routes = [
         path: '/center',
         component: WritingCenterLayout,
         hidden: true,
+        redirect: '/center/manage',
         children: [
             {
                 path: 'manage',

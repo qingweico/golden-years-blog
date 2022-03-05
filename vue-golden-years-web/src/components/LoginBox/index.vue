@@ -88,7 +88,6 @@
 import {Loading} from 'element-ui';
 import router from "@/router";
 import {localLogin} from "@/api/user";
-import {Message} from "element-ui"
 import {setCookie} from "@/utils/cookie";
 
 export default {
@@ -148,14 +147,14 @@ export default {
               // 跳转到首页
               let token = response.data.data;
               setCookie("token", token, 7);
-              Message.success(response.data.msg);
+              this.$message.success(response.data.msg);
               this.$router.replace('/');
               window.location.reload()
             } else {
-              Message.error(response.data.msg);
+              this.$message.error(response.data.msg);
             }
           }, () => {
-            Message.error("网络错误!");
+            this.$message.error("网络错误!");
           });
         }
       });

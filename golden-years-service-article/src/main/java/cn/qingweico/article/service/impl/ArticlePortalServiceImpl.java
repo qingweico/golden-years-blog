@@ -6,11 +6,14 @@ import cn.qingweico.article.mapper.CategoryMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
+import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import java.util.List;
  * @author zqw
  * @date 2021/9/12
  */
+@Slf4j
 @Service
 public class ArticlePortalServiceImpl extends BaseService implements ArticlePortalService {
 
@@ -50,6 +54,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         }
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
+        System.out.println(list);
         return setterPagedGrid(list, page);
     }
 
@@ -99,7 +104,6 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         if (result != null) {
             ArticleDetailVO detailVO = new ArticleDetailVO();
             BeanUtils.copyProperties(result, detailVO);
-            detailVO.setCover(result.getArticleCover());
             return detailVO;
         }
         return null;
@@ -125,6 +129,16 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
     @Override
     public List<Category> queryCategoryList() {
-        return categoryMapper.selectAll();
+        // 缓存
+        String categoriesJson = redisOperator.get(RedisConf.REDIS_ARTICLE_CATEGORY);
+        List<Category> categories;
+        if (StringUtils.isBlank(categoriesJson)) {
+            categories = categoryMapper.selectAll();
+            redisOperator.set(RedisConf.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
+            log.info("类别信息已存入缓存");
+        } else {
+            categories = JsonUtils.jsonToList(categoriesJson, Category.class);
+        }
+        return categories;
     }
 }

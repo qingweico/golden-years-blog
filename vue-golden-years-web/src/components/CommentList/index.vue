@@ -39,7 +39,7 @@
 
   import {mapMutations} from 'vuex';
   import CommentBox from "../CommentBox";
-  import {addComment, deleteComment, getCommentList, reportComment} from "@/api/comment";
+  import {deleteComment, getCommentList} from "@/api/comment";
   export default {
     name: "CommentList",
     props: ['comments', 'userInfos', 'commentInfo'],

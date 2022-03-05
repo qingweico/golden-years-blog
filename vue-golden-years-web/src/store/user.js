@@ -27,7 +27,7 @@ const app = {
             if (state.isLogin) {
                 return state.userInfo
             }
-            return null;
+            return state.userInfo;
         }
 
     },

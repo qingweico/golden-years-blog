@@ -180,18 +180,8 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     @Override
-    public GraceJsonResult getCategoryList() {
-        // 缓存
-        String categoriesJson = redisOperator.get(RedisConf.REDIS_ARTICLE_CATEGORY);
-
-        List<Category> categories;
-        if (StringUtils.isBlank(categoriesJson)) {
-            categories = articlePortalService.queryCategoryList();
-            redisOperator.set(RedisConf.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
-            log.info("类别信息已存入缓存");
-        } else {
-            categories = JsonUtils.jsonToList(categoriesJson, Category.class);
-        }
+    public GraceJsonResult queryEachCategoryArticleCount() {
+        List<Category> categories = articlePortalService.queryCategoryList();
         // 查询每个类别下文章的数量
         ArrayList<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : categories) {
@@ -205,14 +195,19 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     @Override
+    public GraceJsonResult categoryList() {
+        return GraceJsonResult.ok(articlePortalService.queryCategoryList());
+    }
+
+    @Override
     public GraceJsonResult hotList() {
         return GraceJsonResult.ok(articlePortalService.queryHotNews());
     }
 
     @Override
     public GraceJsonResult queryArticleListByAuthorId(String authorId,
-                                                    Integer page,
-                                                    Integer pageSize) {
+                                                      Integer page,
+                                                      Integer pageSize) {
 
         if (page == null) {
             page = Constants.COMMON_START_PAGE;
@@ -239,7 +234,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
             return new GraceJsonResult(ResponseStatusEnum.ARTICLE_NOT_EXIST);
         }
         Set<String> set = new HashSet<>();
-        set.add(articleVO.getAuthor());
+        set.add(articleVO.getAuthorId());
         List<UserBasicInfoVO> authorList = getUserBasicInfoList(set);
         if (!authorList.isEmpty()) {
             articleVO.setAuthorName(authorList.get(0).getNickname());
@@ -286,7 +281,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
         Set<String> idSet = new HashSet<>();
         List<String> idList = new ArrayList<>();
         for (Article article : rows) {
-            idSet.add(article.getAuthor());
+            idSet.add(article.getAuthorId());
             idList.add(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + article.getId());
         }
         // redis mget
@@ -299,7 +294,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
             Article article = rows.get(i);
             IndexArticleVO indexArticleVO = new IndexArticleVO();
             BeanUtils.copyProperties(article, indexArticleVO);
-            UserBasicInfoVO authorInfo = getAuthorInfoIfPresent(article.getAuthor(), authorList);
+            UserBasicInfoVO authorInfo = getAuthorInfoIfPresent(article.getAuthorId(), authorList);
             indexArticleVO.setAuthorVO(authorInfo);
             String redisCountsStr = readCountsRedisList.get(i);
             int readCounts = 0;

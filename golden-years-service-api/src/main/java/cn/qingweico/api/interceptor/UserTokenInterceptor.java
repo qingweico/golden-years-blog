@@ -17,7 +17,7 @@ public class UserTokenInterceptor extends BaseInterceptor implements HandlerInte
     public boolean preHandle(HttpServletRequest request,
                              @Nonnull HttpServletResponse response,
                              @Nonnull Object handler) {
-        String token = request.getHeader("authorization");
+        String token = request.getHeader("Authorization");
         return verifyUserToken(token, RedisConf.REDIS_USER_TOKEN);
     }
 }

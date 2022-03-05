@@ -14,8 +14,8 @@ public class IndexArticleVO {
     private String title;
     private String categoryId;
     private String articleCover;
-    private String author;
     private Integer readCounts;
+    private Integer collectCounts;
     private Integer commentCounts;
     private Date createTime;
     private Date updateTime;

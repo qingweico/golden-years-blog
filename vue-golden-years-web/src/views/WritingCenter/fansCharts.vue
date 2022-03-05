@@ -47,18 +47,61 @@
 <script>
 import echarts from 'echarts'
 import 'echarts/map/js/china.js'
+import {queryRatio, queryRatioByRegion} from "@/api/fans";
+import {mapGetters} from "vuex";
+
 export default {
   name: "fansCharts",
   data() {
     return {
       manCounts: 0,
       womanCounts: 0,
+      userInfo: {},
     }
-  }
-  , methods: {
-    queryRatio() {
-    },
+  },
+  created() {
+    this.userInfo = this.getUserInfo();
+  },
+  methods: {
+    ...mapGetters(['getUserInfo']),
+    // 根据地域查询粉丝数量
     queryRatioByRegion() {
+      let params = new URLSearchParams();
+      params.append("userId", this.userInfo.id);
+      queryRatioByRegion(params).then(res => {
+        if (res.data.success) {
+          let list = res.data.data;
+          // 初始化图表
+          this.createMapChart(list);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
+    // 查询男女比例
+    queryRatio() {
+      let params = new URLSearchParams();
+      params.append("userId", this.userInfo.id);
+      queryRatio(params).then(res => {
+        if (res.data.success) {
+          let manCounts = res.data.data.manCounts;
+          let womanCounts = res.data.data.womanCounts;
+
+          this.manCounts = manCounts;
+          this.womanCounts = womanCounts;
+
+          let manPercent = this.getPercent(manCounts / (manCounts + womanCounts)) + "%";
+          $("#manPercent").css({width: manPercent});
+          let womanPercent = this.getPercent(womanCounts / (manCounts + womanCounts)) + "%";
+          $("#womanPercent").css({width: womanPercent});
+
+          // 初始化图表
+          this.createHistogram(manCounts, womanCounts);
+          this.createPie(manCounts, womanCounts);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
     },
     // 转换百分数
     getPercent(number) {
@@ -90,7 +133,6 @@ export default {
         },
         yAxis: {},
         series: [{
-          // name: '粉丝数量',
           type: 'bar',
           data: [manCounts, womanCounts, manCounts + womanCounts]
         }]
@@ -194,7 +236,7 @@ export default {
               show: false
             }
           },
-          data: data
+          data: list
         }]
       };
       // 初始化echarts实例

@@ -30,7 +30,7 @@ public interface CategoryService {
      * @param oldCategoryName 旧的文章类别名称
      * @return boolean 分类名是否已经存在
      */
-    boolean queryCategoryIsExist(String categoryName, String oldCategoryName);
+    boolean queryCategoryIsPresent(String categoryName, String oldCategoryName);
 
     /**
      * 获得文章分类列表

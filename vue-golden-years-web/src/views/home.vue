@@ -36,7 +36,7 @@
           </router-link>
         </li>
         <li>
-          <router-link to="/time"  v-if="isLogin">
+          <router-link to="/time" v-if="isLogin">
             <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">时间轴</a>
           </router-link>
         </li>
@@ -94,22 +94,28 @@
     </nav>
   </header>
   <LoginBox v-if="showLogin" @closeLoginBox="closeLoginBox"></LoginBox>
-  <div>
-    <router-view/>
+
+  <!--文章-->
+  <div class="content" >
+    <div class="article">
+      <router-view/>
+    </div>
   </div>
 
+  <!--底部-->
   <footer>
-    <p> 豫ICP备2020030311号</p>
+    <p style="margin-bottom: 10px"> 豫ICP备2020030311号</p>
     <p>Copyright © 2020 - 2022 流金岁月 All Rights Reserved</p>
   </footer>
 
+
+  <!--回到顶部-->
   <div>
-    <a
-        href="javascript:void(0);"
-        @click="returnTop"
-        :class="isCdTopVisible?'cd-top cd-is-visible':'cd-top'"
-    >Top</a>
+    <a href="javascript:void(0);" @click="returnTop"
+       :class="isCdTopVisible?'cd-top cd-is-visible':'cd-top'">Top</a>
   </div>
+
+
   </body>
   </html>
 </template>
@@ -277,10 +283,10 @@ export default {
       this.imageCropperShow = false
     },
 
-    submitForm: function (type) {
+    submitForm(type) {
     },
 
-    getKeyword: function () {
+    getKeyword() {
       let tempValue = decodeURI(this.getUrlVars()["keyword"]);
       if (
           tempValue === null ||
@@ -291,7 +297,7 @@ export default {
         this.keyword = tempValue;
       }
     },
-    getToken: function () {
+    getToken() {
       let token = getCookie("token")
       if (token !== null) {
         authVerify(token).then(response => {
@@ -393,7 +399,11 @@ export default {
 };
 </script>
 
-<style scoped>
+<style rel="stylesheet/scss" lang="scss" scoped>
+html, body {
+  height: 100%;
+}
+
 nav .logo {
   color: #006cff;
   text-decoration: none;
@@ -442,5 +452,18 @@ nav .logo {
 
 .uploadImgBody :hover {
   border: dashed 1px #00ccff;
+}
+
+.content {
+  min-height: 100%;
+  .article {
+    padding-bottom: 280px;
+    zoom: 1;
+  }
+}
+
+footer {
+  padding: 10px;
+  margin-top: 100px;
 }
 </style>

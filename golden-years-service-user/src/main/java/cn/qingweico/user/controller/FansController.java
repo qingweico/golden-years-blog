@@ -24,33 +24,33 @@ public class FansController extends BaseController implements FansControllerApi 
     private FanService fanService;
 
     @Override
-    public GraceJsonResult isMeFollowThisAuthor(String writerId, String fanId) {
-        boolean res = fanService.isMeFollowThisAuthor(writerId, fanId);
+    public GraceJsonResult isMeFollowThisAuthor(String userId, String fanId) {
+        boolean res = fanService.isMeFollowThisAuthor(userId, fanId);
         return GraceJsonResult.ok(res);
     }
 
     @Override
-    public GraceJsonResult follow(String writerId, String fanId) {
-        if (writerId == null || fanId == null) {
+    public GraceJsonResult follow(String userId, String fanId) {
+        if (userId == null || fanId == null) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);
         }
-        if (writerId.equals(fanId)) {
+        if (userId.equals(fanId)) {
             return new GraceJsonResult(ResponseStatusEnum.CANNOT_FOLLOW_ONESELF);
         }
-        fanService.follow(writerId, fanId);
+        fanService.follow(userId, fanId);
         return new GraceJsonResult(ResponseStatusEnum.FOLLOWED);
     }
 
     @Override
-    public GraceJsonResult unfollow(String writerId, String fanId) {
-        fanService.unfollow(writerId, fanId);
+    public GraceJsonResult unfollow(String userId, String fanId) {
+        fanService.unfollow(userId, fanId);
         return new GraceJsonResult(ResponseStatusEnum.UNFOLLOWED);
     }
 
     @Override
-    public GraceJsonResult queryAll(String writerId,
-                                    Integer page,
-                                    Integer pageSize) {
+    public GraceJsonResult query(String userId,
+                                 Integer page,
+                                 Integer pageSize) {
         if (page == null) {
             page = Constants.COMMON_START_PAGE;
         }
@@ -58,13 +58,25 @@ public class FansController extends BaseController implements FansControllerApi 
             pageSize = Constants.COMMON_PAGE_SIZE;
         }
 
-        return GraceJsonResult.ok(fanService.getMyFansListViaEs(writerId, page, pageSize));
+        return GraceJsonResult.ok(fanService.getMyFansList(userId, page, pageSize));
     }
 
     @Override
-    public GraceJsonResult queryRatio(String writerId) {
-        int manCounts = fanService.queryFansCounts(writerId, Sex.MAN);
-        int womanCounts = fanService.queryFansCounts(writerId, Sex.WOMAN);
+    public GraceJsonResult queryViaEs(String userId, Integer page, Integer pageSize) {
+        if (page == null) {
+            page = Constants.COMMON_START_PAGE;
+        }
+        if (pageSize == null) {
+            pageSize = Constants.COMMON_PAGE_SIZE;
+        }
+
+        return GraceJsonResult.ok(fanService.getMyFansListViaEs(userId, page, pageSize));
+    }
+
+    @Override
+    public GraceJsonResult queryRatio(String userId) {
+        int manCounts = fanService.queryFansCounts(userId, Sex.MAN);
+        int womanCounts = fanService.queryFansCounts(userId, Sex.WOMAN);
         FansCountsVO fanCountsVO = new FansCountsVO();
         fanCountsVO.setManCounts(manCounts);
         fanCountsVO.setWomanCounts(womanCounts);
@@ -72,18 +84,18 @@ public class FansController extends BaseController implements FansControllerApi 
     }
 
     @Override
-    public GraceJsonResult queryRatioViaEs(String writerId) {
-        return GraceJsonResult.ok(fanService.queryFansCountsViaEs(writerId));
+    public GraceJsonResult queryRatioViaEs(String userId) {
+        return GraceJsonResult.ok(fanService.queryFansCountsViaEs(userId));
     }
 
     @Override
-    public GraceJsonResult queryRatioByRegion(String writerId) {
-        return GraceJsonResult.ok(fanService.queryRatioByRegion(writerId));
+    public GraceJsonResult queryRatioByRegion(String userId) {
+        return GraceJsonResult.ok(fanService.queryRatioByRegion(userId));
     }
 
     @Override
-    public GraceJsonResult queryRatioByRegionViaEs(String writerId) {
-        return GraceJsonResult.ok(fanService.queryRatioByRegionViaEs(writerId));
+    public GraceJsonResult queryRatioByRegionViaEs(String userId) {
+        return GraceJsonResult.ok(fanService.queryRatioByRegionViaEs(userId));
     }
 
     @Override

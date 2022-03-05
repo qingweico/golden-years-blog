@@ -1,27 +1,24 @@
 <template>
   <div>
     <div class="commentBox">
-    <span class="left" v-if="isShowAvatar">
-      <img v-if="isShowAvatar" :src="getUserPhoto" onerror="onerror=null;src=defaultAvatar"/>
-    </span>
-
+      <div v-if="isShowAvatar" class="left">
+        <el-avatar icon="el-icon-user-solid" v-if="isShowAvatar" :src="getUserPhoto"
+                   onerror="onerror=null;src=defaultAvatar"></el-avatar>
+      </div>
       <span class="right">
       <textarea id="textpanel" class="textArea" placeholder="友善的评论是交流的起点" v-model="value" @click="hideEmojiPanel"
-                @input="vaildCount"></textarea>
+                @input="validCount"></textarea>
     </span>
-
     </div>
     <div class="bottom">
       <el-button class="submit p2" type="primary" @click="handleSubmit">发送评论</el-button>
       <el-button class="cancel p2" type="info" @click="handleCancel">取消评论</el-button>
 
       <el-popover
-          placement="top"
-          v-model="isShowEmojiPanel">
+          placement="top">
         <emoji-panel class="emojiPanel" @emojiClick="appendEmoji"></emoji-panel>
-
         <div class="emoji-panel-btn p2" @click="showEmojiPanel" slot="reference">
-          <img src="assets/img/face_logo.png" alt=""/>
+          <img src="../../../assets/img/face_logo.png" alt=""/>
         </div>
       </el-popover>
       <span class="allow p2" v-if="isShowAvatar">还能输入{{ count }}个字符</span>
@@ -90,7 +87,7 @@ export default {
   methods: {
     //拿到vuex中的写的方法
     ...mapMutations(['setLoginMessage']),
-    vaildCount: function () {
+    validCount: function () {
       let count = 1024 - this.value.length;
       if (count <= 0) {
         this.count = 0
@@ -102,8 +99,8 @@ export default {
       let info = this.$store.state.user.userInfo
       let isLogin = this.$store.state.user.isLogin
       if (!isLogin) {
-        this.$notify.error({
-          title: '警告',
+        this.$notify.info({
+          title: '提示',
           message: '登录后才可以评论',
           offset: 100
         });
@@ -113,8 +110,8 @@ export default {
       }
 
       if (this.value === "") {
-        this.$notify.error({
-          title: '警告',
+        this.$notify.info({
+          title: '提示',
           message: '评论内容不能为空',
           offset: 100
         });
@@ -189,7 +186,7 @@ export default {
 @import "../../../assets/css/emoji.css";
 
 .el-popover {
-  height: 135px;
+  height: 220px;
   width: 420px;
 }
 
@@ -199,7 +196,7 @@ export default {
   border-radius: 5px;
   background-color: #ffffff;
   width: 423px;
-  height: 145px;
+  height: 220px;
   position: absolute;
   z-index: 99;
   top: 10px;
@@ -223,23 +220,21 @@ export default {
 }
 
 .commentBox .left {
-  display: inline-block;
-  width: 4%;
-  height: 100%;
+  float: left;
   padding-top: 3px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-top: 5px;
 }
 
 .commentBox .left img {
   cursor: pointer;
-  margin: 0 auto;
-  width: 90%;
-  border-radius: 50%;
 }
 
 .commentBox .right {
-  display: inline-block;
+  float: right;
   margin: 5px 2px 0 0;
-  width: 95%;
+  width: 92%;
   height: 100%;
 }
 
@@ -280,7 +275,7 @@ textarea::-webkit-input-placeholder {
 }
 
 .emoji-item-common {
-  background: url("~@/assets/../../assets/img/emoji_sprite.png");
+  background: url("../../../assets/img/emoji_sprite.png");
   display: inline-block;
 }
 

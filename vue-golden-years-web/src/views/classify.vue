@@ -24,8 +24,7 @@
                   v-for="item in itemByDate"
                   :key="item.uid"
                   :timestamp="item.createTime"
-                  placement="top"
-              >
+                  placement="top">
                 <el-card>
                   <h4 @click="goToList('blogContent', item)" class="itemTitle">{{ item.title }}</h4>
                   <br>
@@ -80,7 +79,7 @@ export default {
     };
   },
   components: {
-    //注册组件
+
   },
   mounted() {
   },

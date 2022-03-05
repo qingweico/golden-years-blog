@@ -39,7 +39,7 @@ public class CategoryController extends BaseController implements CategoryContro
 
         // id为空; 新增类别
         if (pendingCategoryId == null) {
-            isExist = categoryService.queryCategoryIsExist(pendingCategory.getName(),
+            isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
                     null);
             if (isExist) {
                 return GraceJsonResult.errorCustom(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
@@ -49,7 +49,7 @@ public class CategoryController extends BaseController implements CategoryContro
         }
         // id不为空; 修改类别
         else {
-            isExist = categoryService.queryCategoryIsExist(pendingCategory.getName(),
+            isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
                     saveCategoryBO.getOldName());
             if (isExist) {
                 return GraceJsonResult.errorCustom(ResponseStatusEnum.CATEGORY_EXIST_ERROR);

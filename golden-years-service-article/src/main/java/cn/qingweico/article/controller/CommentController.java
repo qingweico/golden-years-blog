@@ -8,6 +8,7 @@ import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.pojo.bo.CommentReplyBO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
+import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.PagedGridResult;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -76,22 +77,22 @@ public class CommentController extends BaseController implements CommentControll
     }
 
     @Override
-    public GraceJsonResult userCommentList(String articleId, Integer page, Integer pageSize) {
+    public GraceJsonResult userCommentList(String userId, Integer page, Integer pageSize) {
         if (page == null) {
             page = Constants.COMMON_START_PAGE;
         }
         if (pageSize == null) {
             pageSize = Constants.COMMON_PAGE_SIZE;
         }
-        PagedGridResult res = commentPortalService.queryWriterComments(articleId,
+        PagedGridResult res = commentPortalService.queryUserComments(userId,
                 page,
                 pageSize);
         return GraceJsonResult.ok(res);
     }
 
     @Override
-    public GraceJsonResult deleteComment(String articleId, String commentId) {
-        commentPortalService.delete(articleId, commentId);
-        return GraceJsonResult.ok();
+    public GraceJsonResult deleteComment(String userId, String commentId) {
+        commentPortalService.delete(userId, commentId);
+        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS    );
     }
 }

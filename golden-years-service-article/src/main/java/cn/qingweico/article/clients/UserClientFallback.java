@@ -3,8 +3,7 @@ package cn.qingweico.article.clients;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,9 +12,9 @@ import java.util.ArrayList;
  * @author zqw
  * @date 2021/10/19
  */
+@Slf4j
 @Component
 public class UserClientFallback implements UserBaseInfoClient {
-    private static final Logger log = LoggerFactory.getLogger(UserClientFallback.class);
 
     @Override
     public GraceJsonResult getUserBasicInfoList(String userIds) {

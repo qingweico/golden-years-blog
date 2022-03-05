@@ -27,8 +27,8 @@ public class PassportInterceptor implements HandlerInterceptor {
                             @Nonnull Object handler) {
       // 获取用户的ip
       String userIp = IpUtils.getRequestIp(request);
-      boolean keyIsExist = redisOperator.keyIsExist("ip:" + userIp);
-      if(keyIsExist) {
+      boolean keyIsPresent = redisOperator.keyIsExist("ip:" + userIp);
+      if(keyIsPresent) {
          GraceException.display(ResponseStatusEnum.SMS_NEED_WAIT_ERROR);
          return false;
       }

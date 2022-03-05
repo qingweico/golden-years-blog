@@ -13,12 +13,10 @@ import cn.qingweico.pojo.vo.UserAccountInfoVO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
-import cn.qingweico.user.service.impl.UserServiceImpl;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +28,7 @@ import java.util.List;
  * @author zqw
  * @date 2021/9/5
  */
+@Slf4j
 @RestController
 public class UserController extends BaseController implements UserControllerApi {
 
@@ -38,8 +37,6 @@ public class UserController extends BaseController implements UserControllerApi 
 
     @Resource
     private LoginLogService loginLogService;
-
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public GraceJsonResult getAccountInfo(String userId) {

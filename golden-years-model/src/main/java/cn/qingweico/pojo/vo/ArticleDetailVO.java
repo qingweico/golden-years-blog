@@ -14,15 +14,15 @@ public class ArticleDetailVO {
 
     private String id;
     private String title;
-    private String cover;
+    private String articleCover;
     private Integer categoryId;
-    private String categoryName;
-    private String author;
+    private String authorId;
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-    private String authorFace;
     private String content;
+    private String authorFace;
     private String authorName;
     private Integer readCounts;
     private Integer collectCounts;
+    private Integer commentCounts;
 }

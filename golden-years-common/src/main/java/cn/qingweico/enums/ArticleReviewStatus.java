@@ -20,15 +20,15 @@ public enum ArticleReviewStatus {
     /**
      * 审核通过(已发布)
      */
-    SUCCESS(3, "审核通过(已发布)"),
+    SUCCESS(2, "审核通过(已发布)"),
     /**
      * 审核未通过
      */
-    FAILED(4, "审核未通过"),
+    FAILED(3, "审核未通过"),
     /**
      * 文章撤回
      */
-    WITHDRAW(5, "文章撤回");
+    WITHDRAW(4, "文章撤回");
 
 
     public final Integer type;

@@ -52,28 +52,28 @@ public interface CommentControllerApi {
     /**
      * 作家查看我的评论管理列表
      *
-     * @param articleId 文章id
+     * @param userId 作者id
      * @param page      起始分页
      * @param pageSize  每页数量
      * @return GraceJsonResult
      */
-    @ApiOperation(value = "作家查看我的评论管理列表", notes = "作家查看我的评论管理列表", httpMethod = "POST")
-    @PostMapping("/user/list")
-    GraceJsonResult userCommentList(@RequestParam String articleId,
+    @ApiOperation(value = "作者查看我的评论管理列表", notes = "作者查看我的评论管理列表", httpMethod = "GET")
+    @GetMapping("/user/list")
+    GraceJsonResult userCommentList(@RequestParam String userId,
                                     @RequestParam Integer page,
                                     @RequestParam Integer pageSize);
 
 
     /**
-     * 作者删除评论
+     * 作者删除(我的)评论
      *
-     * @param articleId 文章id
+     * @param userId 作者id
      * @param commentId 评论id
      * @return GraceJsonResult
      */
     @ApiOperation(value = "作者删除评论", notes = "作者删除评论", httpMethod = "POST")
     @PostMapping("/user/delete")
-    GraceJsonResult deleteComment(@RequestParam String articleId,
+    GraceJsonResult deleteComment(@RequestParam String userId,
                                   @RequestParam String commentId);
 
 

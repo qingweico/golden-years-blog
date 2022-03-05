@@ -2,7 +2,7 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.repository.FriendLinkRepository;
 import cn.qingweico.admin.service.FriendLinkService;
-import cn.qingweico.pojo.mo.FriendLinkMo;
+import cn.qingweico.pojo.mo.FriendLinkMO;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,13 +20,13 @@ public class FriendLinkServiceImpl implements FriendLinkService {
 
 
     @Override
-    public void saveOrUpdateFriendLink(FriendLinkMo friendLinkMo) {
+    public void saveOrUpdateFriendLink(FriendLinkMO friendLinkMo) {
         repo.save(friendLinkMo);
 
     }
 
     @Override
-    public List<FriendLinkMo> queryAllFriendLinkList() {
+    public List<FriendLinkMO> queryAllFriendLinkList() {
         return repo.findAll();
     }
 
@@ -36,7 +36,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    public List<FriendLinkMo> queryAllFriendLinkList(Integer isDelete) {
+    public List<FriendLinkMO> queryAllFriendLinkList(Integer isDelete) {
         return repo.getAllByIsDelete(isDelete);
     }
 }

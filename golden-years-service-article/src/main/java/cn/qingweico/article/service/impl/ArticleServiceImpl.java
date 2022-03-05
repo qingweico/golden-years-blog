@@ -60,7 +60,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
         String articleId = sid.nextShort();
         Article article = new Article();
-        String summary = getArticleSummary(article);
+        String summary = getArticleSummary(newArticleBO.getContent());
         BeanUtils.copyProperties(newArticleBO, article);
 
         article.setId(articleId);
@@ -72,6 +72,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         article.setCollectCounts(0);
         article.setIsDelete(YesOrNo.NO.type);
         article.setSummary(summary);
+        article.setInfluence(0);
         article.setCreateTime(new Date());
         article.setUpdateTime(new Date());
 
@@ -122,6 +123,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     @Override
     public PagedGridResult queryMyArticles(String userId,
                                            String keyword,
+                                           Integer categoryId,
                                            Integer status,
                                            Date startDate,
                                            Date endDate,
@@ -132,19 +134,18 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
 
-        criteria.andEqualTo("author", userId);
+        criteria.andEqualTo("authorId", userId);
         if (StringUtils.isNotBlank(keyword)) {
             criteria.andLike("title", "%" + keyword + "%");
+        }
+        if (categoryId != null) {
+            criteria.andEqualTo("categoryId", categoryId);
         }
         if (ArticleReviewStatus.isArticleStatusValid(status)) {
             criteria.andEqualTo("articleStatus", status);
         }
 
         criteria.andEqualTo("isDelete", YesOrNo.NO.type);
-        // 12 ---> REVIEWING + WAITING_MANUAL
-        if (status != null && status.equals(ArticleReviewStatus.REVIEWING.type)) {
-            criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type);
-        }
         if (startDate != null) {
             criteria.andGreaterThanOrEqualTo("createTime", startDate);
         }
@@ -175,7 +176,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         if (ArticleReviewStatus.SUCCESS.type.equals(pendingStatus)) {
             Article result = articleMapper.selectByPrimaryKey(articleId);
             if (ArticleAppointType.IMMEDIATELY.type.equals(result.getIsAppoint())) {
-                String summary = getArticleSummary(result);
+                String summary = getArticleSummary(result.getContent());
                 ArticleEo articleEo = new ArticleEo();
                 BeanUtils.copyProperties(result, articleEo);
                 articleEo.setSummary(summary);
@@ -186,7 +187,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     }
 
     @Override
-    public PagedGridResult queryAll(Integer status, Integer page, Integer pageSize, Integer deleteStatus) {
+    public PagedGridResult query(Integer status, Integer page, Integer pageSize, Integer deleteStatus) {
         Example example = new Example(Article.class);
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
@@ -296,7 +297,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo("publishUserId", userId);
+        criteria.andEqualTo("author", userId);
         criteria.andEqualTo("id", articleId);
         return articleExample;
     }
@@ -314,9 +315,9 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         return html;
     }
 
-    private String getArticleSummary(Article article) {
+    private String getArticleSummary(String htmlContent) {
         String summary;
-        String contentText = filterHtmlTag(article.getContent());
+        String contentText = filterHtmlTag(htmlContent);
         if (contentText.length() <= ARTICLE_SUMMARY) {
             summary = contentText;
         } else {

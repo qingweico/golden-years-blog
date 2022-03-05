@@ -25,7 +25,7 @@ public interface FileUploaderControllerApi {
     @ApiOperation(value = "上传用户头像",
             notes = "上传用户头像", httpMethod = "POST")
     @PostMapping("/uploadFace")
-    GraceJsonResult uploadFace(String userId, MultipartFile file) throws IOException;
+    GraceJsonResult uploadFace(MultipartFile file) throws IOException;
 
 
 
@@ -49,6 +49,6 @@ public interface FileUploaderControllerApi {
     @ApiOperation(value = "上传多个文件",
             notes = "上传多个文件", httpMethod = "POST")
     @PostMapping("/uploadSomeFiles")
-    GraceJsonResult uploadSomeFiles(String userId, MultipartFile[] files) throws IOException;
+    GraceJsonResult uploadSomeFiles(MultipartFile[] files) throws IOException;
 
 }

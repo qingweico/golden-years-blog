@@ -31,8 +31,8 @@ public interface FriendLinkControllerApi {
     * 查询友情链接列表
     * @return GraceJsonResult
     */
-   @ApiOperation(value = "查询友情链接列表", notes = "查询友情链接列表", httpMethod = "POST")
-   @PostMapping("/list")
+   @ApiOperation(value = "查询友情链接列表", notes = "查询友情链接列表", httpMethod = "GET")
+   @GetMapping("/list")
    GraceJsonResult getFriendLinkList();
 
    /**

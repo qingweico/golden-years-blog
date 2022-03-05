@@ -51,7 +51,7 @@ public class FileUploadController implements FileUploaderControllerApi {
 
 
     @Override
-    public GraceJsonResult uploadFace(String userId, MultipartFile file) throws IOException {
+    public GraceJsonResult uploadFace(MultipartFile file) throws IOException {
         String path;
 
         if (file != null) {
@@ -131,7 +131,7 @@ public class FileUploadController implements FileUploaderControllerApi {
     }
 
     @Override
-    public GraceJsonResult uploadSomeFiles(String userId, MultipartFile[] files) throws IOException {
+    public GraceJsonResult uploadSomeFiles(MultipartFile[] files) throws IOException {
 
         List<String> imageUrlList = new ArrayList<>();
 
@@ -170,7 +170,7 @@ public class FileUploadController implements FileUploaderControllerApi {
                 imageUrlList.add(finalPath);
             }
         }
-        return GraceJsonResult.ok(imageUrlList);
+        return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, imageUrlList);
     }
 
     private File readGridFsByFaceId(String faceId) throws FileNotFoundException {

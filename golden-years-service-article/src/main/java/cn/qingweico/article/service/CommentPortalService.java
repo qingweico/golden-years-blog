@@ -41,25 +41,25 @@ public interface CommentPortalService {
                                          Integer pageSize);
 
     /**
-     * 查询作家文章下所有的评论
+     * 查询作者文章下所有的评论
      *
-     * @param writerId 作家id
+     * @param userId 作家id
      * @param page     分页起始
      * @param pageSize 每页显示的数目
      * @return PagedGridResult
      */
-    PagedGridResult queryWriterComments(String writerId,
-                                        Integer page,
-                                        Integer pageSize);
+    PagedGridResult queryUserComments(String userId,
+                                      Integer page,
+                                      Integer pageSize);
 
     /**
-     * 作家删除评论
+     * 作者删除评论
      *
-     * @param writerId  作家id
+     * @param userId  作者id
      * @param commentId 评论id
      */
 
-    void delete(String writerId, String commentId);
+    void delete(String userId, String commentId);
 
 
 }

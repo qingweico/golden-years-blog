@@ -7,7 +7,7 @@ import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.bo.SaveFriendLinkBO;
-import cn.qingweico.pojo.mo.FriendLinkMo;
+import cn.qingweico.pojo.mo.FriendLinkMO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +27,7 @@ public class FriendLinkController extends BaseController implements FriendLinkCo
    @Override
    public GraceJsonResult saveOrUpdateFriendLink(SaveFriendLinkBO saveFriendLinkBO) {
 
-      FriendLinkMo friendLinkMo = new FriendLinkMo();
+      FriendLinkMO friendLinkMo = new FriendLinkMO();
 
       BeanUtils.copyProperties(saveFriendLinkBO, friendLinkMo);
 
