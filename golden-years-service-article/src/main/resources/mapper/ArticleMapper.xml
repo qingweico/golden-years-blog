@@ -32,4 +32,8 @@
 		and
 		    is_appoint = 1;
 	</update>
+	<select id="getArticleByTime" resultType="cn.qingweico.pojo.Article">
+		SELECT * from t_article where
+			DATE_FORMAT(create_time,'%Y-%m') = #{yearAndMonth};
+	</select>
 </mapper>

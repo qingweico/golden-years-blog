@@ -141,4 +141,9 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         }
         return categories;
     }
+
+    @Override
+    public List<Article> getArticleListByTime(String yearAndMonth) {
+        return articleMapper.getArticleByTime(yearAndMonth);
+    }
 }

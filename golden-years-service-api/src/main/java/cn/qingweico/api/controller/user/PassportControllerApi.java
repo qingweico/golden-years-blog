@@ -27,8 +27,8 @@ public interface PassportControllerApi {
      * @return GraceJsonResult
      */
     @ApiOperation(value = "获得短信验证码", notes = "获得短信验证码", httpMethod = "GET")
-    @GetMapping("/getSmsCode/{mobile}")
-    GraceJsonResult getSmsCode(@PathVariable("mobile") String mobile, HttpServletRequest request);
+    @GetMapping("/getSmsCode")
+    GraceJsonResult getSmsCode(String mobile, HttpServletRequest request);
 
     /**
      * 手机号码登陆; 手机号码不存在则为注册操作

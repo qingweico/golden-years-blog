@@ -73,6 +73,5 @@ public class AppsUserController extends BaseController implements AppsUserContro
             return new GraceJsonResult(ResponseStatusEnum.ACTIVATE_SUCCESS);
         }
         return GraceJsonResult.errorCustom(ResponseStatusEnum.REQUEST_PARAM_ERROR);
-
     }
 }

@@ -47,8 +47,6 @@ import java.util.*;
  */
 @RestController
 public class ArticlePortalController extends BaseController implements ArticlePortalControllerApi {
-    final static Logger log = LoggerFactory.getLogger(ArticlePortalController.class);
-
     @Resource
     private ArticlePortalService articlePortalService;
 
@@ -260,6 +258,11 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     @Override
     public Integer readCounts(String articleId, HttpServletRequest req) {
         return getCountsFromRedis(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId);
+    }
+
+    @Override
+    public GraceJsonResult queryArticleByTime(String data) {
+        return GraceJsonResult.ok(articlePortalService.getArticleListByTime(data));
     }
 
     private UserBasicInfoVO getAuthorInfoIfPresent(String author,

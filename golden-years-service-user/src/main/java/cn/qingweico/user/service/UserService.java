@@ -10,14 +10,15 @@ import cn.qingweico.pojo.bo.UpdateUserInfoBO;
 public interface UserService {
 
     /**
-     * 判断用户是否存在 存在则返回user信息
-     * @param mobile mobile
+     * 判断用户是否存在, 存在则返回user信息
+     * @param mobile 用户手机号
      * @return user
      */
-    AppUser queryMobileIsExist(String mobile);
+    AppUser queryMobileIsPresent(String mobile);
 
     /**
      * 创建用户 新增一条用户记录到数据库
+     * @param mobile 用户手机号
      * @return user
      */
     AppUser createUser(String mobile);

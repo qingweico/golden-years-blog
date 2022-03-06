@@ -133,4 +133,13 @@ public interface ArticlePortalControllerApi {
     @ApiOperation(value = "文章阅读数", notes = "文章阅读数", httpMethod = "GET")
     Integer readCounts(@RequestParam String articleId,
                        HttpServletRequest req);
+
+    /**
+     * 通过时间归类文章
+     * @param date 年份和月份
+     * @return GraceJsonResult GraceJsonResult
+     */
+    @GetMapping("getArticleByTime")
+    @ApiOperation(value = "通过时间归类文章", notes = "通过时间归类文章", httpMethod = "GET")
+    GraceJsonResult queryArticleByTime(String date);
 }

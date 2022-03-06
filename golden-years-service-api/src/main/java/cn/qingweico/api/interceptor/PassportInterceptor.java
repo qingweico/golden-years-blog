@@ -1,6 +1,7 @@
 package cn.qingweico.api.interceptor;
 
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.Constants;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.IpUtils;
 import cn.qingweico.util.RedisOperator;
@@ -18,20 +19,20 @@ import javax.validation.constraints.NotNull;
  */
 public class PassportInterceptor implements HandlerInterceptor {
 
-   @Autowired
-   private RedisOperator redisOperator;
+    @Autowired
+    private RedisOperator redisOperator;
 
-   @Override
-   public boolean preHandle(@Nonnull HttpServletRequest request,
-                            @Nonnull HttpServletResponse response,
-                            @Nonnull Object handler) {
-      // 获取用户的ip
-      String userIp = IpUtils.getRequestIp(request);
-      boolean keyIsPresent = redisOperator.keyIsExist("ip:" + userIp);
-      if(keyIsPresent) {
-         GraceException.display(ResponseStatusEnum.SMS_NEED_WAIT_ERROR);
-         return false;
-      }
-      return true;
-   }
+    @Override
+    public boolean preHandle(@Nonnull HttpServletRequest request,
+                             @Nonnull HttpServletResponse response,
+                             @Nonnull Object handler) {
+        // 获取用户的ip
+        String userIp = IpUtils.getRequestIp(request);
+        boolean keyIsPresent = redisOperator.keyIsExist(Constants.IP + Constants.SYMBOL_COLON + userIp);
+        if (keyIsPresent) {
+            GraceException.display(ResponseStatusEnum.SMS_NEED_WAIT_ERROR);
+            return false;
+        }
+        return true;
+    }
 }

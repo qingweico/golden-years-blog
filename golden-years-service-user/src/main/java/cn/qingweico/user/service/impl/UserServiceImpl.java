@@ -14,6 +14,7 @@ import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.DesensitizationUtil;
 import cn.qingweico.util.JsonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.n3r.idworker.Sid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author zqw
  * @date 2021/9/6
  */
+@Slf4j
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
 
@@ -48,10 +50,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Resource
     private Sid sid;
 
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-
     @Override
-    public AppUser queryMobileIsExist(String mobile) {
+    public AppUser queryMobileIsPresent(String mobile) {
 
         Example userExample = new Example(AppUser.class);
         Example.Criteria userCriteria = userExample.createCriteria();

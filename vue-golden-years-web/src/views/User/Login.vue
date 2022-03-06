@@ -64,7 +64,7 @@
                   <i slot="prefix" class="el-icon-tickets"></i>
                 </el-input>
               </el-col>
-              <el-col :span="2">
+              <el-col :span="8">
                 <el-button @click="onSendSms" :disabled="sendDisabled" class="primary">{{ sendCodeBtn }}</el-button>
               </el-col>
             </el-row>
@@ -74,8 +74,7 @@
                 :loading="loading"
                 type="primary"
                 style="width:100%;"
-                @click.native.prevent="handleSubmit"
-            >登 录
+                @click.native.prevent="handleSubmit">登 录
             </el-button>
           </el-form-item>
         </el-form>
@@ -186,7 +185,7 @@ export default {
                   clearTimeout(timer);
                 }
               }, 1000);
-              this.$message.success("短信已发送至您手机,请查看");
+              this.$message.success(response.data.msg);
               this.$notify.success({
                 title: '验证码',
                 message: response.data.data,
@@ -294,7 +293,7 @@ $light_gray: #eee;
   width: 100%;
 
   .el-tabs {
-    width: 420px;
+    width: 385px;
     max-width: 100%;
     margin: 60px auto;
   }

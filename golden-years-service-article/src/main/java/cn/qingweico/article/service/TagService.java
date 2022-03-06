@@ -16,18 +16,16 @@ import java.util.List;
  */
 public interface TagService {
     /**
-     *
-     * @return
+     * 获取标签列表
+     * @return  List<Tag>
      */
     List<Tag> getTagList();
     /**
-     *
-     * @return
+     * 删除用户自定义标签
      */
-    Integer deletePersonalTag();
+    void deletePersonalTag();
     /**
-     *
-     * @return
+     * 添加用户自定义标签
      */
-    Integer addPersonalTag();
+    void addPersonalTag();
 }

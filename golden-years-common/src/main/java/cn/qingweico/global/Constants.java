@@ -145,4 +145,5 @@ public class Constants {
     public static final String DELIMITER_COLON = ":";
     public static final Integer COMMON_START_PAGE = 1;
     public static final Integer COMMON_PAGE_SIZE = 5;
+    public static final String IP = "ip";
 }

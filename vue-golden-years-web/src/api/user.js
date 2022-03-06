@@ -101,7 +101,7 @@ export function phoneLogin(params) {
  */
 export function getSmsCode(params) {
     return request({
-        url: process.env.USER_API + '/auth/getSmsCode/' + params,
+        url: process.env.USER_API + '/auth/getSmsCode?mobile=' + params,
         method: 'get',
     })
 }

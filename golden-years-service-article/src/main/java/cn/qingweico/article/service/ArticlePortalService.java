@@ -18,9 +18,10 @@ public interface ArticlePortalService {
 
     /**
      * 查询主页文章列表
-     * @param keyword 查询关键字
+     *
+     * @param keyword  查询关键字
      * @param category 按照文章类别查询
-     * @param page 起始查询页面
+     * @param page     起始查询页面
      * @param pageSize 每页查询的数量
      * @return {@link PagedGridResult}
      */
@@ -38,8 +39,9 @@ public interface ArticlePortalService {
 
     /**
      * 查询作家发布的所有文章列表
-     * @param author 作家id
-     * @param page 起始查询页面
+     *
+     * @param author   作家id
+     * @param page     起始查询页面
      * @param pageSize 每页查询的数量
      * @return {@link PagedGridResult}
      */
@@ -49,8 +51,9 @@ public interface ArticlePortalService {
 
     /**
      * 查询作家主页近期佳文
+     *
      * @param author 作家id
-     * @return  {@link PagedGridResult}
+     * @return {@link PagedGridResult}
      */
     PagedGridResult queryGoodArticleListOfAuthor(String author);
 
@@ -76,4 +79,11 @@ public interface ArticlePortalService {
      * @return List<Category>
      */
     List<Category> queryCategoryList();
+
+    /**
+     * 根据时间范围归类文章
+     * @param yearAndMonth 年份和月份
+     * @return List<Category>
+     */
+    List<Article> getArticleListByTime(String yearAndMonth);
 }

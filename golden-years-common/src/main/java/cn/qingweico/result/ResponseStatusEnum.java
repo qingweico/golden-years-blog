@@ -19,7 +19,7 @@ public enum ResponseStatusEnum {
     ALERT_SUCCESS(200, true, "修改成功!"),
     UPDATE_SUCCESS(200, true, "信息更新成功!"),
     UPLOAD_SUCCESS(200, true, "图片上传成功!"),
-    SMS_SEND_SUCCESS(200, true, "短信验证码已发送!"),
+    SMS_SEND_SUCCESS(200, true, "短信已发送至您手机,请查看!"),
     FREEZE_SUCCESS(200, true, "已冻结该用户!"),
     ACTIVATE_SUCCESS(200, true, "已激活该用户!"),
     // fans

@@ -58,7 +58,7 @@ public class PassportController extends BaseController implements PassportContro
         String random = (int) ((Math.random() * 9 + 1) * 100000) + "";
 
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
-        redisOperator.set(RedisConf.MOBILE_SMS_CODE + ":" + mobile, random, 2 * 60);
+        redisOperator.set(RedisConf.MOBILE_SMS_CODE + Constants.SYMBOL_COLON + mobile, random, 2 * 60);
         return new GraceJsonResult(ResponseStatusEnum.SMS_SEND_SUCCESS, random);
     }
 
@@ -78,7 +78,7 @@ public class PassportController extends BaseController implements PassportContro
         }
 
         // 查询数据库, 判断用户是否注册
-        AppUser user = userService.queryMobileIsExist(mobile);
+        AppUser user = userService.queryMobileIsPresent(mobile);
         if (user == null) {
             // 如果用户没有注册过, 则为null, 需要注册信息入库
             user = userService.createUser(mobile);

@@ -9,7 +9,7 @@ export function getNewBlog (params) {
 
 export function getBlogByTime (params) {
   return request({
-    url: process.env.WEB_API + '/index/getBlogByTime',
+    url: process.env.ARTICLE_API + '/portal/article/getArticleByTime',
     method: 'get',
     params
   })

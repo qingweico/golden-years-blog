@@ -40,7 +40,7 @@ public interface FansControllerApi {
 
 
     /**
-     * 用户取关作家
+     * 用户取关作者
      * @param userId 作者id
      * @param fanId 粉丝id
      * @return GraceJsonResult

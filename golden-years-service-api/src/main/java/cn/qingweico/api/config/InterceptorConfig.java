@@ -44,8 +44,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(@NotNull InterceptorRegistry registry) {
         registry.addInterceptor(passportInterceptor())
-                .addPathPatterns("/passport/getSmsCode/**");
-
+                .addPathPatterns("/auth/getSmsCode");
         registry.addInterceptor(userTokenInterceptor())
                 .addPathPatterns("/user/getAccountInfo")
                 .addPathPatterns("/user/updateUserInfo")
