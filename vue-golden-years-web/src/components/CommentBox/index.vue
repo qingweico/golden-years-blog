@@ -6,7 +6,7 @@
                    onerror="onerror=null;src=defaultAvatar"></el-avatar>
       </div>
       <span class="right">
-      <textarea id="textpanel" class="textArea" placeholder="友善的评论是交流的起点" v-model="value" @click="hideEmojiPanel"
+      <textarea id="textpanel" class="textArea" placeholder="友善的评论是交流的起点" v-model="commentContent" @click="hideEmojiPanel"
                 @input="validCount"></textarea>
     </span>
     </div>
@@ -32,6 +32,7 @@
 import {dateFormat} from '@/utils/web'
 import {mapGetters, mapMutations} from 'vuex';
 import EmojiPanel from "@/components/EmojiPanel/EmojiPanel.vue";
+import {getCommentList, publishComment} from "@/api/comment";
 
 export default {
   name: 'CommentBox',
@@ -57,16 +58,24 @@ export default {
   },
   data() {
     return {
-      comments: [],
+      commentReply: {
+        articleId: "",
+        fatherId: "",
+        commentUserId: "",
+        content: ""
+      },
+      articleId: "",
       submitting: false,
-      value: '',
+      commentContent: '',
       user: {},
       count: 1024,
       // 是否显示表情面板
       isShowEmojiPanel: false,
       // 是否显示头像
       isShowAvatar: true,
-      defaultAvatar: this.$SysConf.defaultAvatar
+      defaultAvatar: this.$SysConf.defaultAvatar,
+      nowReplyingFatherCommentId: 0,
+
     }
   },
   computed: {
@@ -85,8 +94,6 @@ export default {
     this.resizeWin();
   },
   methods: {
-    //拿到vuex中的写的方法
-    ...mapMutations(['setLoginMessage']),
     validCount: function () {
       let count = 1024 - this.value.length;
       if (count <= 0) {
@@ -104,11 +111,8 @@ export default {
           message: '登录后才可以评论',
           offset: 100
         });
-        // 未登录, 自动弹出登录框
-        this.setLoginMessage(Math.random())
         return;
       }
-
       if (this.value === "") {
         this.$notify.info({
           title: '提示',
@@ -117,35 +121,11 @@ export default {
         });
         return;
       }
-
-      let userUid = info.uid;
-      let toUserUid = "";
-      let toCommentUid = "";
-      let blogUid = "";
-
-      let source = "";
       // 替换表情
       let content = this.value.replace(/:.*?:/g, this.emoji);
-      if (this.toInfo) {
-        toUserUid = this.toInfo.uid;
-        toCommentUid = this.toInfo.commentUid;
-      }
-      if (this.commentInfo) {
-        blogUid = this.commentInfo.blogUid;
-        source = this.commentInfo.source;
-      }
-      this.comments = {
-        userUid: userUid,
-        toCommentUid: toCommentUid,
-        toUserUid: toUserUid,
-        content: content,
-        blogUid: blogUid,
-        source: source,
-        reply: [],
-      }
       this.value = '';
       this.count = 1024;
-      this.comments.createTime = dateFormat("YYYY-mm-dd HH:MM:SS", new Date());
+      //this.comments.createTime = dateFormat("YYYY-mm-dd HH:MM:SS", new Date());
       this.hideEmojiPanel()
       this.$emit("submit-box", this.comments)
     },
@@ -176,6 +156,57 @@ export default {
       // 当前window 宽
       let centerWidth = document.documentElement.scrollWidth;
       this.isShowAvatar = centerWidth > 800;
+    },
+    getCommentList() {
+      let params = new URLSearchParams();
+      params.append("articleId", this.articleId);
+      params.append("page", this.page);
+      params.append("pageId", this.pageSize);
+      getCommentList(params).then(response => {
+        if (response.data.success) {
+
+        } else {
+          this.$message.error(response.data.msg);
+        }
+      })
+    },
+    // 点击回复出现回复框
+    doReply(fatherCommentId) {
+      // 如果用户点击的当前的评论回复id和nowReplyingFatherCommentId一致, 则隐藏, 如果不一致, 则显示
+      if (fatherCommentId === this.nowReplyingFatherCommentId) {
+        this.nowReplyingFatherCommentId = 0;
+      } else {
+        this.nowReplyingFatherCommentId = fatherCommentId;
+      }
+    },
+
+    // 用户留言或回复
+    doComment(fatherCommentId) {
+      let replyContent = this.commentContent;
+      this.commentDisplay(fatherCommentId, replyContent);
+    },
+    // 调用后端, 留言保存
+    commentDisplay(fatherCommentId, replyContent) {
+      this.commentReply.content = replyContent;
+      publishComment(this.commentReply).then(response => {
+
+        if (response.data.success) {
+          // 清空评论框中内容
+          this.commentContent = "";
+          $("#reply-to-" + fatherCommentId).val("");
+
+          // 重新查询评论与评论数
+          this.getCommentList();
+          this.$message.success(response.data.msg);
+        } else {
+          this.$message.error(response.data.msg);
+        }
+      });
+    },
+    // 用户回复其他用户的评论, 点击后保存到后端
+    replyToComment(fatherCommentId) {
+      let content = $("#reply-to-" + fatherCommentId).val();
+      this.commentDisplay(fatherCommentId, content);
     },
   },
 };

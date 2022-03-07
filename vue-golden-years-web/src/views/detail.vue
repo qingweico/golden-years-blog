@@ -77,14 +77,14 @@
   </article>
 </template>
 <script>
-import {getBlogById} from "@/api/blog";
+import {getBlogById} from "@/api";
+import {getBlogCategory} from "@/api";
 import CommentList from "../components/CommentList";
 import CommentBox from "../components/CommentBox";
-import {getCommentList} from "@/api/comment";
 import {Loading} from "element-ui";
 import Sticky from "@/components/Sticky";
 import SideCatalog from '@/components/VueSideCatalog'
-import {getBlogCategory} from "@/api";
+
 
 export default {
   name: "detail",
@@ -157,7 +157,6 @@ export default {
       params.append("articleId", this.blogId);
     }
     getBlogById(params).then(response => {
-      console.log(response.data);
       if (response.data.success) {
         this.articleDetail = response.data.data;
         this.blogId = this.articleDetail.id
@@ -213,7 +212,7 @@ export default {
       fullscreen: true,
       text: "正在努力加载中~"
     });
-    this.blogId = this.$route.query.blogId;
+    this.blogId = this.$route.query.id;
     // 屏幕大于950px的时候, 显示侧边栏
     this.showSidebar = document.body.clientWidth > 950;
     getBlogCategory().then(res => {

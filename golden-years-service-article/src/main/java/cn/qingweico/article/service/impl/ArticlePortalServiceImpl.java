@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,7 +55,6 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         }
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
-        System.out.println(list);
         return setterPagedGrid(list, page);
     }
 
@@ -143,7 +143,34 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public List<Article> getArticleListByTime(String yearAndMonth) {
-        return articleMapper.getArticleByTime(yearAndMonth);
+    public List<Article> getArticleListByTime(String yearAndMonth, Integer page, Integer pageSize) {
+        return articleMapper.getArticleByTime(yearAndMonth, page, pageSize);
+    }
+
+    @Override
+    public List<String> queryArchiveTimeList(String userId) {
+        return articleMapper.queryArchiveTimeList(userId);
+    }
+
+    @Override
+    public PagedGridResult timeline(String userId, Integer page, Integer pageSize) {
+        Example example = new Example(Article.class);
+        Example.Criteria criteria = setDefaultArticleExample(example);
+        criteria.andEqualTo("authorId", userId);
+
+        PageHelper.startPage(page, pageSize);
+        List<Article> list = articleMapper.selectByExample(example);
+        return setterPagedGrid(list, page);
+    }
+
+    @Override
+    public PagedGridResult queryArticleListByCategoryId(String userId, Integer categoryId, Integer page, Integer pageSize) {
+        Example example = new Example(Article.class);
+        Example.Criteria criteria = setDefaultArticleExample(example);
+        criteria.andEqualTo("authorId", userId);
+        criteria.andEqualTo("categoryId", categoryId);
+        PageHelper.startPage(page, pageSize);
+        List<Article> list = articleMapper.selectByExample(example);
+        return setterPagedGrid(list, page);
     }
 }

@@ -124,7 +124,7 @@ export default {
     goToDetail(blog) {
       let routeData = this.$router.resolve({
         path: "/detail",
-        query: {blogId: blog.id}
+        query: {id: blog.id}
       })
       window.open(routeData.href, '_blank');
     },
@@ -142,7 +142,6 @@ export default {
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getNewBlog(params).then(response => {
-        console.log(response.data);
         if (response.data.success) {
           that.newBlogData = response.data.data.rows;
           that.total = response.data.data.records;

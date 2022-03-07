@@ -8,7 +8,7 @@
           <el-input
               clearable
               class="filter-item"
-              style="width: 130px;  margin-left: 10px;"
+              style="width: 150px;"
               v-model="queryParams.keyword"
               placeholder="博客标题"
               @keyup.enter.native="handleFind"
@@ -26,7 +26,7 @@
             ></el-option>
           </el-select>
           <el-select v-model="queryParams.status" clearable placeholder="文章状态"
-                     style="width:130px; margin-left: 10px;">
+                     style="width:130px;">
             <el-option value="0" label="全部" checked></el-option>
             <el-option value="1" label="审核中"></el-option>
             <el-option value="2" label="已发布"></el-option>
@@ -41,22 +41,21 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              align="right" style="width: 400px; margin-left: 10px;">
+              align="right" style="width: 360px;">
           </el-date-picker>
 
-          <el-button style="margin-left: 10px;" class="filter-item" type="info" icon="el-icon-search"
+          <el-button style="margin-left: 10px;" class="filter-item"  icon="el-icon-search"
                      @click="handleFind">查找
           </el-button>
         </el-form>
       </div>
-      <el-row :gutter="10" style="margin-bottom: 8px; margin-left: 20px;">
-        <el-col :span="1.5">
-          <el-button class="filter-item" type="primary" @click="handleAdd" icon="el-icon-edit">添加博客</el-button>
+      <el-row :gutter="10" style="margin-bottom: 8px; margin-left: 10px;">
+        <el-col :span="2">
+          <el-button class="filter-item" type="primary" @click="handleAdd" size="small" icon="el-icon-edit">添加博客</el-button>
         </el-col>
         <el-col :span="20">
           <right-toolbar :showSearch.sync="showSearch" @queryTable="resetBlogList"></right-toolbar>
         </el-col>
-
       </el-row>
     </div>
 

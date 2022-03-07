@@ -15,5 +15,12 @@ export function getCommentList (params) {
     params
   })
 }
+export function publishComment (params) {
+  return request({
+    url: process.env.ARTICLE_API + '/comment/publish',
+    method: 'post',
+    data: params
+  })
+}
 
 

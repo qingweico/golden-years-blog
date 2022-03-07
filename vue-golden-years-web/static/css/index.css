@@ -135,7 +135,7 @@ nav {
     position: relative
 }
 
-#mnavh {
+#m_nav {
     display: none;
     width: 30px;
     height: 40px;
@@ -157,7 +157,7 @@ nav {
     padding: 0 25px
 }
 
-.navicon {
+.nav_icon {
     display: block;
     position: relative;
     width: 30px;
@@ -166,7 +166,7 @@ nav {
     margin-top: 20px
 }
 
-.navicon:before, .navicon:after {
+.nav_icon:before, .nav_icon:after {
     content: '';
     display: block;
     width: 30px;
@@ -181,31 +181,31 @@ nav {
     transition-duration: 300ms;
 }
 
-.navicon:before {
+.nav_icon:before {
     margin-top: -10px;
 }
 
-.navicon:after {
+.nav_icon:after {
     margin-top: 10px;
 }
 
-.open .navicon {
+.open .nav_icon {
     background: none
 }
 
-.open .navicon:before {
+.open .nav_icon:before {
     margin-top: 0;
     -webkit-transform: rotate(45deg);
     transform: rotate(45deg);
 }
 
-.open .navicon:after {
+.open .nav_icon:after {
     margin-top: 0;
     -webkit-transform: rotate(-45deg);
     transform: rotate(-45deg);
 }
 
-.open .navicon:before, .open .navicon:after {
+.open .nav_icon:before, .open .nav_icon:after {
     content: '';
     display: block;
     width: 30px;
@@ -1961,7 +1961,7 @@ h1.t_nav {
         display: none
     }
 
-    #mnavh {
+    #m_nav {
         position: absolute;
         display: block;
         top: 8px;
@@ -2113,7 +2113,7 @@ h1.t_nav {
         display: none
     }
 
-    #mnavh {
+    #m_nav {
         position: absolute;
         display: block;
         top: 8px;
@@ -2342,7 +2342,7 @@ h1.t_nav {
         display: none
     }
 
-    #mnavh {
+    #m_nav {
         position: absolute;
         display: block;
         top: 8px;

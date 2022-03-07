@@ -136,10 +136,58 @@ public interface ArticlePortalControllerApi {
 
     /**
      * 通过时间归类文章
-     * @param date 年份和月份
+     *
+     * @param monthAndYear 年份和月份
+     * @param page         起始分页
+     * @param pageSize     每页数量
      * @return GraceJsonResult GraceJsonResult
      */
     @GetMapping("getArticleByTime")
     @ApiOperation(value = "通过时间归类文章", notes = "通过时间归类文章", httpMethod = "GET")
-    GraceJsonResult queryArticleByTime(String date);
+    GraceJsonResult queryArticleByTime(@RequestParam Integer page,
+                                       @RequestParam Integer pageSize,
+                                       @RequestParam String monthAndYear);
+
+    /**
+     * 获取归档时间列表
+     *
+     * @param userId 用户id
+     * @return GraceJsonResult GraceJsonResult
+     */
+    @GetMapping("getArchiveTimeList")
+    @ApiOperation(value = "获取归档时间列表", notes = "获取归档时间列表", httpMethod = "GET")
+    GraceJsonResult getArchiveTimeList(@RequestParam String userId);
+
+
+    /**
+     * 主页文章时间线功能
+     *
+     * @param userId   用户id
+     * @param page     起始分页
+     * @param pageSize 每页数量
+     * @return GraceJsonResult GraceJsonResult
+     */
+    @GetMapping("timeline")
+    @ApiOperation(value = "主页文章时间线功能", notes = "主页文章时间线功能", httpMethod = "GET")
+    GraceJsonResult timeline(@RequestParam String userId,
+                             @RequestParam Integer page,
+                             @RequestParam Integer pageSize);
+
+    /**
+     * 主页分类功能
+     *
+     * @param userId     用户id
+     * @param categoryId 类别id
+     * @param page       起始分页
+     * @param pageSize   每页数量
+     * @return GraceJsonResult GraceJsonResult
+     */
+    @GetMapping("getArticleListByCategoryId")
+    @ApiOperation(value = "主页分类功能", notes = "主页分类功能", httpMethod = "GET")
+    GraceJsonResult getArticleListByCategoryId(@RequestParam String userId,
+                                               @RequestParam Integer categoryId,
+                                               @RequestParam Integer page,
+                                               @RequestParam Integer pageSize);
+
+
 }

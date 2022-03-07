@@ -1,5 +1,6 @@
 package cn.qingweico.api.controller;
 
+import cn.qingweico.global.Constants;
 import cn.qingweico.util.RedisOperator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import java.net.Inet4Address;
 
 /**
  * @author zqw
@@ -19,9 +21,6 @@ public class BaseController {
     public RedisOperator redisOperator;
 
     @Resource
-    public RestTemplate restTemplate;
-
-    @Resource
     public ElasticsearchTemplate elasticsearchTemplate;
 
     public Integer getCountsFromRedis(String key) {
@@ -30,5 +29,15 @@ public class BaseController {
             counts = "0";
         }
         return Integer.valueOf(counts);
+    }
+
+    public void checkPagingParams(Integer page, Integer pageSize) {
+        if (page == null || page <= 0) {
+            page = Constants.COMMON_START_PAGE;
+        }
+
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = Constants.COMMON_PAGE_SIZE;
+        }
     }
 }

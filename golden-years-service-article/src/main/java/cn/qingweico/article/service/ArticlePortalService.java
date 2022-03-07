@@ -5,6 +5,7 @@ import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
 import cn.qingweico.util.PagedGridResult;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -82,8 +83,46 @@ public interface ArticlePortalService {
 
     /**
      * 根据时间范围归类文章
+     *
      * @param yearAndMonth 年份和月份
-     * @return List<Category>
+     * @param page         起始查询页面
+     * @param pageSize     每页查询的数量
+     * @return PagedGridResult
      */
-    List<Article> getArticleListByTime(String yearAndMonth);
+    List<Article> getArticleListByTime(String yearAndMonth,
+                                       Integer page,
+                                       Integer pageSize);
+
+
+    /**
+     * 获取归档时间列表
+     *
+     * @param userId 用户id
+     * @return List<String>
+     */
+    List<String> queryArchiveTimeList(String userId);
+
+    /**
+     * 主页时间线功能
+     *
+     * @param userId   用户id
+     * @param page     起始查询页面
+     * @param pageSize 每页查询的数量
+     * @return PagedGridResult
+     */
+    PagedGridResult timeline(String userId, Integer page, Integer pageSize);
+
+    /**
+     * 主页分类功能
+     *
+     * @param userId     用户id
+     * @param categoryId 类别id
+     * @param page       起始分页
+     * @param pageSize   每页数量
+     * @return PagedGridResult PagedGridResult
+     */
+    PagedGridResult queryArticleListByCategoryId(String userId,
+                                                 Integer categoryId,
+                                                 Integer page,
+                                                 Integer pageSize);
 }

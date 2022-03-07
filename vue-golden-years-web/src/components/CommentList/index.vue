@@ -3,30 +3,32 @@
     <div v-for="item in comments" :key="item.uid">
       <div class="commentList">
         <span class="left p1">
-          <img v-if="item.user" :src="item.user.photoUrl ? item.user.photoUrl:defaultAvatar" onerror="onerror=null;src=defaultAvatar" />
-          <img v-else :src="defaultAvatar" />
+          <img v-if="item.user" :src="item.user.photoUrl ? item.user.photoUrl:defaultAvatar"
+               onerror="onerror=null;src=defaultAvatar"  alt=""/>
+          <img v-else :src="defaultAvatar"  alt=""/>
         </span>
 
         <span class="right p1">
           <div class="rightTop" v-if="item.user">
             <el-link class="userName" :underline="false">{{item.user.nickName}}</el-link>
-            <el-tag style="height: 30px; margin-left:5px;" v-for="userTag in userTagDictList" :key="userTag.uid" v-if="item.user.userTag == userTag.dictValue && item.user.userTag != 0" :type="userTag.listClass">{{userTag.dictLabel}}</el-tag>
             <span class="timeAgo" v-if="item.createTime">{{timeAgo(item.createTime)}}</span>
             <span class="timeAgo" v-else>刚刚</span>
           </div>
 
-          <div class="rightCenter ck-content" v-highlight v-html="$xss(item.content, options)"></div>
+          <div class="rightCenter ck-content" v-highlight v-html="item.content"></div>
 
           <div class="rightBottom">
             <el-link class="b1" :underline="false" @click="replyTo(item)">回复</el-link>
-            <el-link class="b1" v-if="$store.state.user.isLogin && $store.state.user.userInfo.uid == item.userUid" :underline="false" @click="delComment(item)">删除</el-link>
+            <el-link class="b1" v-if="$store.state.user.isLogin && $store.state.user.userInfo.uid === item.userUid"
+                     :underline="false" @click="delComment(item)">删除</el-link>
           </div>
 
           <div class="rightCommentList">
             <CommentBox class="comment" :userInfo="userInfo" :toInfo="toInfo" :id="item.uid" :commentInfo="commentInfo"
                         @submit-box="submitBox" @cancel-box="cancelBox"></CommentBox>
 
-            <CommentList class="commentStyle" :id="'commentStyle:' + item.uid" :comments="item.replyList" :commentInfo="commentInfo"></CommentList>
+            <CommentList class="commentStyle" :id="'commentStyle:' + item.uid" :comments="item.replyList"
+                         :commentInfo="commentInfo"></CommentList>
           </div>
         </span>
       </div>
@@ -40,25 +42,12 @@
   import {mapMutations} from 'vuex';
   import CommentBox from "../CommentBox";
   import {deleteComment, getCommentList} from "@/api/comment";
+  import {timeAgo} from "@/utils/web";
   export default {
     name: "CommentList",
     props: ['comments', 'userInfos', 'commentInfo'],
     data() {
       return {
-        // xss白名单配置
-        options : {
-          whiteList: {
-            a: ['href', 'title', 'target'],
-            span: ['class'],
-            h1: ['class'],
-            h2: ['class'],
-            h3: ['class'],
-            h4: ['class'],
-            pre: [],
-            code: ['class'],
-            p: ['class']
-          }
-        },
         taggleStatue: true,
         submitting: false,
         value: '',
@@ -67,7 +56,6 @@
           commentUid: ""
         },
         userInfo: {},
-        userTagDictList: [], // 用户标签字典
         defaultAvatar: this.$SysConf.defaultAvatar
       };
     },
@@ -82,11 +70,10 @@
     },
     compute: {},
     methods: {
-      ...mapMutations(['setCommentList', 'setUserTag']),
       replyTo: function (item) {
         if(!this.validLogin()) {
-          this.$notify.error({
-            title: '错误',
+          this.$notify.info({
+            title: '提示',
             message: "登录后才能回复评论哦~",
             offset: 100
           });
@@ -121,8 +108,6 @@
               commentData.replyList = [];
               commentData.user = this.$store.state.user.userInfo
               this.updateCommentList(comments, commentData.toUid, commentData)
-              console.log('得到的评论', comments)
-              this.$store.commit("setCommentList", comments);
                 this.$notify({
                   title: '成功',
                   message: "评论成功",
@@ -168,55 +153,12 @@
         } else {
           document.getElementById(item.uid).style.display = 'none';
         }
-      }
-      ,
-      report: function (item) {
-        if(!this.validLogin()) {
-          this.$notify.error({
-            title: '错误',
-            message: "登录后才能举报评论哦~",
-            offset: 100
-          });
-          return
-        }
-
-        let userUid = this.$store.state.user.userInfo.uid
-
-        if(userUid == item.userUid) {
-          this.$notify.error({
-            title: '错误',
-            message: "不能举报自己的评论哦~",
-            offset: 100
-          });
-          return;
-        }
-
-        let params = {};
-        params.uid = item.uid;
-        params.userUid = userUid
-        reportComment(params).then(response => {
-          if (response.code == this.$ECode.SUCCESS) {
-            this.$notify({
-              title: '成功',
-              message: response.data,
-              type: 'success',
-              offset: 100
-            });
-          } else {
-            this.$notify.error({
-              title: '错误',
-              message: response.data,
-              type: 'success',
-              offset: 100
-            });
-          }
-        });
       },
       delComment: function (item) {
         if(!this.validLogin()) {
-          this.$notify.error({
-            title: '错误',
-            message: "登录后才能删除评论哦~",
+          this.$notify.info({
+            title: '提示',
+            message: "登录后才能删除评论",
             offset: 100
           });
           return
@@ -226,16 +168,15 @@
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
-        })
-          .then(() => {
+        }).then(() => {
             let params = {};
             params.uid = item.uid;
             params.userUid = this.$store.state.user.userInfo.uid
             deleteComment(params).then(response => {
-              if (response.code == this.$ECode.SUCCESS) {
+              if (response.data.success) {
                 this.$notify({
                   title: '成功',
-                  message: "删除成功",
+                  message: response.data.msg,
                   type: 'success',
                   offset: 100
                 });
@@ -243,22 +184,17 @@
               } else {
                 this.$notify.error({
                   title: '错误',
-                  message: "删除失败",
+                  message: response.data.msg,
                   offset: 100
                 });
               }
               let comments = this.$store.state.app.commentList;
               this.deleteCommentList(comments, params.uid, null)
-              this.$store.commit("setCommentList", comments);
-              this.$emit("deleteComment", "")
             });
 
           })
           .catch(() => {
-            this.$message({
-              type: "info",
-              message: "已取消删除"
-            });
+            /*取消action**/
           });
 
 
@@ -266,22 +202,14 @@
       // 校验是否登录
       validLogin() {
         let userInfo = this.$store.state.user.userInfo
-        if(userInfo.userName == undefined) {
-          return false;
-        } else {
-          return true;
-        }
+        return userInfo === {};
       },
-      /**
-       * dateTimeStamp是一个时间毫秒，注意时间戳是秒的形式，在这个毫秒的基础上除以1000，就是十位数的时间戳。13位数的都是时间毫秒。
-       * @param dateTimeStamp
-       * @returns {string}
-       */
+
       timeAgo(dateTimeStamp) {
         return timeAgo(dateTimeStamp)
       },
       updateCommentList(commentList, uid, targetComment) {
-        if (commentList == undefined || commentList.length <= 0) {
+        if (commentList === undefined || commentList.length <= 0) {
           return;
         }
         for (let item of commentList) {
@@ -294,7 +222,7 @@
         }
       },
       deleteCommentList(commentList, uid, parentList) {
-        if (commentList == undefined || commentList.length <= 0) {
+        if (commentList === undefined || commentList.length <= 0) {
           return;
         }
         for (let item of commentList) {

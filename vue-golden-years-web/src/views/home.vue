@@ -9,71 +9,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
 
+  <!--顶栏开始-->
   <header
       :class="isVisible?'header-navigation slideDown':'header-navigation slideUp'"
-      id="header"
-  >
+      id="header">
     <nav>
-      <div class="logo">
-        <router-link to="/">
-          <a href="javascript:void(0);">流金岁月博客</a>
-        </router-link>
-      </div>
+      <el-row :gutter="20">
+        <el-col :span="16">
 
-      <h2 id="mnavh" @click="openHead" :class="showHead?'open':''">
-        <span class="navicon"></span>
-      </h2>
+          <div class="logo">
+            <router-link to="/">
+              <a href="javascript:void(0);">流金岁月博客</a>
+            </router-link>
+          </div>
 
-      <ul id="star_list" :style="showHead?'display: block':''">
-        <li>
-          <router-link to="/">
-            <a href="javascript:void(0);" :class="[saveTitle === '/' ? 'title' : '']">首页</a>
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/classify" v-if="isLogin">
-            <a href="javascript:void(0);" :class="[saveTitle === '/classify' ? 'title' : '']">分类</a>
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/time" v-if="isLogin">
-            <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">时间轴</a>
-          </router-link>
-        </li>
+          <h2 id="m_nav" @click="openHead" :class="showHead?'open':''">
+            <span class="nav_icon"></span>
+          </h2>
 
-        <li>
-          <router-link to="/rank">
-            <a href="javascript:void(0);" :class="[saveTitle === '/tag' ? 'title' : '']">排行</a>
-          </router-link>
-        </li>
+          <ul id="star_list" :style="showHead?'display: block':''">
+            <li>
+              <router-link to="/">
+                <a href="javascript:void(0);" :class="[saveTitle === '/' ? 'title' : '']">首页</a>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/classify" v-if="isLogin">
+                <a href="javascript:void(0);" :class="[saveTitle === '/classify' ? 'title' : '']">分类</a>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/time" v-if="isLogin">
+                <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">时间轴</a>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/archive" v-if="isLogin">
+                <a href="javascript:void(0);" :class="[saveTitle === '/archive' ? 'title' : '']">归档</a>
+              </router-link>
+            </li>
 
-        <li>
-          <router-link to="/ssr">
-            <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">订阅</a>
-          </router-link>
-        </li>
+            <li>
+              <router-link to="/rank">
+                <a href="javascript:void(0);" :class="[saveTitle === '/tag' ? 'title' : '']">排行</a>
+              </router-link>
+            </li>
 
-        <li>
-          <el-button type="primary" icon="el-icon-edit" @click="goWritingCenter">创作中心</el-button>
-        </li>
-      </ul>
-      <div class="search_box">
-        <div id="search_bar" :class="(showSearch || keyword.length > 0)?'search_bar search_open':'search_bar'">
-          <input
-              ref="searchInput"
-              class="input"
-              placeholder="想搜点什么呢.."
-              type="text"
-              name="keyboard"
-              v-model="keyword"
-              v-on:keyup.enter="search">
-          <p class="search_ico" @click="clickSearchIco">
-            <span></span>
-          </p>
-        </div>
-      </div>
+            <li>
+              <router-link to="/ssr">
+                <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">订阅</a>
+              </router-link>
+            </li>
+          </ul>
+          <div class="search_box">
+            <div id="search_bar" :class="(showSearch || keyword.length > 0)?'search_bar search_open':'search_bar'">
+              <input
+                  ref="searchInput"
+                  class="input"
+                  placeholder="想搜点什么呢.."
+                  type="text"
+                  name="keyboard"
+                  v-model="keyword"
+                  v-on:keyup.enter="search">
+              <p class="search_ico" @click="clickSearchIco">
+                <span></span>
+              </p>
+            </div>
+          </div>
 
-      <el-dropdown @command="handleCommand" class="userInfoAvatar">
+          <el-dropdown @command="handleCommand" class="userInfoAvatar">
         <span class="el-dropdown-link">
           <el-badge class="item" :hidden="!isLogin">
             <img v-if="!isLogin" src="../../static/images/defaultAvatar.png" alt="">
@@ -84,19 +88,26 @@
           </el-badge>
         </span>
 
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="login" v-show="!isLogin">登录</el-dropdown-item>
-          <el-dropdown-item command="goUserHomePage" v-show="isLogin">个人中心</el-dropdown-item>
-          <el-dropdown-item command="logout" v-show="isLogin">退出登录</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="login" v-show="!isLogin">登录</el-dropdown-item>
+              <el-dropdown-item command="goUserHomePage" v-show="isLogin">个人中心</el-dropdown-item>
+              <el-dropdown-item command="logout" v-show="isLogin">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </el-col>
+        <el-col :span="3">
+          <el-button type="primary" icon="el-icon-edit" size="small" @click="goWritingCenter">创作中心</el-button>
+        </el-col>
+      </el-row>
     </nav>
   </header>
+  <!--顶栏结束-->
+
+  <!--登录框-->
   <LoginBox v-if="showLogin" @closeLoginBox="closeLoginBox"></LoginBox>
 
-  <!--文章-->
-  <div class="content" >
+  <!--主体区域; 文章和侧边栏-->
+  <div class="content">
     <div class="article">
       <router-view/>
     </div>
@@ -104,8 +115,9 @@
 
   <!--底部-->
   <footer>
-    <p style="margin-bottom: 10px"> 豫ICP备2020030311号</p>
-    <p>Copyright © 2020 - 2022 流金岁月 All Rights Reserved</p>
+    Copyright © 2020 流金岁月 All Rights Reserved
+    <span class="padding-5">|</span><a target="_blank" href="https://beian.miit.gov.cn/">
+    豫ICP备2020030311号-1</a>
   </footer>
 
 
@@ -114,18 +126,13 @@
     <a href="javascript:void(0);" @click="returnTop"
        :class="isCdTopVisible?'cd-top cd-is-visible':'cd-top'">Top</a>
   </div>
-
-
   </body>
   </html>
 </template>
-
 <script>
-
-
-import LoginBox from "../components/LoginBox";
+import LoginBox from "@/components/LoginBox";
 import {mapMutations} from 'vuex';
-import {delCookie, getCookie, setCookie} from "@/utils/cookie";
+import {delCookie, getCookie} from "@/utils/cookie";
 import {authVerify, deleteUserAccessToken} from "@/api/user";
 import {timeAgo} from "@/utils/web";
 
@@ -197,10 +204,8 @@ export default {
     }
   },
   watch: {
-    watch: {
-      $route(to, from) {
-        this.getCurrentPageTitle()
-      }
+    $route(to, from) {
+      this.getCurrentPageTitle()
     },
     // 判断登录状态位是否改变; 用于控制弹框
     '$store.state.app.loginMessage': function (newFlag, oldFlag) {
@@ -234,7 +239,6 @@ export default {
     getCurrentPageTitle() {
       this.saveTitle = window.location.pathname;
     },
-
     setSize() {
       // 屏幕大于950px的时候, 显示侧边栏
       let clientWidth = document.body.clientWidth
@@ -256,7 +260,7 @@ export default {
     goToDetail(blogId) {
       let routeData = this.$router.resolve({
         path: "/detail",
-        query: {blogId: blogId}
+        query: {id: blogId}
       });
       window.open(routeData.href, '_blank');
     },
@@ -456,14 +460,26 @@ nav .logo {
 
 .content {
   min-height: 100%;
+
   .article {
-    padding-bottom: 280px;
+    padding-bottom: 180px;
     zoom: 1;
   }
 }
 
 footer {
   padding: 10px;
-  margin-top: 100px;
+  margin-top: 280px;
+  color: #fff;
+  width: 100%;
+  position: absolute;
+  text-align: center;
+  line-height: 30px;
+  text-shadow: #000 0.1em 0.1em 0.1em;
+  font-size: 14px;
+}
+
+footer a, footer span {
+  color: #fff;
 }
 </style>

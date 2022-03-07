@@ -163,13 +163,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
                                  Integer category,
                                  Integer page,
                                  Integer pageSize) {
-        if (page == null) {
-            page = Constants.COMMON_START_PAGE;
-        }
-
-        if (pageSize == null) {
-            pageSize = Constants.COMMON_PAGE_SIZE;
-        }
+        checkPagingParams(page, pageSize);
         PagedGridResult res = articlePortalService.queryPortalArticleList(keyword,
                 category,
                 page,
@@ -206,14 +200,7 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     public GraceJsonResult queryArticleListByAuthorId(String authorId,
                                                       Integer page,
                                                       Integer pageSize) {
-
-        if (page == null) {
-            page = Constants.COMMON_START_PAGE;
-        }
-
-        if (pageSize == null) {
-            pageSize = Constants.COMMON_PAGE_SIZE;
-        }
+        checkPagingParams(page, pageSize);
 
         PagedGridResult gridResult = articlePortalService.queryArticleListOfAuthor(authorId, page, pageSize);
         return GraceJsonResult.ok(rebuildArticleGrid(gridResult));
@@ -261,9 +248,31 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     @Override
-    public GraceJsonResult queryArticleByTime(String data) {
-        return GraceJsonResult.ok(articlePortalService.getArticleListByTime(data));
+    public GraceJsonResult queryArticleByTime(Integer page, Integer pageSize, String monthAndYear) {
+        checkPagingParams(page, pageSize);
+        List<Article> articleList = articlePortalService.getArticleListByTime(monthAndYear, --page, pageSize);
+        return GraceJsonResult.ok(articleList);
     }
+
+    @Override
+    public GraceJsonResult getArchiveTimeList(String userId) {
+        return GraceJsonResult.ok(articlePortalService.queryArchiveTimeList(userId));
+    }
+
+    @Override
+    public GraceJsonResult timeline(String userId, Integer page, Integer pageSize) {
+        checkPagingParams(page, pageSize);
+        PagedGridResult result = articlePortalService.timeline(userId, page, pageSize);
+        return GraceJsonResult.ok(result);
+    }
+
+    @Override
+    public GraceJsonResult getArticleListByCategoryId(String userId, Integer categoryId, Integer page, Integer pageSize) {
+        return GraceJsonResult.ok(articlePortalService.queryArticleListByCategoryId(userId,
+                categoryId,
+                page, pageSize));
+    }
+
 
     private UserBasicInfoVO getAuthorInfoIfPresent(String author,
                                                    List<UserBasicInfoVO> authorList) {

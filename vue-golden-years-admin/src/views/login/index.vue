@@ -6,8 +6,7 @@
         :rules="loginRules"
         class="login-form"
         auto-complete="on"
-        label-position="left"
-    >
+        label-position="left">
       <h3 class="title">流金岁月博客后台管理系统</h3>
       <el-form-item prop="username">
         <span class="svg-container svg-container_login">
@@ -33,8 +32,7 @@
             name="password"
             auto-complete="on"
             placeholder="password"
-            @keyup.enter.native="handleLogin"
-        />
+            @keyup.enter.native="handleLogin"/>
         <span class="show-pwd" @click="showPwd">
           <svg-icon :icon-class="iconClass"/>
         </span>
@@ -42,17 +40,19 @@
 
       <el-checkbox v-model="loginForm.isRememberMe" style="margin:0 0 25px 0;"><span style="color: #eee">七天免登录</span>
       </el-checkbox>
+      <span style="color: #eee; float:right; font-size:14px" @click="faceLogin = true">人脸登陆</span>
 
       <el-form-item>
         <el-button
             :loading="loading"
             type="primary"
             style="width:100%;"
-            @click.native.prevent="handleLogin"
-        >登 录
+            @click.native.prevent="handleLogin">登 录
         </el-button>
       </el-form-item>
     </el-form>
+
+    <FaceLogin v-if="faceLogin" @closeLoginBox="closeLoginBox"></FaceLogin>
 
     <!--引入粒子特效-->
     <vue-particles
@@ -71,15 +71,17 @@
         hoverMode="grab"
         :clickEffect="true"
         clickMode="push"
-        class="lizi"
-    >
+        class="lizi">
     </vue-particles>
   </div>
 </template>
 
 <script>
+import FaceLogin from "../../components/FaceLogin";
+
 export default {
   name: "Login",
+  components: {FaceLogin},
   data() {
     const validateUsername = (rule, value, callback) => {
       if (value.length === 0) {
@@ -96,6 +98,7 @@ export default {
       }
     };
     return {
+      faceLogin: false,
       loginForm: {
         username: "",
         password: "",
@@ -118,7 +121,7 @@ export default {
     this.$refs.userNameInput.focus()
   },
   created() {
-  console.log(process.env);
+    console.log(process.env);
   },
   methods: {
     inputFocus: function () {
@@ -160,7 +163,10 @@ export default {
           return false;
         }
       });
-    }
+    },
+    closeLoginBox: function () {
+      this.faceLogin = false;
+    },
   }
 };
 </script>
