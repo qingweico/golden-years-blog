@@ -1,8 +1,9 @@
 import request from '@/utils/request'
 
+/**文章下删除评论**/
 export function deleteComment (params) {
   return request({
-    url: process.env.ARTICLE_API + '/comment/user/delete',
+    url: process.env.ARTICLE_API + '/comment/delete',
     method: 'post',
     params,
     data: {}
@@ -16,6 +17,7 @@ export function getCommentList (params) {
     params
   })
 }
+/**发表新列表**/
 export function publishComment (params) {
   return request({
     url: process.env.ARTICLE_API + '/comment/publish',

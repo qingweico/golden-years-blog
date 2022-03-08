@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-/**上传文章封面*/
+/**创作中心; 上传文章封面*/
 export function uploadBlogCover(params) {
     return request({
         url: process.env.PIC_API + '/fs/uploadSomeFiles',
@@ -8,7 +8,7 @@ export function uploadBlogCover(params) {
         headers: {'Content-Type': 'multipart/form-data'}
     })
 }
-/**添加新文章*/
+/**创作中心; 添加新文章*/
 export function publish(params) {
     return request({
         url: process.env.ARTICLE_API + '/article/user/publish',
@@ -40,3 +40,20 @@ export function deleteBlog(params) {
         params,
     })
 }
+/**创作中心;获取我的评论列表*/
+export function getUserCommentList(params) {
+    return request({
+        url: process.env.ARTICLE_API + '/comment/user/list',
+        method: 'get',
+        params,
+    })
+}
+/**创作中心;删除我的品论*/
+export function deleteComment(params) {
+    return request({
+        url: process.env.ARTICLE_API + '/comment/user/delete',
+        method: 'get',
+        params,
+    })
+}
+

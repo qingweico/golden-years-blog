@@ -211,7 +211,7 @@
 import {getCookie} from "@/utils/cookie";
 import RightToolbar from '@/components/RightToolbar'
 import CKEditor from "@/components/CKEditor";
-import {deleteBlog, publish, queryArticleList, uploadBlogCover, withdrawBlog} from "@/api/blog";
+import {deleteBlog, publish, queryArticleList, uploadBlogCover, withdrawBlog} from "@/api/center";
 import {mapGetters} from "vuex";
 import {getBlogCategory} from "@/api";
 

@@ -1,9 +1,6 @@
 import request from '../utils/request'
 
-/**
- * 验证用户 token
- * @param params
- */
+/** 验证用户token*/
 export function authVerify(params) {
     return request({
         url: process.env.USER_API + '/auth/verify/' + params,
@@ -11,10 +8,7 @@ export function authVerify(params) {
     })
 }
 
-/**
- * 更新用户密码
- * @param params
- */
+/**更新用户密码*/
 export function updateUserPwd(params) {
     return request({
         url: process.env.USER_API + '/user/updateUserPwd',
@@ -23,10 +17,7 @@ export function updateUserPwd(params) {
     })
 }
 
-/**
- * 更新用户信息
- * @param params
- */
+/**更新用户信息*/
 export function updateUserInfo(params) {
     return request({
         url: process.env.USER_API + '/user/updateUserInfo',
@@ -34,11 +25,7 @@ export function updateUserInfo(params) {
         data: params
     })
 }
-
-/**
- * 用户头像上传
- * @param params
- */
+/**用户头像上传*/
 export function uploadFace(params) {
     return request({
         url: process.env.PIC_API + '/fs/uploadFace',
@@ -48,10 +35,7 @@ export function uploadFace(params) {
     })
 }
 
-/**
- * 删除用户 token
- * @param params
- */
+/**删除用户token*/
 export function deleteUserAccessToken(params) {
     return request({
         url: process.env.USER_API + '/auth/delete/' + params,
@@ -59,10 +43,7 @@ export function deleteUserAccessToken(params) {
     })
 }
 
-/**
- * 获取用户登陆日志
- * @param params
- */
+/**获取用户登陆日志*/
 export function getLoginLogList(params) {
     return request({
         url: process.env.USER_API + '/user/getLoginLogList',
@@ -71,10 +52,7 @@ export function getLoginLogList(params) {
     })
 }
 
-/**
- * 账户密码登录
- * @param params
- */
+/**账户密码登录*/
 export function localLogin(params) {
     return request({
         url: process.env.USER_API + '/auth/passwd',
@@ -83,10 +61,7 @@ export function localLogin(params) {
     })
 }
 
-/**
- * 手机号登陆
- * @param params
- */
+/**手机号登陆*/
 export function phoneLogin(params) {
     return request({
         url: process.env.USER_API + '/auth/mobile',
@@ -95,10 +70,7 @@ export function phoneLogin(params) {
     })
 }
 
-/**
- * 获取手机验证码
- * @param params
- */
+/**获取手机验证码*/
 export function getSmsCode(params) {
     return request({
         url: process.env.USER_API + '/auth/getSmsCode?mobile=' + params,

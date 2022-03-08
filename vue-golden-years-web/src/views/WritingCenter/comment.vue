@@ -10,13 +10,11 @@
 
       <div class="single-comment" v-for="(comment, index) in commentList" :key="index">
         <div class="comment-wrapper">
-          <img :src="comment.commentUserFace" style="width: 40px; height: 40px; border-radius: 50%;" alt=""/>
           <div class="basic-wrapper">
+            <div>{{comment.articleTitle}}</div>
+            <div class="comment-content" v-html="comment.content"></div>
             <div class="user-time">
-              <div>{{ comment.commentUserNickname }}</div>
-              <!--              <div class="publish-time">{{formatData(comment.createTime)}}</div>-->
-            </div>
-            <div class="comment-content" v-html="comment.content">
+              <div class="publish-time">{{comment.createTime}}</div>
             </div>
             <div class="operation-wrapper" @click="deleteComment(comment.id, comment.articleId)">
               <span class="delete-span" style="">删除</span>
@@ -24,9 +22,8 @@
           </div>
         </div>
 
-        <div class="article-basic-info" v-show="comment.articleCover != null">
+        <div class="article-basic-info" v-show="comment.articleCover !== ''">
           <img class="cover" :style="'background-image: url(' + comment.articleCover + ')'" alt="" src=""/>
-          <div class="every-title">{{ comment.articleTitle }}</div>
         </div>
       </div>
     </div>
@@ -40,7 +37,7 @@
           :current-page.sync="currentPage"
           :page-size="pageSize"
           layout="total, prev, pager, next, jumper"
-          :total="totalPage">
+          :total="records">
       </el-pagination>
     </div>
 
@@ -48,9 +45,8 @@
 </template>
 
 <script>
-import {deleteComment, getCommentList} from "@/api/comment";
+import {deleteComment, getUserCommentList} from "@/api/center";
 import {mapGetters} from "vuex";
-import {withdrawBlog} from "@/api/blog";
 
 export default {
   name: "comment",
@@ -74,7 +70,8 @@ export default {
       this.$confirm('是否删除当前评论', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认删除',
-        cancelButtonText: '取消'
+        cancelButtonText: '取消',
+        type: 'warning'
       }).then(() => {
         let params = new URLSearchParams();
         params.append("commentId", commentId);
@@ -88,10 +85,7 @@ export default {
           }
         })
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        })
+        /**取消action**/
       })
     },
     queryCommentList() {
@@ -99,11 +93,14 @@ export default {
       params.append("userId", this.userInfo.id);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
-      getCommentList(params).then(res => {
+      getUserCommentList(params).then(res => {
         console.log(res.data);
         if (res.data.success) {
           const grid = res.data.data;
           this.commentList = grid.rows;
+          this.currentPage = grid.currentPage;
+          this.totalPage = grid.totalPage;
+          this.records = grid.records;
         } else {
           this.$message.error(res.data.msg);
         }

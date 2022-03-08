@@ -39,9 +39,9 @@ export default {
           toolbar: 'toolbar_Full',
           codeSnippet_theme: 'zenburn',
           customConfig: '/static/ckeditor/config.js',
-          filebrowserImageUploadUrl: process.env.PIC_API + '/fs/uploadSomeFiles',
-          filebrowserUploadUrl: process.env.PIC_API + '/fs/uploadSomeFiles',
-          pasteUploadFileApi: process.env.PIC_API + '/fs/uploadSomeFiles',
+          filebrowserImageUploadUrl: process.env.PIC_API + '/fs/uploadSomeFiles?',
+          filebrowserUploadUrl: process.env.PIC_API + '/fs/uploadSomeFiles?',
+          pasteUploadFileApi: process.env.PIC_API + '/fs/uploadSomeFiles?',
           extraPlugins: 'codesnippet,panelbutton,floatpanel,colorbutton,markdown,colordialog,dialog,dialogui,smiley,widget,lineutils,eqneditor,justify,tableresize,wordcount,notification,video,fakeobjects,liststyle,pasteUploadImage'
         });
     this.editor = CKEDITOR.instances.editor;
