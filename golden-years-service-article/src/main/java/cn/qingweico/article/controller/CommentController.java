@@ -64,12 +64,7 @@ public class CommentController extends BaseController implements CommentControll
     public GraceJsonResult list(String articleId,
                                 Integer page,
                                 Integer pageSize) {
-        if (page == null) {
-            page = Constants.COMMON_START_PAGE;
-        }
-        if (pageSize == null) {
-            pageSize = Constants.COMMON_PAGE_SIZE;
-        }
+        checkPagingParams(page, pageSize);
         PagedGridResult res = commentPortalService.queryArticleComments(articleId,
                 page,
                 pageSize);
@@ -78,12 +73,7 @@ public class CommentController extends BaseController implements CommentControll
 
     @Override
     public GraceJsonResult userCommentList(String userId, Integer page, Integer pageSize) {
-        if (page == null) {
-            page = Constants.COMMON_START_PAGE;
-        }
-        if (pageSize == null) {
-            pageSize = Constants.COMMON_PAGE_SIZE;
-        }
+        checkPagingParams(page, pageSize);
         PagedGridResult res = commentPortalService.queryUserComments(userId,
                 page,
                 pageSize);
@@ -93,6 +83,6 @@ public class CommentController extends BaseController implements CommentControll
     @Override
     public GraceJsonResult deleteComment(String userId, String commentId) {
         commentPortalService.delete(userId, commentId);
-        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS    );
+        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
     }
 }

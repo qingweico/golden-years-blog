@@ -6,7 +6,8 @@
                    onerror="onerror=null;src=defaultAvatar"></el-avatar>
       </div>
       <span class="right">
-      <textarea id="textpanel" class="textArea" placeholder="友善的评论是交流的起点" v-model="commentContent" @click="hideEmojiPanel"
+      <textarea id="textpanel" class="textArea" placeholder="友善的评论是交流的起点" v-model="commentContent"
+                @click="hideEmojiPanel"
                 @input="validCount"></textarea>
     </span>
     </div>
@@ -40,13 +41,13 @@ export default {
     userInfo: {
       type: Object
     },
-    // 回复的对象
-    toInfo: {
-      type: Object
+    // 回复的评论信息
+    replyToInfo: {
+      type: Object,
     },
     // 博客信息
-    commentInfo: {
-      type: Object
+    articleId: {
+      type: String
     },
     showCancel: {
       type: Boolean,
@@ -64,7 +65,6 @@ export default {
         commentUserId: "",
         content: ""
       },
-      articleId: "",
       submitting: false,
       commentContent: '',
       user: {},
@@ -95,7 +95,7 @@ export default {
   },
   methods: {
     validCount: function () {
-      let count = 1024 - this.value.length;
+      let count = 1024 - this.commentContent.length;
       if (count <= 0) {
         this.count = 0
       } else {
@@ -113,7 +113,7 @@ export default {
         });
         return;
       }
-      if (this.value === "") {
+      if (this.commentContent === "") {
         this.$notify.info({
           title: '提示',
           message: '评论内容不能为空',
@@ -122,12 +122,21 @@ export default {
         return;
       }
       // 替换表情
-      let content = this.value.replace(/:.*?:/g, this.emoji);
-      this.value = '';
+      let content = this.commentContent.replace(/:.*?:/g, this.emoji);
+      this.commentContent = '';
       this.count = 1024;
-      //this.comments.createTime = dateFormat("YYYY-mm-dd HH:MM:SS", new Date());
+      let fatherId = "0";
+      if(this.replyToInfo) {
+        fatherId = this.replyToInfo.commentId;
+      }
+      if (this.articleId) {
+        this.commentReply.articleId = this.articleId;
+      }
+      this.commentReply.commentUserId = info.id;
+      this.commentReply.content = content;
+      this.commentReply.fatherId = fatherId;
       this.hideEmojiPanel()
-      this.$emit("submit-box", this.comments)
+      this.$emit("submit-box", this.commentReply)
     },
     emoji(word) {
       // 生成html
@@ -135,11 +144,15 @@ export default {
       return `<span class="emoji-item-common emoji-${type} emoji-size-small"></span>`;
     },
     handleCancel() {
-      this.value = '';
+      this.commentContent = '';
       this.count = 1024;
       this.isShowEmojiPanel = false
-      if (this.toInfo) {
-        this.$emit("cancel-box", this.toInfo.commentUid)
+      let ToUserId = "";
+      let ToCommentId = "";
+      if (this.replyToInfo) {
+        ToUserId = this.replyToInfo.userId;
+        ToCommentId = this.replyToInfo.commentId;
+        this.$emit("cancel-box", ToCommentId)
       }
       this.hideEmojiPanel()
     },
@@ -150,7 +163,7 @@ export default {
       this.isShowEmojiPanel = false
     },
     appendEmoji(text) {
-      this.value = this.value + ":" + text + ":";
+      this.commentContent = this.commentContent + ":" + text + ":";
     },
     resizeWin() {
       // 当前window 宽
@@ -169,44 +182,6 @@ export default {
           this.$message.error(response.data.msg);
         }
       })
-    },
-    // 点击回复出现回复框
-    doReply(fatherCommentId) {
-      // 如果用户点击的当前的评论回复id和nowReplyingFatherCommentId一致, 则隐藏, 如果不一致, 则显示
-      if (fatherCommentId === this.nowReplyingFatherCommentId) {
-        this.nowReplyingFatherCommentId = 0;
-      } else {
-        this.nowReplyingFatherCommentId = fatherCommentId;
-      }
-    },
-
-    // 用户留言或回复
-    doComment(fatherCommentId) {
-      let replyContent = this.commentContent;
-      this.commentDisplay(fatherCommentId, replyContent);
-    },
-    // 调用后端, 留言保存
-    commentDisplay(fatherCommentId, replyContent) {
-      this.commentReply.content = replyContent;
-      publishComment(this.commentReply).then(response => {
-
-        if (response.data.success) {
-          // 清空评论框中内容
-          this.commentContent = "";
-          $("#reply-to-" + fatherCommentId).val("");
-
-          // 重新查询评论与评论数
-          this.getCommentList();
-          this.$message.success(response.data.msg);
-        } else {
-          this.$message.error(response.data.msg);
-        }
-      });
-    },
-    // 用户回复其他用户的评论, 点击后保存到后端
-    replyToComment(fatherCommentId) {
-      let content = $("#reply-to-" + fatherCommentId).val();
-      this.commentDisplay(fatherCommentId, content);
     },
   },
 };

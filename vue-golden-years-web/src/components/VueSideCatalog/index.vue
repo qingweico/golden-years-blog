@@ -7,7 +7,7 @@
         v-if="title"
         class="side-catalog__title"
     >
-      {{ title }}
+      {{title}}
     </div>
     <div class="side-catalog__list">
       <div>
@@ -72,7 +72,6 @@
 <script>
 import debounce from "lodash.debounce";
 import throttle from "lodash.throttle";
-
 export default {
   name: "SideCatalog",
   props: {
@@ -80,6 +79,11 @@ export default {
       type: Array,
       default() {
         return [
+          // {
+          //   title: 'name',
+          //   ref: 'refname', //f
+          //   level: 1,  //默认为1
+          // },
         ];
       }
     },
@@ -226,12 +230,13 @@ export default {
       this.reverseTopList = JSON.parse(
           JSON.stringify(this.topList)
       ).reverse();
+      // this.scrollHeight = this.scrollToEle.scrollHeight;
     },
     // scroll事件
     scrollHandle() {
       // 点击title的滚动不触发
       if (this.itemClicking) return;
-      const {scrollTop, clientHeight, scrollHeight} = this.scrollToEle;
+      const { scrollTop, clientHeight, scrollHeight } = this.scrollToEle;
       // 到达顶部
       if (scrollTop === 0) {
         this.initActive();
@@ -312,12 +317,12 @@ export default {
     },
     // 根据levelList获取catalogList
     topForDom() {
-      let headLevel = {};
+      let headlevel = {};
       this.levelList.forEach((item, index) => {
-        headLevel[item] = index + 1;
+        headlevel[item] = index + 1;
       });
       const childrenList = Array.from(
-          document.querySelectorAll(`${this.container} > *`)
+          document.querySelectorAll(`${this.container}>*`)
       );
       childrenList.forEach((item, index) => {
         const nodeName = item.nodeName.toLowerCase();
@@ -326,7 +331,7 @@ export default {
             ref: `${item.nodeName}-${index}`,
             title: item.innerText,
             offsetTop: item.offsetTop,
-            level: headLevel[nodeName]
+            level: headlevel[nodeName]
           });
           this.refTopMap[`${item.nodeName}-${index}`] = item.offsetTop;
         }

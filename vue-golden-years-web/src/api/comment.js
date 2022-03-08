@@ -8,9 +8,10 @@ export function deleteComment (params) {
     data: {}
   })
 }
+/**查看文章下评论列表**/
 export function getCommentList (params) {
   return request({
-    url: process.env.ARTICLE_API + '/comment/user/list',
+    url: process.env.ARTICLE_API + '/comment/list',
     method: 'get',
     params
   })

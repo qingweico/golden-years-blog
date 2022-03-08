@@ -16,7 +16,7 @@ export function publish(params) {
         data: params,
     })
 }
-/**个人中心;查询文章列表*/
+/**创作中心;查询文章列表*/
 export function queryArticleList(params) {
     return request({
         url: process.env.ARTICLE_API + '/article/user/query',
@@ -24,7 +24,7 @@ export function queryArticleList(params) {
         params,
     })
 }
-/**个人中心;撤回文章*/
+/**创作中心;撤回文章*/
 export function withdrawBlog(params) {
     return request({
         url: process.env.ARTICLE_API + '/article/user/withdraw',
@@ -32,7 +32,7 @@ export function withdrawBlog(params) {
         params,
     })
 }
-/**个人中心;删除文章*/
+/**创作中心;删除文章*/
 export function deleteBlog(params) {
     return request({
         url: process.env.ARTICLE_API + '/article/user/delete',

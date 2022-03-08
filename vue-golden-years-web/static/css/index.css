@@ -1121,7 +1121,6 @@ footer a {
 }
 
 
-
 /*gd*/
 .gd {
     width: 300px;
@@ -1445,11 +1444,12 @@ h1.t_nav {
     float: left;
     width: 74%;
     overflow: hidden;
-    background: #FFF;
+
 }
 
 .news_view {
-    padding: 0 30px
+    padding: 0 30px;
+    background: #FFF;
 }
 
 .intitle {

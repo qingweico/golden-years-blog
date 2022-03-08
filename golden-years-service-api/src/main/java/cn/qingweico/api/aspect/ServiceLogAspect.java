@@ -28,8 +28,8 @@ public class ServiceLogAspect {
 
         try {
             proceed = proceedingJoinPoint.proceed();
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
+        } catch (Throwable t) {
+            log.error(t.getMessage());
         }
 
         long end = System.currentTimeMillis();

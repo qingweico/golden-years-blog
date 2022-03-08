@@ -56,16 +56,25 @@
         <ul>
           <CommentBox
               :userInfo="userInfo"
-              :commentInfo="commentInfo"
               @submit-box="submitBox"
               :showCancel="showCancel"
-          ></CommentBox>
+              :articleId="articleDetail.id"></CommentBox>
 
           <div class="message_infos">
-            <CommentList :comments="comments" :commentInfo="commentInfo"></CommentList>
-            <el-empty description="还没有评论，快来抢沙发吧!"  v-if="comments.length === 0"></el-empty>
+            <CommentList :comments="comments"></CommentList>
+            <el-empty description="还没有评论，快来抢沙发吧!" v-if="comments.length === 0"></el-empty>
           </div>
         </ul>
+      </div>
+      <!--分页-->
+      <div class="block paged" v-if="comments.length">
+        <el-pagination
+            @current-change="handleCurrentChange"
+            :current-page.sync="currentPage"
+            :page-size="pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="records">
+        </el-pagination>
       </div>
     </div>
     <div class="sidebar2" v-if="showSidebar">
@@ -84,6 +93,7 @@ import CommentBox from "../components/CommentBox";
 import {Loading} from "element-ui";
 import Sticky from "@/components/Sticky";
 import SideCatalog from '@/components/VueSideCatalog'
+import {getCommentList, publishComment} from "@/api/comment";
 
 
 export default {
@@ -109,12 +119,11 @@ export default {
       showCancel: false,
       submitting: false,
       comments: [],
-      commentInfo: {
-        blogId: this.$route.query.blogId
-      },
+      articleId: this.$route.query.id,
       currentPage: 1,
       pageSize: 10,
-      total: 0,
+      totalPages: 0,
+      records: 0,
       toInfo: {},
       userInfo: {},
       blogId: null,
@@ -159,9 +168,8 @@ export default {
     getBlogById(params).then(response => {
       if (response.data.success) {
         this.articleDetail = response.data.data;
-        this.blogId = this.articleDetail.id
         document.title = this.articleDetail.title
-       // this.getCommentList();
+        this.getCommentList();
       }
       setTimeout(() => {
         that.blogContent = this.articleDetail.content
@@ -179,23 +187,9 @@ export default {
       that.showSideCatalog = winScrollHeight > after;
       after = winScrollHeight;
       if (docHeight === winHeight + winScrollHeight) {
-        if (that.comments.length >= that.total) {
-          return;
+        if (that.comments.length >= that.records) {
+          /**无限加载action**/
         }
-        let params = {};
-        params.source = that.commentInfo.source;
-        params.blogUid = that.commentInfo.blogUid;
-        params.currentPage = that.currentPage + 1
-        params.pageSize = that.pageSize;
-        // getCommentList(params).then(response => {
-        //   if (response.data.success) {
-        //     that.comments = that.comments.concat(response.data.records);
-        //     that.setCommentList(that.comments);
-        //     that.currentPage = response.data.current;
-        //     that.pageSize = response.data.size;
-        //     that.total = response.data.total;
-        //   }
-        // });
       }
     })
 
@@ -208,6 +202,7 @@ export default {
     }
   },
   created() {
+    this.getCommentList();
     this.loadingInstance = Loading.service({
       fullscreen: true,
       text: "正在努力加载中~"
@@ -241,46 +236,45 @@ export default {
     goToAuthor() {
     },
     submitBox(e) {
+      console.log(e);
       let params = {};
-      params.blogUid = e.blogUid;
-      params.source = e.source;
-      params.userUid = e.userUid;
+      params.articleId = e.articleId;
+      params.commentUserId = e.commentUserId;
       params.content = e.content;
-      params.blogUid = e.blogUid;
-      addComment(params).then(response => {
+      params.fatherId = e.fatherId;
+      publishComment(params).then(response => {
         if (response.data.status) {
           this.$notify({
             title: "成功",
             message: "评论成功",
             type: "success",
-            offset: 100
           });
         } else {
           this.$notify.error({
             title: "错误",
-            message: response.data,
-            offset: 100
+            message: response.data
           });
         }
         this.getCommentList();
       });
     },
-    // getCommentList: function () {
-    //   let params = {};
-    //   params.source = this.commentInfo.source;
-    //   params.blogUid = this.commentInfo.blogUid;
-    //   params.currentPage = this.currentPage;
-    //   params.pageSize = this.pageSize;
-    //   getCommentList(params).then(response => {
-    //     if (response.data.success) {
-    //       // this.comments = response.data.records;
-    //       // this.setCommentList(this.comments);
-    //       // this.currentPage = response.data.current;
-    //       // this.pageSize = response.data.size;
-    //       // this.total = response.data.total
-    //     }
-    //   });
-    // },
+    getCommentList() {
+      let params = new URLSearchParams();
+      params.append("articleId", this.articleId);
+      params.append("page", this.currentPage);
+      params.append("pageSize",10);
+      getCommentList(params).then(response => {
+        if (response.data.success) {
+          let content = response.data.data;
+          this.comments = content.rows;
+          this.currentPage = content.currentPage;
+          this.totalPages = content.totalPages;
+          this.records = content.records;
+        } else {
+          this.$message.error(response.data.msg);
+        }
+      })
+    },
     imageChange: function (e) {
       let type = e.target.localName;
       if (type === "img") {
@@ -365,4 +359,10 @@ export default {
 .line-style--active {
   background: currentColor;
 }
+.paged {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 20px;
+}
+
 </style>

@@ -322,7 +322,8 @@ export default {
       this.$confirm('是否撤回当前文章', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认撤回',
-        cancelButtonText: '取消'
+        cancelButtonText: '取消',
+        type: "info"
       }).then(() => {
         let params = new URLSearchParams();
         params.append("articleId", articleId);
@@ -344,7 +345,8 @@ export default {
       this.$confirm('是否删除当前文章', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认删除',
-        cancelButtonText: '取消'
+        cancelButtonText: '取消',
+        type: "warning"
       }).then(() => {
         let params = new URLSearchParams();
         params.append("articleId", articleId);

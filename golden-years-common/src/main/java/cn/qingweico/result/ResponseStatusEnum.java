@@ -33,7 +33,8 @@ public enum ResponseStatusEnum {
     ARTICLE_PUBLISH_SUCCESS(200, true, "文章创建成功, 待审核通过后将在首页展示!"),
     ARTICLE_RE_REVIEW_PASS(200, true, "文章可以开始重新审核!"),
     DELETE_HAS_WITHDRAW(200, true, "删除已撤回!"),
-
+    ARTICLE_WITHDRAW_SUCCESS(200, true, "文章撤回成功!"),
+    ARTICLE_DELETE_SUCCESS(200, true, "文章删除成功!"),
     // 50x
     FAILED(500, false, "操作失败!"),
     UN_LOGIN(501, false, "请登录后再继续操作!"),

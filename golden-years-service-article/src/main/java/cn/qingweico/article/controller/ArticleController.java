@@ -206,14 +206,14 @@ public class ArticleController extends BaseController implements ArticleControll
     @Override
     public GraceJsonResult delete(String userId, String articleId) {
         articleService.deleteArticle(userId, articleId);
-        return GraceJsonResult.ok();
+        return new GraceJsonResult(ResponseStatusEnum.ARTICLE_DELETE_SUCCESS);
 
     }
 
     @Override
     public GraceJsonResult withdraw(String userId, String articleId) {
         articleService.withdrawArticle(userId, articleId);
-        return GraceJsonResult.ok();
+        return new GraceJsonResult(ResponseStatusEnum.ARTICLE_WITHDRAW_SUCCESS);
     }
 
 
