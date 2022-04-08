@@ -2,13 +2,15 @@ package cn.qingweico.user.service.impl;
 
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
+import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.Constants;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.AppUser;
+import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.Fans;
 import cn.qingweico.pojo.eo.FansEo;
 import cn.qingweico.pojo.vo.FansCountsVO;
 import cn.qingweico.pojo.vo.RegionRatioVO;
+import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.user.mapper.FansMapper;
 import cn.qingweico.user.service.FanService;
 import cn.qingweico.user.service.UserService;
@@ -69,9 +71,8 @@ public class FanServiceImpl extends BaseService implements FanService {
 
     @Override
     public void follow(String authorId, String fanId) {
-
         // 获得粉丝信息
-        AppUser fansInfo = userService.queryUserById(fanId);
+        User fansInfo = userService.queryUserById(fanId);
         Fans fan = new Fans();
         fan.setId(sid.nextShort());
         fan.setAuthor(authorId);
@@ -81,23 +82,21 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setFace(fansInfo.getFace());
         fan.setSex(fansInfo.getSex());
         fan.setProvince(fansInfo.getProvince());
-        fansMapper.insert(fan);
-
-        // redis 作者粉丝累增
-
-        redisOperator.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + authorId, 1);
-
-        // redis 当前用户的(我的)关注数累增
-
-        redisOperator.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + fanId, 1);
-
-        // 保存粉丝关系到es中
-        FansEo fanEo = new FansEo();
-        BeanUtils.copyProperties(fan, fanEo);
-        IndexQuery indexQuery = new IndexQueryBuilder()
-                .withObject(fanEo)
-                .build();
-        elasticsearchTemplate.index(indexQuery);
+        if (fansMapper.insert(fan) > 0) {
+            // redis 作者粉丝累增
+            redisOperator.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + authorId, 1);
+            // redis 当前用户的(我的)关注数累增
+            redisOperator.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + fanId, 1);
+            // 保存粉丝关系到es中
+            FansEo fanEo = new FansEo();
+            BeanUtils.copyProperties(fan, fanEo);
+            IndexQuery indexQuery = new IndexQueryBuilder()
+                    .withObject(fanEo)
+                    .build();
+            elasticsearchTemplate.index(indexQuery);
+        } else {
+            GraceException.display(ResponseStatusEnum.SYSTEM_ERROR);
+        }
     }
 
     @Override
@@ -105,29 +104,24 @@ public class FanServiceImpl extends BaseService implements FanService {
         Fans fan = new Fans();
         fan.setAuthor(authorId);
         fan.setFanId(fanId);
-
-
-        fansMapper.delete(fan);
-
-        // redis 作家粉丝累减
-
-        redisOperator.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS +  Constants.SYMBOL_COLON + authorId, 1);
-
-        // redis 当前用户的(我的)关注数累减
-
-        redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS +  Constants.SYMBOL_COLON + fanId, 1);
-
-        // 删除es中的粉丝关系
-        DeleteQuery deleteQuery = new DeleteQuery();
-        deleteQuery.setQuery(QueryBuilders.termQuery("authorId", authorId));
-        deleteQuery.setQuery(QueryBuilders.termQuery("fanId", fanId));
-        elasticsearchTemplate.delete(deleteQuery, FansEo.class);
+        if (fansMapper.delete(fan) > 0) {
+            // redis 作者粉丝累减
+            redisOperator.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + authorId, 1);
+            // redis 当前用户的(我的)关注数累减
+            redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + fanId, 1);
+            // 删除es中的粉丝关系
+            DeleteQuery deleteQuery = new DeleteQuery();
+            deleteQuery.setQuery(QueryBuilders.termQuery("authorId", authorId));
+            deleteQuery.setQuery(QueryBuilders.termQuery("fanId", fanId));
+            elasticsearchTemplate.delete(deleteQuery, FansEo.class);
+        } else {
+            GraceException.display(ResponseStatusEnum.SYSTEM_ERROR);
+        }
 
     }
 
     @Override
     public PagedGridResult getMyFansList(String authorId, Integer page, Integer pageSize) {
-
         Fans fan = new Fans();
         fan.setAuthor(authorId);
         List<Fans> fansList = fansMapper.select(fan);
@@ -262,7 +256,7 @@ public class FanServiceImpl extends BaseService implements FanService {
     @Override
     public void passive(String relationId, String fanId) {
         // 根据fanId查询粉丝信息
-        AppUser user = userService.queryUserById(fanId);
+        User user = userService.queryUserById(fanId);
 
         // update db
         Fans fan = new Fans();

@@ -28,6 +28,9 @@ const app = {
                 return state.userInfo
             }
             return state.userInfo;
+        },
+        getUserLoginState(state) {
+            return state.isLogin;
         }
 
     },

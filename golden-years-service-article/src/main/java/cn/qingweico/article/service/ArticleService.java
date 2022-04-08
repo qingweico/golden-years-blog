@@ -16,7 +16,7 @@ public interface ArticleService {
     /**
      * 用户发布新的新文章
      *
-     * @param newArticleBO NewArticleBO
+     * @param newArticleBO {@link  NewArticleBO}
      */
     void createArticle(NewArticleBO newArticleBO);
 
@@ -33,9 +33,18 @@ public interface ArticleService {
      */
     void timelyPublishArticle(String articleId);
 
+
     /**
      * 查询我的文章列表
      *
+     * @param userId     userId
+     * @param keyword    keyword
+     * @param categoryId categoryId
+     * @param status     status
+     * @param startDate  startDate
+     * @param endDate    endDate
+     * @param page       page
+     * @param pageSize   pageSize
      * @return PagedGridResult
      */
     PagedGridResult queryMyArticles(String userId,
@@ -56,14 +65,27 @@ public interface ArticleService {
      */
     void updateArticleStatus(String articleId, Integer pendingStatus);
 
+    /**
+     * 修改文章
+     *
+     * @param newArticleBO {@link  NewArticleBO}
+     */
+    void updateArticle(NewArticleBO newArticleBO);
+
 
     /**
      * 删除文章
+     *
+     * @param userId    用户id
+     * @param articleId 文章id
      */
     void deleteArticle(String userId, String articleId);
 
     /**
      * 撤回文章
+     *
+     * @param userId    用户id
+     * @param articleId 文章id
      */
     void withdrawArticle(String userId, String articleId);
 
@@ -80,24 +102,31 @@ public interface ArticleService {
      *
      * @param status       文章的状态
      * @param page         page 起始分页
+     * @param categoryId   文章分类
      * @param pageSize     pageSize 每页的数目
      * @param deleteStatus 文章的逻辑状态(0:未删除 1: 已删除)
      * @return PagedGridResult
      */
-    PagedGridResult query(Integer status, Integer page, Integer pageSize, Integer deleteStatus);
+    PagedGridResult query(Integer status, Integer categoryId, Integer page, Integer pageSize, Integer deleteStatus);
 
     /**
      * 管理员删除文章(delete sql)
+     *
+     * @param articleId 文章id
      */
     void deleteArticle(String articleId);
 
     /**
      * 重新对文章进行审核
+     *
+     * @param articleId 文章id
      */
     void reReview(String articleId);
 
     /**
      * 管理员撤回用户对文章的删除
+     *
+     * @param articleId 文章id
      */
     void withdrawDelete(String articleId);
 }

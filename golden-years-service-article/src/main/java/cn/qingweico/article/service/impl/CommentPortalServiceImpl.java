@@ -88,11 +88,10 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
         return setterPagedGrid(res, page);
     }
 
-   @Override
-   public void delete(String userId, String commentId) {
-      Comments comments = new Comments();
-      comments.setAuthor(userId);
-      comments.setId(commentId);
-      commentsMapper.delete(comments);
-   }
+    @Override
+    public void delete(String commentId) {
+        Comments comments = new Comments();
+        comments.setId(commentId);
+        commentsMapper.deleteByPrimaryKey(comments);
+    }
 }

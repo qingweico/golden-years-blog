@@ -19,20 +19,42 @@ spring:
   application:
     name: service-user
   datasource:
-    type: com.zaxxer.hikari.HikariDataSource             # 数据源类型：HikariCP
     driver-class-name: com.mysql.cj.jdbc.Driver          # mysql驱动
-    url: jdbc:mysql://localhost:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    masterUrl: jdbc:mysql://localhost:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
+    slaveUrl: jdbc:mysql://localhost:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
     username: root
     password: 990712
-    hikari:
-      connection-timeout: 30000       # 等待连接池分配连接的最大时长(毫秒), 超过这个时长还没可用的连接则发生SQLException, 默认:30秒
-      minimum-idle: 5                 # 最小连接数
-      maximum-pool-size: 20           # 最大连接数
-      auto-commit: true               # 自动提交
-      idle-timeout: 600000            # 连接超时的最大时长(毫秒, 超时则被释放(retired), 默认:10分钟
-      pool-name: DateSourceHikariCP   # 连接池名字
-      max-lifetime: 1800000           # 连接的生命时长 (毫秒, 超时而且没被使用则被释放(retired), 默认:30分钟 1800000ms)
-      connection-test-query: SELECT 1
+    initialization-mode: always
+    # 数据源其他配置
+    # 初始化连接池的大小
+    initialSize: 5
+    # 连接池中的最小空闲连接数
+    minIdle: 5
+    # 连接池中的最大的连接数
+    maxActive: 20
+    # 配置获取连接等待超时的时间
+    maxWait: 60000
+    # 配置获取连接等待超时的时间
+    timeBetweenEvictionRunsMillis: 60000
+    # 配置一个连接在池中最小生存的时间,单位是毫秒
+    minEvictableIdleTimeMillis: 300000
+    # 验证数据库连接的查询语句
+    validationQuery: SELECT 1 FROM DUAL
+    # 获取连接的时候测试连接的有效性
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    # 是否缓存preparedStatement,
+    poolPreparedStatements: true
+    # 配置监控统计拦截的filters,去掉后监控界面sql无法统计,wall用于防火墙
+    filters: stat,wall,log4j2
+    maxPoolPreparedStatementPerConnectionSize: 20
+    # 合并多个DruidDataSource的监控数据
+    useGlobalDataSourceStat: true
+    # 通过connectProperties属性来打开mergeSql功能; 慢SQL记录
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+    # 设置数据源
+    type: com.alibaba.druid.pool.DruidDataSource
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -87,6 +109,7 @@ management:
 mybatis:
   type-aliases-package: cn.qingweico.pojo       # 所有POJO类所在包路径
   mapper-locations: classpath:mapper/*.xml      # mapper映射文件
+  config-location: classpath:/mybatis-config.xml
 
 
 ############################################################
@@ -103,6 +126,3 @@ mapper:
 pagehelper:
   helperDialect: mysql
   supportMethodsArguments: true
-# cookie domain
-website:
-  domain-name: qingweico.cn

@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 import springfox.documentation.oas.annotations.EnableOpenApi;
 import tk.mybatis.spring.annotation.MapperScan;
 
@@ -15,6 +16,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class,
         MongoDataAutoConfiguration.class})
 @EnableOpenApi
+@EnableAsync
 @MapperScan(basePackages = "cn.qingweico.user.mapper")
 @ComponentScan(basePackages = {"cn.qingweico", "org.n3r.idworker"})
 public class Application {

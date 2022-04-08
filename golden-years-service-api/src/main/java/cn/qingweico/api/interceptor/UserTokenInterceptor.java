@@ -1,6 +1,8 @@
 package cn.qingweico.api.interceptor;
 
 import cn.qingweico.global.RedisConf;
+import cn.qingweico.pojo.Admin;
+import cn.qingweico.pojo.User;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -29,7 +31,26 @@ public class UserTokenInterceptor extends BaseInterceptor implements HandlerInte
             response.setStatus(HttpServletResponse.SC_OK);
             return false;
         }
-        String token = request.getHeader("Authorization");
-        return verifyUserToken(token, RedisConf.REDIS_USER_TOKEN);
+        // 如果是管理员则允许操作
+        String tokenKey = RedisConf.REDIS_ADMIN_TOKEN;
+        String infoKey = RedisConf.REDIS_ADMIN_INFO;
+
+        String userTokenKey = RedisConf.REDIS_USER_TOKEN;
+        String userInfoKey = RedisConf.REDIS_USER_INFO;
+        try {
+            Admin admin = baseRestApi.getLoginUser(Admin.class, tokenKey, infoKey);
+            if (admin != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            User user;
+            try {
+                user = baseRestApi.getLoginUser(User.class, userTokenKey, userInfoKey);
+            } catch (Exception ex) {
+                return false;
+            }
+            return user != null;
+        }
+        return true;
     }
 }

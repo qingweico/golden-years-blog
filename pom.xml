@@ -45,13 +45,14 @@
 		<commons-lang3.version>3.4</commons-lang3.version>
 		<commons-fileupload.version>1.4</commons-fileupload.version>
 		<google-guava.version>28.2-jre</google-guava.version>
-		<druid.version>1.1.8</druid.version>
+		<druid.version>1.1.10</druid.version>
 		<jjwt.version>0.7.0</jjwt.version>
 		<swagger.starter.version>3.0.0</swagger.starter.version>
 		<fastdfs.version>1.27.2</fastdfs.version>
 		<oshi.version>3.9.1</oshi.version>
 		<slf4j.version>1.7.21</slf4j.version>
 		<joda-time.version>2.10.6</joda-time.version>
+		<druid-spring-boot-starter.version>1.1.10</druid-spring-boot-starter.version>
 	</properties>
 
 	<dependencyManagement>

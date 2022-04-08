@@ -114,8 +114,8 @@ import PieChart from "@/components/PieChart";
 import BarChart from "@/components/BarChart";
 import LineChart from "@/components/LineChart";
 import CalendarChart from "@/components/CalendarChart";
-import { getSystemConfig} from "@/api/systemConfig";
 import { mapMutations } from "vuex";
+import {getToken} from "../../utils/auth";
 
 export default {
   name: "dashboard",
@@ -147,52 +147,53 @@ export default {
     };
   },
   created() {
-    this.getSystemConfigData();
-    init().then(response => {
-      if (response.code == this.$ECode.SUCCESS) {
-        this.blogTotal = response.data.blogCount;
-        this.commentTotal = response.data.commentCount;
-        this.userTotal = response.data.userCount;
-        this.visitAddTotal = response.data.visitCount;
-      }
-    });
 
-    getVisitByWeek().then(response => {
-      if (response.code == this.$ECode.SUCCESS) {
-        var visitByWeek = response.data;
-        var lineChartData = {
-          date: visitByWeek.date,
-          expectedData: visitByWeek.pv,
-          actualData: visitByWeek.uv
-        };
-        this.lineChartData = lineChartData;
-        this.showLineChart = true;
-      }
-    });
-
-    //通过标签获取博客数目
-    getBlogCountByTag().then(response => {
-      if (response.code == this.$ECode.SUCCESS) {
-        this.blogCountByTag = response.data;
-        var tagList = this.blogCountByTag;
-        for (var a = 0; a < this.blogCountByTag.length; a++) {
-          this.tagNameArray.push(tagList[a].name);
-        }
-        this.showPieChart = true;
-      }
-    });
-
-    //通过博客分类获取博客数目
-    getBlogCountByBlogSort().then(response => {
-      if (response.code == this.$ECode.SUCCESS) {
-        this.blogCountByBlogSort = response.data;
-        let blogSortList = this.blogCountByBlogSort;
-        for (var a = 0; a < this.blogCountByBlogSort.length; a++) {
-          this.blogSortNameArray.push(blogSortList[a].name);
-        }
-        this.showPieBlogSortChart = true;
-      }
-    });
+    // this.getSystemConfigData();
+    // init().then(response => {
+    //   if (response.code == this.$ECode.SUCCESS) {
+    //     this.blogTotal = response.data.blogCount;
+    //     this.commentTotal = response.data.commentCount;
+    //     this.userTotal = response.data.userCount;
+    //     this.visitAddTotal = response.data.visitCount;
+    //   }
+    // });
+    //
+    // getVisitByWeek().then(response => {
+    //   if (response.code == this.$ECode.SUCCESS) {
+    //     var visitByWeek = response.data;
+    //     var lineChartData = {
+    //       date: visitByWeek.date,
+    //       expectedData: visitByWeek.pv,
+    //       actualData: visitByWeek.uv
+    //     };
+    //     this.lineChartData = lineChartData;
+    //     this.showLineChart = true;
+    //   }
+    // });
+    //
+    // //通过标签获取博客数目
+    // getBlogCountByTag().then(response => {
+    //   if (response.code == this.$ECode.SUCCESS) {
+    //     this.blogCountByTag = response.data;
+    //     var tagList = this.blogCountByTag;
+    //     for (var a = 0; a < this.blogCountByTag.length; a++) {
+    //       this.tagNameArray.push(tagList[a].name);
+    //     }
+    //     this.showPieChart = true;
+    //   }
+    // });
+    //
+    // //通过博客分类获取博客数目
+    // getBlogCountByBlogSort().then(response => {
+    //   if (response.code == this.$ECode.SUCCESS) {
+    //     this.blogCountByBlogSort = response.data;
+    //     let blogSortList = this.blogCountByBlogSort;
+    //     for (var a = 0; a < this.blogCountByBlogSort.length; a++) {
+    //       this.blogSortNameArray.push(blogSortList[a].name);
+    //     }
+    //     this.showPieBlogSortChart = true;
+    //   }
+    // });
   },
   methods: {
     //拿到vuex中的方法
@@ -201,13 +202,13 @@ export default {
       this.setOpenNotification(false);
       done();
     },
-    getSystemConfigData: function () {
-      getSystemConfig().then(response => {
-        if (response.code == this.$ECode.SUCCESS) {
-          this.systemConfig = response.data;
-        }
-      });
-    },
+    // getSystemConfigData: function () {
+    //   getSystemConfig().then(response => {
+    //     if (response.code == this.$ECode.SUCCESS) {
+    //       this.systemConfig = response.data;
+    //     }
+    //   });
+    // },
     clickBlogTagPie: function(index) {
       let tag = this.blogCountByTag[index];
       this.$router.push({

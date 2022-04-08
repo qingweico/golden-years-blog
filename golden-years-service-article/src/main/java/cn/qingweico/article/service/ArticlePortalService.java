@@ -2,8 +2,10 @@ package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Category;
+import cn.qingweico.pojo.vo.ArticleArchiveVO;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
 import cn.qingweico.util.PagedGridResult;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
 import java.util.List;
@@ -22,21 +24,24 @@ public interface ArticlePortalService {
      *
      * @param keyword  查询关键字
      * @param category 按照文章类别查询
+     * @param tag      按照文章标签查询
      * @param page     起始查询页面
      * @param pageSize 每页查询的数量
      * @return {@link PagedGridResult}
      */
     PagedGridResult queryPortalArticleList(String keyword,
-                                           Integer category,
+                                           String category,
+                                           String tag,
                                            Integer page,
                                            Integer pageSize);
 
     /**
      * 查询主页热门文章
-     *
-     * @return List<Article>
+     * @param page 起始查询页面
+     * @param pageSize 每页查询的数量
+     * @return PagedGridResult
      */
-    List<Article> queryHotNews();
+    PagedGridResult queryHotArticle(Integer page, Integer pageSize);
 
     /**
      * 查询作家发布的所有文章列表
@@ -53,7 +58,7 @@ public interface ArticlePortalService {
     /**
      * 查询作家主页近期佳文
      *
-     * @param author 作家id
+     * @param author 作者id
      * @return {@link PagedGridResult}
      */
     PagedGridResult queryGoodArticleListOfAuthor(String author);
@@ -70,9 +75,9 @@ public interface ArticlePortalService {
      * 查询首页每个类别下文章的数目
      *
      * @param categoryId 类别id
-     * @return Integer
+     * @return Integer 每个类别下文章的数目
      */
-    Integer queryEachCategoryCount(Integer categoryId);
+    Integer queryEachCategoryArticleCount(String categoryId);
 
     /**
      * 查询首页文章类别
@@ -87,11 +92,11 @@ public interface ArticlePortalService {
      * @param yearAndMonth 年份和月份
      * @param page         起始查询页面
      * @param pageSize     每页查询的数量
-     * @return PagedGridResult
+     * @return List<ArticleArchiveVO>
      */
-    List<Article> getArticleListByTime(String yearAndMonth,
-                                       Integer page,
-                                       Integer pageSize);
+    List<ArticleArchiveVO> getArticleListByTime(String yearAndMonth,
+                                                Integer page,
+                                                Integer pageSize);
 
 
     /**

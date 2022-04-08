@@ -76,16 +76,11 @@ export default {
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       queryFansList(params).then(res => {
-        console.log(res.data)
-        if (res.data.success) {
-          let content = res.data;
-          this.fansList = content.data.rows;
-          this.records = content.data.records;
-          this.currentPage = content.data.currentPage;
-          this.totalPage = content.data.totalPage;
-        } else {
-          this.$message.error(res.data.msg);
-        }
+        let content = res.data;
+        this.fansList = content.rows;
+        this.records = content.records;
+        this.currentPage = content.currentPage;
+        this.totalPage = content.totalPage;
       });
     },
   }
@@ -93,23 +88,6 @@ export default {
 </script>
 
 <style scoped>
-.main-page {
-  width: 980px;
-  margin-left: 20px;
-  padding-bottom: 40px;
-}
-
-.title-box {
-  background-color: white;
-  padding: 20px 0 10px 30px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.title-word {
-  color: #c9394a;
-  font-size: 20px;
-}
-
 .all-fans-wrapper {
   background-color: white;
   padding: 20px 30px;
@@ -148,11 +126,5 @@ export default {
   align-self: center;
   color: #555;
   font-size: 14px;
-}
-
-.paged {
-  text-align: center;
-  margin-top: 60px;
-  margin-bottom: 20px;
 }
 </style>

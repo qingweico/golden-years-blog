@@ -8,9 +8,6 @@
       </router-link>
     </scroll-pane>
     <ul class='contextmenu' v-show="visible" :style="{left:left+'px',top:top+'px'}">
-      <!-- <li @click="closeSelectedTag(selectedTag)">{{$t('tagsView.close')}}</li>
-      <li @click="closeOthersTags">{{$t('tagsView.closeOthers')}}</li>
-      <li @click="closeAllTags">{{$t('tagsView.closeAll')}}</li> -->
     </ul>
   </div>
 </template>
@@ -64,17 +61,6 @@ export default {
         return false
       }
       this.$store.dispatch('addVisitedViews', route)
-    },
-    moveToCurrentTag() {
-      // const tags = this.$refs.tag
-      // this.$nextTick(() => {
-      //   for (const tag of tags) {
-      //     if (tag.to.path === this.$route.path) {
-      //       this.$refs.scrollPane.moveToTarget(tag.$el)
-      //       break
-      //     }
-      //   }
-      // })
     },
     closeSelectedTag(view) {
       this.$store.dispatch('delVisitedViews', view).then((views) => {

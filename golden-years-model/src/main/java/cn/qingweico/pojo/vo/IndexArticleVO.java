@@ -18,7 +18,6 @@ public class IndexArticleVO {
     private Integer collectCounts;
     private Integer commentCounts;
     private Date createTime;
-    private Date updateTime;
     private String summary;
     private UserBasicInfoVO authorVO;
 }

@@ -10,7 +10,6 @@ import lombok.Data;
  */
 @Data
 public class NewAdminBO {
-
     private String username;
     private String password;
     private String confirmPassword;

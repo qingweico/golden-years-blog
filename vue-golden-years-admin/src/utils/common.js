@@ -1,24 +1,10 @@
 import { Message } from 'element-ui'
- import {showdown} from 'showdown'
- import {TurndownService} from 'turndown'
-import showdownKatex from 'showdown-katex'
-
-/** **********************************************************/
-/**
- *  全局状态码
- */
-const ECode = {
-  // 默认页大小
-  SUCCESS: "success",
-  // 默认页码
-  ERROR: "error",
-}
 
 /**
  * 全局配置文件
  */
 const SysConf = {
-  defaultAvatar: "https://gitee.com/moxi159753/wx_picture/raw/master/picture/favicon.png", // 默认头像
+  defaultAvatar: "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png", // 默认头像
 }
 
 /** **********************************************************/
@@ -73,122 +59,12 @@ const FUNCTIONS = {
     const oInput = document.createElement('input')
     oInput.value = text
     document.body.appendChild(oInput)
-    oInput.select() // 选择对象
-    document.execCommand('Copy') // 执行浏览器复制命令
+    // 选择对象
+    oInput.select()
+    // 执行浏览器复制命令
+    document.execCommand('Copy')
     oInput.className = 'oInput'
     oInput.style.display = 'none'
-  },
-  /**
-   * 将Markdown转成Html
-   * @param text
-   */
-  markdownToHtml: text => {
-    let converter = new showdown.Converter({
-      tables: true,
-      extensions: [
-        showdownKatex({
-          // maybe you want katex to throwOnError
-          throwOnError: true,
-          // disable displayMode
-          displayMode: false,
-          // change errorColor to blue
-          errorColor: '#1500ff',
-        }),
-      ],
-    });
-    let html = converter.makeHtml(text)
-    return html;
-  },
-  /**
-   * 将Html转成Markdown
-   * @param text
-   */
-  htmlToMarkdown: text => {
-    var turndownService = new TurndownService()
-
-    // 用于提取代码语言
-    turndownService.addRule('CodeBlock', {
-      filter: function (node, options) {
-        return (
-          node.nodeName === 'PRE' &&
-          node.firstChild &&
-          node.firstChild.nodeName === 'CODE'
-        )
-      },
-      replacement: function (content, node, options) {
-        var className = node.firstChild.getAttribute('class') || ''
-        var language = (className.match(/language-(\S+)/) || [null, ''])[1]
-        return (
-          '\n\n' + options.fence + language + '\n' +
-          node.firstChild.textContent +options.fence
-        )
-      }
-    })
-
-    // 提取数学公式进行转换
-    turndownService.addRule('multiplemath', {
-      filter (node, options) {
-        return node.classList.contains('vditor-math')
-      },
-      replacement (content, node, options) {
-        console.log("中间内容", node.firstChild.textContent)
-        return `$$ \n${node.firstChild.textContent}\n $$`
-      }
-    })
-
-    var turndownPluginGfm = require('turndown-plugin-gfm')
-    var gfm = turndownPluginGfm.gfm
-    var tables = turndownPluginGfm.tables
-    var strikethrough = turndownPluginGfm.strikethrough
-    turndownService.use(gfm)
-    turndownService.use([tables, strikethrough])
-
-    console.log("转换后", turndownService.turndown(text))
-    return turndownService.turndown(text)
-  },
-  /**
-   * 将Html转成Markdown文件
-   * @param title：标题
-   * @param text：正文
-   */
-  htmlToMarkdownFile: (title, text) => {
-
-    title = title || "默认标题"
-
-    let turndownService = new TurndownService()
-
-    let markdown = turndownService.turndown(text)
-
-    //创建一个blob对象,file的一种
-    let blob = new Blob([markdown])
-
-    let link = document.createElement('a')
-
-    link.href = window.URL.createObjectURL(blob)
-
-    //配置下载的文件名
-    link.download = title + '.md'
-
-    link.click()
-  },
-  deepClone(obj,hash=new WeakMap()){
-    if(obj==null) return obj;   //如果是null 或者undefined 我就不进行拷贝操作
-    if(obj instanceof Date) return new Date(obj);
-    if(obj instanceof RegExp) return new RegExp(obj);
-    //可能是对象 或者普通的值 如果是函数的话，是不需要深拷贝的  因为函数是用来调用的，不需要再拷贝一个新的函数
-    if(typeof obj!=='object') return obj;
-    // 是对象的话就要进行深拷贝 [] {} Object.prototype.toString.call(obj)==[object Array]?[]:{}
-    if(hash.get(obj)) return hash.get(obj);
-
-    let cloneObj=new obj.constructor;
-    hash.set(obj,cloneObj);
-    for(let key in obj){
-      if(obj.hasOwnProperty(key)){
-        //实现一个递归拷贝
-        cloneObj[key]= this.deepClone(obj[key],hash);
-      }
-    }
-    return cloneObj;
   },
   /**
    * 通用提示信息
@@ -226,7 +102,6 @@ const FUNCTIONS = {
 }
 
 export default {
-  ECode,
   SysConf,
   FUNCTIONS
 }

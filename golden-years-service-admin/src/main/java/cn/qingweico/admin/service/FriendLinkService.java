@@ -1,6 +1,8 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.mo.FriendLinkMO;
+import cn.qingweico.pojo.mo.FriendLink;
+import cn.qingweico.util.PagedGridResult;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -13,16 +15,18 @@ public interface FriendLinkService {
     /**
      * 保存或者更新友情链接
      *
-     * @param friendLinkMo FriendLinkMo
+     * @param friendLink FriendLinkMo
      */
-    void saveOrUpdateFriendLink(FriendLinkMO friendLinkMo);
+    void saveOrUpdateFriendLink(FriendLink friendLink);
 
     /**
      * 查询所有的友情链接
+     * @param page 起始分页
+     * @param pageSize 每页的数量
      *
-     * @return 友情链接列表
+     * @return PagedGridResult 友情链接列表
      */
-    List<FriendLinkMO> queryAllFriendLinkList();
+    PagedGridResult getFriendLinkList(Integer page, Integer pageSize);
 
     /**
      * 根据友情链接id删除友情链接
@@ -37,6 +41,6 @@ public interface FriendLinkService {
      * @param isDelete 友情链接的可用状态
      * @return 友情链接列表
      */
-    List<FriendLinkMO> queryAllFriendLinkList(Integer isDelete);
+    List<FriendLink> queryAllFriendLinkList(Integer isDelete);
 
 }

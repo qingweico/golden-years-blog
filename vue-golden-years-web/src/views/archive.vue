@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="pagebg sorts"></div>
+    <div class="page_bg sorts"></div>
     <div class="container">
 
       <h1 class="t_nav">
-        <span>有些的时候，正是为了爱才悄悄躲开。躲开的是身影，躲不开的却是那份默默的情怀。</span>
+        <span>有些的时候, 正是为了爱才悄悄躲开, 躲开的是身影, 躲不开的却是那份默默的情怀</span>
         <a href="/" class="n1">网站首页</a>
         <a href="javascript:void(0);" class="n2">归档</a>
       </h1>
@@ -18,7 +18,7 @@
                   active-text="倒序"
                   inactive-text="正序"
                   active-color="#000000"
-                  inactive-color="#13ce66"
+                  inactive-color="#920784"
               ></el-switch>
             </div>
             <el-timeline :reverse="reverse">
@@ -39,10 +39,9 @@
                   v-for="item in itemByDate"
                   :key="item.timestamp"
                   :timestamp="item.createTime"
-                  placement="top"
-              >
+                  placement="top">
                 <el-card>
-                  <h4 @click="goToList('blogContent', item)" class="itemTitle">{{ item.title }}</h4>
+                  <h4 @click="goToList('detail', item)" class="itemTitle">{{ item.title }}</h4>
                   <br>
                   <!--文章类别-->
                   <el-tag
@@ -50,29 +49,41 @@
                       type="success"
                       v-if="item.categoryId != null"
                       @click="goToList('category', item.categoryId)"
-                  >{{ item.blogSort.sortName }}
+                  >{{ getBlogCategoryNameById(item.categoryId) }}
                   </el-tag>
                   <el-tag
                       class="elTag"
-                      v-for="tagItem in item.tagList"
-                      v-if="tagItem != null"
-                      :key="tagItem.id"
-                      style="margin-left: 3px;"
-                      @click="goToList('tag', tagItem)"
+                      v-for="tag in item.tagList"
+                      v-if="tag != null"
+                      :key="tag.id"
+                      style="margin-left: 3px; color: white"
+                      :color="tag.color"
+                      @click="goToList('tag', tag)"
                       type="warning"
-                  >{{ tagItem.content }}
+                  >{{ tag.name }}
                   </el-tag>
                 </el-card>
               </el-timeline-item>
             </el-timeline>
           </div>
+
+          <div class="block paged">
+            <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currentPage"
+                :page-size="pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="records">
+            </el-pagination>
+          </div>
+
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import {getBlogByTime, getArchiveTimeList} from "@/api";
+import {getBlogByTime, getArchiveTimeList, getBlogCategory} from "@/api";
 import {mapGetters} from "vuex";
 
 export default {
@@ -81,10 +92,11 @@ export default {
       selectContent: "",
       reverse: true,
       activities: [],
+      categoryList: [],
       itemByDate: [],
       articleByDate: {},
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 5,
       total: 0,
       records: 0,
     };
@@ -93,16 +105,16 @@ export default {
   mounted() {
   },
   created() {
-
+    getBlogCategory().then(response => {
+      this.categoryList = response.data;
+    });
     getArchiveTimeList(this.getUserInfo().id).then(response => {
-      if (response.data.success) {
-        let activities = response.data.data;
-        let result = [];
-        for (let i = 0; i < activities.length; i++) {
-          let temp = activities[i].replace("年", "-").replace("月", "-") + "1";
-          let dataForDate = {content: activities[i], timestamp: temp};
-          result.push(dataForDate);
-        }
+      let activities = response.data;
+      let result = [];
+      for (let i = 0; i < activities.length; i++) {
+        let temp = activities[i].replace("年", "-").replace("月", "-") + "1";
+        let dataForDate = {content: activities[i], timestamp: temp};
+        result.push(dataForDate);
         this.activities = result;
         // 默认选择最后一个
         this.clickTime(activities[activities.length - 1]);
@@ -119,11 +131,20 @@ export default {
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getBlogByTime(params).then(response => {
-        console.log(response.data);
-        if (response.data.success) {
-          this.itemByDate = response.data.data;
-        }
+        this.itemByDate = response.data;
+        this.records = this.itemByDate.length;
       });
+    },
+    getBlogCategoryNameById(categoryId) {
+      let categoryList = this.categoryList;
+      for (let i = 0; i < categoryList.length; i++) {
+        if (categoryId === categoryList[i].id) {
+          return categoryList[i].name;
+        }
+      }
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
     },
     //跳转到搜索详情页
     goToList(type, entity) {
@@ -175,11 +196,11 @@ export default {
 }
 
 .sortBoxSpan:hover {
-  color: #409eff;
+  color: #920784;
 }
 
 .sortBoxSpanSelect {
-  color: #409eff;
+  color: #920784;
 }
 
 .itemTitle {
@@ -187,7 +208,7 @@ export default {
 }
 
 .itemTitle:hover {
-  color: #409eff;
+  color: #920784;
 }
 
 .elTag {

@@ -5,10 +5,13 @@ import cn.qingweico.api.config.RabbitMqDelayConfig;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.service.ArticleService;
+import cn.qingweico.article.service.TagService;
 import cn.qingweico.enums.ArticleAppointType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.pojo.Tag;
+import cn.qingweico.pojo.bo.TagBO;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.bo.NewArticleBO;
@@ -16,6 +19,7 @@ import cn.qingweico.pojo.eo.ArticleEo;
 import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
 import com.mongodb.client.gridfs.GridFSBucket;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.n3r.idworker.Sid;
@@ -44,15 +48,12 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private ArticleMapper articleMapper;
 
     @Resource
-    private Sid sid;
-
-    @Resource
-    private ElasticsearchTemplate elasticsearchTemplate;
+    private TagService tagService;
 
     @Resource
     public GridFSBucket gridFsBucket;
 
-    private static final Integer ARTICLE_SUMMARY = 100;
+    private static final Integer ARTICLE_SUMMARY = 200;
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
@@ -60,11 +61,10 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
         String articleId = sid.nextShort();
         Article article = new Article();
+        // 文章概要
         String summary = getArticleSummary(newArticleBO.getContent());
         BeanUtils.copyProperties(newArticleBO, article);
-
         article.setId(articleId);
-
         article.setCategoryId(newArticleBO.getCategoryId());
         article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
         article.setCommentCounts(0);
@@ -75,7 +75,26 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         article.setInfluence(0);
         article.setCreateTime(new Date());
         article.setUpdateTime(new Date());
+        List<Tag> tags = newArticleBO.getTags();
+        StringBuilder tagsString = new StringBuilder();
+        tagsString.append("[");
+        for (Tag tag : tags) {
 
+            // 用户自定义标签
+            if (tag.getId() == null) {
+                String personalTagId = tagService.addPersonalTag(tag, newArticleBO.getAuthorId());
+                tagsString.append("\"");
+                tagsString.append(personalTagId);
+                tagsString.append("\",");
+            }
+            // 系统标签
+            tagsString.append("\"");
+            tagsString.append(tag.getId());
+            tagsString.append("\",");
+        }
+        tagsString.append("]");
+        tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
+        article.setTags(tagsString.toString());
         if (article.getIsAppoint().equals(ArticleAppointType.TIMING.type)) {
             article.setCreateTime(newArticleBO.getCreateTime());
             // 发送延迟消息到mq队列
@@ -187,13 +206,38 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     }
 
     @Override
-    public PagedGridResult query(Integer status, Integer page, Integer pageSize, Integer deleteStatus) {
+    public void updateArticle(NewArticleBO newArticleBO) {
+        Article article = new Article();
+        article.setId(newArticleBO.getArticleId());
+        article.setUpdateTime(new Date());
+        BeanUtils.copyProperties(newArticleBO, article);
+        List<Tag> tags = newArticleBO.getTags();
+        StringBuilder tagsString = new StringBuilder();
+        tagsString.append("[");
+        for (Tag tag : tags) {
+            tagsString.append("\"");
+            tagsString.append(tag.getId());
+            tagsString.append("\",");
+        }
+        tagsString.append("]");
+        tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
+        article.setTags(tagsString.toString());
+        if (articleMapper.updateByPrimaryKeySelective(article) <= 0) {
+            GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
+    }
+
+    @Override
+    public PagedGridResult query(Integer status, Integer categoryId, Integer page, Integer pageSize, Integer deleteStatus) {
         Example example = new Example(Article.class);
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
 
         if (ArticleReviewStatus.isArticleStatusValid(status)) {
             criteria.andEqualTo("articleStatus", status);
+        }
+        if (categoryId != null) {
+            criteria.andEqualTo("categoryId", categoryId);
         }
         if (status != null && status.equals(ArticleReviewStatus.REVIEWING.type)) {
             criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type);
@@ -208,16 +252,22 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void deleteArticle(String articleId) {
+        // 删除已通过审核的文章, 还需删除gridFs和es中的数据
+        Integer articleStatus = articleMapper.selectByPrimaryKey(articleId).getArticleStatus();
+        if (ArticleReviewStatus.SUCCESS.type.equals(articleStatus)) {
+            // deleteArticleHtmlForGridFs(articleId);
+            elasticsearchTemplate.delete(ArticleEo.class, articleId);
+        }
         articleMapper.deleteByPrimaryKey(articleId);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void reReview(String articleId) {
-        Example example = new Example(Article.class);
         Article article = new Article();
-        article.setArticleStatus(ArticleReviewStatus.SUCCESS.type);
-        articleMapper.updateByExampleSelective(article, example);
+        article.setId(articleId);
+        article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
+        articleMapper.updateByPrimaryKeySelective(article);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -234,20 +284,12 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     @Override
     public void deleteArticle(String userId, String articleId) {
         Example articleExample = makeExampleCriteria(userId, articleId);
-
         Article pending = new Article();
         pending.setIsDelete(YesOrNo.YES.type);
-
-        // 删除未审核过的文章 -----> 直接设置is_delete = 1
+        // 删除未审核过的文章; 直接设置is_delete = 1
         int result = articleMapper.updateByExampleSelective(pending, articleExample);
         if (result != 1) {
             GraceException.display(ResponseStatusEnum.ARTICLE_DELETE_ERROR);
-        }
-        // 删除已通过审核的文章, 还需删除gridFs和es中的数据
-        Integer articleStatus = articleMapper.selectByPrimaryKey(articleId).getArticleStatus();
-        if (ArticleReviewStatus.SUCCESS.type.equals(articleStatus)) {
-            deleteArticleHtmlForGridFs(articleId);
-            elasticsearchTemplate.delete(ArticleEo.class, articleId);
         }
     }
 
@@ -280,7 +322,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         if (result != 1) {
             GraceException.display(ResponseStatusEnum.ARTICLE_WITHDRAW_ERROR);
         }
-        elasticsearchTemplate.delete(ArticleEo.class, articleId);
+        //elasticsearchTemplate.delete(ArticleEo.class, articleId);
 
     }
 
@@ -297,7 +339,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo("author", userId);
+        criteria.andEqualTo("authorId", userId);
         criteria.andEqualTo("id", articleId);
         return articleExample;
     }

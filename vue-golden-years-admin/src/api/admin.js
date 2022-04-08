@@ -6,9 +6,9 @@ import request from '@/utils/request'
  */
 export function getAdminList(params) {
   return request({
-    url: process.env.ADMIN_API + '/admin/getList',
-    method: 'post',
-    data: params
+    url: process.env.ADMIN_API + '/admin/list',
+    method: 'get',
+    params
   })
 }
 
@@ -46,7 +46,6 @@ export function restPwdAdmin(params) {
 
 /**
  * 获取在线的管理员列表
- * @param params
  */
 export function getOnlineAdminList(params) {
   return request({

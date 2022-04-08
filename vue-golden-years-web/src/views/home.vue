@@ -1,6 +1,5 @@
 <template>
   <html>
-  <body>
   <head>
     <meta charset="utf-8">
     <title>流金岁月</title>
@@ -8,7 +7,7 @@
     <meta name="description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-
+  <body>
   <!--顶栏开始-->
   <header
       :class="isVisible?'header-navigation slideDown':'header-navigation slideUp'"
@@ -16,7 +15,6 @@
     <nav>
       <el-row :gutter="20">
         <el-col :span="16">
-
           <div class="logo">
             <router-link to="/">
               <a href="javascript:void(0);">流金岁月博客</a>
@@ -51,13 +49,17 @@
 
             <li>
               <router-link to="/rank">
-                <a href="javascript:void(0);" :class="[saveTitle === '/tag' ? 'title' : '']">排行</a>
+                <a href="javascript:void(0);" :class="[saveTitle === '/rank' ? 'title' : '']">排行</a>
               </router-link>
             </li>
-
+            <li>
+              <router-link to="/yiqing">
+                <a href="javascript:void(0);" :class="[saveTitle === '/yiqing' ? 'title' : '']">疫情</a>
+              </router-link>
+            </li>
             <li>
               <router-link to="/ssr">
-                <a href="javascript:void(0);" :class="[saveTitle === '/time' ? 'title' : '']">订阅</a>
+                <a href="javascript:void(0);" :class="[saveTitle === '/ssr' ? 'title' : '']">订阅</a>
               </router-link>
             </li>
           </ul>
@@ -76,7 +78,6 @@
               </p>
             </div>
           </div>
-
           <el-dropdown @command="handleCommand" class="userInfoAvatar">
         <span class="el-dropdown-link">
           <el-badge class="item" :hidden="!isLogin">
@@ -87,7 +88,6 @@
                  :src="defaultAvatar" alt="">
           </el-badge>
         </span>
-
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item command="login" v-show="!isLogin">登录</el-dropdown-item>
               <el-dropdown-item command="goUserHomePage" v-show="isLogin">个人中心</el-dropdown-item>
@@ -96,7 +96,9 @@
           </el-dropdown>
         </el-col>
         <el-col :span="3">
-          <el-button type="primary" icon="el-icon-edit" size="small" @click="goWritingCenter">创作中心</el-button>
+          <el-button icon="el-icon-edit" size="small" style="background: #920784; color: white"
+                     @click="goWritingCenter">创作中心
+          </el-button>
         </el-col>
       </el-row>
     </nav>
@@ -115,12 +117,11 @@
 
   <!--底部-->
   <footer>
-    Copyright © 2020 流金岁月 All Rights Reserved
-    <span class="padding-5">|</span><a target="_blank" href="https://beian.miit.gov.cn/">
-    豫ICP备2020030311号-1</a>
+    <p>
+      Copyright © 2020 流金岁月 All Rights Reserved &nbsp;流金岁月博客&nbsp;
+      <a href="https://beian.miit.gov.cn/"> 豫ICP备2020030311号-1</a>
+    </p>
   </footer>
-
-
   <!--回到顶部-->
   <div>
     <a href="javascript:void(0);" @click="returnTop"
@@ -135,6 +136,7 @@ import {mapMutations} from 'vuex';
 import {delCookie, getCookie} from "@/utils/cookie";
 import {authVerify, deleteUserAccessToken} from "@/api/user";
 import {timeAgo} from "@/utils/web";
+import {getUrlVars} from "@/utils/util";
 
 export default {
   name: "index",
@@ -143,19 +145,12 @@ export default {
   },
   data() {
     return {
-      //激活的折叠面板
-      activeNames: ['1'],
-      // 激活的标签
-      activeName: "0",
-      imageCropperShow: false,
-      imageCropperKey: 0,
       // 默认头像
       defaultAvatar: this.$SysConf.defaultAvatar,
-
       saveTitle: "",
       keyword: "",
       // 控制搜索框的弹出
-      showSearch: false,
+      showSearch: true,
       // 控制导航栏的弹出
       showHead: false,
       isCdTopVisible: false,
@@ -169,20 +164,6 @@ export default {
       //控制删除图标的显示
       icon: false,
       labelWidth: "100px",
-      userInfoRules: {
-        oldPwd: [
-          {required: true, message: '旧密码不能为空', trigger: 'blur'},
-          {min: 5, max: 20, message: '密码长度在5到20个字符'},
-        ],
-        newPwd: [
-          {required: true, message: '新密码不能为空', trigger: 'blur'},
-          {min: 5, max: 20, message: '密码长度在5到20个字符'},
-        ],
-        newPwd2: [
-          {required: true, message: '新密码不能为空', trigger: 'blur'},
-          {min: 5, max: 20, message: '密码长度在5到20个字符'},
-        ]
-      }
     };
   },
   mounted() {
@@ -213,7 +194,6 @@ export default {
     }
   },
   created() {
-
     this.getKeyword();
     this.setSize();
     this.getToken();
@@ -224,17 +204,12 @@ export default {
     //拿到vuex中的写的方法
     ...mapMutations(['setUserInfo', 'setLoginState']),
     // 搜索
-    search: function () {
+    search() {
       if (this.keyword === "" || this.keyword.trim() === "") {
-        this.$notify.error({
-          title: '错误',
-          message: "关键字不能为空",
-          type: 'success',
-          offset: 100
-        });
+        this.$refs.searchInput.focus();
         return;
       }
-      this.$router.push({path: "/list", query: {keyword: this.keyword}});
+      this.$router.push({path: "/", query: {keyword: this.keyword}});
     },
     getCurrentPageTitle() {
       this.saveTitle = window.location.pathname;
@@ -272,26 +247,11 @@ export default {
       this.$router.push("/center");
     },
 
-
-    //弹出选择图片框
-    checkPhoto() {
-      this.imageCropperShow = true
-    },
-
     timeAgo(dateTimeStamp) {
       return timeAgo(dateTimeStamp)
     },
-
-
-    close() {
-      this.imageCropperShow = false
-    },
-
-    submitForm(type) {
-    },
-
     getKeyword() {
-      let tempValue = decodeURI(this.getUrlVars()["keyword"]);
+      let tempValue = decodeURI(getUrlVars()["keyword"]);
       if (
           tempValue === null ||
           tempValue === undefined ||
@@ -305,9 +265,9 @@ export default {
       let token = getCookie("token")
       if (token !== null) {
         authVerify(token).then(response => {
-          if (response.data.success) {
+          if (response.success) {
             this.isLogin = true;
-            this.userInfo = response.data.data;
+            this.userInfo = response.data;
             this.setUserInfo(this.userInfo)
           } else {
             this.isLogin = false;
@@ -319,38 +279,19 @@ export default {
         this.isLogin = false;
         this.setLoginState(this.isLogin);
       }
-    },
-
-    /**
-     * 截取URL中的参数
-     * @returns {{}}
-     */
-    getUrlVars: function () {
-      const vars = {};
-      window.location.href.replace(
-          /[?&]+([^=&]+)=([^&#]*)/gi,
-          function (m, key, value) {
-            vars[key] = value;
-          }
-      );
-      return vars;
     }
     ,
-    clickSearchIco: function () {
-      if (this.keyword !== "") {
-        this.search();
-      }
+    clickSearchIco() {
+      this.search();
       this.showSearch = !this.showSearch;
-      // 获取焦点
-      this.$refs.searchInput.focus();
     },
-    openHead: function () {
+    openHead() {
       this.showHead = !this.showHead;
     },
-    returnTop: function () {
+    returnTop() {
       window.scrollTo(0, 0);
     },
-    userLogin: function () {
+    userLogin() {
       this.showLogin = true;
     },
 
@@ -396,7 +337,7 @@ export default {
       });
       window.open(routeData.href, '_self');
     },
-    closeLoginBox: function () {
+    closeLoginBox() {
       this.showLogin = false;
     },
   }
@@ -407,17 +348,8 @@ export default {
 html, body {
   height: 100%;
 }
-
-nav .logo {
-  color: #006cff;
-  text-decoration: none;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 60px;
-}
-
 #star_list li .title {
-  color: #00a7eb;
+  color: #920784;
 }
 
 .userInfoAvatar {
@@ -454,10 +386,6 @@ nav .logo {
   height: 100px;
 }
 
-.uploadImgBody :hover {
-  border: dashed 1px #00ccff;
-}
-
 .content {
   min-height: 100%;
 
@@ -465,21 +393,5 @@ nav .logo {
     padding-bottom: 180px;
     zoom: 1;
   }
-}
-
-footer {
-  padding: 10px;
-  margin-top: 280px;
-  color: #fff;
-  width: 100%;
-  position: absolute;
-  text-align: center;
-  line-height: 30px;
-  text-shadow: #000 0.1em 0.1em 0.1em;
-  font-size: 14px;
-}
-
-footer a, footer span {
-  color: #fff;
 }
 </style>

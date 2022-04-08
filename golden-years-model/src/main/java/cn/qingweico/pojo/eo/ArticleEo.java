@@ -19,7 +19,7 @@ public class ArticleEo {
    @Field
    private String title;
    @Field
-   private Integer categoryId;
+   private String categoryId;
    @Field
    private Integer articleType;
    @Field
@@ -27,8 +27,7 @@ public class ArticleEo {
    @Field
    private String summary;
    @Field
-   private String author;
+   private String authorId;
    @Field
    private Date createTime;
-
 }

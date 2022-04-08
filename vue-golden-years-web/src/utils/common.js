@@ -1,6 +1,4 @@
-import {Message} from 'element-ui'
-import showdown from 'showdown'
-import TurndownService from 'turndown'
+import showdownKatex from 'showdown-katex'
 //*********************************************************
 //                      全局状态码
 //*********************************************************
@@ -58,25 +56,23 @@ const FUNCTIONS = {
         }
     },
     /**
-     * 复制文字到剪切板
-     * @param text
-     */
-    copyText: text => {
-        const oInput = document.createElement('input')
-        oInput.value = text
-        document.body.appendChild(oInput)
-        oInput.select() // 选择对象
-        // 执行浏览器复制命令
-        document.execCommand('Copy')
-        oInput.className = 'oInput'
-        oInput.style.display = 'none'
-    },
-    /**
      * 将Markdown转成Html
      * @param text
      */
     markdownToHtml: text => {
-        let converter = new showdown.Converter();
+        let converter = new showdown.Converter({
+            tables: true,
+            extensions: [
+                showdownKatex({
+                    // maybe you want katex to throwOnError
+                    throwOnError: true,
+                    // disable displayMode
+                    displayMode: false,
+                    // change errorColor to blue
+                    errorColor: '#1500ff',
+                }),
+            ],
+        });
         return converter.makeHtml(text);
     },
     /**
@@ -84,8 +80,47 @@ const FUNCTIONS = {
      * @param text
      */
     htmlToMarkdown: text => {
-        let turnDownService = new TurndownService()
-        return turnDownService.turndown(text)
+        var turndownService = new TurndownService()
+
+        // 用于提取代码语言
+        turndownService.addRule('CodeBlock', {
+            filter: function (node, options) {
+                return (
+                    node.nodeName === 'PRE' &&
+                    node.firstChild &&
+                    node.firstChild.nodeName === 'CODE'
+                )
+            },
+            replacement: function (content, node, options) {
+                var className = node.firstChild.getAttribute('class') || ''
+                var language = (className.match(/language-(\S+)/) || [null, ''])[1]
+                return (
+                    '\n\n' + options.fence + language + '\n' +
+                    node.firstChild.textContent +options.fence
+                )
+            }
+        })
+
+        // 提取数学公式进行转换
+        turndownService.addRule('multiplemath', {
+            filter (node, options) {
+                return node.classList.contains('vditor-math')
+            },
+            replacement (content, node, options) {
+                console.log("中间内容", node.firstChild.textContent)
+                return `$$ \n${node.firstChild.textContent}\n $$`
+            }
+        })
+
+        var turndownPluginGfm = require('turndown-plugin-gfm')
+        var gfm = turndownPluginGfm.gfm
+        var tables = turndownPluginGfm.tables
+        var strikethrough = turndownPluginGfm.strikethrough
+        turndownService.use(gfm)
+        turndownService.use([tables, strikethrough])
+
+        console.log("转换后", turndownService.turndown(text))
+        return turndownService.turndown(text)
     },
     /**
      * 将Html转成Markdown文件
@@ -93,23 +128,15 @@ const FUNCTIONS = {
      * @param text：正文
      */
     htmlToMarkdownFile: (title, text) => {
-
         title = title || "默认标题"
-
-        let turnDownService = new TurndownService()
-
-        let markdown = turnDownService.turndown(text)
-
-        //创建一个blob对象, file的一种
+        let turndownService = new TurndownService()
+        let markdown = turndownService.turndown(text)
+        //创建一个blob对象,file的一种
         let blob = new Blob([markdown])
-
         let link = document.createElement('a')
-
         link.href = window.URL.createObjectURL(blob)
-
-        // 配置下载的文件名
+        //配置下载的文件名
         link.download = title + '.md'
-
         link.click()
     },
 }

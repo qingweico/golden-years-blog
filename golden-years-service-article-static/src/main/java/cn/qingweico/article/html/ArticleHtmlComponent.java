@@ -16,8 +16,8 @@ import java.io.OutputStream;
  * @author zqw
  * @date 2021/9/15
  */
-@Component
 @Slf4j
+@Component
 public class ArticleHtmlComponent {
 
     @Resource

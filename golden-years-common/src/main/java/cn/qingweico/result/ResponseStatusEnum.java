@@ -12,6 +12,7 @@ public enum ResponseStatusEnum {
     // 200
     SUCCESS(200, true, "操作成功!"),
     LOGIN_SUCCESS(200, true, "登陆成功!"),
+    LOGOUT_SUCCESS(200, true, "退出成功!"),
     WELCOME(200, true, "见到你真的很高兴! 您的信息未完善,待完善后方可进行发文、评论等操作!"),
     DELETE_SUCCESS(200, true, "删除成功!"),
     ACCOUNT_ILLEGAL(200, true, "您的账号因违规操作被封!"),
@@ -22,19 +23,20 @@ public enum ResponseStatusEnum {
     SMS_SEND_SUCCESS(200, true, "短信已发送至您手机,请查看!"),
     FREEZE_SUCCESS(200, true, "已冻结该用户!"),
     ACTIVATE_SUCCESS(200, true, "已激活该用户!"),
+    RESET_PASSWORD_SUCCESS(200, true, "重置密码成功!"),
     // fans
     FOLLOWED(200, true, "关注成功"),
     UNFOLLOWED(200, true, "取消关注成功"),
-    CANNOT_FOLLOW_ONESELF(200, true, "不能对自己进行此操作"),
 
     // article
     ARTICLE_REVIEW_PASS(200, true, "文章审核已通过!"),
     ARTICLE_REVIEW_FAIL(200, true, "文章审核未通过!"),
-    ARTICLE_PUBLISH_SUCCESS(200, true, "文章创建成功, 待审核通过后将在首页展示!"),
+    ARTICLE_PUBLISH_SUCCESS(200, true, "文章创建成功,待审核通过后将在首页展示!"),
     ARTICLE_RE_REVIEW_PASS(200, true, "文章可以开始重新审核!"),
     DELETE_HAS_WITHDRAW(200, true, "删除已撤回!"),
     ARTICLE_WITHDRAW_SUCCESS(200, true, "文章撤回成功!"),
     ARTICLE_DELETE_SUCCESS(200, true, "文章删除成功!"),
+    ARTICLE_ALTER_SUCCESS(200, true, "文章修改成功!"),
     // 50x
     FAILED(500, false, "操作失败!"),
     UN_LOGIN(501, false, "请登录后再继续操作!"),
@@ -49,16 +51,17 @@ public enum ResponseStatusEnum {
     FILE_UPLOAD_NULL_ERROR(510, false, "文件不能为空,请选择一个文件再上传!"),
     FILE_UPLOAD_FAILED(511, false, "文件上传失败!"),
     FILE_FORMATTER_FAILED(512, false, "文件图片格式不支持!"),
+    ILLEGAL_MOBILE_NUMBER_FORMAT(513, false, "手机号码格式错误!"),
     FILE_MAX_SIZE_ERROR(514, false, "仅支持2MB大小以下的图片上传!"),
     FILE_NOT_EXIST_ERROR(515, false, "你所查看的文件不存在!"),
     USER_STATUS_ERROR(516, false, "用户状态参数出错!"),
     USER_NOT_EXIST_ERROR(517, false, "用户不存在!"),
     INCORRECT_INFORMATION(518, false, "请检查您的信息!"),
     AUTH_FAIL(519, false, "用户不存在或者密码错误!"),
-    ILLEGAL_MOBILE_NUMBER_FORMAT(520, false, "手机号码格式错误!"),
-
+    PASSWORD_WRONG(520, false, "密码错误!"),
 
     // 自定义系统级别异常 54x
+    SYSTEM_DATE_PARSER_ERROR(540, false, "系统错误,日期解析出错!"),
     SYSTEM_INDEX_OUT_OF_BOUNDS(541, false, "系统错误,数组越界!"),
     SYSTEM_ARITHMETIC_BY_ZERO(542, false, "系统错误,无法除零!"),
     SYSTEM_NULL_POINTER(543, false, "系统错误,空指针!"),
@@ -68,21 +71,19 @@ public enum ResponseStatusEnum {
     SYSTEM_FILE_NOT_FOUND(547, false, "系统错误,文件未找到!"),
     SYSTEM_CLASS_CAST(548, false, "系统错误,类型强制转换错误!"),
     SYSTEM_PARSER_ERROR(549, false, "系统错误,解析出错!"),
-    SYSTEM_DATE_PARSER_ERROR(550, false, "系统错误,日期解析出错!"),
 
     // admin 管理系统 56x
-    ADMIN_USERNAME_NULL_ERROR(561, false, "管理员登录名不能为空!"),
-    ADMIN_USERNAME_EXIST_ERROR(562, false, "管理员登录名已存在!"),
-    ADMIN_NAME_NULL_ERROR(563, false, "管理员负责人不能为空!"),
-    ADMIN_PASSWORD_ERROR(564, false, "密码不能为空或者两次输入不一致!"),
+    CATEGORY_EXIST_ERROR(560, false, "文章分类已存在,请换一个分类名!"),
+    ADMIN_USERNAME_NULL_ERROR(561, false, "用户名不能为空!"),
+    ADMIN_USERNAME_EXIST_ERROR(562, false, "用户名已存在!"),
+    ADMIN_MOBILE_IS_PRESENT(563, false, "手机号已存在!"),
+    ADMIN_PASSWORD_ERROR(564, false, "密码错误!"),
     ADMIN_CREATE_ERROR(565, false, "添加管理员失败!"),
     ADMIN_PASSWORD_NULL_ERROR(566, false, "密码不能为空!"),
     ADMIN_NOT_EXIT_ERROR(567, false, "管理员不存在或密码错误!"),
-    VERIFICATION_CODE_ERROR(560, false, "验证码错误!"),
+    ADMIN_EMAIL_IS_PRESENT(560, false, "邮箱已存在!"),
     ADMIN_FACE_NULL_ERROR(568, false, "人脸信息不能为空!"),
     ADMIN_FACE_LOGIN_ERROR(569, false, "人脸识别失败,请重试!"),
-    CATEGORY_EXIST_ERROR(570, false, "文章分类已存在,请换一个分类名!"),
-
 
     // 创作中心 58x
     ARTICLE_COVER_NOT_EXIST_ERROR(580, false, "文章封面不存在,请选择一个!"),
@@ -91,20 +92,24 @@ public enum ResponseStatusEnum {
     ARTICLE_QUERY_PARAMS_ERROR(583, false, "文章列表查询参数错误!"),
     ARTICLE_DELETE_ERROR(584, false, "文章删除失败!"),
     ARTICLE_WITHDRAW_ERROR(585, false, "文章撤回失败!"),
-    ARTICLE_REVIEW_ERROR(585, false, "文章审核出错!"),
-    ARTICLE_ALREADY_READ_ERROR(586, false, "文章重复阅读!"),
+    ARTICLE_REVIEW_ERROR(586, false, "文章审核出错!"),
     ARTICLE_NOT_EXIST(587, false, "文章不存在!"),
 
 
     // 系统错误,未预期的错误 55x
-    SYSTEM_ERROR(555, false, "系统繁忙,请稍后再试!"),
-    SYSTEM_OPERATION_ERROR(556, false, "操作失败, 请重试!"),
-    SYSTEM_RESPONSE_NO_INFO(557, false, ""),
-    SYSTEM_REQUEST_REFUSE(588, false, "请求系统过于繁忙,请稍后再试!"),
-    REQUEST_PARAM_ERROR(600, false, "请求参数错误!"),
+    REQUEST_PARAM_ERROR(551, false, "请求参数错误!"),
+    SYSTEM_ERROR(552, false, "系统繁忙,请稍后再试!"),
+    SYSTEM_OPERATION_ERROR(553, false, "操作失败,请重试!"),
+    SYSTEM_RESPONSE_NO_INFO(554, false, ""),
+    SYSTEM_REQUEST_REFUSE(555, false, "请求系统过于繁忙,请稍后再试!"),
+
     // 人脸识别错误代码 60X
     FACE_VERIFY_TYPE_ERROR(600, false, "人脸比对验证类型不正确!"),
-    FACE_VERIFY_LOGIN_ERROR(601, false, "人脸登录失败!");
+    FACE_VERIFY_LOGIN_ERROR(601, false, "人脸登录失败!"),
+
+
+    // else
+    CANNOT_FOLLOW_ONESELF(602, false, "不能对自己进行此操作");
 
 
     /**

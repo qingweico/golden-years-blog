@@ -1,13 +1,11 @@
 <template>
   <div
       class="side-catalog"
-      :style="{height}"
-  >
+      :style="{height}">
     <div
         v-if="title"
-        class="side-catalog__title"
-    >
-      {{title}}
+        class="side-catalog__title">
+      {{ title }}
     </div>
     <div class="side-catalog__list">
       <div>
@@ -72,19 +70,14 @@
 <script>
 import debounce from "lodash.debounce";
 import throttle from "lodash.throttle";
+
 export default {
   name: "SideCatalog",
   props: {
     refList: {
       type: Array,
       default() {
-        return [
-          // {
-          //   title: 'name',
-          //   ref: 'refname', //f
-          //   level: 1,  //默认为1
-          // },
-        ];
+        return [];
       }
     },
     // 是否开启dom监听,dom有变化主动更新各个ref的offsetTop值
@@ -236,7 +229,7 @@ export default {
     scrollHandle() {
       // 点击title的滚动不触发
       if (this.itemClicking) return;
-      const { scrollTop, clientHeight, scrollHeight } = this.scrollToEle;
+      const {scrollTop, clientHeight, scrollHeight} = this.scrollToEle;
       // 到达顶部
       if (scrollTop === 0) {
         this.initActive();
@@ -322,7 +315,7 @@ export default {
         headlevel[item] = index + 1;
       });
       const childrenList = Array.from(
-          document.querySelectorAll(`${this.container}>*`)
+          document.querySelectorAll(`${this.container} > *`)
       );
       childrenList.forEach((item, index) => {
         const nodeName = item.nodeName.toLowerCase();

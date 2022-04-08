@@ -4,14 +4,14 @@
       <el-submenu :key="index" :index="index+''" v-if="checkShowOrHidden(item)">
         <template slot="title">
           <i v-if="item.parent.icon" :class="item.parent.icon"></i>
-          <span v-if="item.parent.name" slot="title">{{item.parent.name}}</span>
+          <span v-if="item.parent.name" slot="title">{{ item.parent.name }}</span>
         </template>
 
         <template v-for="child in item.sonItem" v-if="hasOneShowingChildren(child)">
-            <el-menu-item :index="child.url" :key="child.name" @click="goTo(child)">
-              <i v-if="child.icon" :class="child.icon"></i>
-              <span v-if="child.name" slot="title">{{child.name}}</span>
-            </el-menu-item>
+          <el-menu-item :index="child.url" :key="child.name" @click="goTo(child)">
+            <i v-if="child.icon" :class="child.icon"></i>
+            <span v-if="child.name" slot="title">{{ child.name }}</span>
+          </el-menu-item>
         </template>
       </el-submenu>
 
@@ -28,8 +28,8 @@ export default {
     routes: {
       type: Array
     },
-    items:{
-      type:Array
+    items: {
+      type: Array
     },
     isNest: {
       type: Boolean,
@@ -42,8 +42,8 @@ export default {
     }
   },
   methods: {
-    goTo: function(child) {
-      if(child.isJumpExternalUrl === 1) {
+    goTo: function (child) {
+      if (child.isJumpExternalUrl === 1) {
         window.open(child.url)
       } else {
         this.$router.push({path: child.url})

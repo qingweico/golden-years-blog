@@ -1,16 +1,22 @@
 <template>
   <article>
     <div class="blank"></div>
+
+    <h1 class="t_nav" v-if="searchModel">
+      <span>慢生活, 不是懒惰, 放慢速度不是拖延时间, 而是让我们在生活中寻找到平衡</span>
+      <a href="/" class="n1">网站首页</a>
+      <a href="/" class="n2">搜索</a>
+    </h1>
+
     <!--blog context begin-->
     <div class="blogs_box">
       <div
           v-for="item in newBlogData"
           :key="item.id"
           class="blogs"
-          data-scroll-reveal="enter bottom over 1s"
-      >
+          data-scroll-reveal="enter bottom over 1s">
         <h3 class="blog_title">
-          <a href="javascript:void(0);" @click="goToDetail(item)">{{ item.title }}</a>
+          <a href="javascript:void(0);" @click="goToDetail(item)" v-html="item.title"></a>
         </h3>
 
         <span class="blog_pic">
@@ -25,7 +31,7 @@
 
             <li class="author" v-if="item.authorVO">
               <span class="iconfont">&#xe60f;</span>
-              <a href="javascript:void(0);" @click="goToAuthor(item.author)">{{ item.authorVO.nickname }}</a>
+              <a href="javascript:void(0);" @click="goToAuthor(item.authorVO.id)">{{ item.authorVO.nickname }}</a>
             </li>
             <li class="category_name" v-if="item.categoryId">
               <span class="iconfont">&#xe603;</span>
@@ -53,7 +59,7 @@
       </div>
 
       <div class="isEnd">
-        <div class="loadContent" @click="loadContent" v-if="!isEnd&&!loading">点击加载更多</div>
+        <div class="loadContent" @click="loadContent" v-if="!isEnd&&!loading && currentPage < totalPage">点击加载更多</div>
         <div class="lds-css ng-scope" v-if="!isEnd&&loading">
           <div class="load-container">
             <div class="container">
@@ -65,7 +71,8 @@
             </div>
           </div>
         </div>
-        <span v-if="isEnd">我也是有底线的</span>
+        <span v-if="!loading && total && currentPage >= totalPage">我也是有底线的</span>
+        <span v-if="total === 0 && !loading">什么内容也没有</span>
       </div>
     </div>
     <!--blog context end-->
@@ -73,7 +80,8 @@
 
       <!--类别云-->
       <CategoryCloud></CategoryCloud>
-
+      <!--标签云-->
+      <TagCloud></TagCloud>
       <!-- 友情链接-->
       <Link></Link>
     </div>
@@ -82,27 +90,32 @@
 
 <script>
 import {Loading} from 'element-ui';
-import {getBlogCategory, getNewBlog} from "@/api";
+import {getBlogCategory, getNewBlog, searchBlogByES} from "@/api";
 import Link from "@/components/Link";
 import CategoryCloud from "@/components/CategoryCloud";
+import TagCloud from "@/components/TagCloud";
 
 export default {
   name: "index",
   components: {
     Link,
+    TagCloud,
     CategoryCloud
   },
   data() {
     return {
       loadingInstance: null,
+      searchModel: false,
       // 最新文章
       newBlogData: [],
       keyword: "",
-      category: "",
+      categoryId: "",
+      tagId: "",
       categoryList: [],
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 5,
       total: 0,
+      totalPage: 0,
       // 是否到底底部了
       isEnd: false,
       // 是否正在加载
@@ -113,11 +126,29 @@ export default {
     // 注册scroll事件并监听
     this.loading = false;
   },
+  watch: {
+    $route(to, from) {
+      this.keyword = this.$route.query.keyword;
+      let categoryId = this.$route.query.categoryId;
+      if (categoryId !== undefined && categoryId !== "") {
+        this.categoryId = categoryId;
+      }
+      let tagId = this.$route.query.tagId;
+      if (tagId !== undefined && tagId !== "") {
+        this.tagId = tagId;
+      }
+      if (this.keyword !== "" || this.categoryId !== "" || this.tagId !== "") {
+        this.searchModel = true;
+      }
+      this.newBlogList();
+    }
+  },
   created() {
+    getBlogCategory().then((response) => {
+      this.categoryList = response.data;
+    });
     // 获取最新博客
     this.newBlogList();
-    this.getBlogCategory();
-
   },
   methods: {
     // 跳转到文章详情
@@ -138,37 +169,38 @@ export default {
       })
       let params = new URLSearchParams();
       params.append("keyword", this.keyword);
-      params.append("category", this.category);
+      params.append("category", this.categoryId);
+      params.append("tag", this.tagId);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
-      getNewBlog(params).then(response => {
-        if (response.data.success) {
-          that.newBlogData = response.data.data.rows;
-          that.total = response.data.data.records;
-          that.currentPage = response.data.data.currentPage;
-        }
+      searchBlogByES(params).then(response => {
+        that.newBlogData = response.data.rows;
+        that.total = response.data.records;
+        that.totalPage = response.data.totalPage;
+        that.currentPage = response.data.currentPage;
         that.loadingInstance.close();
-      }, function () {
+      }, () => {
         that.isEnd = true;
         that.loadingInstance.close();
       });
     },
-    loadContent: function () {
+    loadContent() {
       let that = this;
       that.loading = true;
       that.currentPage = that.currentPage + 1;
       let params = new URLSearchParams();
       params.append("keyword", this.keyword);
-      params.append("category", this.category);
+      params.append("category", this.categoryId);
+      params.append("tag", this.tagId);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
-      getNewBlog(params).then(response => {
-        if (response.data.success && response.data.data.rows.length > 0) {
+      searchBlogByES(params).then(response => {
+        if (response.data.rows.length > 0) {
           that.isEnd = false;
-          let newData = that.newBlogData.concat(response.data.data.rows);
+          let newData = that.newBlogData.concat(response.data.rows);
           that.newBlogData = newData;
-          that.total = response.data.data.records;
-          that.currentPage = response.data.data.currentPage;
+          that.total = response.data.records;
+          that.currentPage = response.data.currentPage;
           // 全部加载完毕
           if (newData.length < that.pageSize) {
             that.isEnd = true;
@@ -177,18 +209,6 @@ export default {
           that.isEnd = true;
         }
         that.loading = false;
-      });
-    },
-    // 获得所有文章类别
-    getBlogCategory() {
-      getBlogCategory().then((response) => {
-        if (response.data.success) {
-          this.categoryList = response.data.data;
-        } else {
-          this.$message.error(response.data.msg);
-        }
-      }, () => {
-        this.$message.error('网络超时');
       });
     },
     getBlogCategoryNameById(categoryId) {
@@ -205,8 +225,6 @@ export default {
         query: {id: authorId}
       });
       window.open(routeData.href, '_self');
-    },
-    goToBlogListGroupByCategory() {
     }
   },
 
@@ -302,7 +320,6 @@ export default {
     -webkit-transform: scaleY(1.0);
   }
 }
-
 
 .iconfont {
   font-size: 15px;

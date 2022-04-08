@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="all-charts-wrapper">
-      <div class="sex-lable">男女比例</div>
+      <div class="sex-label">男女比例</div>
       <!-- 男女比例 -->
       <div class="sex-wrapper">
 
@@ -35,7 +35,7 @@
         <div id="sexPie" style="width: 800px;height:400px;padding: 15px;"></div>
       </div>
 
-      <div class="city-lable">地域分布</div>
+      <div class="city-label">地域分布</div>
       <div class="map-wrapper">
         <div id="mapChart" style="width: 800px;height:500px;"></div>
       </div>
@@ -69,13 +69,9 @@ export default {
       let params = new URLSearchParams();
       params.append("userId", this.userInfo.id);
       queryRatioByRegion(params).then(res => {
-        if (res.data.success) {
-          let list = res.data.data;
-          // 初始化图表
-          this.createMapChart(list);
-        } else {
-          this.$message.error(res.data.msg);
-        }
+        let list = res.data;
+        // 初始化图表
+        this.createMapChart(list);
       });
     },
     // 查询男女比例
@@ -83,24 +79,20 @@ export default {
       let params = new URLSearchParams();
       params.append("userId", this.userInfo.id);
       queryRatio(params).then(res => {
-        if (res.data.success) {
-          let manCounts = res.data.data.manCounts;
-          let womanCounts = res.data.data.womanCounts;
+        let manCounts = res.data.manCounts;
+        let womanCounts = res.data.womanCounts;
 
-          this.manCounts = manCounts;
-          this.womanCounts = womanCounts;
+        this.manCounts = manCounts;
+        this.womanCounts = womanCounts;
 
-          let manPercent = this.getPercent(manCounts / (manCounts + womanCounts)) + "%";
-          $("#manPercent").css({width: manPercent});
-          let womanPercent = this.getPercent(womanCounts / (manCounts + womanCounts)) + "%";
-          $("#womanPercent").css({width: womanPercent});
+        let manPercent = this.getPercent(manCounts / (manCounts + womanCounts)) + "%";
+        $("#manPercent").css({width: manPercent});
+        let womanPercent = this.getPercent(womanCounts / (manCounts + womanCounts)) + "%";
+        $("#womanPercent").css({width: womanPercent});
 
-          // 初始化图表
-          this.createHistogram(manCounts, womanCounts);
-          this.createPie(manCounts, womanCounts);
-        } else {
-          this.$message.error(res.data.msg);
-        }
+        // 初始化图表
+        this.createHistogram(manCounts, womanCounts);
+        this.createPie(manCounts, womanCounts);
       });
     },
     // 转换百分数
@@ -177,7 +169,7 @@ export default {
     // 根据不同地域粉丝数,在地图上展示
     createMapChart(list) {
 
-      let data = [
+      const data = [
         // 4个直辖市
         {name: '北京', value: 1000}, {name: '天津', value: 596},
         {name: '上海', value: 102}, {name: '重庆', value: 6320},
@@ -268,29 +260,17 @@ export default {
   margin-left: 20px;
   background-color: white;
   padding-bottom: 40px;
-
   display: flex;
   flex-direction: column;
 }
 
-.title-box {
-  padding: 20px 0 10px 30px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.title-word {
-  color: #c9394a;
-  font-size: 20px;
-}
-
 .all-charts-wrapper {
   padding: 20px 30px;
-
   align-self: center;
 }
 
 /* 横向线型图 */
-.sex-lable {
+.sex-label {
   font-size: 16px;
   color: #222;
 }
@@ -383,7 +363,7 @@ export default {
 }
 
 /* 地图地域显示 */
-.city-lable {
+.city-label {
   font-size: 16px;
   color: #222;
   margin-top: 20px;

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.n3r.idworker.Sid;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
@@ -34,6 +35,7 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
     @Resource
     private Sid sid;
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void saveUserLoginLog(String userId) {
         final UserAgent userAgent = UserAgent.parseUserAgentString(ServletReqUtils.getRequest().getHeader("User-Agent"));
@@ -57,7 +59,6 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         userLoginLog.setBrowser(browser);
         userLoginLog.setLoginTime(timestamp);
         userLoginLogMapper.insert(userLoginLog);
-        log.info("saveUserLoginLog...");
     }
 
     @Override
@@ -75,7 +76,6 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         c.setTime(new Date());
         c.add(Calendar.DATE, - 7);
         criteria.andGreaterThanOrEqualTo("loginTime", c.getTime());
-
         PageHelper.startPage(page, pageSize);
         List<UserLoginLog> userLoginLogList = userLoginLogMapper.selectByExample(loginLogExample);
         return setterPagedGrid(userLoginLogList, page);

@@ -32,7 +32,6 @@ public class UploadServiceImpl implements UploaderService {
 
     @Override
     public String uploadFastDfs(MultipartFile file, String fileExtName) throws IOException {
-
         StorePath storePath = fastFileStorageClient.uploadFile(file.getInputStream(),
                 file.getSize(),
                 fileExtName, null);

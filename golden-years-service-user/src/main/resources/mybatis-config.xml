@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!--打印SQL语句-->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <!--开启延迟加载-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--开启驼峰命名转换-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--使用列标签(数据库字段)替换列别名(查询字段的时候给字段自定义的名称) 默认为true-->
+        <setting name="useColumnLabel" value="true"/>
+    </settings>
+    <plugins>
+        <plugin interceptor="cn.qingweico.api.config.split.DynamicDataSourceInterceptor"/>
+    </plugins>
+</configuration>

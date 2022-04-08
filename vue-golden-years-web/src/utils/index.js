@@ -65,3 +65,11 @@ export function formatTime(time, option) {
         )
     }
 }
+// TODO 实现首页搜索自动补全功能
+class TrieNode {
+    data = {};
+    children = [];
+    constructor (data) {
+        this.data = data ;
+    }
+}

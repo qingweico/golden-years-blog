@@ -1,6 +1,7 @@
 package cn.qingweico.validate;
 
 import cn.qingweico.util.CheckUtils;
+import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -12,7 +13,7 @@ import javax.validation.ConstraintValidatorContext;
 public class CheckUrlValidate implements ConstraintValidator<CheckUrl, String> {
 
     @Override
-    public boolean isValid(String url, ConstraintValidatorContext context) {
-        return CheckUtils.checkUrl(url.trim());
+    public boolean isValid(String linkUrl, ConstraintValidatorContext context) {
+        return CheckUtils.checkUrl(linkUrl.trim());
     }
 }

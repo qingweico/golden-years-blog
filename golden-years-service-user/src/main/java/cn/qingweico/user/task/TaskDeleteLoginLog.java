@@ -2,8 +2,7 @@ package cn.qingweico.user.task;
 
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.util.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,13 +10,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import javax.annotation.Resource;
 
 /**
- * @author:qiming
- * @date: 2021/10/24
+ * @author zqw
+ * @date 2021/10/24
  */
 @Configuration
 @EnableScheduling
+@Slf4j
 public class TaskDeleteLoginLog {
-    final Logger log = LoggerFactory.getLogger(TaskDeleteLoginLog.class);
     @Resource
     private LoginLogService loginLogService;
 

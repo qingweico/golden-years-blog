@@ -3,13 +3,18 @@ package cn.qingweico.article.service.impl;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.CategoryMapper;
+import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Category;
+import cn.qingweico.pojo.Tag;
+import cn.qingweico.pojo.vo.ArticleArchiveVO;
+import cn.qingweico.pojo.vo.ArticleClassifyVO;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
+import cn.qingweico.pojo.vo.IndexArticleVO;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
@@ -20,7 +25,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,9 +42,13 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     @Resource
     private CategoryMapper categoryMapper;
 
+    @Resource
+    private TagMapper tagMapper;
+
     @Override
     public PagedGridResult queryPortalArticleList(String keyword,
-                                                  Integer category,
+                                                  String category,
+                                                  String tag,
                                                   Integer page,
                                                   Integer pageSize) {
 
@@ -50,20 +59,43 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         if (StringUtils.isNotBlank(keyword)) {
             criteria.andLike("title", "%" + keyword + "%");
         }
-        if (category != null) {
+        if (StringUtils.isNotBlank(category)) {
             criteria.andEqualTo("categoryId", category);
         }
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
+
+        if (StringUtils.isNotBlank(tag)) {
+            List<Article> result = new ArrayList<>();
+            // 标签筛选
+            for (Article article : list) {
+                String tags = article.getTags();
+                String[] tagIds = tags.replace("[", "")
+                        .replace("]", "")
+                        .replace("\"", "")
+                        .split(",");
+                for (String tagId : tagIds) {
+                    if (tag.equals(tagId)) {
+                        result.add(article);
+                        break;
+                    }
+                }
+                list = result;
+            }
+        }
         return setterPagedGrid(list, page);
     }
 
     @Override
-    public List<Article> queryHotNews() {
+    public PagedGridResult queryHotArticle(Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
-        setDefaultArticleExample(example);
-        PageHelper.startPage(1, 5);
-        return articleMapper.selectByExample(example);
+        Example.Criteria criteria = example.createCriteria();
+        example.orderBy("influence").desc();
+        criteria.andEqualTo("isDelete", YesOrNo.NO.type);
+        criteria.andEqualTo("articleStatus", ArticleReviewStatus.SUCCESS.type);
+        PageHelper.startPage(page, pageSize);
+        List<Article> list = articleMapper.selectByExample(example);
+        return setterPagedGrid(list, page);
     }
 
     @Override
@@ -71,9 +103,13 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
                                                     Integer page,
                                                     Integer pageSize) {
 
+        return getPagedGridResult(author, page, pageSize);
+    }
+
+    private PagedGridResult getPagedGridResult(String author, Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo("author", author);
+        criteria.andEqualTo("authorId", author);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, page);
@@ -82,9 +118,13 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     @Override
     public PagedGridResult queryGoodArticleListOfAuthor(String author) {
         Example example = new Example(Article.class);
-        example.orderBy("createTime").desc();
-        Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo("author", author);
+        example.orderBy("influence").desc();
+        Example.Criteria criteria = example.createCriteria();
+        ;
+        criteria.andEqualTo("isDelete", YesOrNo.NO.type);
+        criteria.andEqualTo("articleStatus", ArticleReviewStatus.SUCCESS.type);
+        criteria.andEqualTo("authorId", author);
+        // 默认只展示5篇热门文章
         PageHelper.startPage(1, 5);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, 1);
@@ -92,25 +132,40 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
     @Override
     public ArticleDetailVO queryDetail(String articleId) {
-
         Article article = new Article();
         article.setId(articleId);
         article.setIsAppoint(YesOrNo.NO.type);
         article.setIsDelete(YesOrNo.NO.type);
         article.setArticleStatus(ArticleReviewStatus.SUCCESS.type);
-
         Article result = articleMapper.selectOne(article);
-
         if (result != null) {
+            List<Tag> tagList = getTagList(result);
             ArticleDetailVO detailVO = new ArticleDetailVO();
+            detailVO.setTagList(tagList);
             BeanUtils.copyProperties(result, detailVO);
             return detailVO;
         }
         return null;
     }
 
+    private List<Tag> getTagList(Article article) {
+        // 获取文章标签
+        String tags = article.getTags();
+        List<Tag> tagList = new ArrayList<>();
+        String[] tagIds = tags.replace("[", "")
+                .replace("]", "")
+                .replace("\"", "")
+                .split(",");
+
+        for (String id : tagIds) {
+            Tag tag = tagMapper.selectByPrimaryKey(id);
+            tagList.add(tag);
+        }
+        return tagList;
+    }
+
     @Override
-    public Integer queryEachCategoryCount(Integer categoryId) {
+    public Integer queryEachCategoryArticleCount(String categoryId) {
         Article article = new Article();
         article.setCategoryId(categoryId);
         articleMapper.select(article);
@@ -120,7 +175,6 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     private Example.Criteria setDefaultArticleExample(Example example) {
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
-
         criteria.andEqualTo("isDelete", YesOrNo.NO.type);
         criteria.andEqualTo("isAppoint", YesOrNo.NO.type);
         criteria.andEqualTo("articleStatus", ArticleReviewStatus.SUCCESS.type);
@@ -143,8 +197,18 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public List<Article> getArticleListByTime(String yearAndMonth, Integer page, Integer pageSize) {
-        return articleMapper.getArticleByTime(yearAndMonth, page, pageSize);
+    public List<ArticleArchiveVO> getArticleListByTime(String yearAndMonth, Integer page, Integer pageSize) {
+        List<Article> articleList = articleMapper.getArticleByTime(yearAndMonth, page, pageSize);
+        List<ArticleArchiveVO> archiveVOList = new ArrayList<>();
+        for (Article article : articleList) {
+            ArticleArchiveVO articleArchiveVO = new ArticleArchiveVO();
+            articleArchiveVO.setArticleId(article.getId());
+            BeanUtils.copyProperties(article, articleArchiveVO);
+            List<Tag> tagList = getTagList(article);
+            articleArchiveVO.setTagList(tagList);
+            archiveVOList.add(articleArchiveVO);
+        }
+        return archiveVOList;
     }
 
     @Override
@@ -154,13 +218,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
     @Override
     public PagedGridResult timeline(String userId, Integer page, Integer pageSize) {
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo("authorId", userId);
-
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
-        return setterPagedGrid(list, page);
+        return getPagedGridResult(userId, page, pageSize);
     }
 
     @Override
@@ -171,6 +229,15 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         criteria.andEqualTo("categoryId", categoryId);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
-        return setterPagedGrid(list, page);
+        List<ArticleClassifyVO> articleClassifyVOList = new ArrayList<>();
+        for (Article article : list) {
+            ArticleClassifyVO articleClassifyVO = new ArticleClassifyVO();
+            List<Tag> tagList = getTagList(article);
+            BeanUtils.copyProperties(article, articleClassifyVO);
+            articleClassifyVO.setTagList(tagList);
+            articleClassifyVO.setArticleId(article.getId());
+            articleClassifyVOList.add(articleClassifyVO);
+        }
+        return setterPagedGrid(articleClassifyVOList, page);
     }
 }

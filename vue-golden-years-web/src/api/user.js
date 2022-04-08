@@ -3,7 +3,7 @@ import request from '../utils/request'
 /** 验证用户token*/
 export function authVerify(params) {
     return request({
-        url: process.env.USER_API + '/auth/verify/' + params,
+        url: process.env.USER_API + '/auth/verify?token=' + params,
         method: 'get',
     })
 }

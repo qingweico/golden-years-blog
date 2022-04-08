@@ -31,9 +31,6 @@ const app = {
     setOpenNotification: (state, openNotificationDialogVisible) => {
       state.openNotificationDialogVisible = openNotificationDialogVisible
     },
-    setBlogForm: (state, blogForm) => {
-      state.blogForm = blogForm
-    },
   },
   actions: {
     ToggleSideBar: ({ commit }) => {

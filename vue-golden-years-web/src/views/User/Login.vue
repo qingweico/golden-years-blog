@@ -110,13 +110,12 @@ export default {
     };
     // 校验手机号
     const validateMobile = (rule, value, callback) => {
-          if (!value || new RegExp(/^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/).test(value)) {
-            callback();
-          } else {
-            callback(new Error("您的手机号码格式不正确!"));
-          }
-        }
-    ;
+      if (!value || new RegExp(/^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/).test(value)) {
+        callback();
+      } else {
+        callback(new Error("您的手机号码格式不正确!"));
+      }
+    };
     return {
       activeName: 'acc_login',
       accountLoginForm: {
@@ -173,31 +172,24 @@ export default {
         } else {
           let mobile = this.phoneLoginForm.phone;
           getSmsCode(mobile).then((response) => {
-            if (response.data.success) {
-              let timer = setInterval(() => {
-                this.time--;
-                this.sendCodeBtn = `${this.time}s后重新发送`;
-                this.sendDisabled = true;
-                if (this.time === 0) {
-                  this.sendDisabled = false;
-                  this.sendCodeBtn = "发送验证码";
-                  this.time = 60;
-                  clearTimeout(timer);
-                }
-              }, 1000);
-              this.$message.success(response.data.msg);
-              this.$notify.success({
-                title: '验证码',
-                message: response.data.data,
-                offset: 100
-              });
-            } else {
-              this.$message.error(response.data.msg);
-            }
-          }, () => {
-            this.$message.error("网络错误!");
+            let timer = setInterval(() => {
+              this.time--;
+              this.sendCodeBtn = `${this.time}s后重发`;
+              this.sendDisabled = true;
+              if (this.time === 0) {
+                this.sendDisabled = false;
+                this.sendCodeBtn = "发送验证码";
+                this.time = 60;
+                clearTimeout(timer);
+              }
+            }, 1000);
+            this.$message.success(response.msg);
+            this.$notify.success({
+              title: '验证码',
+              message: response.data,
+              offset: 100
+            });
           })
-
         }
       })
     },
@@ -215,21 +207,19 @@ export default {
     accountLogin() {
       this.$refs.accountLoginForm.validate((valid) => {
         if (valid) {
+          this.loading = true;
           let params = {};
           params.auth = this.accountLoginForm.username;
           params.password = this.accountLoginForm.password;
           localLogin(params).then(response => {
-            if (response.data.success) {
-              // 跳转到首页
-              let token = response.data.data;
-              this.$message.success(response.data.msg);
-              setCookie("token", token, 7);
-              this.$router.push('/');
-            } else {
-              this.$message.error(response.data.msg);
-            }
+            // 跳转到首页
+            let token = response.data;
+            this.$message.success(response.msg);
+            setCookie("token", token, 7);
+            this.$router.push('/');
+            this.loading = false;
           }, () => {
-            this.$message.error("网络错误!");
+            this.loading = false;
           });
         }
       })
@@ -237,39 +227,38 @@ export default {
     phoneLogin() {
       this.$refs.phoneLoginForm.validate((valid) => {
         if (valid) {
+          this.loading = true;
           let params = {};
           params.mobile = this.phoneLoginForm.phone;
           params.smsCode = this.phoneLoginForm.smsCode;
           phoneLogin(params).then(response => {
-            if (response.data.success) {
-              let userStatus = response.data.data.userStatus;
-              let token = response.data.data.token;
-              if (userStatus === 0) {
-                // 用户未激活
-                this.$confirm('是否完善您的个人信息', '确认信息', {
-                  distinguishCancelAndClose: true,
-                  confirmButtonText: '等会再说',
-                  cancelButtonText: '完善个人信息'
-                }).then(() => {
-                  // 直接去向首页
-                  setCookie("token", token, 7);
-                  this.$router.push('/');
-                }).catch(() => {
-                  // 储存token
-                  setCookie("token", token, 7);
-                  // 去向个人中心完善信息
-                  this.$router.push('/center/account');
-                });
-              } else if (userStatus === 1) {
-                // 用户已激活
-                this.$message.success(response.data.msg);
+            let userStatus = response.data.userStatus;
+            let token = response.data.token;
+            if (userStatus === 0) {
+              // 用户未激活
+              this.$confirm('是否完善您的个人信息', '确认信息', {
+                distinguishCancelAndClose: true,
+                confirmButtonText: '等会再说',
+                cancelButtonText: '完善个人信息'
+              }).then(() => {
+                // 直接去向首页
                 setCookie("token", token, 7);
                 this.$router.push('/');
-              }
-            } else {
-              this.$message.error(response.data.msg);
+              }).catch(() => {
+                // 储存token
+                setCookie("token", token, 7);
+                // 去个人中心完善信息
+                this.$router.push('/center/account');
+              });
+            } else if (userStatus === 1) {
+              // 用户已激活
+              this.$message.success(response.data.msg);
+              setCookie("token", token, 7);
+              this.$router.push('/');
             }
+            this.loading = false;
           }, () => {
+            this.loading = false;
             this.$message.error("网络错误!");
           });
         }
@@ -286,6 +275,7 @@ export default {
 $dark_gray: #889aa4;
 $light_gray: #eee;
 .login-container {
+  background-image: url("../../assets/background.svg");
   position: absolute;
   left: 0;
   right: 0;

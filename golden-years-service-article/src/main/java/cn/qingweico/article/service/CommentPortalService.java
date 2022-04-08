@@ -44,7 +44,7 @@ public interface CommentPortalService {
      * 查询作者文章下所有的评论
      *
      * @param userId 作家id
-     * @param page     分页起始
+     * @param page   分页起始
      * @param pageSize 每页显示的数目
      * @return PagedGridResult
      */
@@ -55,11 +55,10 @@ public interface CommentPortalService {
     /**
      * 作者删除评论
      *
-     * @param userId  作者id
      * @param commentId 评论id
      */
 
-    void delete(String userId, String commentId);
+    void delete(String commentId);
 
 
 }

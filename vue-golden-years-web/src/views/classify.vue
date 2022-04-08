@@ -1,7 +1,13 @@
 <template>
   <div>
-    <div class="pagebg classify"></div>
+    <div class="page_bg classify"></div>
     <div class="container">
+      <h1 class="t_nav">
+        <span></span>
+        <a href="/" class="n1">网站首页</a>
+        <a href="javascript:void(0);" class="n2">分类</a>
+      </h1>
+
       <div class="sortBox">
         <div class="time">
           <div class="block">
@@ -22,36 +28,47 @@
             <el-timeline>
               <el-timeline-item
                   v-for="item in articleListCategory"
-                  :key="item.uid"
+                  :key="item.articleId"
                   :timestamp="item.createTime"
                   placement="top">
                 <el-card>
-                  <h4 @click="goToList('blogContent', item)" class="itemTitle">{{ item.title }}</h4>
+                  <h4 @click="goToList('detail', item)" class="itemTitle">{{ item.title }}</h4>
                   <br>
                   <el-tag
                       class="elTag"
                       type="success"
                       v-if="item.categoryId != null"
                       @click="goToList('category', item)"
-                  >{{ item.categoryId }}
+                  >{{ getBlogCategoryNameById(item.categoryId) }}
                   </el-tag>
                   <el-tag
                       class="elTag"
-                      v-for="tagItem in item.tagList"
-                      v-if="tagItem != null"
-                      :key="tagItem.uid"
-                      style="margin-left: 3px;"
-                      @click="goToList('tag', tagItem)"
-                      type="warning"
-                  >{{ tagItem.content }}
+                      v-for="tag in item.tagList"
+                      v-if="tag != null"
+                      :key="tag.id"
+                      style="margin-left: 3px; color: white"
+                      :color="tag.color"
+                      @click="goToList('tag', tag)"
+                  >{{ tag.name }}
                   </el-tag>
                 </el-card>
               </el-timeline-item>
             </el-timeline>
           </div>
-        </div>
+          <!--分页-->
+          <div class="block paged">
+            <el-pagination
+                @current-change="handleCurrentChange"
+                :current-page.sync="currentPage"
+                :page-size="pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="records">
+            </el-pagination>
+          </div>
 
-        <el-empty description="暂无该类别的文章" v-else style="background-color: white;"></el-empty>
+        </div>
+        <el-empty :description=" '暂无' + getBlogCategoryNameById(selectedBlogId)  +  '类别的文章' " v-else
+                  style="background-color: white;"></el-empty>
       </div>
     </div>
   </div>
@@ -79,22 +96,17 @@ export default {
   },
   created() {
     getBlogCategory().then(response => {
-      if (response.data.success) {
-        let activities = response.data.data;
-        let result = [];
-        for (let i = 0; i < activities.length; i++) {
-          let dataForDate = {
-            categoryName: activities[i].name,
-            id: activities[i].id
-          };
-          result.push(dataForDate);
-        }
+      let activities = response.data;
+      let result = [];
+      for (let i = 0; i < activities.length; i++) {
+        let dataForDate = {
+          categoryName: activities[i].name,
+          id: activities[i].id
+        };
+        result.push(dataForDate);
         this.activities = result;
-
         // 默认选择第一个
         this.getBlogListByCategoryId(activities[0].id);
-      } else {
-        this.$message.error(response.data.msg);
       }
     });
 
@@ -107,64 +119,60 @@ export default {
       params.append("userId", this.getUserInfo().id);
       params.append("categoryId", id);
       params.append("page", this.currentPage);
-      params.append("pageSize", 10);
+      params.append("pageSize", this.pageSize);
       getBlogListByCategoryId(params).then(response => {
-        if (response.data.success) {
-          let content = response.data;
-          this.articleListCategory = content.data.rows;
-          this.currentPage = content.data.currentPage;
-          this.pageSize = content.data.pageSize;
-          this.totalPage = content.data.totalPage;
-          this.records = content.data.records;
-        }
-        else {
-          this.$message.error(response.data.msg);
-        }
+        let content = response.data;
+        this.articleListCategory = content.rows;
+        this.currentPage = content.currentPage;
+        this.totalPage = content.totalPage;
+        this.records = content.records;
       });
+    },
+
+    getBlogCategoryNameById(categoryId) {
+      let categoryList = this.activities;
+      for (let i = 0; i < categoryList.length; i++) {
+        if (categoryId === categoryList[i].id) {
+          return categoryList[i].categoryName;
+        }
+      }
     },
     // 跳转到搜索详情页
     goToList(type, entity) {
       switch (type) {
         case "tag": {
-          // 标签uid
+          // 标签
           let routeData = this.$router.resolve({
             path: "/list",
-            query: {tagUid: entity.uid}
+            query: {tagId: entity.id}
           });
           window.open(routeData.href, "_blank");
         }
           break;
-        case "blogSort": {
+          // 类别
+        case "category": {
           let routeData = this.$router.resolve({
             path: "/list",
-            query: {sortUid: entity.blogSort.uid}
+            query: {categoryId: entity.categoryId}
           });
           window.open(routeData.href, "_blank");
         }
           break;
-        case "author": {
+          // 详情
+        case "detail": {
           let routeData = this.$router.resolve({
-            path: "/list",
-            query: {author: entity.author}
+            path: "/detail",
+            query: {id: entity.articleId}
           });
           window.open(routeData.href, "_blank");
-        }
-          break;
-
-        case "blogContent": {
-          if (entity.type === "0") {
-            let routeData = this.$router.resolve({
-              path: "/info",
-              query: {blogOid: entity.oid}
-            });
-            window.open(routeData.href, "_blank");
-          } else if (entity.type === "1") {
-            window.open(entity.outsideLink, '_blank');
-          }
         }
           break;
       }
-    }
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.getBlogListByCategoryId();
+    },
   }
 };
 </script>
@@ -180,11 +188,11 @@ export default {
 }
 
 .sortBoxSpan:hover {
-  color: #409eff;
+  color: #920784;
 }
 
 .sortBoxSpanSelect {
-  color: #409eff;
+  color: #920784;
 }
 
 .itemTitle {
@@ -192,7 +200,7 @@ export default {
 }
 
 .itemTitle:hover {
-  color: #409eff;
+  color: #920784;
 }
 
 .elTag {

@@ -35,7 +35,7 @@ public class CorsConfig {
         corsConfiguration.addAllowedOrigin("*");
         // 允许携带cookie进行跨域
         corsConfiguration.setAllowCredentials(true);
-        // 2 任意路径都允许第1步配置的跨域
+        // 2任意路径都允许第1步配置的跨域
         source.registerCorsConfiguration("/**", corsConfiguration);
         return new CorsWebFilter(source);
     }

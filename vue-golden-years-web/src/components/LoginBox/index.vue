@@ -24,7 +24,9 @@
                       :disabled="loginType.password"></el-input>
           </el-form-item>
           <el-row class="btn">
-            <el-button class="loginBtn" type="primary" @click="startLogin" :disabled="loginType.password">登录</el-button>
+            <el-button class="loginBtn" type="primary" @click="startLogin" :loading="loading"
+                       :disabled="loginType.password">登录
+            </el-button>
             <el-button class="registerBtn" type="info" @click="goRegister" :disabled="loginType.password">注册</el-button>
           </el-row>
         </div>
@@ -94,7 +96,7 @@ export default {
   name: "share",
   data() {
     return {
-      loading: null,
+      loading: false,
       option: {
         fullscreen: true,
         lock: true
@@ -122,7 +124,7 @@ export default {
         authName: [
           {required: true, message: '请输入用户名', trigger: 'blur'},
           {min: 2, message: "用户名长度大于等于 2 个字符", trigger: "blur"},
-          {max: 10, message: "用户名长度不能大于 10 个字符", trigger: "blur"}
+          {max: 20, message: "用户名长度不能大于 20 个字符", trigger: "blur"}
         ],
         password: [
           {required: true, message: "请输入密码", trigger: "blur"},
@@ -136,41 +138,41 @@ export default {
   created() {
   },
   methods: {
-    startLogin: function () {
+    startLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
+          this.loading = true;
           let params = {};
           params.auth = this.loginForm.authName;
           params.password = this.loginForm.password;
           localLogin(params).then(response => {
-            if (response.data.success) {
-              // 跳转到首页
-              let token = response.data.data;
-              setCookie("token", token, 7);
-              this.$message.success(response.data.msg);
-              this.$router.replace('/');
-              window.location.reload()
-            } else {
-              this.$message.error(response.data.msg);
-            }
+            this.loading = false;
+            // 跳转到首页
+            let token = response.data;
+            setCookie("token", token, 7);
+            this.$message.success(response.msg);
+            this.$router.replace('/');
+            window.location.reload();
+            this.loading = false;
           }, () => {
+            this.loading = false;
             this.$message.error("网络错误!");
           });
         }
       });
     },
-    goRegister: function () {
+    goRegister () {
       router.replace("/login");
     },
 
-    goAuth: function (source) {
+    goAuth() {
       this.loading = Loading.service({
         lock: true,
         text: '加载中……',
         background: 'rgba(0, 0, 0, 0.7)'
       })
     },
-    closeLogin: function () {
+    closeLogin() {
       this.$emit("closeLoginBox", "");
     }
   }

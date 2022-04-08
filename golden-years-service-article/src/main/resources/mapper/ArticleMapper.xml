@@ -16,6 +16,7 @@
 		<result column="comment_counts" jdbcType="INTEGER" property="commentCounts"/>
 		<result column="mongo_file_id" jdbcType="VARCHAR" property="mongoFileId"/>
 		<result column="is_delete" jdbcType="INTEGER" property="isDelete"/>
+		<result column="tags" jdbcType="CLOB" property="tags"/>
 		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
 		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
 		<result column="content" jdbcType="LONGVARCHAR" property="content"/>

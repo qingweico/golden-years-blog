@@ -8,7 +8,6 @@ import lombok.Data;
  */
 @Data
 public class AdminLoginBO {
-
     private String username;
     private String password;
     private String verifyCode;

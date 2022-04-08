@@ -2,7 +2,7 @@
 
 <configuration>
     <!-- 指定日志文件的存储地址,使用绝对路径 -->
-    <property name="LOG_HOME" value="E:/logs/golden-years/service-admin"/>
+    <property name="LOG_HOME" value="C:/logs/golden-years/service-admin"/>
 
     <!-- Console 输出设置 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

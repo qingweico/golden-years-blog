@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface FaceBase64Client {
 
    /**
-    *
-    * @param faceId
-    * @return
+    * 获取人脸图像的base64编码
+    * @param faceId 人脸id
+    * @return GraceJsonResult
     */
    @GetMapping("readFace64InGridFS")
    GraceJsonResult getFaceBase64(@RequestParam("faceId")String faceId);

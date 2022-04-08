@@ -10,8 +10,9 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 public class SaveCategoryBO {
-   private Integer id;
+   private String id;
    @NotBlank(message = "分类名不能为空")
    private String name;
    private String oldName;
+   private String description;
 }

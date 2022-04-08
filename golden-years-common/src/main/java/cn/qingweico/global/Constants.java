@@ -39,6 +39,7 @@ public class Constants {
     public final static String FILE_SUFFIX_JPG = "jpg";
     public final static String FILE_SUFFIX_JPEG = "jpeg";
     public final static String FILE_SUFFIX_PNG = "png";
+    public final static String FILE_SUFFIX_BLOB = "blob";
     /**
      * 文件名后缀-doc
      */

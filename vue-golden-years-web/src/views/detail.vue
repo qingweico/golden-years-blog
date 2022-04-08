@@ -26,9 +26,10 @@
               <span class="iconfont">&#xe603;</span>
               <a
                   href="javascript:void(0);"
-                  @click="goToSortList(articleDetail.categoryId)"
-              >{{ articleDetail.categoryId ? getBlogCategoryNameById(articleDetail.categoryId) : "" }}</a>
+                  @click="goToCategoryList(articleDetail.categoryId)">
+                {{ articleDetail.categoryId ? getBlogCategoryNameById(articleDetail.categoryId) : "" }}</a>
             </li>
+
             <li class="createTime">
               <span class="iconfont">&#xe606;</span>
               {{ articleDetail.createTime }}
@@ -43,31 +44,68 @@
             </li>
           </ul>
         </div>
+        <div class="tags">
+          <el-tag
+              :key="tag.id"
+              v-for="tag in articleDetail.tagList"
+              :hit="false"
+              :color="tag.color"
+              href="javascript:void(0);"
+              @click="goToTagList(tag.id)"
+              target="_blank"
+              effect="plain" style="color: white;margin-right: 10px"
+              :disable-transitions="false">
+            {{ tag.name }}
+          </el-tag>
+        </div>
         <div
             class="news_con ck-content"
             v-html="blogContent"
             v-highlight
-            @click="imageChange"
-        >{{ blogContent }}
+            @click="imageChange">
         </div>
       </div>
-      <div class="news_pl">
-        <h2>文章评论</h2>
-        <ul>
-          <CommentBox
-              :userInfo="userInfo"
-              @submit-box="submitBox"
-              :showCancel="showCancel"
-              :articleId="articleDetail.id"></CommentBox>
 
-          <div class="message_infos">
-            <CommentList :comments="comments"></CommentList>
-            <el-empty description="还没有评论，快来抢沙发吧!" v-if="comments.length === 0"></el-empty>
+      <!-- 分享点赞和收藏 -->
+      <div class="left-social">
+        <div class="share-title">
+          <span class="share-words">分享</span>
+        </div>
+        <div class="back-line"></div>
+        <div class="social-line" @click="shareWeiBo">
+          <img src="@/assets/social/weibo.png" class="social-pic" alt/>
+        </div>
+        <div class="social-line" @click="shareDouBan">
+          <img src="@/assets/social/douban.png" class="social-pic" alt/>
+        </div>
+        <div class="social-line" @click="shareQQ">
+          <img src="@/assets/social/qq.png" class="social-pic" alt/>
+        </div>
+        <div class="social-line" @click="shareQZone">
+          <img src="@/assets/social/qzone.png" class="social-pic" alt/>
+        </div>
+        <div class="social-line" @click="shareWeChat2">
+          <div class="social-share" data-wechat-qrcode-title="请打开微信扫一扫"
+               data-disabled="google,twitter,facebook,douban,qzone,qq,weibo,tencent,linkedin,diandian">
+            <img src="@/assets/social/wechat.png" class="social-pic" alt/>
           </div>
-        </ul>
+        </div>
       </div>
-      <!--分页-->
-      <div class="block paged" v-if="comments.length">
+
+
+      <div class="news_pl">
+        <Comment
+            v-model="data"
+            :user="currentUser"
+            :before-submit="submit"
+            :before-like="like"
+            :before-delete="deleteComment"
+            :upload-img="uploadImg"
+            :props="props"
+        />
+      </div>
+      <!--评论分页-->
+      <div class="block paged" v-if="data.length">
         <el-pagination
             @current-change="handleCurrentChange"
             :current-page.sync="currentPage"
@@ -77,29 +115,71 @@
         </el-pagination>
       </div>
     </div>
+
+    <!-- 右侧导航栏 -->
     <div class="sidebar2" v-if="showSidebar">
       <side-catalog
           :class="vueCategory"
           v-bind="catalogProps">
       </side-catalog>
     </div>
+
   </article>
 </template>
 <script>
 import {getBlogById} from "@/api";
 import {getBlogCategory} from "@/api";
-import CommentList from "../components/CommentList";
-import CommentBox from "../components/CommentBox";
 import {Loading} from "element-ui";
 import Sticky from "@/components/Sticky";
 import SideCatalog from '@/components/VueSideCatalog'
 import {getCommentList, publishComment} from "@/api/comment";
-
-
+import Comment from 'vue-juejin-comment'
+import {mapGetters} from "vuex";
+import { EXAMPLE_DATA } from '@/data'
 export default {
   name: "detail",
   data() {
+    const users = [
+      {
+        name: 'Up&Up',
+        avatar: require('../assets/image/avatar1.jpg'),
+        author: true,
+      },
+      {
+        name: '我叫白云',
+        avatar: require('../assets/image/comment.png'),
+      },
+      {
+        name: '我叫黑土',
+        avatar: require('../assets/image/avatar3.jpg'),
+      },
+      {
+        name: 'NARUTO',
+        avatar: require('../assets/image/avatar2.jpg'),
+      },
+    ]
     return {
+      // 评论列表
+      data: [],
+      props: {
+        id: '_id',
+        content: 'content',
+        imgSrc: 'imgSrc',
+        children: 'childrenComments',
+        likes: 'likes',
+        liked: 'liked',
+        reply: 'reply',
+        createAt: 'createAt',
+        user: 'visitor',
+      },
+      currentUser: {
+        name: '',
+        avatar: '',
+        author: true,
+      },
+      users,
+      wrapStyle: '',
+
       // 目录列表数
       catalogSum: 0,
       showStickyTop: false,
@@ -118,22 +198,25 @@ export default {
       loadingInstance: null,
       showCancel: false,
       submitting: false,
-      comments: [],
       articleId: this.$route.query.id,
       currentPage: 1,
       pageSize: 10,
       totalPages: 0,
       records: 0,
       toInfo: {},
-      userInfo: {},
+      userInfo: this.$store.state.user.userInfo,
       blogId: null,
       articleDetail: {},
       dialogPictureVisible: false,
       dialogImageUrl: "",
+
+
+      defaultAvatar: this.$SysConf.defaultAvatar,
     };
   },
   computed: {
-    vueCategory: function () {
+    ...mapGetters(['getUserPhoto']),
+    vueCategory() {
       if (!this.showStickyTop && this.showSideCatalog) {
         return 'catalog'
       }
@@ -149,10 +232,9 @@ export default {
     },
   },
   components: {
-    CommentList,
-    CommentBox,
     SideCatalog,
-    Sticky
+    Sticky,
+    Comment
   },
   watch: {
     $route(to, from) {
@@ -166,11 +248,9 @@ export default {
       params.append("articleId", this.blogId);
     }
     getBlogById(params).then(response => {
-      if (response.data.success) {
-        this.articleDetail = response.data.data;
-        document.title = this.articleDetail.title
-        this.getCommentList();
-      }
+      this.articleDetail = response.data;
+      document.title = this.articleDetail.title
+      this.getCommentList();
       setTimeout(() => {
         that.blogContent = this.articleDetail.content
         that.loadingInstance.close();
@@ -187,9 +267,9 @@ export default {
       that.showSideCatalog = winScrollHeight > after;
       after = winScrollHeight;
       if (docHeight === winHeight + winScrollHeight) {
-        if (that.comments.length >= that.records) {
-          /**无限加载action**/
-        }
+        // if (that.comments.length >= that.records) {
+        //   /**无限加载action**/
+        // }
       }
     })
 
@@ -202,24 +282,21 @@ export default {
     }
   },
   created() {
+    this.addData(1);
     this.getCommentList();
     this.loadingInstance = Loading.service({
       fullscreen: true,
-      text: "正在努力加载中~"
+      text: "正在努力加载中"
     });
     this.blogId = this.$route.query.id;
     // 屏幕大于950px的时候, 显示侧边栏
     this.showSidebar = document.body.clientWidth > 950;
     getBlogCategory().then(res => {
-      if (res.data.success) {
-        this.articleCategoryList = res.data.data;
-      } else {
-        this.$message.error(res.data.msg);
-      }
+      this.articleCategoryList = res.data;
     });
   },
   methods: {
-    handleCurrentChange: function (val) {
+    handleCurrentChange(val) {
       this.currentPage = val;
       this.getCommentList();
     },
@@ -231,51 +308,137 @@ export default {
         }
       }
     },
-    goToCategoryList() {
+    goToCategoryList(categoryId) {
+      this.$router.push({path: "/", query: {categoryId: categoryId}});
+    },
+    goToTagList() {
     },
     goToAuthor() {
     },
-    submitBox(e) {
-      console.log(e);
-      let params = {};
-      params.articleId = e.articleId;
-      params.commentUserId = e.commentUserId;
-      params.content = e.content;
-      params.fatherId = e.fatherId;
-      publishComment(params).then(response => {
-        if (response.data.status) {
-          this.$notify({
-            title: "成功",
-            message: "评论成功",
-            type: "success",
-          });
-        } else {
-          this.$notify.error({
-            title: "错误",
-            message: response.data
-          });
-        }
-        this.getCommentList();
-      });
+
+    // // ###################### 评论 ######################
+    // addComment(comment, parent, add) {
+    //   let newComment = {};
+    //   let info = this.userInfo;
+    //   let isLogin = this.$store.state.user.isLogin
+    //   if (!isLogin) {
+    //     this.$notify.info({
+    //       title: '提示',
+    //       message: '登录后才可以评论',
+    //     });
+    //     return;
+    //   }
+    //   console.log(comment)
+    //   let params = {};
+    //   params.content = comment.content;
+    //   params.reply = comment.reply;
+    //   params.articleId = this.articleId;
+    //   params.fatherId = 0;
+    //   params.commentUserId = info.id;
+    //   publishComment(params).then(response => {
+    //     this.$notify({
+    //       title: "成功",
+    //       message: "评论成功",
+    //       type: "success",
+    //     });
+    //     this.getCommentList();
+    //   });
+    //   //需调用 add 函数, 并传入 newComment 对象
+    //   add(newComment)
+    // },
+
+
+
+    //
+    // deleteComment(comment, parent) {
+    //   // ...
+    // },
+    // likeComment(comment) {
+    //   // ...
+    // },
+    // uploadOrCopyImg({file, callback}) {
+    //   // ...
+    //   let imgUrl = {};
+    //   callback(imgUrl) // 图片地址必传
+    // },
+    async submit(newComment, parent, add) {
+      const res = await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ newComment, parent })
+        }, 300)
+      })
+
+      add(Object.assign(res.newComment, { _id: new Date().getTime() }))
+
+      console.log('addComment: ', res)
     },
+
+    async like(comment) {
+      const res = await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(comment)
+        }, 0)
+      })
+
+      console.log('likeComment: ', res)
+    },
+
+    async uploadImg({ file, callback }) {
+      const res = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.readAsDataURL(file)
+
+        reader.onload = () => {
+          resolve(reader.result)
+        }
+
+        reader.onerror = () => {
+          reject(reader.error)
+        }
+      })
+
+      callback(res)
+      console.log('uploadImg： ', res)
+    },
+
+    async deleteComment(comment, parent) {
+      const res = await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ comment, parent })
+        }, 300)
+      })
+
+      console.log('deleteComment: ', res)
+    },
+
+    changeUser() {
+      const users = this.users
+      const index = users.findIndex((c) => c.name === this.currentUser.name)
+
+      this.currentUser = users[index === users.length - 1 ? 0 : index + 1]
+      this.$refs.comment.scrollTo({ left: 0, top: 0, behavior: 'smooth' })
+    },
+
+    addData(times) {
+      setTimeout(() => {
+        this.data = new Array(times).fill(EXAMPLE_DATA).flat(Infinity)
+      }, 0)
+    },
+
     getCommentList() {
       let params = new URLSearchParams();
       params.append("articleId", this.articleId);
       params.append("page", this.currentPage);
-      params.append("pageSize",10);
+      params.append("pageSize", this.pageSize);
       getCommentList(params).then(response => {
-        if (response.data.success) {
-          let content = response.data.data;
-          this.comments = content.rows;
-          this.currentPage = content.currentPage;
-          this.totalPages = content.totalPages;
-          this.records = content.records;
-        } else {
-          this.$message.error(response.data.msg);
-        }
+        let content = response.data;
+        this.currentPage = content.currentPage;
+        this.totalPages = content.totalPages;
+        this.records = content.records;
       })
     },
-    imageChange: function (e) {
+    imageChange(e) {
       let type = e.target.localName;
       if (type === "img") {
         this.dialogPictureVisible = true;
@@ -283,16 +446,55 @@ export default {
       }
     },
     // 切割字符串
-    subText: function (str, index) {
+    subText(str, index) {
       if (str.length < index) {
         return str;
       }
       return str.substring(0, index) + "...";
-    }
+    },
+
+    // #######################  社交分享 #######################
+    shareWeiBo() {
+      let weiBoShareUrl = 'http://v.t.sina.com.cn/share/share.php';
+      // 参数url设置分享的内容链接|默认当前页location, 可选参数
+      weiBoShareUrl += '?url=' + encodeURIComponent(document.location);
+      // 参数title设置分享的标题|默认当前页标题, 可选参数
+      weiBoShareUrl += '&title=' + encodeURIComponent(document.title);
+      weiBoShareUrl += '&source=' + encodeURIComponent('');
+      weiBoShareUrl += '&sourceUrl=' + encodeURIComponent('');
+      // 参数content设置页面编码gb2312|utf-8, 可选参数
+      weiBoShareUrl += '&content=' + 'utf-8';
+      // 参数pic设置图片链接|默认为空, 可选参数
+      weiBoShareUrl += '&pic=' + encodeURIComponent('');
+      window.open(weiBoShareUrl, '_blank');
+    },
+    shareDouBan() {
+      let douBanShareUrl = 'http://shuo.douban.com/!service/share?';
+      douBanShareUrl += 'href=' + encodeURIComponent(location.href);      //分享的链接
+      douBanShareUrl += '&name=' + encodeURIComponent(document.title);    //分享的标题
+      window.open(douBanShareUrl, '_blank');
+    },
+    shareQQ() {
+      let qqShareUrl = 'https://connect.qq.com/widget/shareqq/iframe_index.html?';
+      qqShareUrl += 'url=' + encodeURIComponent(location.href);           //分享的链接
+      qqShareUrl += '&title=' + encodeURIComponent(document.title);       //分享的标题
+      window.open(qqShareUrl, '_blank');
+    },
+    shareQZone() {
+      let qzoneShareUrl = 'https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?';
+      qzoneShareUrl += 'url=' + encodeURIComponent(document.location);
+      qzoneShareUrl += '&title=' + encodeURIComponent(document.title);
+      window.open(qzoneShareUrl, '_blank');
+    },
+    shareWeChat2() {
+      let target_url = 'http://zixuephp.net/inc/qrcode_img.php?url=' + document.location.href;
+      target_url = 'http://zixuephp.net/inc/qrcode_img.php?url=http://www.itzixi.com';
+      window.open(target_url, 'weixin', 'height=320, width=320');
+    },
   }
 };
 </script>
-<style>
+<style rel="stylesheet/scss" lang="scss" scoped>
 .emoji-panel-wrap {
   box-sizing: border-box;
   border: 1px solid #cccccc;
@@ -359,10 +561,55 @@ export default {
 .line-style--active {
   background: currentColor;
 }
-.paged {
-  text-align: center;
-  margin-top: 60px;
-  margin-bottom: 20px;
+
+/**分享**/
+.left-social {
+  float: right;
+  display: flex;
+  width: 420px;
+  margin-bottom: 40px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center
 }
 
+.share-title {
+  flex-wrap: nowrap;
+  margin-bottom: 18px;
+  align-self: center;
+}
+
+.share-words {
+  display: inline-block;
+  padding: 0 10px;
+  width: 50px;
+}
+
+.back-line {
+  border-top: 1px solid white;
+  position: relative;
+  top: -27px;
+  z-index: -2;
+}
+
+.social-line {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: row;
+  margin-right: 10px;
+}
+
+.social-pic {
+  width: 38px;
+  height: 38px;
+}
+
+.social-words {
+  vertical-align: middle;
+  padding-left: 12px;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 </style>

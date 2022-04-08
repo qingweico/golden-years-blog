@@ -13,6 +13,21 @@ export function welcome() {
 }
 
 /**
+ * 截取URL中的参数
+ * @returns {{}}
+ */
+export function getUrlVars() {
+    const vars = {};
+    window.location.href.replace(
+        /[?&]+([^=&]+)=([^&#]*)/gi,
+        function (m, key, value) {
+            vars[key] = value;
+        }
+    );
+    return vars;
+}
+
+/**
  * 触发 window.resize
  */
 export function triggerWindowResizeEvent() {

@@ -3,16 +3,20 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.mapper.CategoryMapper;
 import cn.qingweico.admin.service.CategoryService;
 import cn.qingweico.api.service.BaseService;
+import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Category;
+import cn.qingweico.util.PagedGridResult;
+import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,23 +33,29 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void createCategory(Category category) {
-        int res = categoryMapper.insert(category);
-        if (res != 1) {
+        String id = sid.nextShort();
+        category.setId(id);
+        category.setStatus(YesOrNo.YES.type);
+        category.setCreateTime(new Date());
+        category.setUpdateTime(new Date());
+        if (categoryMapper.insert(category) > 0) {
+            String key = RedisConf.REDIS_ARTICLE_CATEGORY;
+            refreshCache(key);
+        } else {
             GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
-
-        // 更新缓存
-        redisOperator.del(RedisConf.REDIS_ARTICLE_CATEGORY);
     }
 
     @Override
     public void modifyCategory(Category category) {
-        int res = categoryMapper.updateByPrimaryKey(category);
-        if (res != 1) {
+        category.setUpdateTime(new Date());
+        if (categoryMapper.updateByPrimaryKeySelective(category) > 0) {
+            String key = RedisConf.REDIS_ARTICLE_CATEGORY;
+            refreshCache(key);
+        } else {
             GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
-        // 更新缓存
-        redisOperator.del(RedisConf.REDIS_ARTICLE_CATEGORY);
+
     }
 
     @Override
@@ -62,7 +72,21 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     }
 
     @Override
-    public List<Category> queryCategoryList() {
-        return categoryMapper.selectAll();
+    public PagedGridResult queryCategoryList(Integer page, Integer pageSize) {
+        Example example = new Example(Category.class);
+        example.orderBy("createTime").desc();
+        PageHelper.startPage(page, pageSize);
+        List<Category> list = categoryMapper.selectByExample(example);
+        return setterPagedGrid(list, page);
+    }
+
+    @Override
+    public void deleteCategory(String categoryId) {
+        if (categoryMapper.deleteByPrimaryKey(categoryId) > 0) {
+            String key = RedisConf.REDIS_ARTICLE_CATEGORY;
+            refreshCache(key);
+        } else {
+            GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
     }
 }

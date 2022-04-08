@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="AppUserMapper" >
-  <resultMap id="BaseResultMap" type="cn.qingweico.pojo.AppUser" >
+<mapper namespace="cn.qingweico.user.mapper.UserMapper" >
+  <resultMap id="BaseResultMap" type="cn.qingweico.pojo.User" >
     <id column="id" property="id" jdbcType="VARCHAR" />
     <result column="mobile" property="mobile" jdbcType="VARCHAR" />
     <result column="nickname" property="nickname" jdbcType="VARCHAR" />

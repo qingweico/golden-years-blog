@@ -7,7 +7,7 @@ const getters = {
   name: state => state.user.name,
   roles: state => state.user.roles,
   menu: state => state.user.menu,
-  buttonMap: state => state.user.buttonMap,
+  user: state => state.user.userInfo,
 
   operaColumnExpand: (state) =>
     state.networkDisk.operaColumnExpand !== null

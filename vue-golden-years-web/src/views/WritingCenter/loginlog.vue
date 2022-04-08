@@ -68,17 +68,11 @@ export default {
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getLoginLogList(params).then(response => {
-        if (response.data.success) {
-          let content = response.data.data;
-          this.logList = content.rows;
-          this.total = content.records;
-          this.totalPage = content.totalPage;
-          this.currentPage = content.currentPage;
-        } else {
-          this.$message.error(response.data.msg);
-        }
-      }, () => {
-        this.$message.error("网络超时");
+        let content = response.data;
+        this.logList = content.rows;
+        this.total = content.records;
+        this.totalPage = content.totalPage;
+        this.currentPage = content.currentPage;
       })
     },
     handleCurrentChange(val) {
@@ -94,25 +88,7 @@ export default {
 </script>
 
 <style scoped>
-.main-page {
-  width: 980px;
-  margin-left: 20px;
-  padding-bottom: 40px;
-}
-
-.title-box {
-  background-color: white;
-  padding: 20px 0 10px 30px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.title-word {
-  color: #c9394a;
-  font-size: 20px;
-}
-
 .log-list-wrapper {
-  margin-top: 15px;
   background-color: #fff;
   padding: 20px 25px;
 }
@@ -149,10 +125,5 @@ export default {
 
 .log-single-line:hover {
   background-color: #f4f4f4;
-}
-.paged {
-  text-align: center;
-  margin-top:60px;
-  margin-bottom:20px;
 }
 </style>

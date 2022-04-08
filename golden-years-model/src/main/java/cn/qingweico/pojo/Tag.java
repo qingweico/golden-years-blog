@@ -2,7 +2,9 @@ package cn.qingweico.pojo;
 
 import lombok.Data;
 
+import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * @author zqw
@@ -11,6 +13,7 @@ import javax.persistence.Table;
 @Data
 @Table(name = "t_tag")
 public class Tag {
+    @Id
     private String id;
     /**
      * 标签名称
@@ -19,7 +22,7 @@ public class Tag {
     /**
      * 标签状态
      */
-    private String status;
+    private Integer status;
     /**
      * 标签颜色
      */
@@ -33,4 +36,13 @@ public class Tag {
      * 系统标签 - 默认为1; 否则为用户自定义标签
      */
     private Integer sys;
+    /**
+     * 标签的创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 标签的修改时间
+     */
+    private Date updateTime;
 }

@@ -10,7 +10,6 @@ import java.util.Date;
  */
 @Data
 public class CommentsVO {
-
     private String commentId;
     private String fatherId;
     private String articleId;
@@ -21,5 +20,4 @@ public class CommentsVO {
     private Date createTime;
     private String quoteUserNickname;
     private String quoteContent;
-
 }

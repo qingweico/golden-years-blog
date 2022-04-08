@@ -1,18 +1,18 @@
 <template>
   <div>
-    <div class="pagebg timer"></div>
+    <div class="page_bg timer"></div>
     <div class="container">
       <h1 class="t_nav">
         <a href="/" class="n1">网站首页</a>
         <a href="javascript:void(0);" class="n2">时间轴</a>
       </h1>
-      <div class="timebox">
+      <div class="time_box">
         <ul id="list" v-infinite-scroll="load">
           <li v-for="item in newBlogData" :key="item.id">
             <span>{{ formatDate(item.createTime) }}</span>
             <a
                 href="javascript:void(0);"
-                @click="goToInfo(item.id)"
+                @click="goToDetail(item.id)"
                 :title="item.title"
             >{{ item.title }}</a>
           </li>
@@ -48,23 +48,18 @@ export default {
     params.append("page", this.currentPage);
     params.append("pageSize", this.pageSize);
     timeline(params).then(response => {
-      console.log(response.data)
-      if (response.data.success) {
-        let content = response.data;
-        this.newBlogData = content.data.rows;
-        this.total = content.data.total;
-        this.currentPage = content.data.currentPage;
-        this.isEnd = false;
-      } else {
-        this.$message.error(response.data.msg);
-      }
+      let content = response.data;
+      this.newBlogData = content.rows;
+      this.total = content.total;
+      this.currentPage = content.currentPage;
+      this.isEnd = false;
 
     });
   },
   methods: {
     ...mapGetters(['getUserInfo']),
     // 跳转到文章详情
-    goToInfo(id) {
+    goToDetail(id) {
       let routeData = this.$router.resolve({
         path: "/detail",
         query: {id: id}
@@ -79,19 +74,19 @@ export default {
       params.append("page", (this.currentPage + 1).toString());
       params.append("pageSize", this.pageSize);
       timeline(params).then(response => {
-        if (response.data.success && response.data.data.rows.length > 0) {
+        if (response.data.rows.length > 0) {
           that.isEnd = false;
           let content = response.data;
-          that.newBlogData = that.newBlogData.concat(content.data.rows);
-          that.total = content.data.data.total;
-          that.currentPage = content.data.data.currentPage;
+          that.newBlogData = that.newBlogData.concat(content.rows);
+          that.total = content.total;
+          that.currentPage = content.currentPage;
         } else {
           that.isEnd = true;
         }
         loading = false;
       });
     },
-    formatDate: function (time) {
+    formatDate(time) {
       let date = new Date(time);
       let year = date.getFullYear();
       // 1~9月份加前缀0

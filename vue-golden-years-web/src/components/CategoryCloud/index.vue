@@ -1,6 +1,6 @@
 <template>
   <div class="cloud" v-if="categoryList.length > 0">
-    <h2 class="hometitle">类别</h2>
+    <h2 class="home_title">类别云</h2>
     <ul>
       <a v-for="item in categoryList" :key="item.id"
          @click="goToList(item.id)">{{ item.name }}({{ item.eachCategoryArticleCount }})</a>
@@ -20,9 +20,7 @@ export default {
   },
   created() {
     getBlogCategoryWithBlogAmount().then(response => {
-      if (response.data.success) {
-        this.categoryList = response.data.data;
-      }
+      this.categoryList = response.data;
     });
   },
   methods: {

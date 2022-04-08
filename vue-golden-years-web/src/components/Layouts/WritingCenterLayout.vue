@@ -51,21 +51,39 @@
                      :class="[saveTitle === '/center/comment' ? 'title' : '']">评论管理</a>
                 </router-link>
               </li>
+              <li class="menu-item">
+                <router-link to="/center/collect">
+                  <a href="javascript:void(0);"
+                     :class="[saveTitle === '/center/collect' ? 'title' : '']">我的收藏</a>
+                </router-link>
+              </li>
+              <li class="menu-item">
+                <router-link to="/center/history">
+                  <a href="javascript:void(0);"
+                     :class="[saveTitle === '/center/history' ? 'title' : '']">浏览历史</a>
+                </router-link>
+              </li>
             </ul>
           </li>
         </ul>
 
         <ul class="menu-list shadow">
-          <li class="">
+          <li>
             <div class="menu-title-wrapper">
               <i class=" el-icon-s-custom" style="font-size:20px"></i>
               <div class="menu-title">个人账号</div>
             </div>
             <ul>
               <li class="menu-item">
-                <router-link to="/center/account">
+                <router-link to="/center/profile">
                   <a href="javascript:void(0);"
-                     :class="[saveTitle === '/center/account' ? 'title' : '']">账号设置</a>
+                     :class="[saveTitle === '/center/profile' ? 'title' : '']">个人资料</a>
+                </router-link>
+              </li>
+              <li class="menu-item">
+                <router-link to="/center/account/setting">
+                  <a href="javascript:void(0);"
+                     :class="[saveTitle === '/center/account/setting' ? 'title' : '']">账户设置</a>
                 </router-link>
               </li>
               <li class="menu-item">
@@ -83,14 +101,13 @@
               <li class="menu-item">
                 <router-link to="/center/fansCharts">
                   <a href="javascript:void(0);"
-                     :class="[saveTitle === '/center/fansCharts' ? 'title' : '']">粉丝画像</a>
+                     :class="[saveTitle === '/center/fansCharts' ? 'title' : '']">粉丝统计</a>
                 </router-link>
               </li>
             </ul>
           </li>
         </ul>
       </div>
-
       <div>
         <router-view/>
       </div>
@@ -137,14 +154,14 @@ export default {
       let token = getCookie("token");
       if (token !== null) {
         authVerify(token).then(response => {
-          if (response.data.success) {
+          if (response.success) {
             this.isLogin = true;
-            this.userInfo = response.data.data;
+            this.userInfo = response.data;
             this.setUserInfo(this.userInfo)
           } else {
             this.isLogin = false;
             delCookie("token");
-            this.$message.error(response.data.msg);
+            this.$message.error(response.msg);
             this.$router.push('/');
           }
           this.setLoginState(this.isLogin);
@@ -203,7 +220,7 @@ body {
 }
 
 .head_wrapper .logo {
-  color: #006cff;
+  color: #920784;
   text-decoration: none;
   font-size: 22px;
   font-weight: 700;
@@ -272,11 +289,11 @@ ol, ul {
 }
 
 .menu-item a:hover {
-  color: red;
+  color: #920784;
 }
 
 .menu-item .title {
-  color: red;
+  color: #920784;
 }
 
 .shadow {

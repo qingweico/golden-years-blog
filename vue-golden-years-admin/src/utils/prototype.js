@@ -1,9 +1,8 @@
-import commonUtil from './common'
+import common from './common'
 
 export default {
   install(Vue, options) {
-    Vue.prototype.$commonUtil = commonUtil.FUNCTIONS
-    Vue.prototype.$ECode = commonUtil.ECode
-    Vue.prototype.$SysConf = commonUtil.SysConf
+    Vue.prototype.$commonUtil = common.FUNCTIONS
+    Vue.prototype.$SysConf = common.SysConf
   }
 }

@@ -25,9 +25,12 @@ public class AsyncConfig {
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(20);
         executor.setKeepAliveSeconds(60);
+        executor.setAwaitTerminationSeconds(60);
         executor.setThreadNamePrefix("AsyncTask-");
+        executor.setTaskDecorator(new ContextDecorator());
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.initialize();
         return executor;
     }
 }

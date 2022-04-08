@@ -1,5 +1,7 @@
 package cn.qingweico.config;
 
+import cn.qingweico.global.Constants;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.util.IpUtils;
 import cn.qingweico.util.RedisOperator;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import javax.annotation.Resource;
 
 /**
  * redis限流
+ *
  * @author zqw
  * @date 2021/10/15
  */
@@ -38,8 +41,8 @@ public class FilterConfig implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         final ServerHttpRequest req = exchange.getRequest();
         String visitIp = IpUtils.getRequestIpGateWay(req);
-        final String visitIpKey = "visit-ip:" + visitIp;
-        final String forbidIp = "forbid-ip:" + visitIp;
+        final String visitIpKey = RedisConf.REDIS_LIMIT_VISIT_IP + Constants.SYMBOL_COLON + visitIp;
+        final String forbidIp = RedisConf.REDIS_LIMIT_FORBID_IP + Constants.SYMBOL_COLON + visitIp;
 
         long limitLeftTime = redisOperator.ttl(forbidIp);
         if (limitLeftTime > 0) {

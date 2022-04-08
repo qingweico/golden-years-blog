@@ -1,9 +1,11 @@
 package cn.qingweico.pojo.vo;
 
+import cn.qingweico.pojo.Tag;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author zqw
@@ -15,7 +17,7 @@ public class ArticleDetailVO {
     private String id;
     private String title;
     private String articleCover;
-    private Integer categoryId;
+    private String categoryId;
     private String authorId;
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
@@ -25,4 +27,5 @@ public class ArticleDetailVO {
     private Integer readCounts;
     private Integer collectCounts;
     private Integer commentCounts;
+    private List<Tag> tagList;
 }

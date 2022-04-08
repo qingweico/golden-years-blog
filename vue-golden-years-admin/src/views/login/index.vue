@@ -17,7 +17,6 @@
             ref="userNameInput"
             name="username"
             type="text"
-            auto-complete="on"
             placeholder="username"
             @keyup.enter.native="handleLogin"
         />
@@ -30,7 +29,6 @@
             :type="pwdType"
             v-model="loginForm.password"
             name="password"
-            auto-complete="on"
             placeholder="password"
             @keyup.enter.native="handleLogin"/>
         <span class="show-pwd" @click="showPwd">
@@ -40,8 +38,11 @@
 
       <el-checkbox v-model="loginForm.isRememberMe" style="margin:0 0 25px 0;"><span style="color: #eee">七天免登录</span>
       </el-checkbox>
-      <span style="color: #eee; float:right; font-size:14px" @click="faceLogin = true">人脸登陆</span>
-
+      <el-link :underline="false" style="font-size:12px; float: right; color:white">
+        <router-link to="/face">
+          人脸登陆
+        </router-link>
+        <i class="el-icon-right" ></i></el-link>
       <el-form-item>
         <el-button
             :loading="loading"
@@ -51,8 +52,6 @@
         </el-button>
       </el-form-item>
     </el-form>
-
-    <FaceLogin v-if="faceLogin" @closeLoginBox="closeLoginBox"></FaceLogin>
 
     <!--引入粒子特效-->
     <vue-particles
@@ -77,11 +76,8 @@
 </template>
 
 <script>
-import FaceLogin from "../../components/FaceLogin";
-
 export default {
   name: "Login",
-  components: {FaceLogin},
   data() {
     const validateUsername = (rule, value, callback) => {
       if (value.length === 0) {
@@ -121,10 +117,9 @@ export default {
     this.$refs.userNameInput.focus()
   },
   created() {
-    console.log(process.env);
   },
   methods: {
-    inputFocus: function () {
+    inputFocus() {
       this.$nextTick(() => {
         this.$refs.userNameInput.focus()
       })
@@ -145,14 +140,10 @@ export default {
           this.$store
               .dispatch("Login", this.loginForm)
               .then(response => {
-                if (response.data.success) {
-                  this.$router.push({path: this.redirect || "/"});
-                } else {
-                  this.$message.error(response.data);
-                }
+                this.$message.success(response.msg);
+                this.$router.push({path: this.redirect || "/"});
                 this.loading = false;
               }, () => {
-                this.$message.error('网络超时');
                 this.loading = false;
               })
               .catch(() => {
@@ -164,7 +155,7 @@ export default {
         }
       });
     },
-    closeLoginBox: function () {
+    closeLoginBox() {
       this.faceLogin = false;
     },
   }
