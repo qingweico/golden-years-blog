@@ -10,7 +10,7 @@
 const version = require('element-ui/package.json').version // element-ui version from node_modules
 const ORIGINAL_THEME = '#409EFF' // default color
 
-import {getSystemConfig, editSystemConfig} from "@/api/systemConfig";
+import {getSystemConfig, editSystemConfig} from "@/api/system/systemConfig";
 export default {
   data() {
     return {

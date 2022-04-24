@@ -4,10 +4,10 @@
       <img :src="dialogImageUrl" alt="dialogImageUrl" style="margin: 0 auto;"/>
     </el-dialog>
     <h1 class="t_nav">
+      <span>人生碌碌，竞短论长，却不道荣枯有数，得失难量。 ——沈复《浮生六记》</span>
       <a href="/" class="n1">首页</a>
       <a href="javascript:void(0);"
          v-if="articleDetail.categoryId"
-         @click="goToCategoryList(articleDetail.categoryId)"
          class="n2"
       >{{ articleDetail.categoryId ? getBlogCategoryNameById(articleDetail.categoryId) : "" }}</a>
     </h1>
@@ -25,8 +25,7 @@
             <li class="category">
               <span class="iconfont">&#xe603;</span>
               <a
-                  href="javascript:void(0);"
-                  @click="goToCategoryList(articleDetail.categoryId)">
+                  href="javascript:void(0);">
                 {{ articleDetail.categoryId ? getBlogCategoryNameById(articleDetail.categoryId) : "" }}</a>
             </li>
 
@@ -38,9 +37,9 @@
               <span class="iconfont">&#xe8c7;</span>
               {{ articleDetail.readCounts }}
             </li>
-            <li class="like">
-              <span class="iconfont">&#xe663;</span>
-              {{ articleDetail.collectCounts }}
+            <li class="comment">
+              <span class="iconfont">&#xe891;</span>
+              {{ articleDetail.commentCounts }}
             </li>
           </ul>
         </div>
@@ -51,9 +50,8 @@
               :hit="false"
               :color="tag.color"
               href="javascript:void(0);"
-              @click="goToTagList(tag.id)"
               target="_blank"
-              effect="plain" style="color: white;margin-right: 10px"
+              effect="plain" style="color: white;margin-right: 10px;cursor: pointer"
               :disable-transitions="false">
             {{ tag.name }}
           </el-tag>
@@ -64,35 +62,41 @@
             v-highlight
             @click="imageChange">
         </div>
-      </div>
-
-      <!-- 分享点赞和收藏 -->
-      <div class="left-social">
-        <div class="share-title">
-          <span class="share-words">分享</span>
-        </div>
-        <div class="back-line"></div>
-        <div class="social-line" @click="shareWeiBo">
-          <img src="@/assets/social/weibo.png" class="social-pic" alt/>
-        </div>
-        <div class="social-line" @click="shareDouBan">
-          <img src="@/assets/social/douban.png" class="social-pic" alt/>
-        </div>
-        <div class="social-line" @click="shareQQ">
-          <img src="@/assets/social/qq.png" class="social-pic" alt/>
-        </div>
-        <div class="social-line" @click="shareQZone">
-          <img src="@/assets/social/qzone.png" class="social-pic" alt/>
-        </div>
-        <div class="social-line" @click="shareWeChat2">
-          <div class="social-share" data-wechat-qrcode-title="请打开微信扫一扫"
-               data-disabled="google,twitter,facebook,douban,qzone,qq,weibo,tencent,linkedin,diandian">
-            <img src="@/assets/social/wechat.png" class="social-pic" alt/>
+        <!--点赞和收藏 -->
+        <LikeAndCollect :praiseCount="articleDetail.starCounts"
+                        :articleCollectCounts="articleDetail.collectCounts"
+                        :articleId="articleId"
+                        @updateStarCounts="updateStarCounts"
+                        @updateCollectCounts="updateCollectCounts"
+                        :isStar="isStar"
+                        :isCollect="isCollect"
+                        @isCollectThisArticle="isCollectThisArticle"
+                        @isStarThisArticle="isStarThisArticle"></LikeAndCollect>
+        <!--分享-->
+        <div class="left-social">
+          <div class="social-line" @click="shareWeiBo">
+            <img src="@/assets/social/weibo.png" class="social-pic" alt/>
+          </div>
+          <div class="social-line" @click="shareDouBan">
+            <img src="@/assets/social/douban.png" class="social-pic" alt/>
+          </div>
+          <div class="social-line" @click="shareQQ">
+            <img src="@/assets/social/qq.png" class="social-pic" alt/>
+          </div>
+          <div class="social-line" @click="shareQZone">
+            <img src="@/assets/social/qzone.png" class="social-pic" alt/>
+          </div>
+          <div class="social-line" @click="shareWeChat2">
+            <div class="social-share" data-wechat-qrcode-title="请打开微信扫一扫"
+                 data-disabled="google,twitter,facebook,douban,qzone,qq,weibo,tencent,linkedin,diandian">
+              <img src="@/assets/social/wechat.png" class="social-pic" alt/>
+            </div>
           </div>
         </div>
       </div>
 
-
+      <!--登录框-->
+      <LoginBox v-if="showLogin" @closeLoginBox="closeLoginBox"></LoginBox>
       <div class="news_pl">
         <Comment
             v-model="data"
@@ -103,7 +107,9 @@
             :upload-img="uploadImg"
             :props="props"
         />
+        <el-empty description="还没有评论,快来抢沙发吧" v-if="!data.length"></el-empty>
       </div>
+
       <!--评论分页-->
       <div class="block paged" v-if="data.length">
         <el-pagination
@@ -127,42 +133,32 @@
   </article>
 </template>
 <script>
-import {getBlogById} from "@/api";
+import {
+  getArticleCollectCounts,
+  getArticleStarCounts,
+  getBlogById, isCollectThisArticle,
+  isStarThisArticle,
+  readArticle
+} from "@/api/detail";
 import {getBlogCategory} from "@/api";
 import {Loading} from "element-ui";
 import Sticky from "@/components/Sticky";
 import SideCatalog from '@/components/VueSideCatalog'
 import {getCommentList, publishComment} from "@/api/comment";
 import Comment from 'vue-juejin-comment'
-import {mapGetters} from "vuex";
-import { EXAMPLE_DATA } from '@/data'
+import {mapGetters, mapMutations} from "vuex";
+import LoginBox from "@/components/LoginBox";
+import LikeAndCollect from "@/components/LikeAndCollect";
+import {getSystemConfig} from "@/api/center";
+
 export default {
   name: "detail",
   data() {
-    const users = [
-      {
-        name: 'Up&Up',
-        avatar: require('../assets/image/avatar1.jpg'),
-        author: true,
-      },
-      {
-        name: '我叫白云',
-        avatar: require('../assets/image/comment.png'),
-      },
-      {
-        name: '我叫黑土',
-        avatar: require('../assets/image/avatar3.jpg'),
-      },
-      {
-        name: 'NARUTO',
-        avatar: require('../assets/image/avatar2.jpg'),
-      },
-    ]
     return {
       // 评论列表
       data: [],
       props: {
-        id: '_id',
+        id: 'commentId',
         content: 'content',
         imgSrc: 'imgSrc',
         children: 'childrenComments',
@@ -173,13 +169,15 @@ export default {
         user: 'visitor',
       },
       currentUser: {
-        name: '',
-        avatar: '',
-        author: true,
+        name: "",
+        avatar: "",
+        author: false
       },
-      users,
-      wrapStyle: '',
-
+      showLogin: false,
+      // 判断用户是否点赞该文章
+      isStar: false,
+      // 判断用户是否收藏该文章
+      isCollect: false,
       // 目录列表数
       catalogSum: 0,
       showStickyTop: false,
@@ -197,25 +195,19 @@ export default {
       // loading对象
       loadingInstance: null,
       showCancel: false,
-      submitting: false,
       articleId: this.$route.query.id,
       currentPage: 1,
       pageSize: 10,
       totalPages: 0,
       records: 0,
-      toInfo: {},
-      userInfo: this.$store.state.user.userInfo,
-      blogId: null,
       articleDetail: {},
       dialogPictureVisible: false,
       dialogImageUrl: "",
-
-
-      defaultAvatar: this.$SysConf.defaultAvatar,
+      systemConfig: {}
     };
   },
   computed: {
-    ...mapGetters(['getUserPhoto']),
+    ...mapGetters(['getUserPhoto', 'getUserInfo']),
     vueCategory() {
       if (!this.showStickyTop && this.showSideCatalog) {
         return 'catalog'
@@ -234,7 +226,9 @@ export default {
   components: {
     SideCatalog,
     Sticky,
-    Comment
+    Comment,
+    LoginBox,
+    LikeAndCollect
   },
   watch: {
     $route(to, from) {
@@ -244,19 +238,27 @@ export default {
   mounted() {
     let that = this;
     let params = new URLSearchParams();
-    if (this.blogId) {
-      params.append("articleId", this.blogId);
+    if (this.articleId) {
+      params.append("articleId", this.articleId);
     }
     getBlogById(params).then(response => {
       this.articleDetail = response.data;
-      document.title = this.articleDetail.title
+      document.title = this.articleDetail.title;
       this.getCommentList();
       setTimeout(() => {
-        that.blogContent = this.articleDetail.content
+        that.blogContent = this.articleDetail.content;
+        that.isStarThisArticle();
         that.loadingInstance.close();
+        let isLogin = this.$store.state.user.isLogin;
+        if (!isLogin) {
+          that.currentUser.avatar = that.$SysConf.defaultAvatar;
+        } else {
+          that.currentUser.avatar = that.getUserInfo.face;
+        }
+        that.currentUser.name = that.getUserInfo.nickname;
+        that.currentUser.author = that.getUserInfo.id === that.articleDetail.authorId;
       }, 200)
     });
-
     let after = 0;
     let offset = 110;
     $(window).scroll(function () {
@@ -267,9 +269,8 @@ export default {
       that.showSideCatalog = winScrollHeight > after;
       after = winScrollHeight;
       if (docHeight === winHeight + winScrollHeight) {
-        // if (that.comments.length >= that.records) {
-        //   /**无限加载action**/
-        // }
+        /**无限加载action**/
+
       }
     })
 
@@ -282,13 +283,16 @@ export default {
     }
   },
   created() {
-    this.addData(1);
+    getSystemConfig().then((response) => {
+      this.systemConfig = response.data;
+    });
+    // 文章阅读数累加
+    readArticle(this.articleId);
     this.getCommentList();
     this.loadingInstance = Loading.service({
       fullscreen: true,
       text: "正在努力加载中"
     });
-    this.blogId = this.$route.query.id;
     // 屏幕大于950px的时候, 显示侧边栏
     this.showSidebar = document.body.clientWidth > 950;
     getBlogCategory().then(res => {
@@ -296,9 +300,41 @@ export default {
     });
   },
   methods: {
+    ...mapMutations(['setUserInfo', 'setLoginState']),
     handleCurrentChange(val) {
       this.currentPage = val;
       this.getCommentList();
+    },
+    isStarThisArticle() {
+      let params = {};
+      params.articleId = this.articleId;
+      params.userId = this.getUserInfo.id;
+      isStarThisArticle(params).then((response) => {
+        this.isStar = response.data;
+      })
+    },
+    // 判断用户是否收藏过该文章
+    isCollectThisArticle() {
+      let params = {};
+      params.articleId = this.articleId;
+      params.userId = this.getUserInfo.id;
+      isCollectThisArticle(params).then((response) => {
+        this.isCollect = response.data;
+      })
+    },
+    updateStarCounts() {
+      let params = new URLSearchParams();
+      params.append("articleId", this.articleId);
+      getArticleStarCounts(params).then(response => {
+        this.articleDetail.starCounts = Number(response.data);
+      })
+    },
+    updateCollectCounts() {
+      let params = new URLSearchParams();
+      params.append("articleId", this.articleId);
+      getArticleCollectCounts(params).then(response => {
+        this.articleDetail.collectCounts = Number(response.data);
+      })
     },
     getBlogCategoryNameById(categoryId) {
       let categoryList = this.articleCategoryList;
@@ -308,71 +344,56 @@ export default {
         }
       }
     },
-    goToCategoryList(categoryId) {
-      this.$router.push({path: "/", query: {categoryId: categoryId}});
+    goToAuthor(authorId) {
+      let routeData = this.$router.resolve({
+        path: "/homepage",
+        query: {id: authorId}
+      });
+      window.open(routeData.href, '_self');
     },
-    goToTagList() {
+    closeLoginBox() {
+      this.showLogin = false;
     },
-    goToAuthor() {
-    },
 
-    // // ###################### 评论 ######################
-    // addComment(comment, parent, add) {
-    //   let newComment = {};
-    //   let info = this.userInfo;
-    //   let isLogin = this.$store.state.user.isLogin
-    //   if (!isLogin) {
-    //     this.$notify.info({
-    //       title: '提示',
-    //       message: '登录后才可以评论',
-    //     });
-    //     return;
-    //   }
-    //   console.log(comment)
-    //   let params = {};
-    //   params.content = comment.content;
-    //   params.reply = comment.reply;
-    //   params.articleId = this.articleId;
-    //   params.fatherId = 0;
-    //   params.commentUserId = info.id;
-    //   publishComment(params).then(response => {
-    //     this.$notify({
-    //       title: "成功",
-    //       message: "评论成功",
-    //       type: "success",
-    //     });
-    //     this.getCommentList();
-    //   });
-    //   //需调用 add 函数, 并传入 newComment 对象
-    //   add(newComment)
-    // },
-
-
-
-    //
-    // deleteComment(comment, parent) {
-    //   // ...
-    // },
-    // likeComment(comment) {
-    //   // ...
-    // },
-    // uploadOrCopyImg({file, callback}) {
-    //   // ...
-    //   let imgUrl = {};
-    //   callback(imgUrl) // 图片地址必传
-    // },
+    // ###################### 评论 ######################
     async submit(newComment, parent, add) {
+      // 判断用户是否登录
+      let isLogin = this.$store.state.user.isLogin;
+      if (!isLogin) {
+        this.showLogin = true;
+        return;
+      }
       const res = await new Promise((resolve) => {
         setTimeout(() => {
-          resolve({ newComment, parent })
+          resolve({newComment, parent})
         }, 300)
       })
 
-      add(Object.assign(res.newComment, { _id: new Date().getTime() }))
-
-      console.log('addComment: ', res)
+      add(Object.assign(res.newComment, {_id: new Date().getTime()}))
+      let comments = res.newComment;
+      let params = {};
+      params.content = comments.content;
+      params.imgSrc = comments.imgSrc;
+      params.likes = comments.likes;
+      params.reply = comments.reply;
+      if (res.parent === null) {
+        params.parent = 0;
+      } else {
+        params.parent = res.parent.id;
+      }
+      params.articleId = this.articleId;
+      params.commentUserId = this.$store.state.user.userInfo.id;
+      params.commentUserNickname = this.currentUser.name;
+      params.commentUserFace = this.face;
+      publishComment(params).then(response => {
+        this.$notify({
+          title: "成功",
+          message: response.msg,
+          type: "success",
+        });
+        this.getCommentList();
+      });
     },
-
     async like(comment) {
       const res = await new Promise((resolve) => {
         setTimeout(() => {
@@ -380,10 +401,10 @@ export default {
         }, 0)
       })
 
-      console.log('likeComment: ', res)
-    },
+    }
+    ,
 
-    async uploadImg({ file, callback }) {
+    async uploadImg({file, callback}) {
       const res = await new Promise((resolve, reject) => {
         const reader = new FileReader()
 
@@ -399,33 +420,15 @@ export default {
       })
 
       callback(res)
-      console.log('uploadImg： ', res)
     },
 
     async deleteComment(comment, parent) {
       const res = await new Promise((resolve) => {
         setTimeout(() => {
-          resolve({ comment, parent })
+          resolve({comment, parent})
         }, 300)
       })
-
-      console.log('deleteComment: ', res)
     },
-
-    changeUser() {
-      const users = this.users
-      const index = users.findIndex((c) => c.name === this.currentUser.name)
-
-      this.currentUser = users[index === users.length - 1 ? 0 : index + 1]
-      this.$refs.comment.scrollTo({ left: 0, top: 0, behavior: 'smooth' })
-    },
-
-    addData(times) {
-      setTimeout(() => {
-        this.data = new Array(times).fill(EXAMPLE_DATA).flat(Infinity)
-      }, 0)
-    },
-
     getCommentList() {
       let params = new URLSearchParams();
       params.append("articleId", this.articleId);
@@ -434,17 +437,24 @@ export default {
       getCommentList(params).then(response => {
         let content = response.data;
         this.currentPage = content.currentPage;
-        this.totalPages = content.totalPages;
         this.records = content.records;
+        this.data = content.rows;
+        for (let item of this.data) {
+          if (item.reply.name === null) {
+            Reflect.deleteProperty(item, "reply");
+          }
+        }
       })
-    },
+    }
+    ,
     imageChange(e) {
       let type = e.target.localName;
       if (type === "img") {
         this.dialogPictureVisible = true;
         this.dialogImageUrl = e.target.currentSrc;
       }
-    },
+    }
+    ,
     // 切割字符串
     subText(str, index) {
       if (str.length < index) {
@@ -467,34 +477,46 @@ export default {
       // 参数pic设置图片链接|默认为空, 可选参数
       weiBoShareUrl += '&pic=' + encodeURIComponent('');
       window.open(weiBoShareUrl, '_blank');
-    },
+    }
+    ,
     shareDouBan() {
       let douBanShareUrl = 'http://shuo.douban.com/!service/share?';
       douBanShareUrl += 'href=' + encodeURIComponent(location.href);      //分享的链接
       douBanShareUrl += '&name=' + encodeURIComponent(document.title);    //分享的标题
       window.open(douBanShareUrl, '_blank');
-    },
+    }
+    ,
     shareQQ() {
       let qqShareUrl = 'https://connect.qq.com/widget/shareqq/iframe_index.html?';
       qqShareUrl += 'url=' + encodeURIComponent(location.href);           //分享的链接
       qqShareUrl += '&title=' + encodeURIComponent(document.title);       //分享的标题
       window.open(qqShareUrl, '_blank');
-    },
+    }
+    ,
     shareQZone() {
       let qzoneShareUrl = 'https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?';
       qzoneShareUrl += 'url=' + encodeURIComponent(document.location);
       qzoneShareUrl += '&title=' + encodeURIComponent(document.title);
       window.open(qzoneShareUrl, '_blank');
-    },
+    }
+    ,
     shareWeChat2() {
       let target_url = 'http://zixuephp.net/inc/qrcode_img.php?url=' + document.location.href;
       target_url = 'http://zixuephp.net/inc/qrcode_img.php?url=http://www.itzixi.com';
       window.open(target_url, 'weixin', 'height=320, width=320');
-    },
+    }
+    ,
   }
 };
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
+.news_view {
+  background-image: linear-gradient(90deg, rgba(50, 0, 0, .05) 3%, transparent 0), linear-gradient(1turn, rgba(50, 0, 0, .05) 3%, transparent 0);
+  background-size: 20px 20px;
+  background-position: 50%;
+  padding-bottom: 10px;
+}
+
 .emoji-panel-wrap {
   box-sizing: border-box;
   border: 1px solid #cccccc;
@@ -566,30 +588,17 @@ export default {
 .left-social {
   float: right;
   display: flex;
-  width: 420px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   flex-direction: row;
   justify-content: center;
-  align-items: center
+  align-items: center;
+  margin-top: 20px;
 }
 
 .share-title {
   flex-wrap: nowrap;
   margin-bottom: 18px;
   align-self: center;
-}
-
-.share-words {
-  display: inline-block;
-  padding: 0 10px;
-  width: 50px;
-}
-
-.back-line {
-  border-top: 1px solid white;
-  position: relative;
-  top: -27px;
-  z-index: -2;
 }
 
 .social-line {
@@ -602,14 +611,5 @@ export default {
 .social-pic {
   width: 38px;
   height: 38px;
-}
-
-.social-words {
-  vertical-align: middle;
-  padding-left: 12px;
-  font-size: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 </style>

@@ -2,9 +2,9 @@
   <div class="login-wrap">
     <div class="ms-login">
       <div class="ms-title">人脸登陆</div>
-      <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
+      <el-form :model="data" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="username">
-          <el-input v-model="param.username" placeholder="username">
+          <el-input v-model="data.username" placeholder="username">
             <template #prepend>
               <el-button icon="el-icon-user"></el-button>
             </template>
@@ -29,7 +29,14 @@
           </div>
         </el-form-item>
         <div class="login-btn">
-          <el-button type="primary" @click="login()">{{ btnValue }}</el-button>
+          <el-row :gutter="12">
+            <el-col :span=12>
+              <el-button type="primary" @click="captureFace()">{{ startCapture }}</el-button>
+            </el-col>
+            <el-col :span=12>
+              <el-button type="primary" :loading="loading" @click="faceVerify()">{{ startFaceVerify }}</el-button>
+            </el-col>
+          </el-row>
         </div>
       </el-form>
     </div>
@@ -37,8 +44,6 @@
 </template>
 
 <script>
-
-import {face} from "../../api/login";
 
 export default {
   name: "face",
@@ -51,20 +56,19 @@ export default {
       }
     };
     return {
-      param: {
-        username: "",
-      },
       enablingCamera: false,
-
+      startCapture: "捕获人脸",
+      startFaceVerify: "人脸信息校验",
       // 全局视频对象
       mediaStreamTrack: null,
       video: null,
       isCameraOpen: false,
-
-      username: "",
-      password: "",
-      verifyCode: '',
-      btnValue: "立即登陆",
+      loading: false,
+      data: {
+        username: "",
+        img64: ""
+      },
+      redirect: undefined,
       beginCapture: false,
       rules: {
         username: [
@@ -74,60 +78,67 @@ export default {
     }
   },
   methods: {
-    submitForm() {
-    },
-
-
-    // ##################################开始处理人脸识别逻辑###################################
+    // ################################## 开始处理人脸识别逻辑 ###################################
 
     clearCameraStatus() {
       this.enablingCamera = false;
       this.isCameraOpen = false;
-      this.btnValue = "立即登陆";
+      this.startCapture = "捕获人脸";
+      this.clearForm();
       let faceView = document.getElementsByClassName('face-view')[0];
       faceView.style.cssText = "width: 280;position: relative";
       let canvas = document.getElementById('canvas');
       let ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, 140, 150);
     },
-
-    switchStatus() {
+    clearForm() {
+      this.data = {
+        username: "",
+        img64: ""
+      }
+    },
+    done() {
+      this.loading = false;
+      this.closeCamera();
       this.clearCameraStatus();
     },
-    login() {
+    captureFace() {
       const that = this;
       if (that.enablingCamera && that.isCameraOpen) {
         this.video = document.getElementById('video');
         let canvas = document.getElementById('canvas');
         let ctx = canvas.getContext('2d');
         ctx.drawImage(this.video, 0, 0, 140, 150);
-        this.btnValue = "开始人脸信息校验";
+        this.startCapture = "重新捕获人脸";
         this.beginCapture = true;
         let img = document.getElementById('canvas').toDataURL();
         // 截取base64
         // base64的图片
-        let img64 = img.split("base64,")[1];
-        let data = {
-          username: this.username,
-          img64: img64
-        }
-        face(data).then((response) => {
-          if (response.data.success) {
-
-          }
-        })
+        this.data.img64 = img.split("base64,")[1];
       } else {
         this.$message.error('请先打开摄像头!');
       }
+    },
+    faceVerify() {
+      this.$refs.login.validate(valid => {
+        if (valid) {
+          this.loading = true;
+          this.$store.dispatch("Face", this.data).then(response => {
+            this.$message.success(response.msg);
+            this.$router.push({path: this.redirect || "/"});
+            this.done();
+          }, () => {
+            this.done();
+          })
+        }
+      })
     },
     openOrCloseCamera() {
       // 如果true, 打开摄像头
       if (this.enablingCamera) {
         this.openCamera();
-        this.btnValue = "捕获人脸";
         let faceView = document.getElementsByClassName('face-view')[0];
         faceView.style.cssText = "width: 142px;position: absolute;";
-        console.log(faceView);
       } else {
         this.closeCamera();
         this.clearCameraStatus();
@@ -176,7 +187,7 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
-  background-image: url(../../assets/img/login-bg.jpg);
+  background-image: url("../../assets/img/login-bg.png");
   background-size: 100%;
 }
 
@@ -185,18 +196,18 @@ export default {
   line-height: 50px;
   text-align: center;
   font-size: 20px;
-  color: gray;
+  color: white;
   border-bottom: 1px solid #ddd;
 }
 
 .ms-login {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 40%;
   width: 350px;
   margin: -190px 0 0 -175px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
@@ -214,7 +225,7 @@ export default {
   margin-bottom: 10px;
 }
 
-/**人脸识别*/
+/**人脸识别框*/
 .face-view {
   position: relative;
   float: left;
@@ -278,8 +289,7 @@ export default {
   font-weight: 400;
   font-stretch: normal;
   letter-spacing: 0;
-  /*#9abcda*/
-  color: gray;
+  color: #9abcda;
   float: right;
   cursor: pointer;
 }

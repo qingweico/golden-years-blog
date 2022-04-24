@@ -3,6 +3,7 @@
     <div class="page_bg timer"></div>
     <div class="container">
       <h1 class="t_nav">
+        <span>我们是一群没有终点,找不到归宿的鹰,我们只能够留下在捕猎中殷勤的身影</span>
         <a href="/" class="n1">网站首页</a>
         <a href="javascript:void(0);" class="n2">时间轴</a>
       </h1>

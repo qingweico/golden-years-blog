@@ -2,7 +2,7 @@
   <html>
   <head>
     <meta charset="utf-8">
-    <title>流金岁月</title>
+    <title></title>
     <meta name="keywords">
     <meta name="description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,7 @@
         <el-col :span="16">
           <div class="logo">
             <router-link to="/">
-              <a href="javascript:void(0);">流金岁月博客</a>
+              <a href="javascript:void(0);" v-if="webInfo.name">{{ webInfo.name }}</a>
             </router-link>
           </div>
 
@@ -53,9 +53,7 @@
               </router-link>
             </li>
             <li>
-              <router-link to="/yiqing">
-                <a href="javascript:void(0);" :class="[saveTitle === '/yiqing' ? 'title' : '']">疫情</a>
-              </router-link>
+              <a href="http://119.29.35.129/yiqing">疫情</a>
             </li>
             <li>
               <router-link to="/ssr">
@@ -119,7 +117,7 @@
   <footer>
     <p>
       Copyright © 2020 流金岁月 All Rights Reserved &nbsp;流金岁月博客&nbsp;
-      <a href="https://beian.miit.gov.cn/"> 豫ICP备2020030311号-1</a>
+      <a href="https://beian.miit.gov.cn/" v-if="webInfo.recordNum">{{ webInfo.recordNum }}</a>
     </p>
   </footer>
   <!--回到顶部-->
@@ -135,8 +133,9 @@ import LoginBox from "@/components/LoginBox";
 import {mapMutations} from 'vuex';
 import {delCookie, getCookie} from "@/utils/cookie";
 import {authVerify, deleteUserAccessToken} from "@/api/user";
-import {timeAgo} from "@/utils/web";
 import {getUrlVars} from "@/utils/util";
+import {getWebConfig} from "@/api";
+import {getSystemConfig} from "@/api/center";
 
 export default {
   name: "index",
@@ -145,8 +144,10 @@ export default {
   },
   data() {
     return {
+      webInfo: {},
       // 默认头像
       defaultAvatar: this.$SysConf.defaultAvatar,
+      systemConfig: {},
       saveTitle: "",
       keyword: "",
       // 控制搜索框的弹出
@@ -199,9 +200,14 @@ export default {
     this.getToken();
     // 获取浏览器类型: navigator.userAgent
     this.getCurrentPageTitle();
+    getWebConfig().then(response => {
+      this.webInfo = response.data;
+    });
+    getSystemConfig().then((response) => {
+      this.systemConfig = response.data;
+    });
   },
   methods: {
-    //拿到vuex中的写的方法
     ...mapMutations(['setUserInfo', 'setLoginState']),
     // 搜索
     search() {
@@ -209,10 +215,21 @@ export default {
         this.$refs.searchInput.focus();
         return;
       }
-      this.$router.push({path: "/", query: {keyword: this.keyword}});
+      this.$router.push({path: "/", query: {keyword: this.keyword, searchModel: this.systemConfig.searchModel}});
     },
     getCurrentPageTitle() {
-      this.saveTitle = window.location.pathname;
+      let test = window.location.href;
+      let start = 0;
+      let end = test.length;
+      for (let i = 0; i < test.length; i++) {
+        if (test[i] === "#") {
+          start = i;
+        }
+        if (test[i] === "?" && i > start) {
+          end = i;
+        }
+      }
+      this.saveTitle = test.substring(start + 1, end);
     },
     setSize() {
       // 屏幕大于950px的时候, 显示侧边栏
@@ -245,10 +262,6 @@ export default {
         return;
       }
       this.$router.push("/center");
-    },
-
-    timeAgo(dateTimeStamp) {
-      return timeAgo(dateTimeStamp)
     },
     getKeyword() {
       let tempValue = decodeURI(getUrlVars()["keyword"]);
@@ -348,6 +361,7 @@ export default {
 html, body {
   height: 100%;
 }
+
 #star_list li .title {
   color: #920784;
 }

@@ -20,13 +20,6 @@ public class UserTokenInterceptor extends BaseInterceptor implements HandlerInte
     public boolean preHandle(HttpServletRequest request,
                              @Nonnull HttpServletResponse response,
                              @Nonnull Object handler) {
-        String origin = request.getHeader("Origin");
-        response.setContentType("application/json;charset=UTF-8");
-        response.setHeader("Access-Control-Allow-Origin", origin);
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
-        response.setHeader("Access-Control-Max-Age", "1800");
-        response.setHeader("Access-Control-Allow-Headers", "x-requested-with,Authorization,token,Origin,Content-Type,Accept");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
         if (HttpMethod.OPTIONS.toString().equals(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             return false;

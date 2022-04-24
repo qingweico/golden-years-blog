@@ -7,13 +7,12 @@
           @keyup.enter.native="handleFind"
           class="filter-item"
           style="width: 200px;"
-          v-model="tagName"
+          v-model="queryParams.tagName"
           placeholder="请输入标签名"
       ></el-input>
       <el-select v-model="queryParams.status" clearable placeholder="标签状态" style="width:110px">
-        <el-option value="0" label="全部" checked></el-option>
         <el-option value="1" label="正常"></el-option>
-        <el-option value="2" label="不可用"></el-option>
+        <el-option value="0" label="不可用"></el-option>
       </el-select>
       <el-select v-model="queryParams.sys" clearable placeholder="标签归属" style="width:110px">
         <el-option value="0" label="用户标签" checked></el-option>
@@ -106,15 +105,15 @@
     </div>
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+    <el-dialog :title="title" :visible.sync="dialogFormVisible" :before-close="closeDialog">
       <el-form :model="form" :rules="rules" ref="form">
         <el-form-item label="标签名称" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="form.name"></el-input>
+          <el-input v-model="form.name" @input="isChange = true"></el-input>
         </el-form-item>
 
         <el-form-item label="标签颜色" :label-width="formLabelWidth" prop="color">
           <div class="block">
-            <el-color-picker v-model="form.color"></el-color-picker>
+            <el-color-picker v-model="form.color" @input="isChange = true"></el-color-picker>
           </div>
         </el-form-item>
         <el-form-item label="标签状态" :label-width="formLabelWidth">
@@ -127,7 +126,7 @@
 
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="handleCancel">取 消</el-button>
         <el-button type="primary" @click="submitForm">确 定</el-button>
       </div>
     </el-dialog>
@@ -137,7 +136,7 @@
 <script>
 
 
-import {saveOrUpdateTag, getTagList, deleteTag} from "@/api/blog";
+import {saveOrUpdateTag, getTagList, deleteTag, batchDeleteTag} from "@/api/blog/index";
 
 export default {
   data() {
@@ -155,6 +154,7 @@ export default {
       dialogFormVisible: false,
       formLabelWidth: "120px",
       isEditForm: false,
+      isChange: false,
       form: {
         id: null,
         name: null,
@@ -181,13 +181,14 @@ export default {
     this.tagList();
   },
   methods: {
-
     tagList() {
       let params = new URLSearchParams;
+      params.append("tagName", this.queryParams.tagName.trim());
+      params.append("status", this.queryParams.status);
+      params.append("sys", this.queryParams.sys);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getTagList(params).then((response) => {
-        console.log(response);
         let content = response.data;
         this.tableData = content.rows;
         this.currentPage = content.currentPage;
@@ -196,13 +197,42 @@ export default {
       })
     },
     handleFind() {
-      // TODO
+      this.tagList();
     },
     handleAdd() {
       this.title = "增加标签"
       this.dialogFormVisible = true;
       this.clearForm();
       this.isEditForm = false;
+    },
+    handleCancel() {
+      this.dialogFormVisible = false;
+      // 清除本次的校验信息
+      this.$refs.form.clearValidate();
+    },
+    // 关闭窗口
+    closeDialog(done) {
+      // 清除本次的校验信息
+      this.$refs.form.clearValidate();
+      if (this.isChange) {
+        this.$confirm("是否放弃本次操作", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          this.clearStatus();
+          done();
+        }).catch(() => {
+          /**cancel**/
+        });
+      } else {
+        this.clearStatus();
+      }
+    },
+    clearStatus() {
+      this.dialogFormVisible = false;
+      this.clearForm();
+      this.isChange = false;
     },
     handleEdit(row) {
       this.title = "编辑标签"
@@ -236,7 +266,15 @@ export default {
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
-
+        let ids = [];
+        for (let item of that.multipleSelection) {
+          ids.push(item.id);
+        }
+        batchDeleteTag(ids).then(response => {
+          this.$message.success(response.msg);
+          that.multipleSelection = [];
+          this.tagList();
+        })
       })
 
     },
@@ -263,24 +301,21 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           // 编辑模式
+          this.form.status = Number(this.form.status);
           if (this.isEditForm) {
-            this.form.status = Number(this.form.status);
             saveOrUpdateTag(this.form).then((response) => {
-              this.dialogFormVisible = false;
-              this.clearForm();
-              this.tagList();
               this.$message.success(response.msg);
-            })
+              this.dialogFormVisible = false;
+              this.tagList();
+            });
           }
           // 添加模式
           else {
-            this.form.status = Number(this.form.status);
             saveOrUpdateTag(this.form).then(response => {
-              this.dialogFormVisible = false;
-              this.clearForm();
-              this.tagList();
               this.$message.success(response.msg);
-            })
+              this.dialogFormVisible = false;
+              this.tagList();
+            });
           }
         }
       })

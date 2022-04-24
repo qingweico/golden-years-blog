@@ -12,6 +12,8 @@
 		<result column="comment_user_nickname" property="commentUserNickname" jdbcType="VARCHAR"/>
 		<result column="comment_user_face" property="commentUserFace" jdbcType="VARCHAR"/>
 		<result column="content" property="content" jdbcType="VARCHAR"/>
+		<result column="likes" property="likes" jdbcType="INTEGER"/>
+		<result column="img_src" property="imgSrc" jdbcType="VARCHAR"/>
 		<result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
 	</resultMap>
 
@@ -19,15 +21,13 @@
 	        parameterType="Map">
 
 		SELECT c.id                    as commentId,
-		       c.father_id             as fatherId,
-		       c.comment_user_id       as commentUserId,
-		       c.comment_user_nickname as commentUserNickname,
-		       c.comment_user_face     as commentUserFace,
+		       c.comment_user_nickname as visitorName,
+		       c.comment_user_face     as visitorAvatar,
 		       c.article_id            as articleId,
 		       c.content               as content,
-		       c.create_time           as createTime,
-		       f.comment_user_nickname as quoteUserNickname,
-		       f.content               as quoteContent
+		       c.create_time           as createAt,
+		       f.comment_user_nickname as replyName,
+		       f.content               as replyAvatar
 		FROM t_comment c
 			     LEFT JOIN
 		     t_comment f

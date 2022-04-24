@@ -18,7 +18,10 @@ module.exports = {
     app: './src/main.js'
   },
   externals: {
-
+    'vue': 'Vue',
+    'element-ui': 'ELEMENT',
+    'turndown': 'turndown',
+    'showdown': 'showdown',
   },
   output: {
     path: config.build.assetsRoot,

@@ -56,7 +56,7 @@ export default {
   },
   methods: {
     initChart() {
-      var that = this;
+      const that = this;
       that.chart = echarts.init(this.$el, 'macarons')
 
       that.chart.on('click',function (param) {

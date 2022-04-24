@@ -8,7 +8,6 @@ import 'element-ui/lib/theme-chalk/index.css'
 import prototype from './utils/prototype'
 
 import "./assets/iconfont/iconfont.css";
-import '../static/css/ckeditor.css';
 import '../static/css/index.css';
 
 Vue.config.productionTip = false

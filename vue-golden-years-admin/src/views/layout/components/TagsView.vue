@@ -1,21 +1,26 @@
 <template>
   <div class="tags-view-container">
     <scroll-pane class='tags-view-wrapper' ref='scrollPane'>
-      <router-link ref='tag' class="tags-view-item" :class="isActive(tag)?'active':''" v-for="tag in Array.from(visitedViews)"
-        :to="tag" :key="tag.path" @contextmenu.prevent.native="openMenu(tag,$event)">
-        {{tag.title}}
+      <router-link ref='tag' class="tags-view-item" :class="isActive(tag)?'active':''"
+                   v-for="tag in Array.from(visitedViews)"
+                   :to="tag" :key="tag.path" @contextmenu.prevent.native="openMenu(tag,$event)">
+        {{ tag.title }}
         <span class='el-icon-close' @click.prevent.stop='closeSelectedTag(tag)'></span>
       </router-link>
     </scroll-pane>
     <ul class='contextmenu' v-show="visible" :style="{left:left+'px',top:top+'px'}">
+<!--      <li @click="closeSelectedTag(selectedTag)">{{ $t('tagsView.close') }}</li>-->
+<!--      <li @click="closeOthersTags">{{ $t('tagsView.closeOthers') }}</li>-->
+<!--      <li @click="closeAllTags">{{ $t('tagsView.closeAll') }}</li>-->
     </ul>
   </div>
 </template>
 
 <script>
 import ScrollPane from '@/components/ScrollPane'
+
 export default {
-  components: { ScrollPane },
+  components: {ScrollPane},
   data() {
     return {
       visible: false,
@@ -74,6 +79,17 @@ export default {
         }
       })
     },
+    moveToCurrentTag() {
+      const tags = this.$refs.tag
+      this.$nextTick(() => {
+        for (const tag of tags) {
+          if (tag.to.path === this.$route.path) {
+            this.$refs.scrollPane.moveToTarget(tag.$el)
+            break
+          }
+        }
+      })
+    },
     closeOthersTags() {
       this.$router.push(this.selectedTag)
       this.$store.dispatch('delOthersViews', this.selectedTag).then(() => {
@@ -105,6 +121,7 @@ export default {
     height: 34px;
     border-bottom: 1px solid #d8dce5;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
+
     .tags-view-item {
       display: inline-block;
       position: relative;
@@ -117,13 +134,16 @@ export default {
       font-size: 12px;
       margin-left: 5px;
       margin-top: 4px;
+
       &:first-of-type {
         margin-left: 15px;
       }
+
       &.active {
         background-color: #42b983;
         color: #fff;
         border-color: #42b983;
+
         &::before {
           content: '';
           background: #fff;
@@ -137,6 +157,7 @@ export default {
       }
     }
   }
+
   .contextmenu {
     margin: 0;
     background: #fff;
@@ -149,10 +170,12 @@ export default {
     font-weight: 400;
     color: #333;
     box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
+
     li {
       margin: 0;
       padding: 7px 16px;
       cursor: pointer;
+
       &:hover {
         background: #eee;
       }
@@ -173,11 +196,13 @@ export default {
       text-align: center;
       transition: all .3s cubic-bezier(.645, .045, .355, 1);
       transform-origin: 100% 50%;
+
       &:before {
         transform: scale(.6);
         display: inline-block;
         vertical-align: -3px;
       }
+
       &:hover {
         background-color: #b4bccc;
         color: #fff;

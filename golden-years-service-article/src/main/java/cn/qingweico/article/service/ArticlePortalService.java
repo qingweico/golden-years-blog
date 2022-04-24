@@ -2,8 +2,10 @@ package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Category;
+import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.vo.ArticleArchiveVO;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
+import cn.qingweico.pojo.vo.CategoryVO;
 import cn.qingweico.util.PagedGridResult;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -37,7 +39,8 @@ public interface ArticlePortalService {
 
     /**
      * 查询主页热门文章
-     * @param page 起始查询页面
+     *
+     * @param page     起始查询页面
      * @param pageSize 每页查询的数量
      * @return PagedGridResult
      */
@@ -56,7 +59,7 @@ public interface ArticlePortalService {
                                              Integer pageSize);
 
     /**
-     * 查询作家主页近期佳文
+     * 查询作者主页文章排行
      *
      * @param author 作者id
      * @return {@link PagedGridResult}
@@ -87,16 +90,23 @@ public interface ArticlePortalService {
     List<Category> queryCategoryList();
 
     /**
+     * 首页查询带有文章数量的文章类别列表
+     * @return List<CategoryVO>
+     */
+
+    List<CategoryVO> getCategoryListWithArticleCount();
+
+    /**
      * 根据时间范围归类文章
      *
      * @param yearAndMonth 年份和月份
      * @param page         起始查询页面
      * @param pageSize     每页查询的数量
-     * @return List<ArticleArchiveVO>
+     * @return PagedGridResult
      */
-    List<ArticleArchiveVO> getArticleListByTime(String yearAndMonth,
-                                                Integer page,
-                                                Integer pageSize);
+    PagedGridResult getArticleListByTime(String yearAndMonth,
+                                         Integer page,
+                                         Integer pageSize);
 
 
     /**
@@ -127,7 +137,15 @@ public interface ArticlePortalService {
      * @return PagedGridResult PagedGridResult
      */
     PagedGridResult queryArticleListByCategoryId(String userId,
-                                                 Integer categoryId,
+                                                 String categoryId,
                                                  Integer page,
                                                  Integer pageSize);
+
+    /**
+     * 获取文章的标签
+     *
+     * @param article Article
+     * @return List<Tag>
+     */
+    List<Tag> getTagList(Article article);
 }

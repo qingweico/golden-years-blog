@@ -2,7 +2,7 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.CategoryMenuMapper;
 import cn.qingweico.admin.service.CategoryMenuService;
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.CategoryMenu;
 import org.springframework.stereotype.Service;
 

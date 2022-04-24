@@ -48,6 +48,7 @@
             <el-form-item label="发布时间">
               <el-date-picker
                   v-model="dateRange"
+                  @change="dateChoice"
                   style="width: 240px"
                   value-format="yyyy-MM-dd"
                   type="daterange"
@@ -145,7 +146,7 @@
                     :value="item.id"></el-option>
               </el-select>
               <el-tag
-                  :key="tag"
+                  :key="tag.id"
                   v-for="tag in dynamicTags"
                   closable
                   :hit="false"
@@ -172,12 +173,13 @@
         <el-row>
         </el-row>
         <el-form-item label="内容" :label-width="formLabelWidth" prop="content">
-          <!--          <CKEditor ref="editor" :content="form.content" style="margin-bottom:30px" @contentChange="contentChange"-->
-          <!--                    :height="360"></CKEditor>-->
-          <!--          <MarkdownEditor  :content="form.content" ref="editor" :height="465"></MarkdownEditor>-->
-          <mavon-editor ref="md" :value="initContent"
-                        autofocus @imgAdd="$imgAdd" @change="change"
-                        style="z-index:1;border: 1px solid #d9d9d9;height:100vh; margin-bottom: 50px"/>
+          <!--富文本编辑器-->
+          <quill-editor v-if="systemConfig.editorModel === 0" ref="textEditor"
+                        @change="onEditorChange" v-model="richTextContent" class="editor"
+                        :options="editorOption"></quill-editor>
+          <!--Markdown编辑器-->
+          <mavon-editor v-if="systemConfig.editorModel === 1" ref="md" :value="initContent"
+                        autofocus @imgAdd="$imgAdd" @change="change" class="editor"/>
         </el-form-item>
         <div class="publish-bottom">
           <div class="buttons">
@@ -192,7 +194,7 @@
                 v-show="isAppoint ===  1"
                 placeholder="定时日期">
             </el-date-picker>
-            <el-button type="primary" class="submit-btn" @click="publishOrEdit">{{ publishBtn }}</el-button>
+            <el-button class="white-btn" @click="publishOrEdit">{{ publishOrEditBtn }}</el-button>
           </div>
         </div>
       </el-form>
@@ -202,13 +204,16 @@
     <!--文章结果展示-->
     <div class="article-list" v-if="articleList.length" v-for="(article, index) in articleList" :key="index">
       <el-card class="box-card" shadow="hover" style="margin-bottom: 10px">
-        <el-descriptions :title="article.title" direction="horizontal" :colon=false size="mini" :column=4>
+        <el-descriptions :title="article.title" direction="horizontal" :colon=false size="mini" :column=5>
           <el-descriptions-item>
             <img :src="article.articleCover" style="width: 175px; height: 125px;"
                  v-show="article.articleType === 1" alt="cover"/>
           </el-descriptions-item>
           <el-descriptions-item>
             <span>{{ article.createTime }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <span>{{ getBlogCategoryNameById(article.categoryId) }}</span>
           </el-descriptions-item>
           <el-descriptions-item>
             <el-tag v-show="article.articleStatus === 1">审核中</el-tag>
@@ -240,8 +245,8 @@
     <div class="block paged">
       <el-pagination
           @current-change="handleCurrentChange"
-          :current-page.sync="queryParams.currentPage"
-          :page-size="queryParams.pageSize"
+          :current-page.sync="currentPage"
+          :page-size="pageSize"
           layout="total, prev, pager, next, jumper"
           :total="records">
       </el-pagination>
@@ -252,29 +257,28 @@
 </template>
 
 <script>
-import MarkdownEditor from "../../components/MarkdownEditor";
-import MavonEditor from "../../components/MavonEditor";
-import CKEditor from "@/components/CKEditor";
+import 'quill/dist/quill.core.css';
+import 'quill/dist/quill.snow.css';
+import 'quill/dist/quill.bubble.css';
+import {quillEditor} from 'vue-quill-editor';
 import {
-  deleteBlog,
+  deleteBlog, getSystemConfig,
   getTagList,
   publishOrUpdate,
   queryArticleList,
-  uploadBlogCover,
+  uploadBlogPic,
   withdrawBlog
 } from "@/api/center";
 import {mapGetters} from "vuex";
 import {getBlogCategory} from "@/api";
 import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
-import axios from "axios";
 
 export default {
   name: "manage",
   components: {
-    CKEditor,
-    MarkdownEditor,
-    mavonEditor
+    mavonEditor,
+    quillEditor
   },
 
   data() {
@@ -286,11 +290,12 @@ export default {
       userInfo: {},
       isAppoint: 0,
       initContent: "",
-      articleContent: "",
+      markdownContent: "",
       inputVisible: false,
       newTagValue: "",
       dynamicTags: [],
       dateRange: "",
+      systemConfig: {},
       // 监听表单内容是否改变
       isChange: false,
       appointWords: "定时发布",
@@ -302,16 +307,34 @@ export default {
       formLabelWidth: "120px",
       CKEditorData: "",
       navTitle: "增加博客",
-      publishBtn: "发布文章",
+      publishOrEditBtn: "发布文章",
+
+      richTextContent: '',
+      editorOption: {
+        placeholder: '开始编辑......',
+        toolbar: {
+          // 工具栏
+          handlers: {
+            'image': function (value) {
+              if (value) {
+                // TODO 使用图片上传服务器方式代替base64
+                document.querySelector('.avatar-uploader input').click()
+              } else {
+                this.quill.format('image', false)
+              }
+            }
+          }
+        }
+      },
       // 查询我的文章
+      currentPage: 1,
+      pageSize: 5,
       totalPage: 0,
       records: 0,
       queryParams: {
         keyword: "",
         categoryId: "",
         status: "",
-        currentPage: 1,
-        pageSize: 5,
         startDateStr: "",
         endDateStr: "",
       },
@@ -336,40 +359,14 @@ export default {
         content: [
           {required: true, message: '内容不能为空', trigger: 'blur'}
         ]
-      },
-      pickerOptions: {
-        shortcuts: [{
-          text: '最近一周',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近一个月',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近三个月',
-          onClick(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-            picker.$emit('pick', [start, end]);
-          }
-        }]
-      },
-      value1: [new Date(2000, 10, 10, 10, 10), new Date(2000, 10, 11, 10, 10)],
-      value2: '',
+      }
     }
   },
   created() {
     this.userInfo = this.getUserInfo;
+    getSystemConfig().then((response) => {
+      this.systemConfig = response.data;
+    })
     getBlogCategory().then(res => {
       this.articleCategoryList = res.data;
     });
@@ -387,20 +384,32 @@ export default {
     // 将图片上传到服务器, 返回地址替换到md中
     $imgAdd(pos, $file) {
       let formData = new FormData();
-      formData.append('file', $file);
-      axios({
-        url: '/common/upload',
-        method: 'post',
-        data: formData,
-        headers: {'Content-Type': 'multipart/form-data'},
-      }).then((url) => {
-        this.$refs.md.$img2Url(pos, url);
+      formData.append('files', $file);
+      uploadBlogPic(formData).then((response) => {
+        this.$message.success(response.msg);
+        this.$refs.md.$img2Url(pos, response.data);
       })
     },
     change(value, render) {
       this.isChange = true;
       // render为markdown解析后的结果
-      this.articleContent = render;
+      this.markdownContent = render;
+    },
+    onEditorChange({editor, html, text}) {
+      this.content = html;
+    },
+    getBlogCategoryNameById(categoryId) {
+      let categoryList = this.articleCategoryList;
+      for (let i = 0; i < categoryList.length; i++) {
+        if (categoryId === categoryList[i].id) {
+          return categoryList[i].name;
+        }
+      }
+    },
+    dateChoice() {
+      let dateArray = String(this.dateRange).split(",");
+      this.queryParams.startDateStr = dateArray[0];
+      this.queryParams.endDateStr = dateArray[1];
     },
     closeDialog() {
       if (this.isChange) {
@@ -432,8 +441,6 @@ export default {
           this.$message.success(response.msg);
           this.queryArticleList();
         })
-      }).catch(() => {
-        /**取消action*/
       })
     },
 
@@ -460,8 +467,6 @@ export default {
         keyword: "",
         categoryId: "",
         status: "",
-        currentPage: 1,
-        pageSize: 5,
         startDateStr: "",
         endDateStr: "",
       }
@@ -473,12 +478,11 @@ export default {
       params.append("userId", this.userInfo.id);
       params.append("keyword", queryParams.keyword);
       params.append("status", queryParams.status);
-      params.append("startDate", "");
-      params.append("endDate", "");
+      params.append("startDate", queryParams.startDateStr);
+      params.append("endDate", queryParams.endDateStr);
       params.append("categoryId", queryParams.categoryId);
-      params.append("page", queryParams.currentPage);
-      params.append("pageSize", queryParams.pageSize);
-
+      params.append("page", this.currentPage);
+      params.append("pageSize", this.pageSize);
       queryArticleList(params).then(res => {
         let content = res.data;
         this.articleList = content.rows;
@@ -512,15 +516,23 @@ export default {
     },
     handleChooseSysTag(tagId) {
       for (let item of this.tagList) {
-        if (item.id === tagId) {
+        if (item.id === tagId && this.dynamicTags) {
           let name = item.name;
           let color = item.color;
-          this.dynamicTags.push({
-            id: tagId,
-            name: name,
-            color: color
-          });
-          break;
+          let isPresent = false;
+          for (let hasPresentItem of this.dynamicTags) {
+            if (hasPresentItem.id === item.id) {
+              isPresent = true;
+            }
+          }
+          if (!isPresent) {
+            this.dynamicTags.push({
+              id: tagId,
+              name: name,
+              color: color
+            });
+            break;
+          }
         }
       }
     },
@@ -546,14 +558,19 @@ export default {
     handleAdd() {
       this.navTitle = "增加博客";
       this.dialogFormVisible = true;
-      // this.$nextTick(() => {
-      //   // 设置富文本内容
-      //   // this.$refs.editor.initData();
-      // });
+      if (this.systemConfig.editorModel === 0) {
+        // rich text
+        this.richTextContent = "";
+      } else if (this.systemConfig.editorModel === 1) {
+        // markdown
+        this.initContent = "";
+        this.markdownContent = "";
+      }
+
     },
     handleEdit(article) {
       this.navTitle = "编辑博客";
-      this.publishBtn = "保存修改"
+      this.publishOrEditBtn = "保存修改"
       this.isEdit = true;
       this.dialogFormVisible = true;
       this.form.articleId = article.id;
@@ -561,11 +578,20 @@ export default {
       this.form.categoryId = article.categoryId;
       this.form.articleCover = article.articleCover;
       this.form.articleType = String(article.articleType);
-      this.initContent = this.$common.htmlToMarkdown(article.content)
+      this.dynamicTags = article.tagList;
+
+      if (this.systemConfig.editorModel === 0) {
+        // rich text
+        this.richTextContent = article.content;
+      } else if (this.systemConfig.editorModel === 1) {
+        // markdown
+        this.initContent = article.content;
+      }
       this.setPicCoverStyle(this.form.articleCover);
     },
     resetBlogList() {
       this.queryParams = this.initQueryParams();
+      this.dateRange = "";
       this.queryArticleList();
       this.$message.success("刷新成功");
     },
@@ -578,9 +604,11 @@ export default {
       this.clearForm();
       this.coverStyle = "";
       this.isChange = false;
+      this.isEdit = false;
+      this.isAppoint = 0;
       this.selectedTag = {};
       this.dynamicTags = [];
-      this.articleContent = "";
+      this.markdownContent = "";
       this.initContent = "";
     },
     preview() {
@@ -598,18 +626,25 @@ export default {
       }
     },
     publishOrEdit() {
-      //获取CKEditor中的内容
-      //this.form.content = this.$refs.editor.getData();
       this.form.authorId = this.userInfo.id;
       this.form.isAppoint = this.isAppoint;
       this.form.createTime = this.timingDate;
-      this.form.content = this.articleContent;
+      if (this.systemConfig.editorModel === 0) {
+        this.form.content = this.richTextContent
+      } else if (this.systemConfig.editorModel === 1) {
+        this.form.content = this.markdownContent;
+      }
       this.form.tags = this.dynamicTags;
+      if (this.dynamicTags.length === 0) {
+        this.$message.error("请至少选择一个标签");
+        return;
+      }
       if (this.form.articleType === 1 && this.form.articleCover === "") {
         this.$notify.error({
           title: '错误',
           message: '请上传一个文章封面吧'
         });
+        return;
       }
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -633,7 +668,7 @@ export default {
       let multiForm = new FormData();
       //append 向form表单添加数据
       multiForm.append('files', f, f.name);
-      uploadBlogCover(multiForm).then(response => {
+      uploadBlogPic(multiForm).then(response => {
         if (response.success) {
           let imagesList = response.data;
           if (imagesList.length < 1) {
@@ -762,6 +797,13 @@ export default {
   align-self: center;
 }
 
+.editor {
+  z-index: 1;
+  border: 1px solid #d9d9d9;
+  height: 100vh;
+  margin-bottom: 50px;
+}
+
 .white-btn {
   background-color: white;
   color: #222222;
@@ -784,20 +826,6 @@ export default {
   padding-right: 5px;
   width: 200px;
   margin-right: 10px;
-}
-
-.submit-btn {
-  background-color: #920784;
-  color: white;
-  height: 40px;
-  margin-right: 10px;
-  padding: 0 20px;
-  border-radius: 5px;
-}
-
-.submit-btn:hover {
-  background-color: #9F5F9F;
-  cursor: pointer;
 }
 
 .el-tag + .el-tag {

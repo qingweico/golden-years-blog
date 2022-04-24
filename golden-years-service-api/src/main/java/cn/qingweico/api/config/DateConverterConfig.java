@@ -46,7 +46,7 @@ public class DateConverterConfig implements Converter<String, Date> {
         } else if (source.matches("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}:\\d{1,2}$")) {
             return parseDate(source, FORMATTER_LIST.get(3));
         } else {
-            GraceException.display(ResponseStatusEnum.SYSTEM_DATE_PARSER_ERROR);
+            GraceException.error(ResponseStatusEnum.SYSTEM_DATE_PARSER_ERROR);
         }
         return null;
     }

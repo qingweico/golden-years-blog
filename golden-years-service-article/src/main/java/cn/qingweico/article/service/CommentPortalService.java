@@ -1,5 +1,6 @@
 package cn.qingweico.article.service;
 
+import cn.qingweico.pojo.bo.CommentReplyBO;
 import cn.qingweico.util.PagedGridResult;
 
 /**
@@ -13,19 +14,9 @@ public interface CommentPortalService {
     /**
      * 发表评论
      *
-     * @param articleId       文章id
-     * @param fatherCommentId 回复评论id
-     * @param content         发表的内容
-     * @param userId          发表评论的用户id
-     * @param nickname        发表评论的用户昵称
-     * @param face            发表评论的用户头像
+     * @param commentReplyBO {@link CommentReplyBO}
      */
-    void publishComment(String articleId,
-                        String fatherCommentId,
-                        String content,
-                        String userId,
-                        String nickname,
-                        String face);
+    void publishComment(CommentReplyBO commentReplyBO);
 
 
     /**

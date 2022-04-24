@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author zqw
@@ -26,12 +27,16 @@ public class TagRestApi extends BaseRestApi {
 
     @ApiOperation(value = "管理员查询所有的标签", notes = "管理员查询所有的标签", httpMethod = "GET")
     @GetMapping("/query")
-    public GraceJsonResult query(@RequestParam Integer page,
+    public GraceJsonResult query(@RequestParam String tagName,
+                                 @RequestParam Integer status,
+                                 @RequestParam Integer sys,
+                                 @RequestParam Integer page,
                                  @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        return GraceJsonResult.ok(tagService.getTagList(page, pageSize));
+        return GraceJsonResult.ok(tagService.getTagList(tagName, status, sys, page, pageSize));
     }
-    @ApiOperation(value = "主站查询所有的标签", notes = "主站查询所有的标签", httpMethod = "GET")
+
+    @ApiOperation(value = "查询所有的标签", notes = "查询所有的标签", httpMethod = "GET")
     @GetMapping("/list")
     public GraceJsonResult list() {
         return GraceJsonResult.ok(tagService.getTagList());
@@ -49,10 +54,17 @@ public class TagRestApi extends BaseRestApi {
         }
     }
 
-    @ApiOperation(value = "管理员删除系统标签", notes = "管理员删除系统标签", httpMethod = "POST")
+    @ApiOperation(value = "管理员删除标签", notes = "管理员删除标签", httpMethod = "POST")
     @PostMapping("/delete/{id}")
     public GraceJsonResult delete(@PathVariable("id") String tagId) {
         tagService.delete(tagId);
+        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
+    }
+
+    @ApiOperation(value = "管理员批量删除标签", notes = "管理员批量删除标签", httpMethod = "POST")
+    @PostMapping("/delete")
+    public GraceJsonResult batchDelete(@RequestBody List<String> ids) {
+        tagService.batchDelete(ids);
         return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
     }
 

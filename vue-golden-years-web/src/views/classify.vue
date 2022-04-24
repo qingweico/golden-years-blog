@@ -3,7 +3,7 @@
     <div class="page_bg classify"></div>
     <div class="container">
       <h1 class="t_nav">
-        <span></span>
+        <span>哪里会有人喜欢孤独,不过是不喜欢失望罢了 ——村上春树《挪威的森林》</span>
         <a href="/" class="n1">网站首页</a>
         <a href="javascript:void(0);" class="n2">分类</a>
       </h1>
@@ -15,7 +15,7 @@
             <el-timeline :reverse="reverse">
               <el-timeline-item v-for="(activity, index) in activities" hide-timestamp :key="index">
                 <span
-                    @click="getBlogListByCategoryId(activity.id)"
+                    @click="getArticleListByCategoryId(activity.id)"
                     :class="[activity.id === selectedBlogId ? 'sortBoxSpan sortBoxSpanSelect' : 'sortBoxSpan']"
                 >{{ activity.categoryName }}</span>
               </el-timeline-item>
@@ -32,13 +32,12 @@
                   :timestamp="item.createTime"
                   placement="top">
                 <el-card>
-                  <h4 @click="goToList('detail', item)" class="itemTitle">{{ item.title }}</h4>
+                  <h4 @click="goToList( item)" class="itemTitle">{{ item.title }}</h4>
                   <br>
                   <el-tag
                       class="elTag"
                       type="success"
                       v-if="item.categoryId != null"
-                      @click="goToList('category', item)"
                   >{{ getBlogCategoryNameById(item.categoryId) }}
                   </el-tag>
                   <el-tag
@@ -48,7 +47,6 @@
                       :key="tag.id"
                       style="margin-left: 3px; color: white"
                       :color="tag.color"
-                      @click="goToList('tag', tag)"
                   >{{ tag.name }}
                   </el-tag>
                 </el-card>
@@ -86,7 +84,7 @@ export default {
       activities: [],
       articleListCategory: [],
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 5,
       totalPage: 0,
       records: 0
     };
@@ -106,18 +104,21 @@ export default {
         result.push(dataForDate);
         this.activities = result;
         // 默认选择第一个
-        this.getBlogListByCategoryId(activities[0].id);
+        this.getArticleListByCategoryId(activities[0].id);
       }
     });
 
   },
   methods: {
     ...mapGetters(['getUserInfo']),
-    getBlogListByCategoryId(id) {
+    getArticleListByCategoryId(id) {
       this.selectedBlogId = id;
+      this.getPagedArticleList();
+    },
+    getPagedArticleList() {
       let params = new URLSearchParams();
       params.append("userId", this.getUserInfo().id);
-      params.append("categoryId", id);
+      params.append("categoryId", this.selectedBlogId);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getBlogListByCategoryId(params).then(response => {
@@ -128,7 +129,6 @@ export default {
         this.records = content.records;
       });
     },
-
     getBlogCategoryNameById(categoryId) {
       let categoryList = this.activities;
       for (let i = 0; i < categoryList.length; i++) {
@@ -138,40 +138,16 @@ export default {
       }
     },
     // 跳转到搜索详情页
-    goToList(type, entity) {
-      switch (type) {
-        case "tag": {
-          // 标签
-          let routeData = this.$router.resolve({
-            path: "/list",
-            query: {tagId: entity.id}
-          });
-          window.open(routeData.href, "_blank");
-        }
-          break;
-          // 类别
-        case "category": {
-          let routeData = this.$router.resolve({
-            path: "/list",
-            query: {categoryId: entity.categoryId}
-          });
-          window.open(routeData.href, "_blank");
-        }
-          break;
-          // 详情
-        case "detail": {
-          let routeData = this.$router.resolve({
-            path: "/detail",
-            query: {id: entity.articleId}
-          });
-          window.open(routeData.href, "_blank");
-        }
-          break;
-      }
+    goToList(entity) {
+      let routeData = this.$router.resolve({
+        path: "/detail",
+        query: {id: entity.articleId}
+      });
+      window.open(routeData.href, "_blank");
     },
     handleCurrentChange(val) {
       this.currentPage = val;
-      this.getBlogListByCategoryId();
+      this.getPagedArticleList();
     },
   }
 };

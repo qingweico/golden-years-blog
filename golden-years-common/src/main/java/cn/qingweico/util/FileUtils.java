@@ -1,20 +1,25 @@
 package cn.qingweico.util;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import sun.misc.BASE64Encoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.Binder;
 import java.io.*;
 import java.net.URLDecoder;
+import java.util.Arrays;
 
 /**
  * @author zqw
  * @date 2021/9/10
  */
+@Slf4j
 public class FileUtils {
 
     /**
-     * 文件流下载 在浏览器展示
+     * 文件流下载; 在浏览器展示
      *
      * @param response HttpServletResponse
      * @param file     文件从盘符开始的完整路径
@@ -27,7 +32,7 @@ public class FileUtils {
             try {
                 filePath = URLDecoder.decode(filePath, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                log.error("{}", e.getMessage());
             }
         }
 
@@ -59,7 +64,7 @@ public class FileUtils {
             }
             out.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("{}", e.getMessage());
         } finally {
             try {
                 if (out != null) {
@@ -69,7 +74,7 @@ public class FileUtils {
                     in.close();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("{}", e.getMessage());
             }
         }
     }
@@ -84,19 +89,20 @@ public class FileUtils {
     public static String fileToBase64(File file) {
         InputStream in;
         byte[] fileData = null;
+        int read = 0;
         // 读取文件字节数组
         try {
             in = new FileInputStream(file);
             fileData = new byte[in.available()];
-            in.read(fileData);
+            read = in.read(fileData);
             in.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("read byte: {}, {}", read, e.getMessage());
         }
-
-        // 对字节数组Base64编码并且返回
-        BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encode(fileData);
+        // 对字节数组Base64编码并且去掉换行符(由于JDK自带base64不会去掉换行符,导致base64格式验证失败)
+        // 根据RFC822规定, BASE64Encoder编码每76个字符, 还需要加上一个回车换行
+        // 部分Base64编码的java库还按照这个标准实行
+        return Base64.encodeBase64String(fileData);
     }
 
 }

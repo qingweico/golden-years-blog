@@ -19,4 +19,12 @@ public interface FaceBase64Client {
     */
    @GetMapping("readFace64InGridFS")
    GraceJsonResult getFaceBase64(@RequestParam("faceId")String faceId);
+
+   /**
+    * 根据faceId删除GridFs中的人脸信息
+    * @param faceId 人脸id
+    * @return GraceJsonResult
+    */
+   @GetMapping("removeGridFsFile")
+   GraceJsonResult removeGridFsFile(@RequestParam("faceId")String faceId);
 }

@@ -1,9 +1,11 @@
 package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.bo.NewArticleBO;
+import cn.qingweico.pojo.vo.ArticleAdminVO;
 import cn.qingweico.util.PagedGridResult;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户和管理员相关的文章服务
@@ -47,14 +49,14 @@ public interface ArticleService {
      * @param pageSize   pageSize
      * @return PagedGridResult
      */
-    PagedGridResult queryMyArticles(String userId,
-                                    String keyword,
-                                    Integer categoryId,
-                                    Integer status,
-                                    Date startDate,
-                                    Date endDate,
-                                    Integer page,
-                                    Integer pageSize);
+    PagedGridResult queryUserArticles(String userId,
+                                      String keyword,
+                                      String categoryId,
+                                      Integer status,
+                                      Date startDate,
+                                      Date endDate,
+                                      Integer page,
+                                      Integer pageSize);
 
 
     /**
@@ -100,14 +102,26 @@ public interface ArticleService {
     /**
      * 管理员查询所有的文章列表
      *
+     * @param keyword      文章标题
      * @param status       文章的状态
-     * @param page         page 起始分页
      * @param categoryId   文章分类
-     * @param pageSize     pageSize 每页的数目
+     * @param tagId        文章标签
      * @param deleteStatus 文章的逻辑状态(0:未删除 1: 已删除)
-     * @return PagedGridResult
+     * @param startDateStr 文章发布时间(开始)
+     * @param endDateStr   文章发布时间(截止)
+     * @param page         page 起始分页
+     * @param pageSize     pageSize 每页的数目
+     * @return List<ArticleAdminVO>
      */
-    PagedGridResult query(Integer status, Integer categoryId, Integer page, Integer pageSize, Integer deleteStatus);
+    List<ArticleAdminVO> query(String keyword,
+                               Integer status,
+                               String categoryId,
+                               String tagId,
+                               Integer deleteStatus,
+                               Date startDateStr,
+                               Date endDateStr,
+                               Integer page,
+                               Integer pageSize);
 
     /**
      * 管理员删除文章(delete sql)

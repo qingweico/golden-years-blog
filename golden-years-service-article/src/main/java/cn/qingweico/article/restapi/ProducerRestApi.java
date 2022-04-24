@@ -1,6 +1,7 @@
 package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.config.RabbitMqConfig;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.pojo.eo.ArticleEo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,30 +22,29 @@ import java.util.Date;
 @RequestMapping("producer")
 public class ProducerRestApi {
 
-   @Resource
-   public ElasticsearchTemplate elasticsearchTemplate;
+    @Resource
+    public ElasticsearchTemplate elasticsearchTemplate;
 
-   @Resource
-   private RabbitTemplate rabbitTemplate;
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
-   @GetMapping("send")
-   public GraceJsonResult send() {
-      rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
-              "article.hello",
-              "这是一条消息!");
-      return GraceJsonResult.ok();
-   }
+    @GetMapping("send")
+    public GraceJsonResult send() {
+        rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
+                "article.hello",
+                "这是一条消息!");
+        return GraceJsonResult.ok();
+    }
 
-   @GetMapping("delay")
-   public GraceJsonResult delay() {
+    @GetMapping("delay")
+    public GraceJsonResult delay() {
+        System.out.println("生产者发送的延迟消息:" + new Date());
+        return GraceJsonResult.ok();
+    }
 
-      System.out.println("生产者发送的延迟消息:" + new Date());
-      return GraceJsonResult.ok();
-   }
-
-   @GetMapping("delete/{articleId}")
-   public GraceJsonResult delete(@PathVariable("articleId") String articleId) {
-      elasticsearchTemplate.delete(ArticleEo.class, articleId);
-      return GraceJsonResult.ok();
-   }
+    @GetMapping("delete/{articleId}")
+    public GraceJsonResult delete(@PathVariable("articleId") String articleId) {
+        elasticsearchTemplate.delete(ArticleEo.class, articleId);
+        return GraceJsonResult.ok();
+    }
 }

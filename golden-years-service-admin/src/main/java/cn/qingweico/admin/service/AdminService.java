@@ -1,8 +1,7 @@
 package cn.qingweico.admin.service;
 
 import cn.qingweico.pojo.Admin;
-import cn.qingweico.pojo.bo.NewAdminBO;
-import cn.qingweico.pojo.bo.UpdateAdminBO;
+import cn.qingweico.pojo.bo.OperatorAdminBO;
 import cn.qingweico.util.PagedGridResult;
 
 /**
@@ -31,9 +30,9 @@ public interface AdminService {
     /**
      * 新增admin用户信息
      *
-     * @param newAdminBO NewAdminBO
+     * @param operatorAdminBO NewAdminBO
      */
-    void createAdminUser(NewAdminBO newAdminBO);
+    void createAdminUser(OperatorAdminBO operatorAdminBO);
 
     /**
      * 分页查询admin列表
@@ -56,9 +55,9 @@ public interface AdminService {
     /**
      * 更新管理员个人信息
      *
-     * @param user {@link UpdateAdminBO}
+     * @param user {@link OperatorAdminBO}
      */
-    void updateUserProfile(UpdateAdminBO user);
+    void updateUserProfile(OperatorAdminBO user);
 
     /**
      * 检查管理员用户名的唯一性

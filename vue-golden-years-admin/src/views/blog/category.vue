@@ -16,14 +16,14 @@
       <el-button
           class="filter-item"
           type="info"
-          @click="handleBlogSortByQuantity"
+          @click="handleArticleSortByCount"
           icon="el-icon-document">博客数量排序
       </el-button>
       <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
     </div>
     <el-table :data="tableData"
-              style="width: 100%"
-              @selection-change="handleSelectionChange">
+              @selection-change="handleSelectionChange"
+              style="width: 100%">
       <el-table-column type="selection"></el-table-column>
       <el-table-column label="序号" width="60" align="center">
         <template slot-scope="scope">
@@ -48,11 +48,23 @@
           <span>{{ scope.row.eachCategoryArticleCount }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="状态" width="150" align="center" prop="clickCount">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.status === 1">可用</el-tag>
+          <el-tag type="danger" v-if="scope.row.status === 0">不可用</el-tag>
+        </template>
+      </el-table-column>
 
 
       <el-table-column label="创建时间" width="150" align="center" prop="createTime">
         <template slot-scope="scope">
           <span>{{ scope.row.createTime }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="更新时间" width="150" align="center" prop="createTime">
+        <template slot-scope="scope">
+          <span>{{ scope.row.updateTime }}</span>
         </template>
       </el-table-column>
 
@@ -77,20 +89,28 @@
     </div>
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+    <el-dialog :title="title" :visible.sync="dialogFormVisible" :before-close="closeDialog">
       <el-form :model="form" :rules="rules" ref="form">
         <el-form-item label="分类名称" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="form.name"></el-input>
+          <el-input v-model="form.name" @input="isChange = true"></el-input>
         </el-form-item>
 
         <el-form-item label="分类介绍" :label-width="formLabelWidth" prop="description">
-          <el-input v-model="form.description"
+          <el-input v-model="form.description" @input="isChange = true"
                     :autosize="{ minRows: 3, maxRows: 10}"
                     type="textarea"></el-input>
         </el-form-item>
+
+        <el-form-item label="状态" :label-width="formLabelWidth">
+          <el-switch
+              v-model="form.status"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+          </el-switch>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="handleCancel">取 消</el-button>
         <el-button type="primary" @click="submitForm">确 定</el-button>
       </div>
     </el-dialog>
@@ -99,7 +119,12 @@
 
 <script>
 
-import {deleteCategory, getBlogCategory, saveOrUpdateCategory} from "../../api/blog";
+import {
+  deleteCategory,
+  saveOrUpdateCategory,
+  batchDeleteCategory,
+  getCategoryListWithArticleCount
+} from "@/api/blog";
 
 export default {
   data() {
@@ -108,6 +133,7 @@ export default {
       multipleSelection: [],
       tableData: [],
       keyword: "",
+      sort: false,
       currentPage: 1,
       pageSize: 10,
       records: 0,
@@ -115,16 +141,15 @@ export default {
       title: "增加分类",
       // 控制弹出框
       dialogFormVisible: false,
+      isChange: false,
       formLabelWidth: "120px",
       isEditForm: false,
-      queryParams: {
-        name: ""
-      },
       form: {
         id: null,
         name: null,
         oldName: null,
-        description: null
+        description: null,
+        status: false
       },
       rules: {
         name: [
@@ -141,12 +166,15 @@ export default {
   created() {
     this.categoryList();
   },
+  watch: {},
   methods: {
     categoryList() {
       let params = new URLSearchParams();
+      params.append("keyword", this.keyword.trim());
       params.append("page", this.currentPage);
+      params.append("sort", this.sort);
       params.append("pageSize", this.pageSize);
-      getBlogCategory(params).then(res => {
+      getCategoryListWithArticleCount(params).then(res => {
         this.tableData = res.data.rows;
         this.records = res.data.records;
         this.totalPages = res.data.totalPages;
@@ -157,11 +185,36 @@ export default {
         id: null,
         name: null,
         oldName: null,
-        description: null
+        description: null,
+        status: false,
       }
     },
+    // 关闭窗口
+    closeDialog(done) {
+      // 清除本次的校验信息
+      this.$refs.form.clearValidate();
+      if (this.isChange) {
+        this.$confirm("是否放弃本次操作", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() => {
+          this.clearStatus();
+          done();
+        }).catch(() => {
+          /**cancel**/
+        });
+      } else {
+        this.clearStatus();
+      }
+    },
+    clearStatus() {
+      this.dialogFormVisible = false;
+      this.clearData();
+      this.isChange = false;
+    },
     handleFind() {
-      this.currentPage = 1
+      this.categoryList();
     },
     handleAdd() {
       this.title = "增加分类"
@@ -169,8 +222,13 @@ export default {
       this.clearData();
       this.isEditForm = false;
     },
+    handleCancel() {
+      this.dialogFormVisible = false;
+      // 清除本次的校验信息
+      this.$refs.form.clearValidate();
+    },
     // 通过博客数量排序
-    handleBlogSortByQuantity() {
+    handleArticleSortByCount() {
       this.$confirm(
           "此操作将根据博博客数量进行排序, 是否继续?",
           "提示",
@@ -180,9 +238,31 @@ export default {
             type: "warning"
           }
       ).then(() => {
-      }).catch(() => {
-        this.$message.info("已取消批量排序")
-      });
+        this.sort = true;
+        this.categoryList();
+      })
+    },
+    handleDeleteBatch() {
+      const that = this;
+      if (that.multipleSelection.length <= 0) {
+        this.$message.error("请先选中需要删除的内容!")
+        return;
+      }
+      this.$confirm("此操作将把选中的类别删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        let ids = [];
+        for (let item of that.multipleSelection) {
+          ids.push(item.id);
+        }
+        batchDeleteCategory(ids).then(response => {
+          this.$message.success(response.msg);
+          that.multipleSelection = [];
+          this.categoryList();
+        })
+      })
     },
     handleEdit(row) {
       this.title = "编辑分类"
@@ -192,6 +272,7 @@ export default {
       this.form.oldName = row.name;
       this.form.name = row.name;
       this.form.description = row.description;
+      this.form.status = !!row.status;
     },
     handleDelete(row) {
       this.$confirm("此操作将把分类删除, 是否继续?", "提示", {
@@ -203,59 +284,50 @@ export default {
           this.categoryList();
           this.$message.success(result.msg);
         })
-      }).catch(() => {
-        this.$message.info("已取消删除")
-      });
-    },
-    handleDeleteBatch() {
-      if (this.multipleSelection.length <= 0) {
-        this.$message.error("请先选中需要删除的内容!")
-        return;
-      }
-      this.$confirm("此操作将把选中的分类删除, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(() => {
-
-      }).catch(() => {
-        this.$message.info("已取消删除")
-      });
+      })
     },
     handleCurrentChange(val) {
       this.currentPage = val;
       this.categoryList();
     },
-    resetQuery() {
-      this.queryParams = {
-        name: "",
-        isDelete: ""
+    // 改变多选
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    getBlogCategoryNameById(categoryId) {
+      let categoryList = this.tableData;
+      alert(JSON.stringify(categoryList))
+      for (let i = 0; i < categoryList.length; i++) {
+        if (categoryId === categoryList[i].id) {
+          return categoryList[i].name;
+        }
       }
+    },
+    resetQuery() {
+      this.keyword = "";
+      this.sort = false;
       this.categoryList();
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
+          this.form.status = Number(this.form.status);
           if (this.isEditForm) {
             saveOrUpdateCategory(this.form).then(response => {
-              this.$message.success(response.msg)
+              this.$message.success(response.msg);
               this.dialogFormVisible = false;
-              this.clearData();
               this.categoryList();
             });
           } else {
             saveOrUpdateCategory(this.form).then(response => {
-              this.$message.success(response.msg)
+              this.$message.success(response.msg);
               this.dialogFormVisible = false;
               this.categoryList();
             });
           }
+
         }
-      })
-    },
-    // 改变多选
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
+      });
     }
   }
 };

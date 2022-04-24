@@ -10,7 +10,7 @@
       <div class="single-fan" v-for="(fan, fanIndex) in fansList" :key="fanIndex">
         <a target="_blank"
            class="fan-face"
-           @click="passive(fan.id, fan.fanId)">
+           @click="goUserHomepage(fan)">
           <img :src="fan.face" class="fan-face" alt="face"/>
         </a>
 
@@ -55,15 +55,17 @@ export default {
   },
   methods: {
     ...mapGetters(['getUserInfo']),
+    // 被动更新粉丝信息
     passive(relationId, fanId) {
       let params = {};
       params.relationId = relationId;
       params.fanId = fanId;
-      passive(params).then((response) => {
-        if (response.data.success) {
+      passive(params)
+    },
+    goUserHomepage(fan) {
+      this.passive(fan.id, fan.fanId);
+      this.$router.push({path: '/homepage', query: {id: fan.fanId}})
 
-        }
-      });
     },
     handleCurrentChange(val) {
       this.currentPage = val;

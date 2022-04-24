@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {Message, MessageBox, Loading} from 'element-ui'
+import {Message, MessageBox} from 'element-ui'
 import store from '../store'
 import {getToken} from '@/utils/auth'
 // 导入NProgress进度条
@@ -39,7 +39,7 @@ service.interceptors.request.use(config => {
 // response 拦截器
 service.interceptors.response.use(response => {
         // 响应时结束进度条
-        NProgress.done()
+        NProgress.done();
         const res = response.data;
         if (res.success) {
             // 请求完毕

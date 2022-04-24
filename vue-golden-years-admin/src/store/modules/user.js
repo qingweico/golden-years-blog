@@ -1,6 +1,6 @@
 import {login, logout, getInfo, getMenu} from '@/api/login'
 import {getToken, setToken, removeToken} from '@/utils/auth'
-
+import {face} from "@/api/login";
 const user = {
     state: {
         token: getToken(),
@@ -44,6 +44,24 @@ const user = {
                 login(params).then(response => {
                     if (response.success) {
                         const token = response.data
+                        // 向cookie中设置token
+                        setToken(token);
+                        // 向store中设置cookie
+                        commit('SET_TOKEN', token);
+                    }
+                    resolve(response)
+                }).catch(error => {
+                    reject(error)
+                })
+            })
+        },
+
+        // 人脸登录
+        Face({commit}, data) {
+            return new Promise((resolve, reject) => {
+                face(data).then(response => {
+                    if (response.success) {
+                        const token = response.data;
                         // 向cookie中设置token
                         setToken(token);
                         // 向store中设置cookie

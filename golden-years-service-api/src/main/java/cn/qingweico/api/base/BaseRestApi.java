@@ -1,17 +1,17 @@
 package cn.qingweico.api.base;
 
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.Constants;
-import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.Admin;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.JwtUtils;
 import cn.qingweico.util.RedisOperator;
 import cn.qingweico.util.ServletReqUtils;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 
 import javax.annotation.Resource;
@@ -20,6 +20,8 @@ import javax.annotation.Resource;
  * @author zqw
  * @date 2021/9/5
  */
+@Slf4j
+@EnableFeignClients
 public class BaseRestApi {
 
     @Autowired
@@ -38,35 +40,37 @@ public class BaseRestApi {
 
     public void checkPagingParams(Integer page, Integer pageSize) {
         if (page == null || page <= 0) {
-            page = Constants.COMMON_START_PAGE;
+            log.error("page: {}", page);
+            GraceException.error(ResponseStatusEnum.FAILED);
         }
 
         if (pageSize == null || pageSize <= 0) {
-            pageSize = Constants.COMMON_PAGE_SIZE;
+            log.error("pageSize: {}", pageSize);
+            GraceException.error(ResponseStatusEnum.FAILED);
         }
     }
 
     public <T> T getLoginUser(Class<T> loginUserType, String tokenKey, String infoKey) {
         String token = ServletReqUtils.getRequest().getHeader("Authorization");
         // 验证JWT
-        String id = "";
+        String id = SysConf.EMPTY_STRING;
         T t = null;
         try {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
-                id = claims.get("user_id", String.class);
-                t = JsonUtils.jsonToPojo(redisOperator.get(infoKey + Constants.SYMBOL_COLON + id), loginUserType);
+                id = claims.get(SysConf.USER_ID, String.class);
+                t = JsonUtils.jsonToPojo(redisOperator.get(infoKey + SysConf.SYMBOL_COLON + id), loginUserType);
             }
         } catch (Exception e) {
-            GraceException.display(ResponseStatusEnum.TICKET_INVALID);
+            GraceException.error(ResponseStatusEnum.TICKET_INVALID);
         }
         if (!StringUtils.isEmpty(id)) {
-            String redisToken = redisOperator.get(tokenKey + Constants.SYMBOL_COLON + id);
+            String redisToken = redisOperator.get(tokenKey + SysConf.SYMBOL_COLON + id);
             if (StringUtils.isEmpty(redisToken) || !token.equals(redisToken)) {
-                GraceException.display(ResponseStatusEnum.TICKET_INVALID);
+                GraceException.error(ResponseStatusEnum.TICKET_INVALID);
             }
         } else {
-            GraceException.display(ResponseStatusEnum.TICKET_INVALID);
+            GraceException.error(ResponseStatusEnum.TICKET_INVALID);
         }
         return t;
     }

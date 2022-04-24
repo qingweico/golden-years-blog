@@ -2,15 +2,18 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.repository.FriendLinkRepository;
 import cn.qingweico.admin.service.FriendLinkService;
+import cn.qingweico.api.service.BaseService;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.mo.FriendLink;
+import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -18,14 +21,10 @@ import java.util.List;
  * @date 2021/9/10
  */
 @Service
-public class FriendLinkServiceImpl implements FriendLinkService {
+public class FriendLinkServiceImpl extends BaseService implements FriendLinkService {
 
     @Resource
     private FriendLinkRepository repo;
-
-    @Resource
-    private MongoTemplate mongoTemplate;
-
 
     @Override
     public void saveOrUpdateFriendLink(FriendLink friendLink) {
@@ -34,10 +33,19 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    public PagedGridResult getFriendLinkList(Integer page, Integer pageSize) {
+    public PagedGridResult getFriendLinkList(String linkName, Integer iDelete, Integer page, Integer pageSize) {
         // start 0 not 1
         Pageable pageable = PageRequest.of(--page, pageSize);
-        Page<FriendLink> friendLinkPage = repo.findAll(pageable);
+        FriendLink fl = new FriendLink();
+        fl.setLinkName(linkName);
+        fl.setIsDelete(iDelete);
+        // 条件查询
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                .withMatcher("linkName", ExampleMatcher.GenericPropertyMatchers.contains())
+                .withMatcher("isDelete", ExampleMatcher.GenericPropertyMatchers.exact());
+
+        Example<FriendLink> example = Example.of(fl, exampleMatcher);
+        Page<FriendLink> friendLinkPage = repo.findAll(example, pageable);
         PagedGridResult pgr = new PagedGridResult();
         pgr.setRows(friendLinkPage.getContent());
         pgr.setRecords(friendLinkPage.getTotalElements());
@@ -49,10 +57,28 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Override
     public void delete(String linkId) {
         repo.deleteById(linkId);
+        refreshCache(RedisConf.REDIS_FRIEND_LINK);
     }
 
     @Override
-    public List<FriendLink> queryAllFriendLinkList(Integer isDelete) {
-        return repo.getAllByIsDelete(isDelete);
+    public void deleteAll(List<String> ids) {
+        for (String id : ids) {
+            repo.deleteById(id);
+        }
+        refreshCache(RedisConf.REDIS_FRIEND_LINK);
+    }
+
+    @Override
+    public List<FriendLink> queryIndexFriendLinkList(Integer isDelete) {
+        String cacheFriendLinkKey = RedisConf.REDIS_FRIEND_LINK;
+        String cache = redisOperator.get(cacheFriendLinkKey);
+        List<FriendLink> friendLinkList;
+        if (StringUtils.isBlank(cache)) {
+            friendLinkList = repo.getAllByIsDelete(isDelete);
+            redisOperator.set(cacheFriendLinkKey, JsonUtils.objectToJson(friendLinkList));
+        } else {
+            friendLinkList = JsonUtils.jsonToList(cache, FriendLink.class);
+        }
+        return friendLinkList;
     }
 }

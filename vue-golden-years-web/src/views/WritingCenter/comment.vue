@@ -9,7 +9,7 @@
     <div class="comment-list-wrapper" v-if="commentList.length">
       <el-table :data="commentList"
                 style="width: 100%">
-        <el-table-column label="文章标题" width="200" align="center">
+        <el-table-column label="文章封面" width="200" align="center">
           <template slot-scope="scope">
             <img
                 v-if="scope.row.articleCover"
@@ -125,8 +125,5 @@ export default {
 </script>
 
 <style scoped>
-.comment-list-wrapper {
-  background-color: white;
-  margin-top: 20px;
-}
+
 </style>

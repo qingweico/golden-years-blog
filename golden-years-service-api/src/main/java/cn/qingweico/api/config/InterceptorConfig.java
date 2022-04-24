@@ -28,12 +28,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(@NotNull InterceptorRegistry registry) {
-//        registry.addInterceptor(smsInterceptor())
-//                .addPathPatterns("/auth/getSmsCode");
-//        registry.addInterceptor(userTokenInterceptor())
-//                .addPathPatterns("/user/getAccountInfo")
-//                .addPathPatterns("/user/updateUserInfo")
-//                .addPathPatterns("/fs/uploadFace")
-//                .addPathPatterns("/fs/uploadSomeFiles");
+        registry.addInterceptor(smsInterceptor())
+                .addPathPatterns("/auth/getSmsCode");
     }
 }

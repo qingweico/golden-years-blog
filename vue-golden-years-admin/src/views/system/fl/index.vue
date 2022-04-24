@@ -7,23 +7,18 @@
             clearable
             class="filter-item"
             style="width: 250px;"
-            v-model="queryParams.name"
+            v-model="queryParams.linkName"
             placeholder="请输入友情链接名称"
             @keyup.enter.native="handleSearch">
         </el-input>
         <el-select
-            v-model="queryParams.status"
+            v-model="queryParams.isDelete"
             style="width: 140px"
-            filterable
             clearable
-            remote
-            reserve-keyword
             placeholder="状态"
-            @keyup.enter.native="handleSearch"
-            :loading="loading">
-          <el-option value="0" label="全部" checked></el-option>
-          <el-option value="1" label="启用"></el-option>
-          <el-option value="1" label="禁用"></el-option>
+            @keyup.enter.native="handleSearch">
+          <el-option value="0" label="可用"></el-option>
+          <el-option value="1" label="不可用"></el-option>
         </el-select>
         <el-button style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search"
                    @click="handleSearch">查找
@@ -84,7 +79,7 @@
 
     <el-dialog :title="title"
                :visible.sync="dialogFormVisible"
-               :before-close="closeDialog" width="70%">
+               :before-close="closeDialog" width="30%">
       <el-form label-width="80px" :model="form" :rules="rules" ref="form">
         <el-form-item label="链接名称" prop="linkName">
           <el-input v-model="form.linkName" @input="isChange = true"></el-input>
@@ -100,12 +95,10 @@
           </el-switch>
         </el-form-item>
       </el-form>
-      <template #footer>
-          <span class="dialog-footer">
-              <el-button @click="handleCancel">取 消</el-button>
-              <el-button type="primary" @click="saveEdit">确 定</el-button>
-          </span>
-      </template>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleCancel">取 消</el-button>
+        <el-button type="primary" @click="saveEdit">确 定</el-button>
+      </div>
     </el-dialog>
 
     <!--分页-->
@@ -122,7 +115,8 @@
 </template>
 
 <script>
-import {deleteFl, getFlList, saveOrUpdate} from "@/api/system";
+import {deleteFl, getFlList, saveOrUpdate} from "@/api/system/fl";
+import {batchDelete} from "../../../api/system/fl";
 
 export default {
   name: "fl",
@@ -138,11 +132,11 @@ export default {
 
     return {
       tableData: [],
+      multipleSelection: [],
       dialogFormVisible: false,
-      loading: false,
       title: "添加友情链接",
       queryParams: {
-        name: "",
+        linkName: "",
         isDelete: ""
       },
       status: false,
@@ -176,6 +170,8 @@ export default {
   methods: {
     getFriendLinkList() {
       let params = new URLSearchParams();
+      params.append("linkName", this.queryParams.linkName);
+      params.append("isDelete", this.queryParams.isDelete);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getFlList(params).then((response) => {
@@ -187,7 +183,7 @@ export default {
       })
     },
     handleSearch() {
-      this.loading = true;
+      this.getFriendLinkList();
     },
     handleCancel() {
       // 清除本次的校验信息
@@ -214,7 +210,9 @@ export default {
         this.clearStatus();
       }
     },
-    handleSelectionChange() {
+    // 改变多选
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
     },
     clearStatus() {
       this.dialogFormVisible = false;
@@ -222,6 +220,26 @@ export default {
       this.isChange = false;
     },
     handleDeleteBatch() {
+      const that = this;
+      if (that.multipleSelection.length <= 0) {
+        that.$message.error("请先选中需要删除的内容")
+        return;
+      }
+      this.$confirm("此操作将把选中的内容删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        let ids = [];
+        for (let item of that.multipleSelection) {
+          ids.push(item.id);
+        }
+        batchDelete(ids).then((response) => {
+          this.$message.success(response.msg);
+          that.multipleSelection = [];
+          this.getFriendLinkList();
+        })
+      })
     },
     handleEdit(row) {
       this.dialogFormVisible = true;
@@ -263,7 +281,7 @@ export default {
     },
     refresh() {
       this.queryParams = {
-        name: "",
+        linkName: "",
         isDelete: ""
       }
       this.getFriendLinkList();

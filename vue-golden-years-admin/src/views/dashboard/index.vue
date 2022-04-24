@@ -9,7 +9,7 @@
             <svg-icon icon-class="eye" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">IP数: </div>
+            <div class="card-panel-text">IP数:</div>
             <count-to class="card-panel-num" :startVal="0" :endVal="visitAddTotal" :duration="3200"></count-to>
           </div>
         </div>
@@ -21,7 +21,7 @@
             <svg-icon icon-class="peoples" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">用户数: </div>
+            <div class="card-panel-text">用户数:</div>
             <count-to class="card-panel-num" :startVal="0" :endVal="userTotal" :duration="2600"></count-to>
           </div>
         </div>
@@ -33,7 +33,7 @@
             <svg-icon icon-class="message" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">评论数: </div>
+            <div class="card-panel-text">评论数:</div>
             <count-to class="card-panel-num" :startVal="0" :endVal="commentTotal" :duration="3000"></count-to>
           </div>
         </div>
@@ -44,78 +44,71 @@
             <svg-icon icon-class="form" class-name="card-panel-icon"/>
           </div>
           <div class="card-panel-description">
-            <div class="card-panel-text">文章数: </div>
+            <div class="card-panel-text">文章数:</div>
             <count-to class="card-panel-num" :startVal="0" :endVal="blogTotal" :duration="3600"></count-to>
           </div>
         </div>
       </el-col>
     </el-row>
 
-<!--    &lt;!&ndash;文章贡献度&ndash;&gt;-->
-<!--    <el-row>-->
-<!--      <CalendarChart></CalendarChart>-->
-<!--    </el-row>-->
+    <!--文章贡献度-->
+    <el-row>
+      <CalendarChart></CalendarChart>
+    </el-row>
 
-<!--    &lt;!&ndash; 分类图&ndash;&gt;-->
-<!--    <el-row :gutter="32">-->
-<!--      <el-col :xs="24" :sm="24" :lg="8">-->
-<!--        <div class="chart-wrapper">-->
-<!--          <pie-chart-->
-<!--            ref="blogSortPie"-->
-<!--            @clickPie="clickBlogSortPie"-->
-<!--            v-if="showPieBlogSortChart"-->
-<!--            :value="blogCountByBlogSort"-->
-<!--            :tagName="blogSortNameArray"-->
-<!--          ></pie-chart>-->
-<!--        </div>-->
-<!--      </el-col>-->
+    <!-- 分类图-->
+    <el-row :gutter="32">
+      <el-col :xs="24" :sm="24" :lg="12">
+        <div class="chart-wrapper">
+          <pie-chart
+              ref="blogSortPie"
+              @clickPie="clickBlogCategoryPie"
+              v-if="showPieBlogSortChart"
+              :value="blogCountByCategory"
+              :tagName="blogSortNameArray"
+          ></pie-chart>
+        </div>
+      </el-col>
+      <!--标签图-->
+      <el-col :xs="24" :sm="24" :lg="12">
+        <div class="chart-wrapper">
+          <pie-chart
+              v-if="showPieChart"
+              @clickPie="clickBlogTagPie"
+              :value="blogCountByTag"
+              :tagName="tagNameArray"
+          ></pie-chart>
+        </div>
+      </el-col>
 
-<!--      <el-col :xs="24" :sm="24" :lg="8">-->
-<!--        <div class="chart-wrapper">-->
-<!--          <pie-chart-->
-<!--            v-if="showPieChart"-->
-<!--            @clickPie="clickBlogTagPie"-->
-<!--            :value="blogCountByTag"-->
-<!--            :tagName="tagNameArray"-->
-<!--          ></pie-chart>-->
-<!--        </div>-->
-<!--      </el-col>-->
+      <el-col
+          :xs="{span: 24}"
+          :sm="{span: 12}"
+          :md="{span: 12}"
+          :lg="{span: 6}"
+          :xl="{span: 6}"
+          style="margin-bottom:30px;"
+      >
+      </el-col>
+    </el-row>
 
-<!--      <el-col-->
-<!--        :xs="{span: 24}"-->
-<!--        :sm="{span: 12}"-->
-<!--        :md="{span: 12}"-->
-<!--        :lg="{span: 6}"-->
-<!--        :xl="{span: 6}"-->
-<!--        style="margin-bottom:30px;"-->
-<!--      >-->
-<!--      </el-col>-->
-<!--    </el-row>-->
-
-<!--    &lt;!&ndash;访问量统计&ndash;&gt;-->
-<!--    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">-->
-<!--      <line-chart v-if="showLineChart" :chart-data="lineChartData"></line-chart>-->
-<!--    </el-row>-->
+    <!--访问量统计-->
+    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+      <line-chart v-if="showLineChart" :chart-data="lineChartData"></line-chart>
+    </el-row>
 
 
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import {mapGetters, mapMutations} from "vuex";
 import CountTo from "vue-count-to";
-import {
-  init,
-  getVisitByWeek,
-  getBlogCountByTag,
-  getBlogCountByBlogSort
-} from "@/api/index";
+import {getBlogCountByBlogCategory, getBlogCountByTag, getVisitByWeek, init} from "@/api";
 import PieChart from "@/components/PieChart";
 import BarChart from "@/components/BarChart";
 import LineChart from "@/components/LineChart";
 import CalendarChart from "@/components/CalendarChart";
-import { mapMutations } from "vuex";
-import {getToken} from "../../utils/auth";
 
 export default {
   name: "dashboard",
@@ -139,7 +132,7 @@ export default {
       showPieBlogSortChart: false,
       showLineChart: false,
       blogCountByTag: [],
-      blogCountByBlogSort: [],
+      blogCountByCategory: [],
       tagNameArray: [],
       blogSortNameArray: [],
       lineChartData: {},
@@ -148,52 +141,52 @@ export default {
   },
   created() {
 
-    // this.getSystemConfigData();
-    // init().then(response => {
-    //   if (response.code == this.$ECode.SUCCESS) {
-    //     this.blogTotal = response.data.blogCount;
-    //     this.commentTotal = response.data.commentCount;
-    //     this.userTotal = response.data.userCount;
-    //     this.visitAddTotal = response.data.visitCount;
-    //   }
-    // });
-    //
-    // getVisitByWeek().then(response => {
-    //   if (response.code == this.$ECode.SUCCESS) {
-    //     var visitByWeek = response.data;
-    //     var lineChartData = {
-    //       date: visitByWeek.date,
-    //       expectedData: visitByWeek.pv,
-    //       actualData: visitByWeek.uv
-    //     };
-    //     this.lineChartData = lineChartData;
-    //     this.showLineChart = true;
-    //   }
-    // });
-    //
-    // //通过标签获取博客数目
-    // getBlogCountByTag().then(response => {
-    //   if (response.code == this.$ECode.SUCCESS) {
-    //     this.blogCountByTag = response.data;
-    //     var tagList = this.blogCountByTag;
-    //     for (var a = 0; a < this.blogCountByTag.length; a++) {
-    //       this.tagNameArray.push(tagList[a].name);
-    //     }
-    //     this.showPieChart = true;
-    //   }
-    // });
-    //
-    // //通过博客分类获取博客数目
-    // getBlogCountByBlogSort().then(response => {
-    //   if (response.code == this.$ECode.SUCCESS) {
-    //     this.blogCountByBlogSort = response.data;
-    //     let blogSortList = this.blogCountByBlogSort;
-    //     for (var a = 0; a < this.blogCountByBlogSort.length; a++) {
-    //       this.blogSortNameArray.push(blogSortList[a].name);
-    //     }
-    //     this.showPieBlogSortChart = true;
-    //   }
-    // });
+    init().then(response => {
+      this.blogTotal = response.data.blogCount;
+      this.commentTotal = response.data.commentCount;
+      this.userTotal = response.data.userCount;
+      this.visitAddTotal = response.data.visitCount;
+    });
+
+    getVisitByWeek().then(response => {
+      let visitByWeek = response.data;
+      this.lineChartData = {
+        date: visitByWeek.date,
+        expectedData: visitByWeek.pv,
+        actualData: visitByWeek.uv
+      };
+      this.showLineChart = true;
+    });
+
+    // 通过标签获取博客数目
+    getBlogCountByTag().then(response => {
+      this.blogCountByTag = response.data;
+      let tagList = this.blogCountByTag;
+      for (let a = 0; a < this.blogCountByTag.length; a++) {
+        this.tagNameArray.push(tagList[a].name);
+      }
+      this.showPieChart = true;
+    });
+
+    // 通过博客分类获取博客数目
+    getBlogCountByBlogCategory().then(response => {
+      let data = response.data;
+      let blogCountByCategory = [];
+      console.log(data)
+      for (let item of data) {
+        blogCountByCategory.push({
+          id: item.id,
+          name: item.name,
+          value: item.eachCategoryArticleCount
+        })
+      }
+      this.blogCountByCategory = blogCountByCategory;
+      let categoryList = this.blogCountByCategory;
+      for (let a = 0; a < this.blogCountByCategory.length; a++) {
+        this.blogSortNameArray.push(categoryList[a].name);
+      }
+      this.showPieBlogSortChart = true;
+    });
   },
   methods: {
     //拿到vuex中的方法
@@ -202,49 +195,38 @@ export default {
       this.setOpenNotification(false);
       done();
     },
-    // getSystemConfigData: function () {
-    //   getSystemConfig().then(response => {
-    //     if (response.code == this.$ECode.SUCCESS) {
-    //       this.systemConfig = response.data;
-    //     }
-    //   });
-    // },
-    clickBlogTagPie: function(index) {
-      let tag = this.blogCountByTag[index];
+    clickBlogTagPie(index) {
+      let tagId = this.blogCountByTag[index].tagId;
       this.$router.push({
-        path: "/blog/blog",
-        query: { tag: tag }
+        path: "/blog/article",
+        query: {tagId: tagId}
       });
     },
-    clickBlogSortPie: function(index) {
-      let blogSort = this.blogCountByBlogSort[index];
+    clickBlogCategoryPie(index) {
+      let categoryId = this.blogCountByCategory[index].id;
       this.$router.push({
-        path: "/blog/blog",
-        query: { blogSort: blogSort }
+        path: "/blog/article",
+        query: {categoryId: categoryId}
       });
 
     },
-    btnClick: function(type) {
+    btnClick(type) {
       switch (type) {
-        case "1":
-          {
-            this.$router.push({ path: "/log/webVisit" });
-          }
+        case "1": {
+          this.$router.push({path: "/log/webVisit"});
+        }
           break;
-        case "2":
-          {
-            this.$router.push({ path: "/user/user" });
-          }
+        case "2": {
+          this.$router.push({path: "/user/user"});
+        }
           break;
-        case "3":
-          {
-            this.$router.push({ path: "/message/comment" });
-          }
+        case "3": {
+          this.$router.push({path: "/message/comment"});
+        }
           break;
-        case "4":
-          {
-            this.$router.push({ path: "/blog/blog" });
-          }
+        case "4": {
+          this.$router.push({path: "/blog/article"});
+        }
           break;
       }
     }
@@ -256,12 +238,14 @@ export default {
 .dashboard-editor-container {
   padding: 32px;
   background-color: rgb(240, 242, 245);
+
   .chart-wrapper {
     background: #fff;
     padding: 16px 16px 0;
     margin-bottom: 32px;
   }
 }
+
 .btn {
   width: 80px;
   height: 40px;
@@ -312,35 +296,45 @@ export default {
     background: #fff;
     box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.05);
+
     &:hover {
       .card-panel-icon-wrapper {
         color: #fff;
       }
+
       .icon-people {
         background: #40c9c6;
       }
+
       .icon-message {
         background: #36a3f7;
       }
+
       .icon-money {
         background: #f4516c;
       }
+
       .icon-shoppingCard {
         background: #34bfa3;
       }
     }
+
     .icon-people {
       color: #40c9c6;
     }
+
     .icon-message {
       color: #36a3f7;
     }
+
     .icon-money {
       color: #f4516c;
     }
+
     .icon-shoppingCard {
       color: #34bfa3;
     }
+
     .card-panel-icon-wrapper {
       float: left;
       margin: 14px 0 0 14px;
@@ -348,20 +342,24 @@ export default {
       transition: all 0.38s ease-out;
       border-radius: 6px;
     }
+
     .card-panel-icon {
       float: left;
       font-size: 48px;
     }
+
     .card-panel-description {
       float: left;
       font-weight: bold;
       margin: 26px 0 0 70px;
+
       .card-panel-text {
         line-height: 18px;
         color: rgba(0, 0, 0, 0.45);
         font-size: 16px;
         margin-bottom: 12px;
       }
+
       .card-panel-num {
         font-size: 20px;
       }

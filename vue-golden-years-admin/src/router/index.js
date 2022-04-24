@@ -7,8 +7,8 @@ import Layout from '../views/layout/Layout'
 
 export const constantRouterMap = [
     {path: '/login', component: () => import('../views/login/index'), hidden: true},
-    {path: '/face', component: () => import('../views/login/face'), hidden: true},
     {path: '/404', component: () => import('../views/404'), hidden: true},
+    {path: '/face', component: () => import('../views/login/face'), hidden: true},
 
     {
         path: '/',
@@ -24,15 +24,15 @@ export const constantRouterMap = [
     {
         path: '/blog',
         component: Layout,
-        redirect: '/blog/blog',
+        redirect: '/blog/article',
         name: '博客管理',
         meta: {title: '博客管理', icon: 'edit'},
         children: [
             {
-                path: 'blog',
-                name: '博客管理',
-                component: () => import('@/views/blog/blog'),
-                meta: {title: '博客管理', icon: 'edit'}
+                path: 'article',
+                name: '文章管理',
+                component: () => import('@/views/blog/article'),
+                meta: {title: '文章管理', icon: 'edit'}
             },
             {
                 path: 'category',
@@ -69,41 +69,48 @@ export const constantRouterMap = [
         path: '/user',
         component: Layout,
         redirect: '/user/user',
-        name: '用户管理',
-        meta: {title: '用户管理', icon: 'user1'},
+        meta: {title: '用户管理'},
         children: [
             {
                 path: 'user',
                 name: '用户管理',
                 component: () => import('@/views/user/user'),
                 meta: {title: '用户管理', icon: 'table'}
-            },
+            }
+        ]
+    },
+    {
+        path: '/message',
+        component: Layout,
+        redirect: '/message/comment',
+        name: '消息管理',
+        meta: {title: '消息管理'},
+        children: [
             {
-                path: 'admin',
-                name: '管理员管理',
-                component: () => import('@/views/user/admin'),
-                meta: {title: '管理员管理', icon: 'table'}
-            },
+                path: 'comment',
+                name: '评论管理',
+                component: () => import('@/views/message/comment'),
+                meta: {title: '评论管理', icon: 'table'}
+            }
         ]
     },
     {
         path: '/restapi',
         component: Layout,
-        redirect: '/restapi/adminRestApi',
         name: '接口管理',
         meta: {title: '接口管理', icon: 'restapi'},
         children: [
             {
                 path: 'admin',
-                name: 'Admin接口',
+                name: '管理员接口',
                 component: () => import('@/views/restapi/admin'),
-                meta: {title: 'Admin接口', icon: 'table'}
+                meta: {title: '管理员接口', icon: 'table'}
             },
             {
                 path: 'picture',
-                name: 'Picture接口',
+                name: '图片接口',
                 component: () => import('@/views/restapi/picture'),
-                meta: {title: 'Picture接口', icon: 'table'}
+                meta: {title: '图片接口', icon: 'table'}
             },
             {
                 path: 'user',
@@ -122,7 +129,6 @@ export const constantRouterMap = [
     {
         path: '/monitor',
         component: Layout,
-        redirect: '/monitor/springBootAdmin',
         name: '监控中心',
         meta: {title: '监控中心', icon: 'log'},
         children: [
@@ -143,12 +149,6 @@ export const constantRouterMap = [
                 name: '数据监控',
                 component: () => import('@/views/monitor/druid'),
                 meta: {title: '数据监控'}
-            },
-            {
-                path: 'online',
-                name: '在线用户',
-                component: () => import('@/views/monitor/online'),
-                meta: {title: '在线用户'}
             },
             {
                 path: 'elasticsearch',
@@ -177,8 +177,14 @@ export const constantRouterMap = [
             {
                 path: 'systemConfig',
                 name: '系统配置',
-                component: () => import('@/views/system/systemConfig'),
+                component: () => import('@/views/system/SystemConfig'),
                 meta: {title: '系统配置'}
+            },
+            {
+                path: 'webConfig',
+                name: '网站配置',
+                component: () => import('@/views/system/WebConfig'),
+                meta: {title: '网站配置'}
             }
         ]
     },
@@ -186,7 +192,7 @@ export const constantRouterMap = [
 ]
 
 const router = new VueRouter({
-    mode: 'history',
+    // mode: 'history',
     scrollBehavior: () => ({y: 0}),
     routes: constantRouterMap
 })

@@ -252,14 +252,13 @@ export default {
               });
             } else if (userStatus === 1) {
               // 用户已激活
-              this.$message.success(response.data.msg);
+              this.$message.success(response.msg);
               setCookie("token", token, 7);
               this.$router.push('/');
             }
             this.loading = false;
           }, () => {
             this.loading = false;
-            this.$message.error("网络错误!");
           });
         }
       })

@@ -10,6 +10,5 @@ import lombok.Data;
 public class AdminLoginBO {
     private String username;
     private String password;
-    private String verifyCode;
     private String img64;
 }

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/home.vue'
+import Home from '@/views/home.vue'
 import WritingCenterLayout from "@/components/Layouts/WritingCenterLayout";
 
 Vue.use(VueRouter)
@@ -8,7 +8,6 @@ Vue.use(VueRouter)
 export const constantRouterMap = [
     {
         path: '/',
-        name: 'Home',
         component: Home,
         children: [
             {path: '/', component: () => import('@/views/index')},
@@ -20,7 +19,6 @@ export const constantRouterMap = [
             {path: '/rank', component: () => import('@/views/rank')},
         ]
     },
-    {path: '/yiqing', component: () => import('@/views/yiqing')},
     {
         path: '/login',
         name: 'login',
@@ -110,13 +108,12 @@ export const constantRouterMap = [
 ]
 
 const router = new VueRouter({
-    mode: 'history',
-    base: process.env.BASE_URL,
+    // mode: 'history',
+    scrollBehavior: () => ({y: 0}),
     routes: constantRouterMap
 })
 const VueRouterPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(to) {
     return VueRouterPush.call(this, to).catch(err => err)
 }
-
 export default router

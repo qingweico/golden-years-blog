@@ -13,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author zqw
@@ -27,9 +28,11 @@ public class CategoryRestApi extends BaseRestApi {
 
     @ApiOperation(value = "查询分类列表", notes = "查询分类列表", httpMethod = "GET")
     @GetMapping("/getCategoryList")
-    public GraceJsonResult getCategoryList(@RequestParam Integer page,
+    public GraceJsonResult getCategoryList(@RequestParam String keyword,
+                                           @RequestParam Boolean sort,
+                                           @RequestParam Integer page,
                                            @RequestParam Integer pageSize) {
-        PagedGridResult result = categoryService.queryCategoryList(page, pageSize);
+        PagedGridResult result = categoryService.queryCategoryList(keyword,sort, page, pageSize);
         return GraceJsonResult.ok(result);
     }
 
@@ -69,10 +72,17 @@ public class CategoryRestApi extends BaseRestApi {
             return new GraceJsonResult(ResponseStatusEnum.ALERT_SUCCESS);
         }
     }
-    @ApiOperation(value = "查询分类列表", notes = "查询分类列表", httpMethod = "POST")
+
+    @ApiOperation(value = "删除类别", notes = "删除类别", httpMethod = "POST")
     @PostMapping("/deleteCategory/{id}")
     public GraceJsonResult deleteCategory(@PathVariable("id") String categoryId) {
         categoryService.deleteCategory(categoryId);
+        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
+    }
+    @ApiOperation(value = "批量删除类别", notes = "批量删除类别", httpMethod = "POST")
+    @PostMapping("/delete")
+    public GraceJsonResult batchDeleteCategory(@RequestBody List<String> ids) {
+        categoryService.deleteAll(ids);
         return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
     }
 }

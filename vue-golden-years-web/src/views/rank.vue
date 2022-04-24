@@ -33,12 +33,12 @@
               <span class="iconfont">&#xe8c7;</span>
               <span>{{ item.readCounts }}</span>
             </li>
-            <li class="collect">
-              <span class="iconfont">&#xe663;</span>
-              {{ item.readCounts }}
+            <li class="start_count">
+              <span class="iconfont">&#xf010d;</span>
+              {{ item.commentCounts }}
             </li>
             <li class="comments">
-              <span class="iconfont">&#xe663;</span>
+              <span class="iconfont">&#xe891;</span>
               {{ item.commentCounts }}
             </li>
             <li class="createTime">

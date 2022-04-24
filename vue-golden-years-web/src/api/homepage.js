@@ -3,7 +3,7 @@ import request from '@/utils/request'
 /**获取作者所有的文章根据作者id**/
 export function getAuthorArticleList(params) {
     return request({
-        url: process.env.ARTICLE_API + '/portal/article/homepage',
+        url: process.env.GATEWAY_API + '/portal/article/homepage',
         method: 'get',
         params
     })
@@ -12,7 +12,7 @@ export function getAuthorArticleList(params) {
 /**获取作者基本信息根据作者id**/
 export function getAuthorInfo(params) {
     return request({
-        url: process.env.USER_API + '/user/getUserBasicInfo',
+        url: process.env.GATEWAY_API + '/user/getUserBasicInfo',
         method: 'get',
         params
     })
@@ -21,7 +21,7 @@ export function getAuthorInfo(params) {
 /**关注作者**/
 export function attention(params) {
     return request({
-        url: process.env.USER_API + '/fans/follow',
+        url: process.env.GATEWAY_API + '/fans/follow',
         method: 'post',
         data: params
     })
@@ -30,7 +30,7 @@ export function attention(params) {
 /**取消关注**/
 export function cancelAttention(params) {
     return request({
-        url: process.env.USER_API + '/fans/unfollow',
+        url: process.env.GATEWAY_API + '/fans/unfollow',
         method: 'post',
         data: params
     })
@@ -39,7 +39,7 @@ export function cancelAttention(params) {
 /**查询是否关注此作者**/
 export function hasFollowThisAuthorOrNot(params) {
     return request({
-        url: process.env.USER_API + '/fans/hasFollowThisAuthorOrNot',
+        url: process.env.GATEWAY_API + '/fans/hasFollowThisAuthorOrNot',
         method: 'get',
         params
     })
@@ -48,7 +48,7 @@ export function hasFollowThisAuthorOrNot(params) {
 /**用户主页文章排行*/
 export function rank(params) {
     return request({
-        url: process.env.ARTICLE_API + '/portal/article/rank/' + params,
+        url: process.env.GATEWAY_API + '/portal/article/rank/' + params,
         method: 'get',
         params
     })

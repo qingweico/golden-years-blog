@@ -58,7 +58,7 @@
 <script>
 import store from "@/store";
 import {VueCropper} from "vue-cropper";
-import {uploadAvatar} from "../../../api/system";
+import {uploadAvatar} from "@/api/system/profile";
 
 export default {
   components: {VueCropper},
@@ -76,11 +76,16 @@ export default {
       // 弹出层标题
       title: "修改头像",
       options: {
-        img: store.getters.avatar, //裁剪图片的地址
-        autoCrop: true, // 是否默认生成截图框
-        autoCropWidth: 200, // 默认生成截图框宽度
-        autoCropHeight: 200, // 默认生成截图框高度
-        fixedBox: true // 固定截图框大小 不允许改变
+        // 裁剪图片的地址
+        img: store.getters.avatar,
+        // 是否默认生成截图框
+        autoCrop: true,
+        // 默认生成截图框宽度
+        autoCropWidth: 200,
+        // 默认生成截图框高度
+        autoCropHeight: 200,
+        // 固定截图框大小 不允许改变
+        fixedBox: true
       },
       previews: {}
     };
@@ -89,7 +94,37 @@ export default {
     // 编辑头像
     editCropper() {
       this.open = true;
+      // this.getImageFileFromUrl(this.options.img, 'fileName.png', (file) => {
+      //
+      // });
     },
+    fileToBase64(file) {
+      let reader = new FileReader();
+      let base64 = "";
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        base64 = reader.result;
+      }
+      return base64;
+    },
+    getImageFileFromUrl(url, imageName, callback) {
+      // imageName一定要带上后缀
+      let blob = null;
+      let xhr = new XMLHttpRequest();
+      xhr.open("GET", url);
+      xhr.setRequestHeader('Accept', 'image/jpeg');
+      xhr.responseType = "blob";
+      xhr.withCredentials = true;
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          blob = xhr.response;
+          let imgFile = new File([blob], imageName, {type: 'image/jpeg'});
+          callback.call(this, imgFile);
+        }
+      };
+      xhr.send();
+    },
+
     // 打开弹出层结束时的回调
     modalOpened() {
       this.visible = true;
@@ -113,7 +148,7 @@ export default {
     // 上传预处理
     beforeUpload(file) {
       if (file.type.indexOf("image/") === -1) {
-        this.$message.error("文件格式错误，请上传图片类型,如：JPG，PNG后缀的文件。");
+        this.$message.error("文件格式错误，请上传图片类型,如:JPG, PNG后缀的文件");
       } else {
         const reader = new FileReader();
         reader.readAsDataURL(file);

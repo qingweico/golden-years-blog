@@ -2,10 +2,11 @@
   <article>
     <div class="blank"></div>
 
-    <h1 class="t_nav" v-if="searchModel">
+    <h1 class="t_nav" v-if="isSearchModel">
       <span>慢生活, 不是懒惰, 放慢速度不是拖延时间, 而是让我们在生活中寻找到平衡</span>
       <a href="/" class="n1">网站首页</a>
-      <a href="/" class="n2">搜索</a>
+      <a href="/" class="n2" v-if="categoryId">{{ getBlogCategoryNameById(categoryId) }}</a>
+      <a href="/" class="n2" v-if="tagId">{{ getBlogTagNameById(tagId) }}</a>
     </h1>
 
     <!--blog context begin-->
@@ -28,7 +29,6 @@
         <p class="blog_summary">{{ item.summary }} ...</p>
         <div class="blog_info">
           <ul>
-
             <li class="author" v-if="item.authorVO">
               <span class="iconfont">&#xe60f;</span>
               <a href="javascript:void(0);" @click="goToAuthor(item.authorVO.id)">{{ item.authorVO.nickname }}</a>
@@ -36,18 +36,19 @@
             <li class="category_name" v-if="item.categoryId">
               <span class="iconfont">&#xe603;</span>
               <a href="javascript:void(0);"
+                 @click="goToList(item.categoryId)"
               > {{ getBlogCategoryNameById(item.categoryId) }}</a>
             </li>
             <li class="view">
               <span class="iconfont">&#xe8c7;</span>
               <span>{{ item.readCounts }}</span>
             </li>
-            <li class="collect">
-              <span class="iconfont">&#xe663;</span>
-              {{ item.readCounts }}
+            <li class="start_count">
+              <span class="iconfont">&#xf010d;</span>
+              {{ item.commentCounts }}
             </li>
             <li class="comments">
-              <span class="iconfont">&#xe663;</span>
+              <span class="iconfont">&#xe891;</span>
               {{ item.commentCounts }}
             </li>
             <li class="createTime">
@@ -90,10 +91,11 @@
 
 <script>
 import {Loading} from 'element-ui';
-import {getBlogCategory, getNewBlog, searchBlogByES} from "@/api";
+import {getBlogCategory, getHotTag, searchBlogByElasticSearch, searchBlogBySql} from "@/api";
 import Link from "@/components/Link";
 import CategoryCloud from "@/components/CategoryCloud";
 import TagCloud from "@/components/TagCloud";
+import {getSystemConfig} from "@/api/center";
 
 export default {
   name: "index",
@@ -105,13 +107,17 @@ export default {
   data() {
     return {
       loadingInstance: null,
-      searchModel: false,
+      // 初始化默认使用es
+      searchModel: 1,
+      isSearchModel: false,
+      systemConfig: {},
       // 最新文章
       newBlogData: [],
       keyword: "",
       categoryId: "",
       tagId: "",
       categoryList: [],
+      tagList: [],
       currentPage: 1,
       pageSize: 5,
       total: 0,
@@ -128,17 +134,28 @@ export default {
   },
   watch: {
     $route(to, from) {
-      this.keyword = this.$route.query.keyword;
+      let searchModel = this.$route.query.searchModel;
+      let keyword = this.$route.query.keyword;
+      if (keyword !== undefined && keyword !== "") {
+        this.keyword = keyword;
+      }
+      if (searchModel !== undefined && searchModel !== "") {
+        this.searchModel = searchModel;
+      }
       let categoryId = this.$route.query.categoryId;
       if (categoryId !== undefined && categoryId !== "") {
+        // 暂不开启类别和标签同时搜索
         this.categoryId = categoryId;
+        this.tagId = "";
       }
       let tagId = this.$route.query.tagId;
       if (tagId !== undefined && tagId !== "") {
+        // 暂不开启类别和标签同时搜索
         this.tagId = tagId;
+        this.categoryId = "";
       }
       if (this.keyword !== "" || this.categoryId !== "" || this.tagId !== "") {
-        this.searchModel = true;
+        this.isSearchModel = true;
       }
       this.newBlogList();
     }
@@ -146,6 +163,12 @@ export default {
   created() {
     getBlogCategory().then((response) => {
       this.categoryList = response.data;
+    });
+    getHotTag().then(response => {
+      this.tagList = response.data;
+    });
+    getSystemConfig().then((response) => {
+      this.systemConfig = response.data;
     });
     // 获取最新博客
     this.newBlogList();
@@ -162,6 +185,7 @@ export default {
     // 最新博客列表
     newBlogList() {
       let that = this;
+      that.currentPage = 1;
       that.loadingInstance = Loading.service({
         lock: true,
         text: '正在努力加载中……',
@@ -173,16 +197,27 @@ export default {
       params.append("tag", this.tagId);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
-      searchBlogByES(params).then(response => {
-        that.newBlogData = response.data.rows;
-        that.total = response.data.records;
-        that.totalPage = response.data.totalPage;
-        that.currentPage = response.data.currentPage;
-        that.loadingInstance.close();
-      }, () => {
-        that.isEnd = true;
-        that.loadingInstance.close();
-      });
+      if (Number(this.searchModel) === 1) {
+        searchBlogByElasticSearch(params).then(response => {
+          that.newBlogData = response.data.rows;
+          that.total = response.data.records;
+          that.totalPage = response.data.totalPage;
+          that.loadingInstance.close();
+        }, () => {
+          that.isEnd = true;
+          that.loadingInstance.close();
+        });
+      } else if (Number(this.searchModel) === 0) {
+        searchBlogBySql(params).then(response => {
+          that.newBlogData = response.data.rows;
+          that.total = response.data.records;
+          that.totalPage = response.data.totalPage;
+          that.loadingInstance.close();
+        }, () => {
+          that.isEnd = true;
+          that.loadingInstance.close();
+        })
+      }
     },
     loadContent() {
       let that = this;
@@ -194,22 +229,41 @@ export default {
       params.append("tag", this.tagId);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
-      searchBlogByES(params).then(response => {
-        if (response.data.rows.length > 0) {
-          that.isEnd = false;
-          let newData = that.newBlogData.concat(response.data.rows);
-          that.newBlogData = newData;
-          that.total = response.data.records;
-          that.currentPage = response.data.currentPage;
-          // 全部加载完毕
-          if (newData.length < that.pageSize) {
+      if (Number(this.searchModel) === 1) {
+        searchBlogByElasticSearch(params).then(response => {
+          if (response.data.rows.length > 0) {
+            that.isEnd = false;
+            let newData = that.newBlogData.concat(response.data.rows);
+            that.newBlogData = newData;
+            that.total = response.data.records;
+            that.currentPage = response.data.currentPage;
+            // 全部加载完毕
+            if (newData.length < that.pageSize) {
+              that.isEnd = true;
+            }
+          } else {
             that.isEnd = true;
           }
-        } else {
-          that.isEnd = true;
-        }
-        that.loading = false;
-      });
+          that.loading = false;
+        });
+      } else if (Number(this.searchModel) === 0) {
+        searchBlogBySql(params).then(response => {
+          if (response.data.rows.length > 0) {
+            that.isEnd = false;
+            let newData = that.newBlogData.concat(response.data.rows);
+            that.newBlogData = newData;
+            that.total = response.data.records;
+            that.currentPage = response.data.currentPage;
+            // 全部加载完毕
+            if (newData.length < that.pageSize) {
+              that.isEnd = true;
+            }
+          } else {
+            that.isEnd = true;
+          }
+          that.loading = false;
+        });
+      }
     },
     getBlogCategoryNameById(categoryId) {
       let categoryList = this.categoryList;
@@ -218,6 +272,20 @@ export default {
           return categoryList[i].name;
         }
       }
+    },
+    getBlogTagNameById(tagId) {
+      let tagList = this.tagList;
+      for (let i = 0; i < tagList.length; i++) {
+        if (tagId === tagList[i].id) {
+          return tagList[i].name;
+        }
+      }
+    },
+    goToList(categoryId) {
+      this.$router.push({
+        path: "/",
+        query: {categoryId: categoryId, searchModel: this.systemConfig.searchModel}
+      });
     },
     goToAuthor(authorId) {
       let routeData = this.$router.resolve({

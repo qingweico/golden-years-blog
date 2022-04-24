@@ -9,25 +9,29 @@
 </template>
 
 <script>
-import {getBlogCategoryWithBlogAmount} from "@/api";
+import {getCategoryListWithArticleCount} from "@/api";
+import {getSystemConfig} from "@/api/center";
 
 export default {
   name: "CategoryCloud",
   data() {
     return {
-      categoryList: []
+      categoryList: [],
+      systemConfig:{}
     };
   },
   created() {
-    getBlogCategoryWithBlogAmount().then(response => {
+    getCategoryListWithArticleCount().then(response => {
       this.categoryList = response.data;
+    });
+    getSystemConfig().then((response) => {
+      this.systemConfig = response.data;
     });
   },
   methods: {
     //跳转到类别列表详情页
-    goToList(uid) {
-      // let routeData = this.$router.resolve({path: "/list", query: {tagUid: uid}});
-      //window.open(routeData.href, '_blank');
+    goToList(id) {
+      this.$router.push({path: "/", query: {categoryId: id,searchModel: this.systemConfig.searchModel}});
     },
   }
 };

@@ -1,7 +1,5 @@
 import router from './router'
-import store from './store'
 import {constantRouterMap} from './router/index'
-import {getCookie} from "./utils/cookie";
 // 不重定向白名单
 const whiteList = ['/login']
 const whiteListActiveList = ['/', '/401', '/404', '/500']
@@ -23,18 +21,7 @@ router.beforeEach((to, from, next) => {
     }
 
     // 向白名单中添加内容
-    // 从cookie中获取可以访问的导航栏列表
-    let webNavbarList = JSON.parse(getCookie("webNavbarList"))
-    const activeList = []
-    if (webNavbarList) {
-        for (let c = 0; c < webNavbarList.length; c++) {
-            activeList.push(webNavbarList[c].url)
-        }
-    }
-
     if (whiteListActiveList.indexOf(to.path) !== -1) {
-        next()
-    } else if (activeList.indexOf(to.path) !== -1) {
         next()
     } else if (whiteList.indexOf(to.path) !== -1) {
         next()

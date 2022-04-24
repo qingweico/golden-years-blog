@@ -5,11 +5,13 @@
         <span slot="label"><i class="el-icon-edit"></i>系统配置</span>
         <el-form style="margin-left: 20px;" label-position="left" label-width="140px">
           <aside>
+            配置文章编辑器模式和主站文章搜索模式
             <br/>
           </aside>
           <el-form-item label="文本编辑器">
-            <el-radio v-for="item in editorModalDictList" :key="item.uid" v-model="form.editorModel"
-                      :label="item.dictValue" border size="medium">{{ item.dictLabel }}
+            <el-radio v-model="form.editorModel" :label=0 border size="medium">富文本编辑器
+            </el-radio>
+            <el-radio v-model="form.editorModel" :label=1 border size="medium">MarkDown
             </el-radio>
           </el-form-item>
 
@@ -25,9 +27,13 @@
                 <i slot="reference" style="cursor: pointer;margin-left: 2px" class="el-icon-question"></i>
               </el-popover>
             </template>
-            <el-radio v-for="item in searchModelDictList" :key="item.uid" v-model="form.searchModel"
-                      :label="item.dictValue" border size="medium">{{ item.dictLabel }}
+            <el-radio v-model="form.searchModel"
+                      :label=0 border size="medium">SQL
             </el-radio>
+            <el-radio v-model="form.searchModel"
+                      :label=1 border size="medium">ElasticSearch
+            </el-radio>
+
           </el-form-item>
 
           <el-form-item>
@@ -52,99 +58,28 @@
             使用IO流将文件存储本地磁盘中<br/>
           </aside>
 
-          <el-form-item label="本地文件域名" prop="localPictureBaseUrl">
-            <el-input v-model="form.localPictureBaseUrl" auto-complete="new-password" style="width: 400px"></el-input>
+          <el-form-item label="本地文件域名" prop="localPicUrl">
+            <el-input v-model="form.localPicUrl" style="width: 400px"></el-input>
           </el-form-item>
           <el-form-item label="文件上传本地">
-            <el-radio v-for="item in yesNoDictList" :key="item.uid" v-model="form.uploadLocal"
-                      :label="item.dictValue" border size="medium">{{ item.dictLabel }}
+            <el-radio v-model="form.uploadLocal" :label=1
+                      border size="medium"> 是
+            </el-radio>
+            <el-radio v-model="form.uploadLocal" :label=0
+                      border size="medium"> 否
             </el-radio>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm()">保 存</el-button>
+            <el-button type="primary" :loading="loading" @click="submitForm()">保 存</el-button>
           </el-form-item>
-
         </el-form>
       </el-tab-pane>
-
-      <el-tab-pane name="four">
-        <span slot="label">
-          <i class="el-icon-date"></i> 七牛云对象存储
-        </span>
-        <el-form
-            style="margin-left: 20px;"
-            label-position="left"
-            :model="form"
-            label-width="120px"
-            :rules="rules"
-            ref="form"
-        >
-          <aside>
-            使用七牛云构建对象存储服务<br/>
-          </aside>
-
-          <el-form-item label="七牛云文件域名" prop="qiNiuPictureBaseUrl">
-            <el-input v-model="form.qiNiuPictureBaseUrl" auto-complete="new-password" style="width: 400px"></el-input>
-          </el-form-item>
-
-          <el-form-item label="七牛云公钥">
-            <el-input v-model="form.qiNiuAccessKey" auto-complete="new-password" style="width: 400px"></el-input>
-          </el-form-item>
-
-          <el-form-item label="七牛云私钥">
-            <el-input type="password" v-model="form.qiNiuSecretKey" auto-complete="new-password"
-                      style="width: 400px"></el-input>
-          </el-form-item>
-
-          <el-form-item label="上传空间">
-            <el-input v-model="form.qiNiuBucket" style="width: 400px"></el-input>
-          </el-form-item>
-
-          <el-form-item label="存储区域">
-            <el-select v-model="form.qiNiuArea" placeholder="请选择存储区域" clearable>
-              <el-option v-for="item in areaDictList"
-                         :key="item.dictValue"
-                         :label="item.dictLabel"
-                         :value="item.dictValue"></el-option>
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="文件上传七牛云">
-            <el-radio v-for="item in yesNoDictList" :key="item.uid" v-model="form.uploadQiNiu" :label="item.dictValue"
-                      border size="medium">{{ item.dictLabel }}
-            </el-radio>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button type="primary" @click="submitForm()">保 存</el-button>
-          </el-form-item>
-
-        </el-form>
-      </el-tab-pane>
-
-      <el-tab-pane name="five">
-        <span slot="label">
-          <i class="el-icon-date"></i> Minio对象存储
-        </span>
-
-        <el-form
-            style="margin-left: 20px;"
-            label-position="left"
-            :model="form"
-            label-width="120px"
-            :rules="rules"
-            ref="form">
-        </el-form>
-      </el-tab-pane>
-
 
       <el-tab-pane name="seven">
         <span slot="label"><i class="el-icon-edit"></i> Redis管理</span>
         <el-form style="margin-left: 20px;" label-position="left" label-width="120px">
-
           <aside>
-            Redis管理主要用于清空一些缓存数据<br/>
-            用户首次部署时, 可以使用清空全部, 把Redis中的缓存一键清空<br/>
+            Redis管理主要用于清空一些缓存数据<br/><br/>
           </aside>
           <el-form-item label="全部">
             <el-row>
@@ -156,62 +91,71 @@
           <el-form-item label="博客相关">
             <el-row>
               <el-col :span="3">
-                <el-button type="primary" @click="cleanRedis('BLOG_CLICK')">清空点击量</el-button>
+                <el-button type="primary" @click="cleanRedis('redis_article_detail')">博客详情</el-button>
               </el-col>
-
               <el-col :span="3">
-                <el-button type="success" @click="cleanRedis('BLOG_PRAISE')">清空点赞量</el-button>
+                <el-button type="primary" @click="cleanRedis('redis_article_comment_counts')">博客评论</el-button>
               </el-col>
-
               <el-col :span="3">
-                <el-button type="info" @click="cleanRedis('BLOG_LEVEL')">清空推荐博客</el-button>
+                <el-button type="primary" @click="cleanRedis('redis_article_read_counts')">博客阅读量</el-button>
               </el-col>
-
               <el-col :span="3">
-                <el-button type="warning" @click="cleanRedis('HOT_BLOG')">清空热门博客</el-button>
+                <el-button type="primary" @click="cleanRedis('redis_article_star_counts, redis_article_already_star')">
+                  博客点赞量
+                </el-button>
               </el-col>
-
               <el-col :span="3">
-                <el-button type="danger" @click="cleanRedis('NEW_BLOG')">清空最新博客</el-button>
-              </el-col>
-            </el-row>
-          </el-form-item>
-
-          <el-form-item label="分类和归档相关">
-            <el-row>
-              <el-col :span="3">
-                <el-button type="primary" @click="cleanRedis('MONTH_SET')">清空分类日期</el-button>
-              </el-col>
-
-              <el-col :span="3">
-                <el-button type="success" @click="cleanRedis('BLOG_SORT_BY_MONTH')">清空分类数据</el-button>
-              </el-col>
-
-              <el-col :span="3">
-                <el-button type="info" @click="cleanRedis('BLOG_SORT_CLICK')">清空分类点击量</el-button>
-              </el-col>
-
-              <el-col :span="3">
-                <el-button type="warning" @click="cleanRedis('TAG_CLICK')">清空标签点击量</el-button>
+                <el-button type="primary"
+                           @click="cleanRedis('redis_article_collect_counts,redis_article_already_collect')">博客收藏量
+                </el-button>
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="系统相关">
+          <el-form-item label="标签">
             <el-row>
               <el-col :span="3">
-                <el-button type="primary" @click="cleanRedis('REDIS_DICT_TYPE')">清空字典</el-button>
+                <el-button type="success" @click="cleanRedis('redis_article_tag')">标签数据</el-button>
               </el-col>
-
+            </el-row>
+          </el-form-item>
+          <el-form-item label="分类">
+            <el-row>
               <el-col :span="3">
-                <el-button type="success" @click="cleanRedis('ADMIN_VISIT_MENU')">清空角色访问菜单</el-button>
+                <el-button type="success" @click="cleanRedis('redis_article_category')">分类数据</el-button>
               </el-col>
-
               <el-col :span="3">
-                <el-button type="info" @click="cleanRedis('userToken')">清空用户Token</el-button>
+                <el-button type="success" @click="cleanRedis('redis_article_category_with_article_count')">
+                  带有文章数量的类别
+                </el-button>
               </el-col>
-
+            </el-row>
+          </el-form-item>
+          <el-form-item label="用户">
+            <el-row>
               <el-col :span="3">
-                <el-button type="warning" @click="cleanRedis('REQUEST_LIMIT')">清空接口请求限制</el-button>
+                <el-button type="info" @click="cleanRedis('redis_user_token')">用户token</el-button>
+              </el-col>
+              <el-col :span="3">
+                <el-button type="info" @click="cleanRedis('redis_user_info')">用户信息</el-button>
+              </el-col>
+              <el-col :span="3">
+                <el-button type="info" @click="cleanRedis('redis_author_fans_counts')">用户粉丝</el-button>
+              </el-col>
+              <el-col :span="3">
+                <el-button type="info" @click="cleanRedis('redis_my_follow_counts')">用户关注</el-button>
+              </el-col>
+            </el-row>
+          </el-form-item>
+          <el-form-item label="系统">
+            <el-row>
+              <el-col :span="3">
+                <el-button  @click="cleanRedis('redis_friend_link')">友情链接</el-button>
+              </el-col>
+              <el-col :span="3">
+                <el-button @click="cleanRedis('redis_system_config')">系统配置</el-button>
+              </el-col>
+              <el-col :span="3">
+                <el-button @click="cleanRedis('redis_web_config')">网站配置</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -223,60 +167,60 @@
 </template>
 
 <script>
-import {getSystemConfig, cleanRedisByKey} from "@/api/systemConfig";
+import {getSystemConfig, cleanRedisByKey, alterSystemConfig} from "@/api/system/systemConfig";
 
 export default {
   data() {
     return {
-      form: {},
-      index: "0", // 当前激活页
+      form: {
+        id: "",
+        searchModel: 0,
+        editorModel: 0,
+        uploadLocal: 0,
+        localPicUrl: ""
+      },
+      loading: false,
       activeName: "one",
-      areaDictList: [], //存储区域字典
-      yesNoDictList: [], //是否字典
-      openDictList: [], // 开启关闭字典
-      picturePriorityDictList: [], //图片显示优先级字典
-      editorModalDictList: [], // 文本编辑器字典列表
-      searchModelDictList: [], // 搜索模式字典列表
-      loadingInstance: null, // loading对象
       rules: {
-        localPictureBaseUrl: [
-          {pattern: /^((https|http|ftp|rtsp|mms)?:\/\/)[^\s]+/, message: '请输入正确的域名'},
-        ],
-        qiNiuPictureBaseUrl: [
-          {pattern: /^((https|http|ftp|rtsp|mms)?:\/\/)[^\s]+/, message: '请输入正确的域名'},
-        ],
-        email: [
-          {pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/, message: '请输入正确的邮箱'},
-        ],
+        localPicUrl: [
+          {
+            pattern: "^([hH][tT]{2}[pP]:/*|[hH][tT]{2}[pP][sS]:/*|[fF][tT][pP]:/*)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~/])" +
+                "+(\\??(([A-Za-z0-9-~]+=?)([A-Za-z0-9-~]*)&?)*)$", message: '请输入正确的域名'
+          },
+        ]
       }
     };
   },
   watch: {},
   components: {},
   created() {
-    // 获取字典
-    this.getDictList()
     // 获取系统配置
-    this.getSystemConfigList()
+    this.getSystemConfig()
   },
   methods: {
     handleClick(tab, event) {
 
     },
-    getSystemConfigList: function () {
+    getSystemConfig() {
       getSystemConfig().then(response => {
-
+        this.form = response.data;
       });
     },
-    cleanRedis: function (key) {
+    cleanRedis(key) {
       let params = []
       params.push(key)
       cleanRedisByKey(params).then(response => {
-
+        this.$message.success(response.msg);
       })
     },
-    submitForm: function () {
-
+    submitForm() {
+      this.loading = true;
+      alterSystemConfig(this.form).then(response => {
+        this.loading = false;
+        this.$message.success(response.msg);
+      }, () => {
+        this.loading = false;
+      })
     },
 
   }

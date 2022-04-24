@@ -3,7 +3,7 @@ import request from '@/utils/request'
 /**文章下删除评论**/
 export function deleteComment (params) {
   return request({
-    url: process.env.ARTICLE_API + '/comment/delete',
+    url: process.env.GATEWAY_API + '/comment/delete',
     method: 'post',
     params,
     data: {}
@@ -12,7 +12,7 @@ export function deleteComment (params) {
 /**查看文章下评论列表**/
 export function getCommentList (params) {
   return request({
-    url: process.env.ARTICLE_API + '/comment/list',
+    url: process.env.GATEWAY_API + '/comment/list',
     method: 'get',
     params
   })
@@ -20,7 +20,7 @@ export function getCommentList (params) {
 /**发表新列表**/
 export function publishComment (params) {
   return request({
-    url: process.env.ARTICLE_API + '/comment/publish',
+    url: process.env.GATEWAY_API + '/comment/publish',
     method: 'post',
     data: params
   })

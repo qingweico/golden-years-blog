@@ -10,11 +10,32 @@
           style="width: 200px;"
           v-model="queryParams.keyword"
       ></el-input>
+      <el-input
+          @keyup.enter.native="handleFind"
+          class="filter-item"
+          clearable
+          placeholder="请输入手机号"
+          style="width: 200px;"
+          v-model="queryParams.mobile"
+      ></el-input>
       <el-select clearable placeholder="账号状态" style="width:140px" v-model="queryParams.status">
+        <el-option value="0" label="未激活"></el-option>
+        <el-option value="1" label="正常"></el-option>
+        <el-option value="2" label="已冻结"></el-option>
       </el-select>
+      <el-date-picker
+          v-model="dateRange"
+          @change="dateChoice"
+          style="width: 240px"
+          value-format="yyyy-MM-dd"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="截止日期"
+      ></el-date-picker>
+
       <el-button @click="handleFind" class="filter-item" icon="el-icon-search" type="primary">查找
       </el-button>
-      <el-button class="filter-item" type="primary" @click="handleAdd" icon="el-icon-edit">添加用户</el-button>
       <el-button icon="el-icon-refresh" @click="refresh">重置</el-button>
     </div>
 
@@ -78,7 +99,6 @@
           </template>
         </template>
       </el-table-column>
-
       <el-table-column label="注册日期" width="160" align="center" prop="createTime">
         <template slot-scope="scope">
           <span>{{ scope.row.createdTime }}</span>
@@ -86,11 +106,15 @@
       </el-table-column>
       <el-table-column fixed="right" align="center" label="操作" min-width="250">
         <template slot-scope="scope">
-          <el-button @click="handleEdit(scope.row)" size="small" type="primary">编辑
+          <el-button @click="look(scope.row)" size="small" type="primary">查看
           </el-button>
           <el-button @click="resetPassword(scope.row)" size="small" type="primary">重置密码
           </el-button>
-          <el-button @click="handleDelete(scope.row)" size="small" type="danger">删除
+          <el-button @click="inactiveOrNot(scope.row)" size="small" type="danger"
+                     v-if="scope.row.activeStatus === 1">冻结
+          </el-button>
+          <el-button @click="inactiveOrNot(scope.row)"
+                     v-if="scope.row.activeStatus === 2" size="small">解冻
           </el-button>
         </template>
       </el-table-column>
@@ -108,74 +132,44 @@
     </div>
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
-      <el-form :model="form" :rules="rules" ref="form">
+    <el-dialog title="查看用户" :visible.sync="dialogFormVisible">
+      <el-form :model="form" ref="form">
         <el-form-item :label-width="formLabelWidth" label="用户头像">
           <div class="imgBody" v-if="form.face">
-            <i @click="deletePhoto()" @mouseover="icon = true" class="el-icon-error inputClass" v-show="icon"></i>
-            <img @mouseout="icon = false" @mouseover="icon = true" v-bind:src="form.face" alt=""/>
-          </div>
-          <div @click="checkPhoto" class="uploadImgBody" v-else>
-            <i class="el-icon-plus avatar-uploader-icon"></i>
+            <img v-bind:src="form.face" alt=""/>
           </div>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="昵称" prop="nickname">
-          <el-input v-model="form.nickname"></el-input>
+        <el-form-item :label-width="formLabelWidth" label="真实姓名">
+          <el-input v-model="form.realName" readonly></el-input>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="手机号" prop="mobile">
-          <el-input v-model="form.mobile"></el-input>
+        <el-form-item :label-width="formLabelWidth" label="昵称">
+          <el-input v-model="form.nickname" readonly></el-input>
         </el-form-item>
-        <el-form-item :label-width="formLabelWidth" label="邮箱" prop="email">
-          <el-input v-model="form.email"></el-input>
+        <el-form-item :label-width="formLabelWidth" label="手机号">
+          <el-input v-model="form.mobile" readonly></el-input>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="邮箱">
+          <el-input v-model="form.email" readonly></el-input>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="生日">
+          <el-input v-model="form.birthday" readonly></el-input>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="省份">
+          <el-input v-model="form.province" readonly></el-input>
         </el-form-item>
         <el-form-item label="性别" :label-width="formLabelWidth">
-          <el-radio-group v-model="form.sex">
-            <el-radio border size="medium" :label=1> 男
-            </el-radio>
-            <el-radio border size="medium" :label=0> 女
-            </el-radio>
-            <el-radio border size="medium" :label=2> 保密
-            </el-radio>
-          </el-radio-group>
+          <span v-if="form.sex === 1">男</span>
+          <span v-if="form.sex === 0">女</span>
+          <span v-if="form.sex === 2">保密</span>
         </el-form-item>
       </el-form>
-      <el-form-item :label-width="formLabelWidth" label="用户状态" prop="status">
-        <el-switch
-            v-model="form.status"
-            active-color="#13ce66"
-            inactive-color="#ff4949">
-        </el-switch>
-      </el-form-item>
-      <el-form-item :label-width="formLabelWidth" label="用户状态" prop="status">
-        <el-date-picker
-            v-model="form.birthday"
-            type="date"
-            placeholder="请选择生日">
-        </el-date-picker>
-      </el-form-item>
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button @click="submitForm" type="primary">确 定</el-button>
-      </div>
     </el-dialog>
-
-    <avatar-cropper
-        :height="300"
-        :key="imageCropperKey"
-        :url="url"
-        :width="300"
-        @close="close"
-        @crop-upload-success="cropSuccess"
-        lang-type="zh"
-        v-show="imageCropperShow">
-    </avatar-cropper>
   </div>
 </template>
 
 <script>
-import {deleteUser, getUserList, resetPassword} from "@/api/user";
-import {saveOrUpdate} from "@/api/user";
-import AvatarCropper from '@/components/AvatarCropper'
+import {getUserList, resetPassword} from "@/api/user";
+import {freezeOrNot} from "../../api/user";
 
 export default {
   data() {
@@ -184,20 +178,16 @@ export default {
       pageSize: 10,
       records: 0,
       totalPage: 0,
-      title: "增加用户",
       tableData: [],
-      //控制弹出框
-      icon: false,
-      url: process.env.PIC_API + "/fs/uploadFace",
-      imageCropperKey: 0,
-      imageCropperShow: false,
       dialogFormVisible: false,
       formLabelWidth: "120px",
       isEditForm: false,
+      dateRange: "",
       // 搜索条件
       queryParams: {
         keyword: "",
         status: "",
+        mobile: "",
         startDateStr: "",
         endDateStr: "",
       },
@@ -212,25 +202,7 @@ export default {
         birthday: null,
       },
       defaultAvatar: this.$SysConf.defaultAvatar, // 默认头像
-      rules: {
-        nickname: [
-          {required: true, message: '用户昵称不能为空', trigger: 'blur'},
-          {min: 1, max: 20, message: '长度在1到20个字符'},
-        ],
-        mobile: [
-          {
-            required: true, message: '手机号不能为空', trigger: 'blur',
-            pattern: /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/
-          },
-        ],
-        email: [
-          {pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/, message: '请输入正确的邮箱'},
-        ]
-      }
-    };
-  },
-  components: {
-    AvatarCropper
+    }
   },
   created() {
     this.userList();
@@ -240,29 +212,28 @@ export default {
       this.queryParams = {
         keyword: "",
         status: "",
+        mobile: "",
         startDateStr: "",
         endDateStr: "",
       };
+      this.dateRange = "";
       this.userList();
     },
-    clearData() {
-      this.form = {
-        nickname: null,
-        face: null,
-        mobile: null,
-        email: null,
-        sex: null,
-      }
+    dateChoice() {
+      let dateArray = String(this.dateRange).split(",");
+      this.queryParams.startDateStr = dateArray[0];
+      this.queryParams.endDateStr = dateArray[1];
     },
     userList() {
       let params = new URLSearchParams();
       let queryParams = this.queryParams;
-      params.append("nickname", queryParams.keyword);
-      params.append("state", queryParams.state);
+      params.append("nickname", queryParams.keyword.trim());
+      params.append("status", queryParams.status);
+      params.append("mobile", queryParams.mobile.trim());
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
-      params.append("startDateStr", queryParams.startDateStr);
-      params.append("endDateStr", queryParams.endDateStr);
+      params.append("startDate", queryParams.startDateStr);
+      params.append("endDate", queryParams.endDateStr);
       getUserList(params).then(response => {
         let content = response.data;
         this.tableData = content.rows;
@@ -271,62 +242,44 @@ export default {
         this.totalPage = content.totalPage;
       });
     },
-
-    cropSuccess(resData) {
-      this.imageCropperShow = false
-      this.imageCropperKey = this.imageCropperKey + 1
-      this.form.face = resData;
-      this.$notify({
-        title: "成功",
-        message: '上传成功',
-        type: "success"
-      });
-    },
-    close() {
-      this.imageCropperShow = false
-    },
-    deletePhoto() {
-      this.form.face = "";
-      this.icon = false;
-    },
-    // 弹出选择图片框
-    checkPhoto() {
-      this.imageCropperShow = true
-    },
     handleFind() {
       this.currentPage = 1
       this.userList();
     },
-    handleAdd() {
-      this.dialogFormVisible = true;
-      this.form = this.getFormObject();
-      this.isEditForm = false;
-    },
-    handleEdit(row) {
-      this.title = "编辑用户";
+    look(row) {
       this.dialogFormVisible = true;
       this.isEditForm = true;
-      this.form.sex = row.sex;
       this.form.face = row.face;
       this.form.nickname = row.nickname;
       this.form.mobile = row.mobile;
+      this.form.sex = row.sex;
       this.form.email = row.email;
+      this.form.birthday = row.birthday;
+      this.form.province = row.province;
+      this.form.realName = row.realName;
     },
-    handleDelete(row) {
-      this.$confirm("此操作将把用户删除, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      }).then(() => {
-        let params = {};
-        params.uid = row.uid;
-        deleteUser(params).then(response => {
-          this.$message.success(response.msg)
-          this.userList();
-        });
-      }).catch(() => {
-        this.$message.info("已取消删除")
-      });
+    inactiveOrNot(row) {
+      let params = new URLSearchParams();
+      params.append("userId", row.id)
+      if (row.activeStatus === 1) {
+        params.append("doStatus", 2);
+        this.inactive(params);
+      } else {
+        params.append("doStatus", 1);
+        this.active(params);
+      }
+    },
+    active(params) {
+      freezeOrNot(params).then((response) => {
+        this.$message.success(response.msg);
+        this.userList();
+      })
+    },
+    inactive(params) {
+      freezeOrNot(params).then((response) => {
+        this.$message.success(response.msg);
+        this.userList();
+      })
     },
     resetPassword(row) {
       this.$confirm("此操作将把用户密码重置为初始密码?", "提示", {
@@ -345,51 +298,6 @@ export default {
       this.currentPage = val;
       this.userList();
     },
-    clearStatus() {
-      this.dialogFormVisible = false;
-      this.clearData();
-    },
-    submitForm() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          if (this.isEditForm) {
-            saveOrUpdate(this.form).then(response => {
-              if (response.data.success) {
-                this.$notify({
-                  title: "成功",
-                  message: response.msg,
-                  type: "success"
-                });
-                this.clearStatus();
-                this.userList();
-              } else {
-                this.$notify.error({
-                  title: "失败",
-                  message: response.msg
-                });
-              }
-            });
-          } else {
-            saveOrUpdate(this.form).then(response => {
-              if (response.data.success) {
-                this.$notify({
-                  title: "成功",
-                  message: response.msg,
-                  type: "success"
-                });
-                this.clearStatus();
-                this.userList();
-              } else {
-                this.$notify.error({
-                  title: "失败",
-                  message: response.msg
-                });
-              }
-            });
-          }
-        }
-      })
-    }
   }
 };
 </script>
@@ -407,28 +315,11 @@ export default {
   border-color: #409eff;
 }
 
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 100px;
-  height: 100px;
-  line-height: 100px;
-  text-align: center;
-}
 
 .imgBody {
   width: 100px;
   height: 100px;
   border: solid 2px #ffffff;
-  float: left;
-  position: relative;
-}
-
-.uploadImgBody {
-  margin-left: 5px;
-  width: 100px;
-  height: 100px;
-  border: dashed 1px #c0c0c0;
   float: left;
   position: relative;
 }

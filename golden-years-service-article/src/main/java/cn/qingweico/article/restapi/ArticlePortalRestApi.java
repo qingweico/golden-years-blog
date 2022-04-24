@@ -3,19 +3,18 @@ package cn.qingweico.article.restapi;
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticlePortalService;
-import cn.qingweico.global.Constants;
+import cn.qingweico.article.service.IndexService;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.vo.*;
 import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.eo.ArticleEo;
-import cn.qingweico.util.IpUtils;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -34,28 +33,30 @@ import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
  * @author zqw
  * @date 2021/9/12
  */
+@Slf4j
 @Api(value = "主页文章相关的接口定义", tags = {"主页文章相关的接口定义"})
 @RequestMapping("/portal/article")
 @RestController
 public class ArticlePortalRestApi extends BaseRestApi {
+
+    // ########################################### 主站文章API ###########################################
+
     @Resource
     private ArticlePortalService articlePortalService;
 
-
     @ApiOperation(value = "首页查询文章列表(elasticSearch)", notes = "首页查询文章列表(elasticSearch)", httpMethod = "GET")
     @GetMapping("es/search")
-    public GraceJsonResult listViaEs(@RequestParam String keyword,
-                                     @RequestParam String category,
-                                     @RequestParam String tag,
-                                     @RequestParam Integer page,
-                                     @RequestParam Integer pageSize) {
+    public GraceJsonResult articleListByElasticSearch(@RequestParam String keyword,
+                                                      @RequestParam String category,
+                                                      @RequestParam String tag,
+                                                      @RequestParam Integer page,
+                                                      @RequestParam Integer pageSize) {
         page--;
         Pageable pageable = PageRequest.of(page, pageSize);
 
@@ -85,69 +86,17 @@ public class ArticlePortalRestApi extends BaseRestApi {
         // 按照文章标签查询
         if (StringUtils.isBlank(keyword) && !StringUtils.isBlank(tag)) {
             searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(QueryBuilders.termQuery("tagId", tag))
+                    // tags: "" (string 空格隔开)
+                    .withQuery(QueryBuilders.matchQuery("tags", tag))
                     .withPageable(pageable)
                     .build();
 
             pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleEo.class);
         }
 
-        String searchTitleField = "title";
         // 按照关键字查询, 并且高亮显示关键字
         if (StringUtils.isNotBlank(keyword) && StringUtils.isBlank(category) && StringUtils.isBlank(tag)) {
-            String preTag = "<font color='red'>";
-            String postTag = "</font>";
-            searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(QueryBuilders.matchQuery(searchTitleField, keyword))
-                    .withHighlightFields(new HighlightBuilder.Field(searchTitleField)
-                            .preTags(preTag)
-                            .postTags(postTag))
-                    .withPageable(pageable)
-                    .build();
-
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery,
-                    ArticleEo.class,
-                    new SearchResultMapper() {
-                        @Override
-                        public <T> AggregatedPage<T> mapResults(SearchResponse searchResponse,
-                                                                Class<T> aClass,
-                                                                Pageable pageable) {
-                            List<ArticleEo> articleHighLightList = new ArrayList<>();
-                            SearchHits searchHits = searchResponse.getHits();
-                            for (SearchHit hit : searchHits) {
-                                HighlightField highlightField = hit.getHighlightFields().get(searchTitleField);
-                                String title = highlightField.getFragments()[0].toString();
-
-                                String articleId = (String) hit.getSourceAsMap().get("id");
-                                String categoryId = (String) hit.getSourceAsMap().get("categoryId");
-                                Integer articleType = (Integer) hit.getSourceAsMap().get("articleType");
-                                String articleCover = (String) hit.getSourceAsMap().get("articleCover");
-                                String summary = (String) hit.getSourceAsMap().get("summary");
-                                String author = (String) hit.getSourceAsMap().get("author");
-                                Long dateLong = (Long) hit.getSourceAsMap().get("createTime");
-                                Date createTime = new Date(dateLong);
-
-                                ArticleEo articleEo = new ArticleEo();
-                                articleEo.setId(articleId);
-                                articleEo.setCategoryId(categoryId);
-                                articleEo.setTitle(title);
-                                articleEo.setArticleType(articleType);
-                                articleEo.setArticleCover(articleCover);
-                                articleEo.setSummary(summary);
-                                articleEo.setAuthorId(author);
-                                articleEo.setCreateTime(createTime);
-                                articleHighLightList.add(articleEo);
-                            }
-
-                            return new AggregatedPageImpl<>((List<T>) articleHighLightList,
-                                    pageable, searchResponse.getHits().totalHits);
-                        }
-
-                        @Override
-                        public <T> T mapSearchHit(SearchHit searchHit, Class<T> aClass) {
-                            return null;
-                        }
-                    });
+            pagedArticle = queryByKeyword(keyword, pageable);
         }
 
         List<ArticleEo> articleEoList = pagedArticle.getContent();
@@ -165,36 +114,77 @@ public class ArticlePortalRestApi extends BaseRestApi {
         return GraceJsonResult.ok(rebuildArticleGrid(gridResult));
     }
 
+    private AggregatedPage<ArticleEo> queryByKeyword(String keyword, Pageable pageable) {
+        String preTag = "<font color='red'>";
+        String postTag = "</font>";
+        String searchTitleField = "title";
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.matchQuery(searchTitleField, keyword))
+                .withHighlightFields(new HighlightBuilder.Field(searchTitleField)
+                        .preTags(preTag)
+                        .postTags(postTag))
+                .withPageable(pageable)
+                .build();
+
+        return elasticsearchTemplate.queryForPage(searchQuery,
+                ArticleEo.class,
+                new SearchResultMapper() {
+                    @Override
+                    public <T> AggregatedPage<T> mapResults(SearchResponse searchResponse,
+                                                            Class<T> aClass,
+                                                            Pageable pageable) {
+                        List<ArticleEo> articleHighLightList = new ArrayList<>();
+                        SearchHits searchHits = searchResponse.getHits();
+                        for (SearchHit hit : searchHits) {
+                            HighlightField highlightField = hit.getHighlightFields().get(searchTitleField);
+                            String title = highlightField.getFragments()[0].toString();
+
+                            String articleId = (String) hit.getSourceAsMap().get("id");
+                            String categoryId = (String) hit.getSourceAsMap().get("categoryId");
+                            Integer articleType = (Integer) hit.getSourceAsMap().get("articleType");
+                            String articleCover = (String) hit.getSourceAsMap().get("articleCover");
+                            String summary = (String) hit.getSourceAsMap().get("summary");
+                            String author = (String) hit.getSourceAsMap().get("author");
+                            Long dateLong = (Long) hit.getSourceAsMap().get("createTime");
+                            Date createTime = new Date(dateLong);
+
+                            ArticleEo articleEo = new ArticleEo();
+                            articleEo.setId(articleId);
+                            articleEo.setCategoryId(categoryId);
+                            articleEo.setTitle(title);
+                            articleEo.setArticleType(articleType);
+                            articleEo.setArticleCover(articleCover);
+                            articleEo.setSummary(summary);
+                            articleEo.setAuthorId(author);
+                            articleEo.setCreateTime(createTime);
+                            articleHighLightList.add(articleEo);
+                        }
+
+                        return new AggregatedPageImpl<>((List<T>) articleHighLightList,
+                                pageable, searchResponse.getHits().totalHits);
+                    }
+
+                    @Override
+                    public <T> T mapSearchHit(SearchHit searchHit, Class<T> aClass) {
+                        return null;
+                    }
+                });
+    }
+
     @ApiOperation(value = "首页查询文章列表(sql)", notes = "首页查询文章列表(sql)", httpMethod = "GET")
     @GetMapping("search")
-    public GraceJsonResult query(@RequestParam String keyword,
-                                 @RequestParam String category,
-                                 @RequestParam String tag,
-                                 @RequestParam Integer page,
-                                 @RequestParam Integer pageSize) {
+    public GraceJsonResult articleListBySql(@RequestParam String keyword,
+                                            @RequestParam String category,
+                                            @RequestParam String tag,
+                                            @RequestParam Integer page,
+                                            @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
         PagedGridResult res = articlePortalService.queryPortalArticleList(keyword,
-                tag,
                 category,
+                tag,
                 page,
                 pageSize);
         return GraceJsonResult.ok(rebuildArticleGrid(res));
-    }
-
-    @ApiOperation(value = "首页查询每个类别下文章的数量", notes = "首页查询每个类别下文章的数量", httpMethod = "GET")
-    @GetMapping("category/articleCount")
-    public GraceJsonResult queryEachCategoryArticleCount() {
-        List<Category> categories = articlePortalService.queryCategoryList();
-        // 查询每个类别下文章的数量
-        ArrayList<CategoryVO> categoryVOList = new ArrayList<>();
-        for (Category category : categories) {
-            CategoryVO categoryVO = new CategoryVO();
-            BeanUtils.copyProperties(category, categoryVO);
-            int categoryCount = articlePortalService.queryEachCategoryArticleCount(category.getId());
-            categoryVO.setEachCategoryArticleCount(categoryCount);
-            categoryVOList.add(categoryVO);
-        }
-        return GraceJsonResult.ok(categoryVOList);
     }
 
     @ApiOperation(value = "首页查询分类列表", notes = "首页查询分类列表", httpMethod = "GET")
@@ -229,51 +219,13 @@ public class ArticlePortalRestApi extends BaseRestApi {
         return GraceJsonResult.ok(gridResult);
     }
 
-    @GetMapping("detail")
-    @ApiOperation(value = "文章详情", notes = "文章详情", httpMethod = "GET")
-    public GraceJsonResult detail(@RequestParam String articleId) {
-        ArticleDetailVO articleVO = articlePortalService.queryDetail(articleId);
-        if (articleVO == null) {
-            return new GraceJsonResult(ResponseStatusEnum.ARTICLE_NOT_EXIST);
-        }
-        Set<String> set = new HashSet<>();
-        set.add(articleVO.getAuthorId());
-        List<UserBasicInfoVO> authorList = getUserBasicInfoList(set);
-        if (!authorList.isEmpty()) {
-            articleVO.setAuthorName(authorList.get(0).getNickname());
-            articleVO.setAuthorFace(authorList.get(0).getFace());
-        }
-        articleVO.setReadCounts(getCountsFromRedis(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId));
-        if (authorList.size() == 0) {
-            return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR, articleVO);
-        } else {
-            return GraceJsonResult.ok(articleVO);
-        }
-    }
-
-    @PostMapping("readArticle")
-    @ApiOperation(value = "文章阅读量累加", notes = "文章阅读量累加", httpMethod = "POST")
-    public GraceJsonResult readArticle(@RequestParam String articleId, HttpServletRequest req) {
-        String visitIp = IpUtils.getRequestIp(req);
-        redisOperator.setnx60s(RedisConf.REDIS_ARTICLE_ALREADY_READ + Constants.SYMBOL_COLON + articleId + Constants.SYMBOL_COLON + visitIp, visitIp);
-        redisOperator.increment(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId, 1);
-        return GraceJsonResult.ok();
-    }
-
-
-    @GetMapping("readCounts")
-    @ApiOperation(value = "文章阅读数", notes = "文章阅读数", httpMethod = "GET")
-    public Integer readCounts(@RequestParam String articleId) {
-        return getCountsFromRedis(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + articleId);
-    }
-
     @GetMapping("getArticleByTime")
     @ApiOperation(value = "通过时间归类文章", notes = "通过时间归类文章", httpMethod = "GET")
     public GraceJsonResult queryArticleByTime(@RequestParam Integer page,
                                               @RequestParam Integer pageSize,
                                               @RequestParam String monthAndYear) {
         checkPagingParams(page, pageSize);
-        List<ArticleArchiveVO> articleArchiveVOList = articlePortalService.getArticleListByTime(monthAndYear, --page, pageSize);
+        PagedGridResult articleArchiveVOList = articlePortalService.getArticleListByTime(monthAndYear, page, pageSize);
         return GraceJsonResult.ok(articleArchiveVOList);
     }
 
@@ -296,7 +248,7 @@ public class ArticlePortalRestApi extends BaseRestApi {
     @GetMapping("getArticleListByCategoryId")
     @ApiOperation(value = "主页分类功能", notes = "主页分类功能", httpMethod = "GET")
     public GraceJsonResult getArticleListByCategoryId(@RequestParam String userId,
-                                                      @RequestParam Integer categoryId,
+                                                      @RequestParam String categoryId,
                                                       @RequestParam Integer page,
                                                       @RequestParam Integer pageSize) {
         return GraceJsonResult.ok(articlePortalService.queryArticleListByCategoryId(userId,
@@ -304,6 +256,101 @@ public class ArticlePortalRestApi extends BaseRestApi {
                 page, pageSize));
     }
 
+    // ########################################### 文章全局状态 ###########################################
+
+    @Resource
+    private IndexService indexService;
+
+    @ApiOperation(value = "获取全站文章数量", notes = "获取全站文章数量")
+    @GetMapping("getArticleCounts")
+    public Integer getArticleCounts() {
+        return indexService.getArticleCounts();
+    }
+
+    @ApiOperation(value = "获取全站评论数量", notes = "获取全站评论数量")
+    @GetMapping("getCommentCount")
+    public Integer getCommentCount() {
+        return indexService.getCommentCount();
+    }
+
+    @ApiOperation(value = "获取每个标签下文章数目", notes = "获取每个标签下文章数目")
+    @GetMapping(value = "/getBlogCountByTag")
+    public GraceJsonResult getBlogCountByTag() {
+        return GraceJsonResult.ok(indexService.getBlogCountByTag());
+    }
+
+    @ApiOperation(value = "获取一年内的文章贡献数", notes = "获取一年内的文章贡献数")
+    @GetMapping(value = "/getBlogContributeCount")
+    public GraceJsonResult getBlogContributeCount() {
+        return GraceJsonResult.ok(indexService.getBlogContributeCount());
+    }
+
+    @ApiOperation(value = "首页查询带有文章数量的文章类别列表", notes = "首页查询带有文章数量的文章类别列表", httpMethod = "GET")
+    @GetMapping("category/getCategoryListWithArticleCount")
+    public GraceJsonResult queryEachCategoryArticleCount() {
+        return GraceJsonResult.ok(articlePortalService.getCategoryListWithArticleCount());
+    }
+
+    // ########################################### 辅助函数 ###########################################
+
+    private PagedGridResult rebuildArticleGrid(PagedGridResult gridResult) {
+        String articleListJson = JsonUtils.objectToJson(gridResult.getRows());
+        List<Article> rows = JsonUtils.jsonToList(articleListJson, Article.class);
+        Set<String> idSet = new HashSet<>();
+        List<String> idList = new ArrayList<>();
+        for (Article article : rows) {
+            idSet.add(article.getAuthorId());
+            // 设置文章点赞数 收藏数等等
+            idList.add(RedisConf.REDIS_ARTICLE_READ_COUNTS + SysConf.SYMBOL_COLON + article.getId());
+            idList.add(RedisConf.REDIS_ARTICLE_STAR_COUNTS + SysConf.SYMBOL_COLON + article.getId());
+            idList.add(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS + SysConf.SYMBOL_COLON + article.getId());
+            idList.add(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + article.getId());
+
+        }
+        // redis mget
+        List<String> countsRedisList = redisOperator.mget(idList);
+
+        List<UserBasicInfoVO> authorList = getUserInfoListByIdsClient(idSet);
+        List<IndexArticleVO> indexArticleList = new ArrayList<>();
+        int j = 0;
+        for (Article article : rows) {
+            IndexArticleVO indexArticleVO = new IndexArticleVO();
+            BeanUtils.copyProperties(article, indexArticleVO);
+            UserBasicInfoVO authorInfo = getAuthorInfoIfPresent(article.getAuthorId(), authorList);
+            indexArticleVO.setAuthorVO(authorInfo);
+            String readCountsStr;
+            String starCountsStr;
+            String collectCountsStr;
+            String commentCountsStr;
+            readCountsStr = countsRedisList.get(j++);
+            starCountsStr = countsRedisList.get(j++);
+            collectCountsStr = countsRedisList.get(j++);
+            commentCountsStr = countsRedisList.get(j++);
+            int readCounts = 0;
+            int starCounts = 0;
+            int collectCounts = 0;
+            int commentCounts = 0;
+            if (StringUtils.isNotBlank(readCountsStr)) {
+                readCounts = Integer.parseInt(readCountsStr);
+            }
+            if (StringUtils.isNotBlank(starCountsStr)) {
+                starCounts = Integer.parseInt(starCountsStr);
+            }
+            if (StringUtils.isNotBlank(collectCountsStr)) {
+                collectCounts = Integer.parseInt(collectCountsStr);
+            }
+            if (StringUtils.isNotBlank(commentCountsStr)) {
+                commentCounts = Integer.parseInt(commentCountsStr);
+            }
+            indexArticleVO.setReadCounts(readCounts);
+            indexArticleVO.setStarCounts(starCounts);
+            indexArticleVO.setCommentCounts(commentCounts);
+            indexArticleVO.setCollectCounts(collectCounts);
+            indexArticleList.add(indexArticleVO);
+        }
+        gridResult.setRows(indexArticleList);
+        return gridResult;
+    }
 
     private UserBasicInfoVO getAuthorInfoIfPresent(String author,
                                                    List<UserBasicInfoVO> authorList) {
@@ -317,46 +364,14 @@ public class ArticlePortalRestApi extends BaseRestApi {
         }
         return null;
     }
-
-    private PagedGridResult rebuildArticleGrid(PagedGridResult gridResult) {
-        String articleListJson = JsonUtils.objectToJson(gridResult.getRows());
-        List<Article> rows = JsonUtils.jsonToList(articleListJson, Article.class);
-        Set<String> idSet = new HashSet<>();
-        List<String> idList = new ArrayList<>();
-        for (Article article : rows) {
-            idSet.add(article.getAuthorId());
-            idList.add(RedisConf.REDIS_ARTICLE_READ_COUNTS + Constants.SYMBOL_COLON + article.getId());
-        }
-        // redis mget
-        List<String> readCountsRedisList = redisOperator.mget(idList);
-
-        List<UserBasicInfoVO> authorList = getUserBasicInfoList(idSet);
-        List<IndexArticleVO> indexArticleList = new ArrayList<>();
-
-        for (int i = 0; i < rows.size(); i++) {
-            Article article = rows.get(i);
-            IndexArticleVO indexArticleVO = new IndexArticleVO();
-            BeanUtils.copyProperties(article, indexArticleVO);
-            UserBasicInfoVO authorInfo = getAuthorInfoIfPresent(article.getAuthorId(), authorList);
-            indexArticleVO.setAuthorVO(authorInfo);
-            String redisCountsStr = readCountsRedisList.get(i);
-            int readCounts = 0;
-            if (StringUtils.isNotBlank(redisCountsStr)) {
-                readCounts = Integer.parseInt(redisCountsStr);
-            }
-            indexArticleVO.setReadCounts(readCounts);
-            indexArticleList.add(indexArticleVO);
-        }
-        gridResult.setRows(indexArticleList);
-        return gridResult;
-    }
+    // ########################################### 远程调用 ###########################################
 
     @Resource
     private UserBaseInfoClient client;
 
-    public List<UserBasicInfoVO> getUserBasicInfoList(Set<?> idSet) {
+    public List<UserBasicInfoVO> getUserInfoListByIdsClient(Set<?> idSet) {
         List<UserBasicInfoVO> userBasicInfoVOList;
-        GraceJsonResult result = client.getUserBasicInfoList(JsonUtils.objectToJson(idSet));
+        GraceJsonResult result = client.queryByIds(JsonUtils.objectToJson(idSet));
         if (result != null) {
             String userJson = JsonUtils.objectToJson(result.getData());
             userBasicInfoVOList = JsonUtils.jsonToList(userJson, UserBasicInfoVO.class);
@@ -365,4 +380,5 @@ public class ArticlePortalRestApi extends BaseRestApi {
         }
         return userBasicInfoVOList;
     }
+
 }

@@ -28,7 +28,6 @@ a {
 
 a:hover {
     text-decoration: none;
-    color: #920784;
 }
 
 .clear {
@@ -90,6 +89,12 @@ header {
     width: 25%;
     overflow: hidden;
     float: left;
+}
+
+.praise_collect {
+    overflow: hidden;
+    padding-top: 10px;
+    margin: 10px auto;
 }
 
 .sidebar2 {
@@ -724,13 +729,16 @@ footer p {
 
 .blog_info {
     overflow: hidden;
-    margin-top: 30px
+    margin-top: 30px;
+    display: flex;
+    flex-direction:row;
+    flex-wrap: nowrap;
 }
 
 .blog_info ul li {
     float: left;
     font-size: 12px;
-    padding: 0 0 0 20px;
+    padding: 0 0 0 10px;
     color: #748594;
     line-height: 1.5;
     display: inline-block;
@@ -1029,7 +1037,8 @@ footer p {
 
 .cloud ul a:hover {
     border-radius: 0;
-    text-shadow: #000 1px 1px 1px
+    text-shadow: #000 1px 1px 1px;
+    cursor: pointer;
 }
 
 /*links*/
@@ -1411,7 +1420,7 @@ h1.t_nav {
     height: auto;
 }
 
-.infos_box .share {
+.infos_box .praise_collect {
     padding: 20px;
 }
 
@@ -1434,25 +1443,44 @@ h1.t_nav {
     text-decoration: underline
 }
 
-.diggit {
+.digit {
     float: left;
     width: 140px;
-    background: #E2523A url(../images/dzbg.jpg) no-repeat center left 10px;
+    background: #920784;
     color: #fff;
     box-shadow: 1px 2px 6px 0 rgba(0, 0, 0, .2);
     border-radius: 3px;
     line-height: 40px;
     text-align: center;
-    padding-left: 20px;
     margin: auto auto auto 20%;
 }
 
-.diggit a {
+.digit a {
     color: #fff;
 }
 
-#diggnum {
+#praiseNum {
     margin: 5px;
+}
+
+#collectNum {
+    margin: 5px;
+}
+
+.collect {
+    float: left;
+    margin-left: 40px;
+    width: 140px;
+    color: #fff;
+    background: #920784;
+    box-shadow: 1px 2px 6px 0 rgba(0, 0, 0, .2);
+    border-radius: 3px;
+    line-height: 40px;
+    text-align: center;
+}
+
+.collect a {
+    color: #fff;
 }
 
 .otherlink, .xzsm, .ffsm {
@@ -1569,7 +1597,7 @@ h1.t_nav {
     margin: 5px 0;
     padding-left: 10px;
     border-radius: 5px;
-    text-shadow: rgba(255, 255, 255, 0.3) 0px 1px 0px;
+    text-shadow: rgba(255, 255, 255, 0.3) 0 1px 0;
 }
 
 .ab_box .avatar {
@@ -1641,7 +1669,7 @@ h1.t_nav {
     border: 0 none;
 }
 
-.dasbox a {
+.collect a {
     color: #fff;
 }
 
@@ -1818,11 +1846,11 @@ h1.t_nav {
         margin: 0 5px;
     }
 
-    .share ul li i {
+    .praise_collect ul li i {
         height: 150px
     }
 
-    .share ul li h2 {
+    .praise_collect ul li h2 {
         padding: 15px 5px;
     }
 
@@ -1942,7 +1970,7 @@ h1.t_nav {
 
     .blog_info {
         width: 100%;
-        clear: both
+        clear: both;
     }
 
     .blogs .blog_pic {
@@ -2001,11 +2029,11 @@ h1.t_nav {
         margin: 20px auto;
     }
 
-    .share ul li {
+    .praise_collect ul li {
         width: 50%
     }
 
-    .share ul li i {
+    .praise_collect ul li i {
         height: 150px
     }
 
@@ -2013,7 +2041,7 @@ h1.t_nav {
         margin: 0 15px;
     }
 
-    .share ul li h2 {
+    .praise_collect ul li h2 {
         padding: 15px 15px;
     }
 
@@ -2041,12 +2069,12 @@ h1.t_nav {
         margin-top: 50px;
     }
 
-    .diggit {
+    .digit {
         float: none;
         margin-left: auto;
     }
 
-    .dasbox {
+    .collect {
         display: none
     }
 
@@ -2183,6 +2211,7 @@ h1.t_nav {
     .blog_info {
         width: 100%;
         clear: both;
+
     }
 
     .blogs .blog_pic {
@@ -2241,11 +2270,11 @@ h1.t_nav {
         margin: 20px auto;
     }
 
-    .share ul li {
+    .praise_collect ul li {
         width: 50%
     }
 
-    .share ul li i {
+    .praise_collect ul li i {
         height: 150px
     }
 
@@ -2253,7 +2282,7 @@ h1.t_nav {
         margin: 0 3%;
     }
 
-    .share ul li h2 {
+    .praise_collect ul li h2 {
         padding: 15px 15px;
     }
 
@@ -2292,12 +2321,12 @@ h1.t_nav {
         margin-top: 50px;
     }
 
-    .diggit {
+    .digit {
         float: none;
         margin-left: auto;
     }
 
-    .dasbox {
+    .collect {
         display: none
     }
 
@@ -2318,6 +2347,10 @@ h1.t_nav {
         overflow: scroll;
         overflow-x: hidden;
         overflow-y: auto;
+    }
+
+    .collect {
+        display: none
     }
 
 }

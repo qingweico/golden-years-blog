@@ -4,18 +4,12 @@
       <hamburger
           :toggle-click="toggleSideBar"
           :is-active="sidebar.opened"
-          class="hamburger-container"
-      />
-
+          class="hamburger-container"/>
       <breadcrumb/>
-
       <div class="right-menu">
-
         <el-tooltip content="门户页面" effect="dark" placement="bottom">
           <Website id="website" class="right-menu-item"/>
         </el-tooltip>
-
-
         <el-tooltip effect="dark" content="全屏" placement="bottom">
           <screenfull class="screenfull right-menu-item"></screenfull>
         </el-tooltip>

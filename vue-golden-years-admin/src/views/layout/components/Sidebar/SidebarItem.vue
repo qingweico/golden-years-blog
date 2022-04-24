@@ -1,5 +1,6 @@
 <template>
   <div class="menu-wrapper">
+    <span>流金岁月后台管理</span>
     <template v-for="(item,index) in items" v-if="items.length>0">
       <el-submenu :key="index" :index="index+''" v-if="checkShowOrHidden(item)">
         <template slot="title">
@@ -19,7 +20,6 @@
 
   </div>
 </template>
-
 <script>
 
 export default {
@@ -42,7 +42,7 @@ export default {
     }
   },
   methods: {
-    goTo: function (child) {
+    goTo (child) {
       if (child.isJumpExternalUrl === 1) {
         window.open(child.url)
       } else {

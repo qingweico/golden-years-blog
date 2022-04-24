@@ -156,7 +156,6 @@ export default {
             this.loading = false;
           }, () => {
             this.loading = false;
-            this.$message.error("网络错误!");
           });
         }
       });

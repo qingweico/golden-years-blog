@@ -4,29 +4,32 @@ import cn.qingweico.api.config.RabbitMqConfig;
 import cn.qingweico.api.config.RabbitMqDelayConfig;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
+import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.ArticleService;
 import cn.qingweico.article.service.TagService;
 import cn.qingweico.enums.ArticleAppointType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.Tag;
-import cn.qingweico.pojo.bo.TagBO;
+import cn.qingweico.pojo.vo.ArticleAdminVO;
+import cn.qingweico.pojo.vo.CenterArticleVO;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.bo.NewArticleBO;
 import cn.qingweico.pojo.eo.ArticleEo;
 import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.mongodb.client.gridfs.GridFSBucket;
-import org.apache.commons.beanutils.BeanUtilsBean;
+import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-import org.n3r.idworker.Sid;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -34,13 +37,14 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
+import javax.xml.ws.Response;
+import java.util.*;
 
 /**
  * @author zqw
  * @date 2021/9/11
  */
+@Slf4j
 @Service
 public class ArticleServiceImpl extends BaseService implements ArticleService {
 
@@ -49,6 +53,9 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
     @Resource
     private TagService tagService;
+
+    @Resource
+    private ArticlePortalService articlePortalService;
 
     @Resource
     public GridFSBucket gridFsBucket;
@@ -85,16 +92,17 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 String personalTagId = tagService.addPersonalTag(tag, newArticleBO.getAuthorId());
                 tagsString.append("\"");
                 tagsString.append(personalTagId);
-                tagsString.append("\",");
+            } else {
+                // 系统标签
+                tagsString.append("\"");
+                tagsString.append(tag.getId());
             }
-            // 系统标签
-            tagsString.append("\"");
-            tagsString.append(tag.getId());
             tagsString.append("\",");
         }
         tagsString.append("]");
         tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
         article.setTags(tagsString.toString());
+        // 定时发布文章
         if (article.getIsAppoint().equals(ArticleAppointType.TIMING.type)) {
             article.setCreateTime(newArticleBO.getCreateTime());
             // 发送延迟消息到mq队列
@@ -109,7 +117,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 return message;
             };
             rabbitTemplate.convertAndSend(RabbitMqDelayConfig.EXCHANGE_DELAY,
-                    "article.delay.publish.success.do",
+                    SysConf.ARTICLE_DELAY_PUBLISH_SUCCESS_DO,
                     articleId,
                     messagePostProcessor);
         } else if (article.getIsAppoint().equals(ArticleAppointType.IMMEDIATELY.type)) {
@@ -118,7 +126,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
         int res = articleMapper.insert(article);
         if (res != 1) {
-            GraceException.display(ResponseStatusEnum.ARTICLE_CREATE_ERROR);
+            GraceException.error(ResponseStatusEnum.ARTICLE_CREATE_ERROR);
         }
         updateArticleStatus(articleId, ArticleReviewStatus.REVIEWING.type);
     }
@@ -136,44 +144,42 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         Article article = new Article();
         article.setId(articleId);
         article.setIsAppoint(ArticleAppointType.IMMEDIATELY.type);
-        articleMapper.updateByPrimaryKeySelective(article);
+        if (articleMapper.updateByPrimaryKeySelective(article) < 0) {
+            log.error("timelyPublishArticle error");
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
     }
 
     @Override
-    public PagedGridResult queryMyArticles(String userId,
-                                           String keyword,
-                                           Integer categoryId,
-                                           Integer status,
-                                           Date startDate,
-                                           Date endDate,
-                                           Integer page,
-                                           Integer pageSize) {
+    public PagedGridResult queryUserArticles(String userId,
+                                             String keyword,
+                                             String categoryId,
+                                             Integer status,
+                                             Date startDate,
+                                             Date endDate,
+                                             Integer page,
+                                             Integer pageSize) {
 
-        Example example = new Example(Article.class);
-        example.orderBy("createTime").desc();
-        Example.Criteria criteria = example.createCriteria();
-
-        criteria.andEqualTo("authorId", userId);
-        if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike("title", "%" + keyword + "%");
-        }
-        if (categoryId != null) {
-            criteria.andEqualTo("categoryId", categoryId);
-        }
-        if (ArticleReviewStatus.isArticleStatusValid(status)) {
-            criteria.andEqualTo("articleStatus", status);
-        }
-
-        criteria.andEqualTo("isDelete", YesOrNo.NO.type);
-        if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo("createTime", startDate);
-        }
-        if (endDate != null) {
-            criteria.andLessThanOrEqualTo("createTime", endDate);
-        }
+        Example example = conditionalQueryArticle(userId, keyword, categoryId, status
+                , YesOrNo.NO.type, startDate, endDate);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
-        return setterPagedGrid(list, page);
+        PageInfo<Article> pageInfo = new PageInfo<>(list);
+        List<Article> paged = pageInfo.getList();
+        List<CenterArticleVO> result = new ArrayList<>();
+        for (Article article : paged) {
+            CenterArticleVO centerArticleVO = new CenterArticleVO();
+            BeanUtils.copyProperties(article, centerArticleVO);
+            List<Tag> tagList = articlePortalService.getTagList(article);
+            centerArticleVO.setTagList(tagList);
+            result.add(centerArticleVO);
+        }
+        PagedGridResult pgr = new PagedGridResult();
+        pgr.setRows(result);
+        pgr.setCurrentPage(pageInfo.getPageNum());
+        pgr.setRecords(pageInfo.getTotal());
+        pgr.setTotalPage(pageInfo.getPages());
+        return pgr;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -188,7 +194,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         int res = articleMapper.updateByExampleSelective(article, example);
 
         if (res != 1) {
-            GraceException.display(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
+            GraceException.error(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
         }
 
         // 如果审核通过, 则查询article相关的字段并放入es中
@@ -198,7 +204,19 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 String summary = getArticleSummary(result.getContent());
                 ArticleEo articleEo = new ArticleEo();
                 BeanUtils.copyProperties(result, articleEo);
+                // 获取文章标签id集合
+                String[] tagIds = result.getTags().replace("[", "")
+                        .replace("]", "")
+                        .replace("\"", "")
+                        .split(",");
+                StringBuilder resultTag = new StringBuilder();
+                for (String id : tagIds) {
+                    resultTag.append(id);
+                    resultTag.append(" ");
+                }
+                resultTag.delete(resultTag.length() - 1, resultTag.length());
                 articleEo.setSummary(summary);
+                articleEo.setTags(resultTag.toString());
                 IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleEo).build();
                 elasticsearchTemplate.index(indexQuery);
             }
@@ -223,30 +241,87 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
         article.setTags(tagsString.toString());
         if (articleMapper.updateByPrimaryKeySelective(article) <= 0) {
-            GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
     }
 
     @Override
-    public PagedGridResult query(Integer status, Integer categoryId, Integer page, Integer pageSize, Integer deleteStatus) {
+    public List<ArticleAdminVO> query(String keyword,
+                                      Integer status,
+                                      String categoryId,
+                                      String tagId,
+                                      Integer deleteStatus,
+                                      Date startDateStr,
+                                      Date endDateStr,
+                                      Integer page,
+                                      Integer pageSize) {
+        Example example = conditionalQueryArticle(null, keyword, categoryId, status
+                , deleteStatus, startDateStr, endDateStr);
+        PageHelper.startPage(page, pageSize);
+        List<Article> list = articleMapper.selectByExample(example);
+        if (StringUtils.isNotBlank(tagId)) {
+            ArrayList<Article> result = new ArrayList<>();
+            // 标签筛选
+            for (Article article : list) {
+                String tags = article.getTags();
+                String[] tagIds = tags.replace("[", "")
+                        .replace("]", "")
+                        .replace("\"", "")
+                        .split(",");
+                for (String tag : tagIds) {
+                    if (tag.equals(tagId)) {
+                        result.add(article);
+                        break;
+                    }
+                }
+                list = result;
+            }
+        }
+        List<ArticleAdminVO> result = new ArrayList<>();
+        for (Article article : list) {
+            ArticleAdminVO articleAdminVO = new ArticleAdminVO();
+            BeanUtils.copyProperties(article, articleAdminVO);
+            List<Tag> tagList = articlePortalService.getTagList(article);
+            articleAdminVO.setTagList(tagList);
+            result.add(articleAdminVO);
+        }
+        return result;
+    }
+
+    private Example conditionalQueryArticle(String userId,
+                                            String keyword,
+                                            String categoryId,
+                                            Integer status,
+                                            Integer deleteStatus,
+                                            Date startDate,
+                                            Date endDate) {
         Example example = new Example(Article.class);
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
+        if (StringUtils.isNotBlank(userId)) {
+            criteria.andEqualTo("authorId", userId);
+        }
+        if (StringUtils.isNotBlank(keyword)) {
+            criteria.andLike("title", "%" + keyword + "%");
+        }
 
         if (ArticleReviewStatus.isArticleStatusValid(status)) {
             criteria.andEqualTo("articleStatus", status);
         }
-        if (categoryId != null) {
+        if (StringUtils.isNotBlank(categoryId)) {
             criteria.andEqualTo("categoryId", categoryId);
         }
-        if (status != null && status.equals(ArticleReviewStatus.REVIEWING.type)) {
-            criteria.andEqualTo("articleStatus", ArticleReviewStatus.REVIEWING.type);
+        if (deleteStatus != null) {
+            criteria.andEqualTo("isDelete", deleteStatus);
         }
-        criteria.andEqualTo("isDelete", deleteStatus);
+        if (startDate != null) {
+            criteria.andGreaterThanOrEqualTo("createTime", startDate);
+        }
+        if (endDate != null) {
+            criteria.andLessThanOrEqualTo("createTime", endDate);
+        }
+        return example;
 
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
-        return setterPagedGrid(list, page);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -289,7 +364,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         // 删除未审核过的文章; 直接设置is_delete = 1
         int result = articleMapper.updateByExampleSelective(pending, articleExample);
         if (result != 1) {
-            GraceException.display(ResponseStatusEnum.ARTICLE_DELETE_ERROR);
+            GraceException.error(ResponseStatusEnum.ARTICLE_DELETE_ERROR);
         }
     }
 
@@ -314,15 +389,13 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     @Override
     public void withdrawArticle(String userId, String articleId) {
         Example articleExample = makeExampleCriteria(userId, articleId);
-
         Article pending = new Article();
         pending.setArticleStatus(ArticleReviewStatus.WITHDRAW.type);
-
         int result = articleMapper.updateByExampleSelective(pending, articleExample);
         if (result != 1) {
-            GraceException.display(ResponseStatusEnum.ARTICLE_WITHDRAW_ERROR);
+            GraceException.error(ResponseStatusEnum.ARTICLE_WITHDRAW_ERROR);
         }
-        //elasticsearchTemplate.delete(ArticleEo.class, articleId);
+        elasticsearchTemplate.delete(ArticleEo.class, articleId);
 
     }
 
@@ -333,7 +406,6 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         article.setId(articleId);
         article.setMongoFileId(articleMongoId);
         articleMapper.updateByPrimaryKeySelective(article);
-
     }
 
     private Example makeExampleCriteria(String userId, String articleId) {

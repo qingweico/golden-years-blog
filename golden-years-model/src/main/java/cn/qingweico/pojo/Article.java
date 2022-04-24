@@ -1,5 +1,6 @@
 package cn.qingweico.pojo;
 
+import cn.qingweico.enums.ArticleReviewStatus;
 import lombok.Data;
 
 import javax.persistence.Id;
@@ -46,7 +47,8 @@ public class Article {
     private Integer isAppoint;
 
     /**
-     * 文章状态;  1: 审核中(用户已提交)
+     * 文章状态 {@link ArticleReviewStatus}
+     * 1: 审核中(用户已提交)
      * 2: 审核通过(已发布)
      * 3: 审核未通过
      * 4: 文章撤回(已发布的情况下才能撤回和删除)
@@ -77,17 +79,22 @@ public class Article {
      */
     private Integer collectCounts;
     /**
-     * 文章评论总数; 评论防刷, 距离上次评论需要间隔时间控制数秒
+     * 文章评论总数; 评论防刷, 距离上次评论需要间隔时间控制数秒 - 放redis
      */
     private Integer commentCounts;
+    /**
+     * 文章点赞数; - 放redis
+     */
+    private Integer starCounts;
 
     /**
      * 文章静态化与mongo关联id
      */
+    @Deprecated
     private String mongoFileId;
 
     /**
-     * 逻辑删除状态; 非物理删除, 1: 删除, 0: 未删除
+     * 逻辑删除状态; 1: 非物理删除; 0: 未删除
      */
     private Integer isDelete;
 
@@ -97,7 +104,7 @@ public class Article {
     private Date createTime;
 
     /**
-     * 文章的修改时间
+     * 文章的更新时间
      */
     private Date updateTime;
     /**

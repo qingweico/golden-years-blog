@@ -2,11 +2,11 @@ import request from '@/utils/request'
 
 /**
  * 获取文件列表
- * @param data
+ * @param params
  */
 export function getFileList(params) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/getFileList',
+    url: process.env.GATEWAY_API + '/networkDisk/getFileList',
     method: 'post',
     data: params
   })
@@ -14,7 +14,7 @@ export function getFileList(params) {
 
 export function getFileTree(params) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/getFileTree',
+    url: process.env.GATEWAY_API + '/networkDisk/getFileTree',
     method: 'post',
     data: params
   })
@@ -26,7 +26,7 @@ export function getFileTree(params) {
  */
 export function getStorage(data) {
   return request({
-    url: process.env.PICTURE_API + '/storage/getStorage',
+    url: process.env.GATEWAY_API + '/storage/getStorage',
     method: 'get',
     data
   })
@@ -38,7 +38,7 @@ export function getStorage(data) {
  */
 export function unzipFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/unzipFile',
+    url: process.env.GATEWAY_API + '/networkDisk/unzipFile',
     method: 'post',
     data
   })
@@ -50,7 +50,7 @@ export function unzipFile(data) {
  */
 export function deleteFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/deleteFile',
+    url: process.env.GATEWAY_API + '/networkDisk/deleteFile',
     method: 'post',
     data
   })
@@ -62,7 +62,7 @@ export function deleteFile(data) {
  */
 export function selectFileByFileType(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/selectFileByFileType',
+    url: process.env.GATEWAY_API + '/networkDisk/selectFileByFileType',
     method: 'post',
     data
   })
@@ -74,7 +74,7 @@ export function selectFileByFileType(data) {
  */
 export function moveFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/moveFile',
+    url: process.env.GATEWAY_API + '/networkDisk/moveFile',
     method: 'post',
     data
   })
@@ -86,7 +86,7 @@ export function moveFile(data) {
  */
 export function createFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/createFile',
+    url: process.env.GATEWAY_API + '/networkDisk/createFile',
     method: 'post',
     data
   })
@@ -98,7 +98,7 @@ export function createFile(data) {
  */
 export function editFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/edit',
+    url: process.env.GATEWAY_API + '/networkDisk/edit',
     method: 'post',
     data
   })
@@ -110,7 +110,7 @@ export function editFile(data) {
  */
 export function batchDeleteFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/batchDeleteFile',
+    url: process.env.GATEWAY_API + '/networkDisk/batchDeleteFile',
     method: 'post',
     data
   })
@@ -122,7 +122,7 @@ export function batchDeleteFile(data) {
  */
 export function batchMoveFile(data) {
   return request({
-    url: process.env.PICTURE_API + '/networkDisk/batchMoveFile',
+    url: process.env.GATEWAY_API + '/networkDisk/batchMoveFile',
     method: 'post',
     data
   })

@@ -17,8 +17,14 @@ import java.util.ArrayList;
 public class UserClientFallback implements UserBaseInfoClient {
 
     @Override
-    public GraceJsonResult getUserBasicInfoList(String userIds) {
-        log.warn("{}, 用户服务不可用", DateUtils.dateToStringWithTime());
+    public GraceJsonResult queryByIds(String userIds) {
+        log.warn("{}, query user info, 用户服务不可用", DateUtils.dateToStringWithTime());
         return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR, new ArrayList<>(0));
+    }
+
+    @Override
+    public GraceJsonResult getUserBasicInfo(String userId) {
+        log.warn("{}, get user basic info, 用户服务不可用", DateUtils.dateToStringWithTime());
+        return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR);
     }
 }

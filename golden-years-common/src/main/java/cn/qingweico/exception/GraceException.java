@@ -9,7 +9,7 @@ import cn.qingweico.result.ResponseStatusEnum;
  * @date 2021/9/6
  */
 public class GraceException {
-   public static void display(ResponseStatusEnum responseStatus) {
+   public static void error(ResponseStatusEnum responseStatus) {
       throw new CustomException(responseStatus);
    }
 }

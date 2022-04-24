@@ -19,7 +19,7 @@ export function getCookie(name) {
 export function delCookie(name) {
     let exp = new Date();
     exp.setTime(exp.getTime() - 1);
-    let cval = getCookie(name);
-    if (cval != null)
-        document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+    let val = getCookie(name);
+    if (val != null)
+        document.cookie = name + "=" + val + ";expires=" + exp.toGMTString();
 } 

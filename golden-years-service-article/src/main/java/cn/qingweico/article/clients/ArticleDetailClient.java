@@ -1,6 +1,5 @@
 package cn.qingweico.article.clients;
 
-import cn.qingweico.pojo.vo.ArticleDetailVO;
 import cn.qingweico.result.GraceJsonResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

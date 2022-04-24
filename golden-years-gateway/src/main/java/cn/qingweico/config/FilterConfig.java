@@ -1,6 +1,6 @@
 package cn.qingweico.config;
 
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.util.IpUtils;
 import cn.qingweico.util.RedisOperator;
@@ -41,8 +41,8 @@ public class FilterConfig implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         final ServerHttpRequest req = exchange.getRequest();
         String visitIp = IpUtils.getRequestIpGateWay(req);
-        final String visitIpKey = RedisConf.REDIS_LIMIT_VISIT_IP + Constants.SYMBOL_COLON + visitIp;
-        final String forbidIp = RedisConf.REDIS_LIMIT_FORBID_IP + Constants.SYMBOL_COLON + visitIp;
+        final String visitIpKey = RedisConf.REDIS_LIMIT_VISIT_IP + SysConf.SYMBOL_COLON + visitIp;
+        final String forbidIp = RedisConf.REDIS_LIMIT_FORBID_IP + SysConf.SYMBOL_COLON + visitIp;
 
         long limitLeftTime = redisOperator.ttl(forbidIp);
         if (limitLeftTime > 0) {

@@ -7,19 +7,12 @@
     </div>
 
     <div class="account-wrapper">
-      <div class="middle-wrapper">
-        <div class="every-line">
-          <div class="pre-label">作者昵称</div>
-          <div class="info-words">
-            <el-input v-model="userAccountInfo.nickname" placeholder="请输入作家昵称" maxlength="8"></el-input>
-          </div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">作家头像</div>
+      <el-form :model="form" ref="form" :rules="infoRules">
+        <el-form-item :label-width="formLabelWidth" label="用户头像">
           <div class="info-face">
             <div class="choose-face-wrapper">
-              <img id="user-face" :src="userAccountInfo.face" class="user-face"
-                   alt="user-face"/>
+              <img id="user-face" :src="form.face" class="user-face"
+                   alt/>
               <div class="choose-face">选择头像</div>
               <input type="file"
                      id="inputPic"
@@ -32,79 +25,94 @@
             </div>
             <div class="upload-suggest">请上传尺寸200X200像素(大小不能超过2M), 能够代表形象的图片, 请勿使用低俗/二维码/广告的头像</div>
           </div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">真实姓名</div>
-          <div class="info-words">
-            <el-input id="realname" name="realname" v-model="userAccountInfo.realName" placeholder="请输入真实姓名"
-                      maxlength="8"></el-input>
-          </div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">生日</div>
-          <div class="info-words">
-            <el-date-picker
-                v-model="userAccountInfo.birthday"
-                type="date"
-                placeholder="选择日期">
-            </el-date-picker>
-          </div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">性别</div>
-          <div class="info-words">
-            <el-radio-group v-model="userAccountInfo.sex">
-              <el-radio :label="0">男生</el-radio>
-              <el-radio :label="1">女生</el-radio>
-              <el-radio :label="2">保密</el-radio>
-            </el-radio-group>
-          </div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">所在城市</div>
-          <div style="position: relative;">
-            <el-input id="city-picker"
-                      name="city-picker"
-                      data-toggle="city-picker"
-                      class="pick-city"></el-input>
-          </div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">注册手机</div>
-          <div class="info-words">{{ userAccountInfo.mobile }}</div>
-        </div>
-        <div class="every-line">
-          <div class="pre-label">联系邮箱</div>
-          <div class="info-words">
-            <el-input id="email" name="email" v-model="userAccountInfo.email" placeholder="请输入邮箱"
-                      maxlength="20"></el-input>
-          </div>
-        </div>
-      </div>
-      <div class="submit-wrapper">
-        <el-button type="primary" @click="handleSubmit" class="submit-btn" :loading="loading">提交信息</el-button>
-      </div>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="真实姓名" prop="realName">
+          <el-input v-model="form.realName" style="width: 200px"></el-input>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="昵称" prop="nickname">
+          <el-input v-model="form.nickname" style="width: 200px"></el-input>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="手机号" prop="mobile">
+          <span>{{form.mobile}}</span>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="邮箱" prop="email">
+          <el-input v-model="form.email" style="width: 200px"></el-input>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="生日" prop="birthday">
+          <el-date-picker v-model="form.birthday"
+                          type="date" style="width: 200px"
+                          placeholder="选择日期">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item :label-width="formLabelWidth" label="省份" prop="province">
+          <CitySelector :province="form.province" style="width: 200px"
+                        @province="getProvince"></CitySelector>
+        </el-form-item>
+        <el-form-item label="性别" :label-width="formLabelWidth" prop="sex">
+          <el-radio-group v-model="form.sex">-->
+            <el-radio :label=0>男生</el-radio>
+            <el-radio :label=1>女生</el-radio>
+            <el-radio :label=2>保密</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+
+    </div>
+    <div class="submit-wrapper">
+      <el-button type="primary" @click="handleSubmit" class="submit-btn" :loading="loading">提交信息</el-button>
     </div>
   </div>
 
 </template>
 
 <script>
-import 'city-picker/cityPicker.css'
 import {mapGetters} from "vuex";
+import CitySelector from "@/components/CitySelect"
 import {updateUserInfo, uploadFace} from "@/api/user";
 
 export default {
   name: "account",
+  components: {
+    CitySelector
+  },
   data() {
     return {
-      userAccountInfo: {},
       loading: false,
+      formLabelWidth: '100px',
+      form: {},
+      infoRules: {
+        email: [
+          {
+            required: true,
+            trigger: "blur",
+            message: "请输入邮箱"
+          },
+          {
+            pattern: "^([a-z0-9A-Z]+[-|_]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$",
+            message: "请输入合法的邮箱"
+          }
+        ],
+        realName: [
+          {
+            required: true,
+            trigger: "blur",
+            message: "请输入真实姓名"
+          },
+          {min: 1, max: 5, message: "真实姓名长度在 1 到 5 个字符", trigger: "blur"}
+        ],
+        nickname: [
+          {
+            required: true,
+            trigger: "blur",
+            message: "请输入昵称"
+          },
+          {min: 1, max: 10, message: "昵称长度在 1 到 10 个字符", trigger: "blur"}
+        ]
+      },
     }
   },
   created() {
-    this.userAccountInfo = this.getUserInfo();
-
+    this.form = this.getUserInfo();
   },
   methods: {
     ...mapGetters(['getUserInfo']),
@@ -121,24 +129,41 @@ export default {
           message: response.msg,
           offset: 100
         });
-        this.userAccountInfo.face = response.data;
+        this.form.face = response.data;
       });
     },
+    getProvince(data) {
+      this.form.province = data;
+    },
     handleSubmit() {
-      this.loading = true;
-      setTimeout(() => {
-      }, 2000);
-      let userAccountInfo = this.userAccountInfo;
-      userAccountInfo.province = "河南省";
-      userAccountInfo.city = "信阳市";
-      userAccountInfo.district = "固始县";
-      updateUserInfo(userAccountInfo).then((response) => {
-        this.$message.success(response.msg);
-        this.loading = false;
-      }, () => {
-        this.loading = false;
-        this.$message.error('网络超时');
-      });
+      // 信息校验
+      this.$refs.form.validate(valid => {
+        if(valid) {
+          let params = {};
+          params.id = this.form.id;
+          params.realName = this.form.realName;
+          params.face = this.form.face;
+          params.nickname = this.form.nickname;
+          params.sex = this.form.sex;
+          if(!this.form.province) {
+            this.$message.error("请选择省份");
+            return;
+          }
+          params.province = this.form.province;
+          params.mobile = this.form.mobile;
+          params.email = this.form.email;
+          params.birthday = this.form.birthday;
+          this.loading = true;
+          setTimeout(() => {
+          }, 2000);
+          updateUserInfo(params).then((response) => {
+            this.$message.success(response.msg);
+            this.loading = false;
+          }, () => {
+            this.loading = false;
+          });
+        }
+      })
     },
 
     // 鼠标移动到上传组件上发生css变化

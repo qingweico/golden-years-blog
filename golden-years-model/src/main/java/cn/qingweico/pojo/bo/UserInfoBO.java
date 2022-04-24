@@ -26,7 +26,7 @@ public class UserInfoBO {
     private String realName;
 
     @Email
-    @NotBlank(message = "邮件不能为空")
+    @NotBlank(message = "邮箱不能为空")
     private String email;
 
     @NotNull(message = "请选择一个性别")
@@ -40,10 +40,4 @@ public class UserInfoBO {
 
     @NotBlank(message = "请选择所在城市")
     private String province;
-
-    @NotBlank(message = "请选择所在城市")
-    private String city;
-
-    @NotBlank(message = "请选择所在城市")
-    private String district;
 }

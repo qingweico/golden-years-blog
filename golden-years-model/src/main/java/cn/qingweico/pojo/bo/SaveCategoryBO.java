@@ -15,4 +15,5 @@ public class SaveCategoryBO {
    private String name;
    private String oldName;
    private String description;
+   private Integer status;
 }

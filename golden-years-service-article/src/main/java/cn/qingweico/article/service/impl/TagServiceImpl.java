@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.List;
 
@@ -37,9 +38,22 @@ public class TagServiceImpl extends BaseService implements TagService {
     private Sid sid;
 
     @Override
-    public PagedGridResult getTagList(Integer page, Integer pageSize) {
-        Example example = new Example(Article.class);
+    public PagedGridResult getTagList(String tagName,
+                                      Integer status,
+                                      Integer sys,
+                                      Integer page, Integer pageSize) {
+        Example example = new Example(Tag.class);
         example.orderBy("createTime").desc();
+        Example.Criteria criteria = example.createCriteria();
+        if (StringUtils.isNotBlank(tagName)) {
+            criteria.andLike("name", "%" + tagName + "%");
+        }
+        if (status != null) {
+            criteria.andEqualTo("status", status);
+        }
+        if (sys != null) {
+            criteria.andEqualTo("sys", sys);
+        }
         PageHelper.startPage(page, pageSize);
         List<Tag> tags = tagMapper.selectByExample(example);
         return setterPagedGrid(tags, page);
@@ -53,10 +67,9 @@ public class TagServiceImpl extends BaseService implements TagService {
             Example example = new Example(Tag.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo("status", YesOrNo.YES.type);
-            criteria.andEqualTo("sys", YesOrNo.YES.type);
             tags = tagMapper.selectByExample(example);
             redisOperator.set(RedisConf.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
-            log.info("标签信息已存入缓存");
+            log.info("tag list has been cached");
         } else {
             tags = JsonUtils.jsonToList(tagJson, Tag.class);
         }
@@ -77,7 +90,7 @@ public class TagServiceImpl extends BaseService implements TagService {
                 refreshCache(keys);
                 log.info("saveOrUpdate(refreshCache): {}", keys);
             } else {
-                log.error("更新标签失败");
+                log.error("update tag error");
             }
         } else {
             // 添加操作
@@ -91,14 +104,27 @@ public class TagServiceImpl extends BaseService implements TagService {
                 refreshCache(keys);
                 log.info("insert(refreshCache): {}", keys);
             } else {
-                log.error("新增标签失败");
+                log.error("add tag error");
             }
         }
     }
 
     @Override
     public void delete(String tagId) {
-        tagMapper.deleteByPrimaryKey(tagId);
+        if (tagMapper.deleteByPrimaryKey(tagId) > 0) {
+            String keys = RedisConf.REDIS_ARTICLE_TAG;
+            refreshCache(keys);
+        } else {
+            log.error("delete tag error");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void batchDelete(List<String> ids) {
+        for (String id : ids) {
+            tagMapper.deleteByPrimaryKey(id);
+        }
     }
 
     @Override
@@ -121,9 +147,9 @@ public class TagServiceImpl extends BaseService implements TagService {
         if (tagMapper.insert(personalTag) > 0) {
             String keys = RedisConf.REDIS_ARTICLE_TAG;
             refreshCache(keys);
-            log.info("insert(refreshCache): {}", keys);
+            log.info("insert personalTag(refreshCache): {}", keys);
         } else {
-            log.error("新增标签失败");
+            log.error("addPersonalTag error");
         }
         return tagId;
     }

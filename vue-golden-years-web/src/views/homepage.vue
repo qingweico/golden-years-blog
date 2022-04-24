@@ -34,7 +34,7 @@
               <span class="iconfont">&#xe8c7;</span>
               <span>{{ item.readCounts }}</span>
             </li>
-            <li class="collect">
+            <li class="collect_count">
               <span class="iconfont">&#xe663;</span>
               {{ item.readCounts }}
             </li>

@@ -3,6 +3,8 @@ package cn.qingweico.admin.service;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.util.PagedGridResult;
 
+import java.util.List;
+
 /**
  * @author zqw
  * @date 2021/9/10
@@ -33,16 +35,29 @@ public interface CategoryService {
 
     /**
      * 获得文章分类列表
-     * @param page 起始分页
+     *
+     * @param keyword  类别名称
+     * @param sort     是否按照文章数量排序(降序)
+     * @param page     起始分页
      * @param pageSize 每页的数量
      * @return PagedGridResult
      */
-    PagedGridResult queryCategoryList(Integer page, Integer pageSize);
+    PagedGridResult queryCategoryList(String keyword, Boolean sort, Integer page, Integer pageSize);
 
 
     /**
      * 删除文章类别
+     *
      * @param categoryId 类别id
      */
     void deleteCategory(String categoryId);
+
+    /**
+     * 批量删除文章类别
+     *
+     * @param ids 类别id集合
+     */
+    void deleteAll(List<String> ids);
+
+
 }

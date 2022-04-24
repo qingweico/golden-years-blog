@@ -27,5 +27,6 @@ public class ArticleDetailVO {
     private Integer readCounts;
     private Integer collectCounts;
     private Integer commentCounts;
+    private Integer starCounts;
     private List<Tag> tagList;
 }

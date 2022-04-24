@@ -12,7 +12,7 @@ const Code = {
  */
 const SysConf = {
     // 默认头像
-    defaultAvatar: "https://gitee.com/moxi159753/wx_picture/raw/master/picture/favicon.png",
+    defaultAvatar: "https://cdn.qingweico.cn/defaultAvatar.png",
 }
 
 
@@ -80,7 +80,7 @@ const FUNCTIONS = {
      * @param text
      */
     htmlToMarkdown: text => {
-        var turndownService = new TurndownService()
+        let turndownService = new TurndownService();
 
         // 用于提取代码语言
         turndownService.addRule('CodeBlock', {

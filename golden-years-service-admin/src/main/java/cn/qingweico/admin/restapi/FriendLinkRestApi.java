@@ -12,12 +12,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author zqw
@@ -51,11 +51,20 @@ public class FriendLinkRestApi extends BaseRestApi {
 
     @ApiOperation(value = "管理员查询友情链接列表", notes = "管理员查询友情链接列表", httpMethod = "GET")
     @GetMapping("/list")
-    public GraceJsonResult getFriendLinkList(@RequestParam Integer page,
+    public GraceJsonResult getFriendLinkList(@RequestParam String linkName,
+                                             @RequestParam Integer isDelete,
+                                             @RequestParam Integer page,
                                              @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult result = friendLinkService.getFriendLinkList(page, pageSize);
+        PagedGridResult result = friendLinkService.getFriendLinkList(linkName, isDelete, page, pageSize);
         return GraceJsonResult.ok(result);
+    }
+
+    @ApiOperation(value = "批量删除友情链接", notes = "批量删除友情链接", httpMethod = "POST")
+    @PostMapping("/delete")
+    public GraceJsonResult batchDelete(@RequestBody List<String> ids) {
+        friendLinkService.deleteAll(ids);
+        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
     }
 
     @ApiOperation(value = "删除友情链接", notes = "删除友情链接", httpMethod = "POST")
@@ -68,6 +77,6 @@ public class FriendLinkRestApi extends BaseRestApi {
     @ApiOperation(value = "首页友情链接列表", notes = "查询友情链接列表", httpMethod = "GET")
     @GetMapping("/portal/list")
     public GraceJsonResult getIndexFriendLinkList() {
-        return GraceJsonResult.ok(friendLinkService.queryAllFriendLinkList(YesOrNo.NO.type));
+        return GraceJsonResult.ok(friendLinkService.queryIndexFriendLinkList(YesOrNo.NO.type));
     }
 }

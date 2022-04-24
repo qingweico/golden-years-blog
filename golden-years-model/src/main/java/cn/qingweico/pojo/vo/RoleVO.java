@@ -29,7 +29,7 @@ public class RoleVO {
     private String summary;
 
     /**
-     * 该角色所能管辖的区域
+     * 该角色所能管辖的菜单
      */
     private String categoryMenuIds;
 }

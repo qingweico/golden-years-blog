@@ -69,12 +69,12 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         Example loginLogExample = new Example(UserLoginLog.class);
         loginLogExample.orderBy("loginTime").desc();
         Example.Criteria criteria = loginLogExample.createCriteria();
-        criteria.andEqualTo("userId");
+        criteria.andEqualTo("userId", userId);
         Calendar c = Calendar.getInstance();
 
         // 只展示用户最近一周的登陆日志
         c.setTime(new Date());
-        c.add(Calendar.DATE, - 7);
+        c.add(Calendar.DATE, -7);
         criteria.andGreaterThanOrEqualTo("loginTime", c.getTime());
         PageHelper.startPage(page, pageSize);
         List<UserLoginLog> userLoginLogList = userLoginLogMapper.selectByExample(loginLogExample);

@@ -57,17 +57,6 @@ public class User {
      * 省份
      */
     private String province;
-
-    /**
-     * 城市
-     */
-    private String city;
-
-    /**
-     * 区县
-     */
-    private String district;
-
     /**
      * 用户状态：
      * 0: 未激活

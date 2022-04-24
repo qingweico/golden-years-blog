@@ -3,10 +3,10 @@ package cn.qingweico.files.restapi;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.files.resource.FileResource;
 import cn.qingweico.files.service.UploaderService;
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
+import cn.qingweico.pojo.bo.GridFsBO;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
-import cn.qingweico.pojo.bo.NewAdminBO;
 import cn.qingweico.util.FileUtils;
 import com.mongodb.client.gridfs.GridFSFindIterable;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -17,11 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Decoder;
 
@@ -50,8 +46,17 @@ public class FileUploadRestApi {
     @Resource
     private GridFSBucket gridFsBucket;
 
-    @Value("${pic.path}")
-    private String facePicPath;
+    private static final String FACE_PIC_PATH;
+
+
+    static {
+        String os = System.getProperty("os.name");
+        if (SysConf.OS.equals(os)) {
+            FACE_PIC_PATH = "C://facePic";
+        } else {
+            FACE_PIC_PATH = "/home/java/facePic";
+        }
+    }
 
     @ApiOperation(value = "上传用户头像", notes = "上传用户头像", httpMethod = "POST")
     @PostMapping("/uploadFace")
@@ -67,10 +72,10 @@ public class FileUploadRestApi {
                 // 获得文件扩展名
                 String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
                 // 判断文件扩展名类型
-                if (!fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPG) &&
-                        !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPEG) &&
-                        !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_PNG) &&
-                !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_BLOB)) {
+                if (!fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPG) &&
+                        !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPEG) &&
+                        !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_PNG) &&
+                        !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_BLOB)) {
                     return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_FORMATTER_FAILED);
                 }
 
@@ -93,18 +98,18 @@ public class FileUploadRestApi {
     }
 
 
-    @ApiOperation(value = "上传文件到mongodb的GridFS中", notes = "上传文件到mongodb的GridFS中", httpMethod = "POST")
-    @PostMapping("/uploadToGridFS")
-    public GraceJsonResult uploadToGridFs(NewAdminBO newAdminBO) throws IOException {
+    @ApiOperation(value = "上传文件到mongodb的GridFs中", notes = "上传文件到mongodb的GridFs中", httpMethod = "POST")
+    @PostMapping("/uploadToGridFs")
+    public GraceJsonResult uploadToGridFs(@RequestBody GridFsBO gridFsBO) throws IOException {
 
         // 获得图片的base64字符串
-        String file64 = newAdminBO.getImg64();
+        String file64 = gridFsBO.getImg64();
         // 将base64字符串转换为字符数组
         byte[] bytes = new BASE64Decoder().decodeBuffer(file64);
         // 转换为输入流
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         // 上传到gridFS中
-        ObjectId id = gridFsBucket.uploadFromStream(newAdminBO.getUsername() + Constants.FILE_SUFFIX_PNG, inputStream);
+        ObjectId id = gridFsBucket.uploadFromStream(gridFsBO.getUsername() + SysConf.SYMBOL_POINT + SysConf.FILE_SUFFIX_PNG, inputStream);
         // 获得文件在gridFS中的主键id
         String fileId = id.toString();
         return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, fileId);
@@ -115,7 +120,7 @@ public class FileUploadRestApi {
     public void readInGridFs(String faceId, HttpServletResponse resp) throws IOException {
 
         if (StringUtils.isBlank(faceId)) {
-            GraceException.display(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
+            GraceException.error(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
         }
 
         // 从gridFS中读取文件
@@ -129,7 +134,7 @@ public class FileUploadRestApi {
     @GetMapping("/readFace64InGridFS")
     public GraceJsonResult readFace64InGridFs(String faceId) throws IOException {
 
-        // 获得GridFS中人脸数据文件
+        // 获得GridFs中人脸数据文件
         File face = readGridFsByFaceId(faceId);
 
         // 转换人脸为base64
@@ -156,9 +161,9 @@ public class FileUploadRestApi {
                         // 获得文件扩展名
                         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
                         // 判断文件扩展名类型
-                        if (!fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPG) &&
-                                !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_JPEG) &&
-                                !fileExtension.equalsIgnoreCase(Constants.FILE_SUFFIX_PNG)) {
+                        if (!fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPG) &&
+                                !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPEG) &&
+                                !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_PNG)) {
                             continue;
                         }
                         // 执行文件上传
@@ -185,20 +190,24 @@ public class FileUploadRestApi {
 
         GridFSFindIterable gridFsFiles = gridFsBucket.
                 find(Filters.eq("_id", new ObjectId((faceId))));
-
         GridFSFile gridFs = gridFsFiles.first();
-
         if (gridFs == null) {
-            GraceException.display(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
+            GraceException.error(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
         }
         String fileName = gridFs.getFilename();
         // 获取文件流; 保存到本地或者服务器的临时目录
-        File picFile = new File(facePicPath + fileName);
+        File picFile = new File(FACE_PIC_PATH + SysConf.SYMBOL_LEFT_OBLIQUE_LINE + fileName);
         // 创建文件输出流
         OutputStream os = new FileOutputStream(picFile);
         // 下载到服务器或者本地
         gridFsBucket.downloadToStream(new ObjectId(faceId), os);
         return picFile;
+    }
+    @ApiOperation(value = "根据faceId删除GridFs中的人脸信息", notes = "根据faceId删除GridFs中的人脸信息", httpMethod = "GET")
+    @GetMapping("/removeGridFsFile")
+    public GraceJsonResult removeGridFsFile(String faceId){
+        gridFsBucket.delete(new ObjectId(faceId));
+        return GraceJsonResult.ok();
     }
 }
 

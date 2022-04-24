@@ -33,7 +33,6 @@ public class BaseService {
 
     protected static final long MILLIS_MINUTE = 60 * MILLIS_SECOND;
 
-
     public PagedGridResult setterPagedGrid(List<?> list,
                                            Integer page) {
         PageInfo<?> pageList = new PageInfo<>(list);

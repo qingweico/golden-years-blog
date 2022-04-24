@@ -2,6 +2,7 @@ import axios from 'axios'
 import router from '@/router/index'
 import {getCookie} from "@/utils/cookie";
 import {Loading, Message} from 'element-ui'
+import {resetPassword} from "../../../vue-golden-years-admin/src/api/user";
 // 创建axios实例
 const service = axios.create({
     // api 的 base_url
@@ -60,13 +61,18 @@ service.interceptors.response.use(
             requestNum = 0
             loading.close();
             if (response.status === 401 || response.status === 400) {
-                router.push('404').then(() => {});
+                router.push('404').then(() => {
+                });
                 return res
             } else if (response.status === 500) {
-                router.push('500').then(() => {});
+                alert(response.status)
+                router.push('500').then(() => {
+                });
                 return Promise.reject('error')
             } else if (response.status === 502) {
-                router.push('502').then(() => {});
+                alert(response.status)
+                router.push('502').then(() => {
+                });
                 return Promise.reject('error')
             } else {
                 Message({
@@ -81,8 +87,30 @@ service.interceptors.response.use(
     error => {
         requestNum = 0
         loading.close();
-        // 出现网络超时
-        router.push('500').then(() => {});
+        console.log('err' + error)
+        let {message} = error;
+        if (message === "Network Error") {
+            message = "后端接口连接异常";
+            router.push('500').then(() => {
+            });
+        } else if (message.includes("timeout")) {
+            message = "网络超时";
+            router.push('500').then(() => {
+            });
+        } else if (message === "Request failed with status code 502") {
+            message = "请求频繁, 请稍后再试"
+            router.push('502').then(() => {
+            });
+        } else if (message === "Request failed with status code 500") {
+            message = "请求错误"
+            router.push('500').then(() => {
+            });
+        }
+        Message({
+            message: message,
+            type: 'error',
+            duration: 5 * 1000
+        })
         return Promise.reject(error)
     }
 )

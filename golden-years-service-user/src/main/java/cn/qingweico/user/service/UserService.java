@@ -1,5 +1,6 @@
 package cn.qingweico.user.service;
 
+import cn.qingweico.enums.UserStatus;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.pojo.bo.UserInfoBO;
@@ -18,6 +19,7 @@ public interface UserService {
      *
      * @param nickname  用户昵称
      * @param status    用户状态
+     * @param mobile    用户手机号
      * @param startDate 开始时间
      * @param endDate   截至时间
      * @param page      起始分页
@@ -26,6 +28,7 @@ public interface UserService {
      */
     PagedGridResult queryUserList(String nickname,
                                   Integer status,
+                                  String mobile,
                                   Date startDate,
                                   Date endDate,
                                   Integer page,
@@ -108,4 +111,13 @@ public interface UserService {
      * @param updatePwdBO {@link UpdatePwdBO}
      */
     void alterPwd(UpdatePwdBO updatePwdBO);
+
+
+    /**
+     * 获取全站用户的数量
+     * {@link UserStatus} 只获取已激活和冻结的用户
+     *
+     * @return {@code Integer} 全站用户的数量
+     */
+    Integer queryUserCounts();
 }

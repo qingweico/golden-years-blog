@@ -23,7 +23,7 @@ public class Comments {
     private String author;
 
     /**
-     * 如果是回复留言, 则本条为子留言, 需要关联查询
+     * 如果是回复评论, 则本条为子评论, 需要关联查询
      */
     private String fatherId;
 
@@ -43,7 +43,7 @@ public class Comments {
     private String articleCover;
 
     /**
-     * 发布留言的用户id
+     * 发布评论的用户id
      */
     private String commentUserId;
 
@@ -58,9 +58,17 @@ public class Comments {
     private String commentUserFace;
 
     /**
-     * 留言内容
+     * 评论内容
      */
     private String content;
+    /**
+     * 评论点赞数
+     */
+    private Integer likes;
+    /**
+     * 评论图片
+     */
+    private String imgSrc;
 
     /**
      * 留言时间

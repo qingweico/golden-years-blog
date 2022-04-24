@@ -59,9 +59,10 @@ export default {
 
     }
   },
-  methods: {
+  computed: {
     ...mapGetters(['getUserInfo']),
-
+  },
+  methods: {
     queryLoginLogList() {
       let params = new URLSearchParams();
       params.append("userId", this.userId);
@@ -81,7 +82,7 @@ export default {
     },
   },
   created() {
-    this.userId = this.getUserInfo().userId;
+    this.userId = this.getUserInfo.id;
     this.queryLoginLogList();
   }
 }

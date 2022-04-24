@@ -21,12 +21,13 @@ public interface FriendLinkService {
 
     /**
      * 查询所有的友情链接
-     * @param page 起始分页
-     * @param pageSize 每页的数量
      *
+     * @param page     起始分页
+     * @param pageSize 每页的数量
      * @return PagedGridResult 友情链接列表
      */
-    PagedGridResult getFriendLinkList(Integer page, Integer pageSize);
+    PagedGridResult getFriendLinkList(String linkName, Integer isDelete,
+                                      Integer page, Integer pageSize);
 
     /**
      * 根据友情链接id删除友情链接
@@ -36,11 +37,18 @@ public interface FriendLinkService {
     void delete(String linkId);
 
     /**
+     * 批量删除友情链接
+     *
+     * @param ids 友情链接id集合
+     */
+    void deleteAll(List<String> ids);
+
+    /**
      * 首页友情链接的展示
      *
      * @param isDelete 友情链接的可用状态
      * @return 友情链接列表
      */
-    List<FriendLink> queryAllFriendLinkList(Integer isDelete);
+    List<FriendLink> queryIndexFriendLinkList(Integer isDelete);
 
 }

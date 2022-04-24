@@ -1,15 +1,18 @@
 package cn.qingweico.user.service.impl;
 
+import cn.qingweico.api.config.RabbitMqConfig;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UserInfoBO;
+import cn.qingweico.user.clients.FavoritesClient;
 import cn.qingweico.user.mapper.UserMapper;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
@@ -20,7 +23,6 @@ import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -43,21 +45,19 @@ import java.util.concurrent.locks.ReentrantLock;
 public class UserServiceImpl extends BaseService implements UserService {
     @Resource
     private LoginLogService loginLogService;
+    @Resource
+    private UserMapper userMapper;
 
     private final static String[] FACE = {
             "https://cdn.qingweico.cn/blog/274080b281e5f0d31b7390207d78f591.jpeg",
             "https://cdn.qingweico.cn/blog/a21f7fc6328bcb72d1a0d9647b3b93c9.jpg",
             "https://cdn.qingweico.cn/blog/0f6087e207dd169cbe300863110f98d0.jpeg"
     };
-    @Resource
-    private UserMapper userMapper;
-
-    @Resource
-    private Sid sid;
 
     @Override
     public PagedGridResult queryUserList(String nickname,
                                          Integer status,
+                                         String mobile,
                                          Date startDate,
                                          Date endDate,
                                          Integer page,
@@ -70,7 +70,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (StringUtils.isNotBlank(nickname)) {
             criteria.andLike("nickname", "%" + nickname + "%");
         }
-
+        if (StringUtils.isNotBlank(mobile)) {
+            criteria.andLike("mobile", "%" + mobile + "%");
+        }
         if (UserStatus.isUserStatusValid(status)) {
             criteria.andEqualTo("activeStatus", status);
         }
@@ -93,7 +95,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         User user = new User();
         user.setId(userId);
         user.setActiveStatus(doStatus);
-        userMapper.updateByPrimaryKeySelective(user);
+        if (userMapper.updateByPrimaryKeySelective(user) > 0) {
+            String key = RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId;
+            refreshCache(key);
+        } else {
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
+
     }
 
     @Override
@@ -108,7 +116,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public User createUser(String mobile) {
-
         String userId = sid.nextShort();
         User user = new User();
         user.setId(userId);
@@ -121,7 +128,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setSex(Sex.SECRET.type);
         user.setCreatedTime(new Date());
         user.setUpdatedTime(new Date());
-        userMapper.insert(user);
+        // 放 rabbitmq 中, 为用户创建默认的收藏夹
+        rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
+                SysConf.ARTICLE_CREATE_FAVORITES_DO, userId);
+        if (userMapper.insert(user) < 0) {
+            log.error("create user error");
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
         return user;
     }
 
@@ -150,7 +163,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         try {
             int res = userMapper.updateByPrimaryKeySelective(userInfo);
             if (res != 1) {
-                GraceException.display(ResponseStatusEnum.USER_UPDATE_ERROR);
+                GraceException.error(ResponseStatusEnum.USER_UPDATE_ERROR);
             }
         } finally {
             lock.unlock();
@@ -159,12 +172,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         try {
             updateCacheLatch.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("{}",e.getMessage());
         }
         // 查询数据库中最新的数据放入缓存中
         User user = queryUserById(userId);
-        log.info("updateUserInfo: 缓存已更新");
-        redisOperator.set(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+        redisOperator.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+        log.info("update user info: cache has been updated");
     }
 
     @Override
@@ -181,12 +194,13 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Async("asyncTask")
     public void doSaveUserAuthToken(User user, String token) {
         // 保存token以及用户信息到redis中
-        redisOperator.set(RedisConf.REDIS_USER_TOKEN + Constants.SYMBOL_COLON + user.getId(), token);
-        redisOperator.set(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
+        redisOperator.set(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + user.getId(), token);
+        redisOperator.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
     }
 
-    @Async("asyncTask")
+
     @Override
+    @Async("asyncTask")
     public void doSaveLoginLog(String userId) {
         // 保存用户登陆日志信息
         loginLogService.saveUserLoginLog(userId);
@@ -201,7 +215,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             String key = RedisConf.REDIS_USER_INFO;
             refreshCache(key);
         } else {
-            GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
     }
 
@@ -216,7 +230,15 @@ public class UserServiceImpl extends BaseService implements UserService {
             String key = RedisConf.REDIS_USER_INFO;
             refreshCache(key);
         } else {
-            GraceException.display(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
+    }
+
+    @Override
+    public Integer queryUserCounts() {
+        Example example = new Example(User.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andNotEqualTo("activeStatus", UserStatus.INACTIVE.type);
+        return userMapper.selectCountByExample(example);
     }
 }

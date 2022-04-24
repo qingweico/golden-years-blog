@@ -2,7 +2,7 @@ package cn.qingweico.user.restapi;
 
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.enums.UserStatus;
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
@@ -10,7 +10,6 @@ import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.PasswordAuthBO;
 import cn.qingweico.pojo.bo.RegisterLoginBO;
 import cn.qingweico.user.handler.DefaultHandler;
-import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.CheckUtils;
 import cn.qingweico.util.IpUtils;
@@ -37,7 +36,7 @@ import java.util.HashMap;
 @Slf4j
 @RestController
 @Api(value = "用户注册登陆相关的接口定义", tags = {"用户注册登陆相关的接口定义"})
-@RequestMapping("auth")
+@RequestMapping("/u/auth")
 public class PassportRestApi extends BaseRestApi {
 
     @Resource
@@ -53,13 +52,13 @@ public class PassportRestApi extends BaseRestApi {
         String userIp = IpUtils.getRequestIp(request);
 
         // 根据用户的ip进行限制, 限制用户在60s内只能获得一次验证码
-        redisOperator.setnx60s(RedisConf.REDIS_IP + Constants.SYMBOL_COLON + userIp, userIp);
+        redisOperator.setnx60s(RedisConf.REDIS_IP + SysConf.SYMBOL_COLON + userIp, userIp);
 
 
         String random = (int) ((Math.random() * 9 + 1) * 100000) + "";
 
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
-        redisOperator.set(RedisConf.MOBILE_SMS_CODE + Constants.SYMBOL_COLON + mobile, random, 2 * 60);
+        redisOperator.set(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile, random, 2 * 60);
         return new GraceJsonResult(ResponseStatusEnum.SMS_SEND_SUCCESS, random);
     }
 
@@ -91,7 +90,7 @@ public class PassportRestApi extends BaseRestApi {
         userService.doSaveLoginLog(user.getId());
         int userStatus = user.getActiveStatus();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
-        redisOperator.del(RedisConf.MOBILE_SMS_CODE + Constants.SYMBOL_COLON + mobile);
+        redisOperator.del(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put("token", jsonWebToken);
         map.put("userStatus", user.getActiveStatus());
@@ -128,6 +127,7 @@ public class PassportRestApi extends BaseRestApi {
                 if (userStatus == UserStatus.ACTIVE.type) {
                     String jsonWebToken = JwtUtils.createJwt(user.getId());
                     userService.doSaveUserAuthToken(user, jsonWebToken);
+                    userService.doSaveLoginLog(user.getId());
                     return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, jsonWebToken);
                 }
             }
@@ -139,19 +139,19 @@ public class PassportRestApi extends BaseRestApi {
     @ApiOperation(value = "验证JWT", notes = "验证JWT", httpMethod = "GET")
     @GetMapping("/verify")
     public GraceJsonResult authVerify(@RequestParam String token) {
-        String userId = "";
+        String userId = SysConf.EMPTY_STRING;
         User user = null;
         try {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
-                userId = claims.get("user_id", String.class);
-                user = JsonUtils.jsonToPojo(redisOperator.get(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId), User.class);
+                userId = claims.get(SysConf.USER_ID, String.class);
+                user = JsonUtils.jsonToPojo(redisOperator.get(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId), User.class);
             }
         } catch (Exception e) {
             return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
         }
         if (!StringUtils.isEmpty(userId)) {
-            String redisToken = redisOperator.get(RedisConf.REDIS_USER_TOKEN + Constants.SYMBOL_COLON + userId);
+            String redisToken = redisOperator.get(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
             if (StringUtils.isEmpty(redisToken)) {
                 return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
             }
@@ -161,20 +161,20 @@ public class PassportRestApi extends BaseRestApi {
         return GraceJsonResult.ok(user);
     }
 
-    @ApiOperation(value = "删除用户token", notes = "删除用户token", httpMethod = "GET")
-    @GetMapping("/delete")
-    public GraceJsonResult deleteUserAccessToken(@RequestParam String token) {
-        String userId = "";
+    @ApiOperation(value = "删除用户token", notes = "删除用户token", httpMethod = "POST")
+    @PostMapping("/delete")
+    public GraceJsonResult deleteUserAccessToken(@RequestBody String token) {
+        String userId = SysConf.EMPTY_STRING;
         try {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
-                userId = claims.get("user_id", String.class);
+                userId = claims.get(SysConf.USER_ID, String.class);
             }
         } catch (Exception e) {
             return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
         }
-        redisOperator.del(RedisConf.REDIS_USER_TOKEN + Constants.SYMBOL_COLON + userId);
-        redisOperator.del(RedisConf.REDIS_USER_INFO + Constants.SYMBOL_COLON + userId);
+        redisOperator.del(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
+        redisOperator.del(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId);
         return GraceJsonResult.ok();
     }
 }

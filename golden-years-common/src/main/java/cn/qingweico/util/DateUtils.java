@@ -31,7 +31,6 @@ public final class DateUtils {
      * yyyy-MM-dd hh:mm:ss
      */
     public static String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    public static String DATE_PATTERN = "yyyyMMddHHmmss";
 
     /**
      * 则个
@@ -39,20 +38,19 @@ public final class DateUtils {
     private static final boolean LENIENT_DATE = false;
 
 
-    private static final Random random = new Random();
+    private static final Random R = new Random();
     private static final int ID_BYTES = 10;
 
     public synchronized static String generateId() {
         StringBuilder result = new StringBuilder();
         result.append(System.currentTimeMillis());
         for (int i = 0; i < ID_BYTES; i++) {
-            result.append(random.nextInt(10));
+            result.append(R.nextInt(10));
         }
         return result.toString();
     }
 
-    protected static float normalizedJulian(float JD) {
-
+    private static float normalizedJulian(float JD) {
         return Math.round(JD + 0.5f) - 0.5f;
     }
 
@@ -119,6 +117,63 @@ public final class DateUtils {
         c2.setTime(late);
 
         return daysBetween(c1, c2);
+    }
+
+    /**
+     * 将String转换成date
+     *
+     * @param dateTime String
+     * @return date
+     */
+    public static Date strToDateTime(String dateTime) {
+        Date date = null;
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            date = format.parse(dateTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    /**
+     * 获取某个时间段内所有日期
+     *
+     * @param begin start time
+     * @param end   end time
+     * @return List<String>
+     */
+    public static List<String> getDayBetweenDates(String begin, String end) {
+        Date dBegin = strToDateTime(begin);
+        Date dEnd = strToDateTime(end);
+        List<String> lDate = new ArrayList<>();
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
+        lDate.add(sd.format(dBegin));
+        Calendar calBegin = Calendar.getInstance();
+        // 使用给定的 Date 设置此 Calendar 的时间
+        calBegin.setTime(dBegin);
+        Calendar calEnd = Calendar.getInstance();
+        // 使用给定的 Date 设置此 Calendar 的时间
+        calEnd.setTime(dEnd);
+        // 测试此日期是否在指定日期之后
+        while (dEnd.after(calBegin.getTime())) {
+            // 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+            calBegin.add(Calendar.DAY_OF_MONTH, 1);
+            lDate.add(sd.format(calBegin.getTime()));
+        }
+        return lDate;
+    }
+
+    /**
+     * Date转换成String
+     *
+     * @param dateTime Date
+     * @return String
+     */
+    public static String dateTimeToStr(Date dateTime) {
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return format.format(dateTime);
     }
 
     /**
@@ -244,31 +299,77 @@ public final class DateUtils {
      */
     public static Date stringToDate(String dateText, String format,
                                     boolean lenient) {
-
         if (dateText == null) {
             return null;
         }
-
         DateFormat df;
-
         try {
-
             if (format == null) {
                 df = new SimpleDateFormat();
             } else {
                 df = new SimpleDateFormat(format);
             }
-
             // setLenient avoids allowing dates like 9/32/2001
             // which would otherwise parse to 10/2/2001
             df.setLenient(false);
-
             return df.parse(dateText);
         } catch (ParseException e) {
-
             return null;
         }
     }
+
+    /**
+     * 获取过去第几天的日期
+     *
+     * @param past past day
+     * @return String
+     */
+    public static String getPastDate(int past, String formatStr) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - past);
+        Date today = calendar.getTime();
+        SimpleDateFormat format = new SimpleDateFormat(formatStr);
+        return format.format(today);
+    }
+
+    /**
+     * 获取过去N天内的日期数组
+     *
+     * @param intervals intervals天内
+     * @param formatStr 格式化字符串   yyyy-MM-dd
+     * @return 日期数组
+     */
+    public static ArrayList<String> getDaysByN(int intervals, String formatStr) {
+        ArrayList<String> pastDaysList = new ArrayList<>();
+        for (int i = intervals - 1; i >= 0; i--) {
+            pastDaysList.add(getPastDate(i, formatStr));
+        }
+        return pastDaysList;
+    }
+
+
+    /**
+     * 获取今天开始的时间
+     *
+     * @return String
+     */
+    public static String getToDayStartTime() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        Date date = new Date(System.currentTimeMillis());
+        return format.format(date);
+    }
+
+    /**
+     * 获取今天结束的时间
+     *
+     * @return String
+     */
+    public static String getToDayEndTime() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        Date date = new Date(System.currentTimeMillis());
+        return format.format(date);
+    }
+
 
     /**
      * @return Timestamp
@@ -296,6 +397,17 @@ public final class DateUtils {
      */
     public static Date stringToDate(String dateString) {
         return stringToDate(dateString, ISO_EXPANDED_DATE_FORMAT, LENIENT_DATE);
+    }
+
+    /**
+     * 获取现在的时间 yyyy-MM-dd HH:mm:ss
+     *
+     * @return String
+     */
+    public static String getNowTime() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(System.currentTimeMillis());
+        return formatter.format(date);
     }
 
     /**
@@ -339,6 +451,17 @@ public final class DateUtils {
     }
 
     /**
+     * 获取某天开始的日期
+     *
+     * @param oneDay Date 某天
+     * @return String
+     */
+    public static String getOneDayStartTime(Date oneDay) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        return formatter.format(oneDay);
+    }
+
+    /**
      * @param pattern String
      * @return String
      */
@@ -356,13 +479,33 @@ public final class DateUtils {
     }
 
     /**
+     * 获取几天之后的日期
+     *
+     * @param date yyyy-MM-dd HH:mm:ss
+     * @param day  加减的天数
+     * @return static
+     */
+    public static Date getDate(String date, int day) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar cal = Calendar.getInstance();
+        try {
+            Date beforeDate = formatter.parse(date);
+            cal.setTime(beforeDate);
+            cal.add(Calendar.DAY_OF_MONTH, day);
+            return cal.getTime();
+        } catch (ParseException e) {
+            /*ignore*/
+        }
+        return null;
+    }
+
+    /**
      * 返回固定格式的当前时间
      * yyyy-MM-dd hh:mm:ss
      *
      * @return String
      */
     public static String dateToStringWithTime() {
-
         return dateToString(new Date(), DATETIME_PATTERN);
     }
 
@@ -377,6 +520,7 @@ public final class DateUtils {
 
         return dateToString(date, DATETIME_PATTERN);
     }
+
     /**
      * 获取当前Date型日期
      *
@@ -543,6 +687,7 @@ public final class DateUtils {
         }
         return dt;
     }
+
     /**
      * 获取服务器启动时间
      */
@@ -584,10 +729,6 @@ public final class DateUtils {
         return dateFormat;
     }
 
-    public static String sDateFormat() {
-        return new SimpleDateFormat(DATE_PATTERN).format(Calendar.getInstance().getTime());
-    }
-
     /**
      * 获得本月的第一天日期
      *
@@ -615,6 +756,7 @@ public final class DateUtils {
         calendarLast.getActualMaximum(Calendar.DAY_OF_MONTH);
         return format.format(calendarLast.getTime());
     }
+
     /**
      * 计算两个时间差
      */

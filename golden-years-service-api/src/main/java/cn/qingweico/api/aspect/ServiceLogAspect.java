@@ -1,6 +1,6 @@
 package cn.qingweico.api.aspect;
 
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -34,9 +34,9 @@ public class ServiceLogAspect {
 
         long end = System.currentTimeMillis();
         long cost = end - start;
-        if (cost > Constants.NUM_1000) {
+        if (cost > SysConf.NUM_1000) {
             log.error("当前执行用时: {}ms", cost);
-        } else if (cost > Constants.NUM_500) {
+        } else if (cost > SysConf.NUM_500) {
             log.warn("当前执行用时: {}ms", cost);
         } else {
             log.info("当前执行用时: {}ms", cost);

@@ -141,14 +141,25 @@ export default {
   created() {
     this.getCurrentPageTitle();
     this.getToken();
-    this.userInfo = this.getUserInfo();
+    this.userInfo = this.getUserInfo;
 
   },
 
   methods: {
     ...mapMutations(['setUserInfo', 'setLoginState']),
     getCurrentPageTitle() {
-      this.saveTitle = window.location.pathname;
+      let test = window.location.href;
+      let start = 0;
+      let end = test.length;
+      for (let i = 0; i < test.length; i++) {
+        if (test[i] === "#") {
+          start = i;
+        }
+        if (test[i] === "?" && i > start) {
+          end = i;
+        }
+      }
+      this.saveTitle = test.substring(start + 1, end);
     },
     getToken() {
       let token = getCookie("token");

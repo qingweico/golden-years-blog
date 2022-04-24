@@ -15,7 +15,6 @@
 		<module>golden-years-service-files</module>
 		<module>golden-years-service-admin</module>
 		<module>golden-years-service-article</module>
-		<module>golden-years-service-article-static</module>
 		<module>golden-years-gateway</module>
 	</modules>
 	<packaging>pom</packaging>

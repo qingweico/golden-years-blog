@@ -2,8 +2,6 @@ package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.article.service.CommentPortalService;
-import cn.qingweico.global.Constants;
-import cn.qingweico.global.RedisConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.pojo.bo.CommentReplyBO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
@@ -38,32 +36,17 @@ public class CommentRestApi extends BaseRestApi {
     public GraceJsonResult publish(@RequestBody @Valid CommentReplyBO commentReplyBO) {
 
         String userId = commentReplyBO.getCommentUserId();
-
         Set<String> set = new HashSet<>();
         set.add(userId);
-
-        UserBasicInfoVO userVO = articlePortalController.getUserBasicInfoList(set).get(0);
+        UserBasicInfoVO userVO = articlePortalController.getUserInfoListByIdsClient(set).get(0);
         // 获得发表评论的用户昵称
         String nickname = userVO.getNickname();
         // 获得发表评论的用户头像
         String face = userVO.getFace();
-
-
-        commentPortalService.publishComment(commentReplyBO.getArticleId(),
-                commentReplyBO.getFatherId(),
-                commentReplyBO.getContent(),
-                commentReplyBO.getCommentUserId(),
-                nickname,
-                face);
-
-        return GraceJsonResult.ok();
-    }
-
-    @ApiOperation(value = "用户评论数查询", notes = "用户评论数查询", httpMethod = "GET")
-    @GetMapping("/counts")
-    public GraceJsonResult getCounts(@RequestParam String articleId) {
-        int commentCounts = getCountsFromRedis(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + Constants.SYMBOL_COLON + articleId);
-        return GraceJsonResult.ok(commentCounts);
+        commentReplyBO.setCommentUserNickname(nickname);
+        commentReplyBO.setCommentUserFace(face);
+        commentPortalService.publishComment(commentReplyBO);
+        return new GraceJsonResult(ResponseStatusEnum.COMMENT_SUCCESS);
     }
 
     @ApiOperation(value = "查看文章的评论列表", notes = "查看文章的评论列表", httpMethod = "GET")

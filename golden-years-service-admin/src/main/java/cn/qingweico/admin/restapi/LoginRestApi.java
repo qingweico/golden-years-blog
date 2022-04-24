@@ -7,7 +7,6 @@ import cn.qingweico.admin.service.RoleService;
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.enums.FaceVerifyType;
 import cn.qingweico.enums.MenuType;
-import cn.qingweico.global.Constants;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.Admin;
@@ -48,7 +47,7 @@ public class LoginRestApi extends BaseRestApi {
     @Resource
     private CategoryMenuService categoryMenuService;
     @Resource
-    private FaceVerifyUtils faceVerify;
+    private CompareFace faceVerify;
 
     @Resource
     private FaceBase64Client client;
@@ -96,7 +95,7 @@ public class LoginRestApi extends BaseRestApi {
         Set<String> secondMenuIdList = new HashSet<>();
         categoryMenuList.forEach(item -> {
             // 查询二级菜单
-            if (item.getMenuType() == MenuType.MENU && item.getMenuLevel() == SysConf.TWO) {
+            if (item.getMenuType() == MenuType.MENU && item.getMenuLevel() == SysConf.NUM_TWO) {
                 secondMenuIdList.add(item.getId());
             }
         });
@@ -111,7 +110,7 @@ public class LoginRestApi extends BaseRestApi {
 
         childCategoryMenuList.forEach(item -> {
             // 选出所有的一级分类
-            if (item.getMenuLevel() == SysConf.TWO) {
+            if (item.getMenuLevel() == SysConf.NUM_TWO) {
                 if (StringUtils.isNotEmpty(item.getParentId())) {
                     parentCategoryMenuIds.add(item.getParentId());
                 }
@@ -123,7 +122,7 @@ public class LoginRestApi extends BaseRestApi {
         }
 
         List<CategoryMenu> list = new ArrayList<>(parentCategoryMenuList);
-        Map<String, Object> map = new HashMap<>(Constants.NUM_TWO);
+        Map<String, Object> map = new HashMap<>(SysConf.NUM_TWO);
         map.put(SysConf.PARENT_LIST, list);
         map.put(SysConf.SON_LIST, childCategoryMenuList);
         return GraceJsonResult.ok(map);
@@ -134,7 +133,7 @@ public class LoginRestApi extends BaseRestApi {
     public GraceJsonResult getInfo() {
         String tokenKey = RedisConf.REDIS_ADMIN_TOKEN;
         String infoKey = RedisConf.REDIS_ADMIN_INFO;
-        return GraceJsonResult.ok(getLoginUser(Admin.class,tokenKey, infoKey));
+        return GraceJsonResult.ok(getLoginUser(Admin.class, tokenKey, infoKey));
     }
 
     @ApiOperation(value = "退出登陆", notes = "退出登陆", httpMethod = "POST")
@@ -151,43 +150,47 @@ public class LoginRestApi extends BaseRestApi {
         } catch (Exception e) {
             return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
         }
-        redisOperator.del(RedisConf.REDIS_ADMIN_INFO + Constants.DELIMITER_COLON + adminId);
-        redisOperator.del(RedisConf.REDIS_ADMIN_TOKEN + Constants.DELIMITER_COLON + adminId);
+        redisOperator.del(RedisConf.REDIS_ADMIN_INFO + SysConf.DELIMITER_COLON + adminId);
+        redisOperator.del(RedisConf.REDIS_ADMIN_TOKEN + SysConf.DELIMITER_COLON + adminId);
         return new GraceJsonResult(ResponseStatusEnum.LOGOUT_SUCCESS);
     }
 
     @ApiOperation(value = "人脸登陆", notes = "人脸登陆", httpMethod = "POST")
     @PostMapping("/face")
-    public GraceJsonResult face(AdminLoginBO adminLoginBO) {
+    public GraceJsonResult face(@RequestBody AdminLoginBO adminLoginBO) {
         // 判断用户名和faceId不为空
         if (StringUtils.isBlank(adminLoginBO.getUsername())) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_USERNAME_NULL_ERROR);
         }
-
+        Admin admin = adminService.queryAdminByUsername(adminLoginBO.getUsername());
+        if (admin == null) {
+            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_IS_NOT_PRESENT);
+        }
         String base64 = adminLoginBO.getImg64();
         if (StringUtils.isBlank(base64)) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_NULL_ERROR);
         }
         // 从数据库中查询faceId
-        Admin adminUser = adminService.queryAdminByUsername(adminLoginBO.getUsername());
-        String adminFaceId = adminUser.getFaceId();
+        String adminFaceId = admin.getFaceId();
         if (StringUtils.isBlank(adminFaceId)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
+            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_NOT_ENABLE);
         }
-
-        // 请求文件服务 获得人脸数据的base64数据
+        // 请求文件服务, 获得人脸数据的base64数据
         GraceJsonResult result = client.getFaceBase64(adminFaceId);
         String base64Db = null;
         if (result != null) {
             base64Db = (String) result.getData();
         }
-
         // 调用阿里ai进行人脸对比识别, 判断可行度, 从而实现人脸登陆
-        boolean pass = faceVerify.faceVerify(FaceVerifyType.BASE64.type, base64, base64Db, 60);
+        boolean pass = faceVerify.faceVerify(FaceVerifyType.BASE64.type, base64, base64Db, 60.0f);
 
         if (!pass) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
         }
-        return GraceJsonResult.ok();
+        String adminId = admin.getId();
+        String jsonWebToken = JwtUtils.createJwt(adminId);
+        adminService.doSaveLoginLog(adminId);
+        adminService.doSaveToken(admin, jsonWebToken);
+        return new GraceJsonResult(ResponseStatusEnum.FACE_PASS, jsonWebToken);
     }
 }

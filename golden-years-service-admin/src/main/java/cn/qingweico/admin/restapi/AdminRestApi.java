@@ -1,20 +1,22 @@
 package cn.qingweico.admin.restapi;
 
+import cn.qingweico.admin.clients.FaceBase64Client;
 import cn.qingweico.admin.service.AdminService;
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.bo.UpdateAdminBO;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.Admin;
-import cn.qingweico.pojo.bo.NewAdminBO;
+import cn.qingweico.pojo.bo.OperatorAdminBO;
 import cn.qingweico.util.PagedGridResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +33,8 @@ import javax.validation.Valid;
 public class AdminRestApi extends BaseRestApi {
     @Resource
     private AdminService adminService;
+    @Resource
+    private FaceBase64Client client;
 
     @ApiOperation(value = "查询管理员用户名是否存在", notes = "查询管理员用户名是否存在", httpMethod = "POST")
     @PostMapping("/present")
@@ -41,32 +45,27 @@ public class AdminRestApi extends BaseRestApi {
 
     @ApiOperation(value = "创建新的管理员", notes = "创建新的管理员", httpMethod = "POST")
     @PostMapping("/add")
-    public GraceJsonResult add(NewAdminBO newAdminBO) {
-
-        // 判断BO中的用户名和密码不为空
-
+    public GraceJsonResult add(@RequestBody OperatorAdminBO operatorAdminBO) {
         // 若BO中base64不为空, 则代表人脸识别登陆, 否则需要用户名和密码
-        if (StringUtils.isBlank(newAdminBO.getImg64())) {
-            if (StringUtils.isBlank(newAdminBO.getPassword()) ||
-                    StringUtils.isBlank(newAdminBO.getConfirmPassword())) {
+        if (StringUtils.isBlank(operatorAdminBO.getImg64())) {
+            if (StringUtils.isBlank(operatorAdminBO.getPassword()) ||
+                    StringUtils.isBlank(operatorAdminBO.getConfirmPassword())) {
                 return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_PASSWORD_NULL_ERROR);
             }
         }
 
         // 若密码不为空, 则必须验证两次输入的密码是否一致
-        if (StringUtils.isNotBlank(newAdminBO.getPassword())) {
-            if (!newAdminBO.getPassword().
-                    equals(newAdminBO.getConfirmPassword())) {
+        if (StringUtils.isNotBlank(operatorAdminBO.getPassword())) {
+            if (!operatorAdminBO.getPassword().
+                    equals(operatorAdminBO.getConfirmPassword())) {
                 return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_PASSWORD_ERROR);
 
             }
         }
         // 校验用户名唯一性
-        adminService.checkUsernameIsPresent(newAdminBO.getUsername());
-
+        adminService.checkUsernameIsPresent(operatorAdminBO.getUsername());
         // 执行admin信息入库操作
-        adminService.createAdminUser(newAdminBO);
-
+        adminService.createAdminUser(operatorAdminBO);
         return new GraceJsonResult(ResponseStatusEnum.APPEND_SUCCESS);
     }
 
@@ -88,7 +87,7 @@ public class AdminRestApi extends BaseRestApi {
         Admin loginUser = getLoginUser(Admin.class, tokenKey, infoKey);
         String id = loginUser.getId();
         if (!BCrypt.checkpw(updatePwdBO.getOldPassword(), loginUser.getPassword())) {
-            GraceException.display(ResponseStatusEnum.ADMIN_PASSWORD_ERROR);
+            GraceException.error(ResponseStatusEnum.ADMIN_PASSWORD_ERROR);
         }
         String encryptedPwd = BCrypt.hashpw(updatePwdBO.getNewPassword(), BCrypt.gensalt());
         adminService.alterPwd(id, encryptedPwd);
@@ -97,14 +96,25 @@ public class AdminRestApi extends BaseRestApi {
 
     @ApiOperation(value = "更新管理员个人信息", notes = "更新管理员个人信息", httpMethod = "POST")
     @PostMapping("/updateProfile")
-    public GraceJsonResult updateProfile(@RequestBody UpdateAdminBO user) {
+    public GraceJsonResult updateProfile(@RequestBody OperatorAdminBO user) {
         String tokenKey = RedisConf.REDIS_ADMIN_TOKEN;
         String infoKey = RedisConf.REDIS_ADMIN_INFO;
         Admin loginUser = getLoginUser(Admin.class, tokenKey, infoKey);
         String id = loginUser.getId();
         user.setId(id);
-        // TODO 检擦手机号码和邮箱
+        // TODO 检擦手机号码和邮箱是否唯一
         adminService.updateUserProfile(user);
         return new GraceJsonResult(ResponseStatusEnum.UPDATE_SUCCESS);
+    }
+    @ApiOperation(value = "删除管理员人脸信息", notes = "删除管理员人脸信息", httpMethod = "POST")
+    @PostMapping("/deleteFaceInfo/{id}")
+    public GraceJsonResult deleteFaceInfo(@PathVariable("id") String id){
+        Admin admin = adminService.queryAdminById(id);
+        client.removeGridFsFile(admin.getFaceId());
+        admin.setFaceId("");
+        OperatorAdminBO operatorAdminBO = new OperatorAdminBO();
+        BeanUtils.copyProperties(admin, operatorAdminBO);
+        adminService.updateUserProfile(operatorAdminBO);
+        return GraceJsonResult.ok();
     }
 }

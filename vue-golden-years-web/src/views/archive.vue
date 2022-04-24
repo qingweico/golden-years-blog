@@ -4,7 +4,7 @@
     <div class="container">
 
       <h1 class="t_nav">
-        <span>有些的时候, 正是为了爱才悄悄躲开, 躲开的是身影, 躲不开的却是那份默默的情怀</span>
+        <span>种一棵树最好的时间是十年前,其次是现在</span>
         <a href="/" class="n1">网站首页</a>
         <a href="javascript:void(0);" class="n2">归档</a>
       </h1>
@@ -41,14 +41,13 @@
                   :timestamp="item.createTime"
                   placement="top">
                 <el-card>
-                  <h4 @click="goToList('detail', item)" class="itemTitle">{{ item.title }}</h4>
+                  <h4 @click="goToList(item)" class="itemTitle">{{ item.title }}</h4>
                   <br>
                   <!--文章类别-->
                   <el-tag
                       class="elTag"
                       type="success"
                       v-if="item.categoryId != null"
-                      @click="goToList('category', item.categoryId)"
                   >{{ getBlogCategoryNameById(item.categoryId) }}
                   </el-tag>
                   <el-tag
@@ -58,7 +57,6 @@
                       :key="tag.id"
                       style="margin-left: 3px; color: white"
                       :color="tag.color"
-                      @click="goToList('tag', tag)"
                       type="warning"
                   >{{ tag.name }}
                   </el-tag>
@@ -97,7 +95,7 @@ export default {
       articleByDate: {},
       currentPage: 1,
       pageSize: 5,
-      total: 0,
+      totalPage: 0,
       records: 0,
     };
   },
@@ -126,13 +124,17 @@ export default {
     ...mapGetters(['getUserInfo']),
     clickTime(content) {
       this.selectContent = content;
+      this.getArchiveArticleList();
+    },
+    getArchiveArticleList() {
       let params = new URLSearchParams();
       params.append("monthAndYear", this.selectContent);
       params.append("page", this.currentPage);
       params.append("pageSize", this.pageSize);
       getBlogByTime(params).then(response => {
-        this.itemByDate = response.data;
-        this.records = this.itemByDate.length;
+        this.itemByDate = response.data.rows;
+        this.records = response.data.records;
+        this.totalPage = response.data.totalPage;
       });
     },
     getBlogCategoryNameById(categoryId) {
@@ -145,32 +147,17 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.getArchiveArticleList();
     },
     //跳转到搜索详情页
-    goToList(type, entity) {
-      switch (type) {
-        case "tag": {
-          let routeData = this.$router.resolve({
-            path: "/list",
-            query: {tagUid: entity.id}
-          });
-          window.open(routeData.href, "_blank");
-        }
-          break;
-        case "category": {
-          let routeData = this.$router.resolve({
-            path: "/list",
-            query: {id: entity.categoryId}
-          });
-          window.open(routeData.href, "_blank");
-        }
-          break;
-        case "detail": {
-        }
-          break;
-      }
+    goToList(entity) {
+      let routeData = this.$router.resolve({
+        path: "/detail",
+        query: {id: entity.articleId}
+      });
+      window.open(routeData.href, "_blank");
     },
-    formatDate: function (time) {
+    formatDate(time) {
       let date = new Date(time);
       let year = date.getFullYear();
       // 1~9月份加前缀0

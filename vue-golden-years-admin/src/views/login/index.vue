@@ -38,11 +38,10 @@
 
       <el-checkbox v-model="loginForm.isRememberMe" style="margin:0 0 25px 0;"><span style="color: #eee">七天免登录</span>
       </el-checkbox>
-      <el-link :underline="false" style="font-size:12px; float: right; color:white">
-        <router-link to="/face">
-          人脸登陆
-        </router-link>
-        <i class="el-icon-right" ></i></el-link>
+      <el-checkbox v-model="isFaceLogin" style="margin:0 0 25px 0; float: right; color: #eee" @change="goFaceLogin()">
+        <router-link to="/face">人脸登陆</router-link>
+      </el-checkbox>
+
       <el-form-item>
         <el-button
             :loading="loading"
@@ -52,7 +51,6 @@
         </el-button>
       </el-form-item>
     </el-form>
-
     <!--引入粒子特效-->
     <vue-particles
         color="#fff"
@@ -76,6 +74,7 @@
 </template>
 
 <script>
+
 export default {
   name: "Login",
   data() {
@@ -94,7 +93,7 @@ export default {
       }
     };
     return {
-      faceLogin: false,
+      isFaceLogin: false,
       loginForm: {
         username: "",
         password: "",
@@ -133,6 +132,11 @@ export default {
         this.iconClass = "eye";
       }
     },
+    goFaceLogin(){
+      if(this.isFaceLogin) {
+        this.$router.push("/face");
+      }
+    },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
@@ -154,10 +158,7 @@ export default {
           return false;
         }
       });
-    },
-    closeLoginBox() {
-      this.faceLogin = false;
-    },
+    }
   }
 };
 </script>

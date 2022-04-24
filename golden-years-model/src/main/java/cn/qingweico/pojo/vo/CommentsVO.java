@@ -1,6 +1,8 @@
 package cn.qingweico.pojo.vo;
 
+import cn.qingweico.pojo.bo.Reply;
 import lombok.Data;
+import org.apache.ibatis.javassist.compiler.ast.Visitor;
 
 import java.util.Date;
 
@@ -11,13 +13,13 @@ import java.util.Date;
 @Data
 public class CommentsVO {
     private String commentId;
-    private String fatherId;
-    private String articleId;
-    private String commentUserId;
-    private String commentUserNickname;
-    private String commentUserFace;
     private String content;
-    private Date createTime;
-    private String quoteUserNickname;
-    private String quoteContent;
+    private Boolean liked;
+    private Integer likes;
+    private String replyName;
+    private String replyAvatar;
+    private String visitorName;
+    private String visitorAvatar;
+    private CommentsVO childrenComments;
+    private Date createAt;
 }

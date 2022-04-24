@@ -41,22 +41,27 @@ spring:
         - id: user-route
           uri: lb://service-user
           predicates:
-            - Path=/user/**, /appUser/**, /fans/**, /passport/**
+            - Path=/user/**, /fans/**, /u/auth/**
         - id: admin-route
           uri: lb://service-admin
           predicates:
-            - Path=/admin/**, /category/**, /friendLink/**, /Kaptcha
+            - Path=/admin/**, /category/**, /fl/**, /index/**, /auth/**, /monitor/**, /systemConfig/**, /webConfig/**
         - id: article-route
           uri: lb://service-article
           predicates:
-            - Path=/article/**, /portal/article/**, /comment/**
+            - Path=/article/**, /portal/article/**, /comment/**, /producer/**, /tag/**
         - id: files-route
           uri: lb://service-files
           predicates:
             - Path=/fs/**
     nacos:
       discovery:
-        server-addr: 119.29.35.129:8848
+        # 配置 Nacos 地址
+        server-addr: 127.0.0.1:8848
+        # server-addr: 106.12.136.221:8848
+        # 配置 service-gateway 公网ip 本地部署不用开启
+        # ip: 106.12.136.221
+        # port: 7000
 management:
   endpoints:
     web:
@@ -64,6 +69,6 @@ management:
         include: '*'
 # ip请求限制的参数配置
 blackIp:
-  continueCounts: ${counts:10}     # ip连续请求的次数
+  continueCounts: ${counts:30}     # ip连续请求的次数
   timeInterval: ${interval:1}      # ip判断的事件间隔, 单位: 秒
   limitTimes: ${times:15}          # 限制的事件, 单位: 秒

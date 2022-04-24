@@ -24,9 +24,12 @@ public enum ResponseStatusEnum {
     FREEZE_SUCCESS(200, true, "已冻结该用户!"),
     ACTIVATE_SUCCESS(200, true, "已激活该用户!"),
     RESET_PASSWORD_SUCCESS(200, true, "重置密码成功!"),
+    FACE_PASS(200, true, "人脸识别成功!"),
     // fans
     FOLLOWED(200, true, "关注成功"),
     UNFOLLOWED(200, true, "取消关注成功"),
+    // comment
+    COMMENT_SUCCESS(200, true, "评论成功"),
 
     // article
     ARTICLE_REVIEW_PASS(200, true, "文章审核已通过!"),
@@ -37,6 +40,12 @@ public enum ResponseStatusEnum {
     ARTICLE_WITHDRAW_SUCCESS(200, true, "文章撤回成功!"),
     ARTICLE_DELETE_SUCCESS(200, true, "文章删除成功!"),
     ARTICLE_ALTER_SUCCESS(200, true, "文章修改成功!"),
+    STAR_SUCCESS(200, true, "点赞成功!"),
+    UN_STAR_SUCCESS(200, true, "取消点赞成功!"),
+    COLLECT_SUCCESS(200, true, "收藏成功!"),
+    UN_COLLECT_SUCCESS(200, true, "取消收藏成功!"),
+    CREATE_FAVORITES_SUCCESS(200, true, "创建收藏夹成功!"),
+    CLEAN_CACHE_SUCCESS(200, true, "清除缓存成功!"),
     // 50x
     FAILED(500, false, "操作失败!"),
     UN_LOGIN(501, false, "请登录后再继续操作!"),
@@ -72,7 +81,7 @@ public enum ResponseStatusEnum {
     SYSTEM_CLASS_CAST(548, false, "系统错误,类型强制转换错误!"),
     SYSTEM_PARSER_ERROR(549, false, "系统错误,解析出错!"),
 
-    // admin 管理系统 56x
+    // admin 管理系统 56x ~ 57x
     CATEGORY_EXIST_ERROR(560, false, "文章分类已存在,请换一个分类名!"),
     ADMIN_USERNAME_NULL_ERROR(561, false, "用户名不能为空!"),
     ADMIN_USERNAME_EXIST_ERROR(562, false, "用户名已存在!"),
@@ -81,9 +90,11 @@ public enum ResponseStatusEnum {
     ADMIN_CREATE_ERROR(565, false, "添加管理员失败!"),
     ADMIN_PASSWORD_NULL_ERROR(566, false, "密码不能为空!"),
     ADMIN_NOT_EXIT_ERROR(567, false, "管理员不存在或密码错误!"),
-    ADMIN_EMAIL_IS_PRESENT(560, false, "邮箱已存在!"),
     ADMIN_FACE_NULL_ERROR(568, false, "人脸信息不能为空!"),
     ADMIN_FACE_LOGIN_ERROR(569, false, "人脸识别失败,请重试!"),
+    ADMIN_EMAIL_IS_PRESENT(570, false, "邮箱已存在!"),
+    ADMIN_IS_NOT_PRESENT(571, false, "管理员不存在!"),
+    ADMIN_FACE_LOGIN_NOT_ENABLE(572, false, "人脸登录未开启!"),
 
     // 创作中心 58x
     ARTICLE_COVER_NOT_EXIST_ERROR(580, false, "文章封面不存在,请选择一个!"),

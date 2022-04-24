@@ -3,7 +3,7 @@ package cn.qingweico.user.service.impl;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.Constants;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.Fans;
@@ -84,9 +84,9 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setProvince(fansInfo.getProvince());
         if (fansMapper.insert(fan) > 0) {
             // redis 作者粉丝累增
-            redisOperator.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + authorId, 1);
+            redisOperator.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累增
-            redisOperator.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + fanId, 1);
+            redisOperator.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
             // 保存粉丝关系到es中
             FansEo fanEo = new FansEo();
             BeanUtils.copyProperties(fan, fanEo);
@@ -95,7 +95,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                     .build();
             elasticsearchTemplate.index(indexQuery);
         } else {
-            GraceException.display(ResponseStatusEnum.SYSTEM_ERROR);
+            GraceException.error(ResponseStatusEnum.SYSTEM_ERROR);
         }
     }
 
@@ -106,16 +106,16 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setFanId(fanId);
         if (fansMapper.delete(fan) > 0) {
             // redis 作者粉丝累减
-            redisOperator.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS + Constants.SYMBOL_COLON + authorId, 1);
+            redisOperator.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累减
-            redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + Constants.SYMBOL_COLON + fanId, 1);
+            redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
             // 删除es中的粉丝关系
             DeleteQuery deleteQuery = new DeleteQuery();
             deleteQuery.setQuery(QueryBuilders.termQuery("authorId", authorId));
             deleteQuery.setQuery(QueryBuilders.termQuery("fanId", fanId));
             elasticsearchTemplate.delete(deleteQuery, FansEo.class);
         } else {
-            GraceException.display(ResponseStatusEnum.SYSTEM_ERROR);
+            GraceException.error(ResponseStatusEnum.SYSTEM_ERROR);
         }
 
     }
@@ -267,26 +267,29 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setFace(user.getFace());
         fan.setSex(user.getSex());
         fan.setProvince(user.getProvince());
-        fansMapper.updateByPrimaryKeySelective(fan);
+        if (fansMapper.updateByPrimaryKeySelective(fan) > 0) {
+            // update es
 
-        // update es
+            Map<String, Object> updateMap = new HashMap<>(4);
+            updateMap.put("nickname", user.getNickname());
+            updateMap.put("faceId", user.getFace());
+            updateMap.put("sex", user.getSex());
+            updateMap.put("province", user.getProvince());
 
-        Map<String, Object> updateMap = new HashMap<>(4);
-        updateMap.put("nickname", user.getNickname());
-        updateMap.put("faceId", user.getFace());
-        updateMap.put("sex", user.getSex());
-        updateMap.put("province", user.getProvince());
-
-        IndexRequest indexRequest = new IndexRequest();
-        indexRequest.source(updateMap);
+            IndexRequest indexRequest = new IndexRequest();
+            indexRequest.source(updateMap);
 
 
-        UpdateQuery updateQuery = new UpdateQueryBuilder()
-                .withClass(Fans.class)
-                .withId(relationId)
-                .withIndexRequest(indexRequest)
-                .build();
-        elasticsearchTemplate.update(updateQuery);
+            UpdateQuery updateQuery = new UpdateQueryBuilder()
+                    .withClass(Fans.class)
+                    .withId(relationId)
+                    .withIndexRequest(indexRequest)
+                    .build();
+            elasticsearchTemplate.update(updateQuery);
+        } else {
+            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
+
 
     }
 }

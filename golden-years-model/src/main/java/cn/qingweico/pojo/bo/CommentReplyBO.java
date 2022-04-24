@@ -4,6 +4,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * @author zqw
@@ -11,17 +12,14 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 public class CommentReplyBO {
-
-    @NotBlank(message = "留言信息不完整")
+    @NotBlank
     private String articleId;
-
-    @NotBlank(message = "留言信息不完整")
-    private String fatherId;
-
-    @NotBlank(message = "当前用户信息不正确, 请尝试重新登录")
+    @NotBlank
     private String commentUserId;
-
-    @NotBlank(message = "留言内容不能为空")
-    @Length(max = 1024, message = "留言内容长度不能超过1024")
+    private String commentUserNickname;
+    private String commentUserFace;
+    private String imgSrc;
+    private Integer likes;
     private String content;
+    private String parent;
 }

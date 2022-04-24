@@ -12,11 +12,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = "service-user", path = "user", fallback = UserClientFallback.class)
 public interface UserBaseInfoClient {
     /**
-     * 批量查询用户基本信息
+     * 批量查询用户信息
      *
      * @param userIds 用户id集合
      * @return GraceJsonResult
      */
     @GetMapping("queryByIds")
-    GraceJsonResult getUserBasicInfoList(@RequestParam("userIds") String userIds);
+    GraceJsonResult queryByIds(@RequestParam("userIds") String userIds);
+
+    /**
+     * 查询用户基本信息
+     *
+     * @param userId 用户id
+     * @return GraceJsonResult
+     */
+    @GetMapping("getUserBasicInfo")
+    GraceJsonResult getUserBasicInfo(@RequestParam String userId);
 }

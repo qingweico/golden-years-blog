@@ -26,7 +26,7 @@ public class Admin {
      */
     private String password;
     /**
-     * 人脸入库图片信息, 该信息保存到mongoDB的gridFS中
+     * 人脸入库图片信息, 该信息保存到mongoDB的gridFS中, 为""则表示未开启人脸登录
      */
     private String faceId;
 

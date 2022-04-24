@@ -33,7 +33,7 @@ public class Tag {
      */
     private String userId;
     /**
-     * 系统标签 - 默认为1; 否则为用户自定义标签
+     * 系统标签 - 默认为1; 否则为用户自定义标签(0)
      */
     private Integer sys;
     /**

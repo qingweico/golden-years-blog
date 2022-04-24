@@ -5,23 +5,21 @@
         <span slot="label">
           <i class="el-icon-date"></i> 网站信息
         </span>
-
         <el-form
             style="margin-left: 20px;"
             label-position="left"
             :model="form"
             label-width="80px"
-            ref="from"
-        >
+            ref="from">
           <el-form-item label="LOGO">
-            <div class="imgBody" v-if="form.photoList">
+            <div class="imgBody" v-if="form.logo">
               <i
                   class="el-icon-error inputClass"
                   v-show="icon"
                   @click="deletePhoto()"
                   @mouseover="icon = true"
               ></i>
-              <img @mouseover="icon = true" @mouseout="icon = false" v-bind:src="form.photoList[0]" alt>
+              <img @mouseover="icon = true" @mouseout="icon = false" v-bind:src="form.logo" alt>
             </div>
             <div v-else class="uploadImgBody" @click="checkPhoto">
               <i class="el-icon-plus avatar-uploader-icon"></i>
@@ -30,240 +28,151 @@
 
           <el-row :gutter="24">
             <el-col :span="10">
-              <el-form-item label="网站名称" prop="oldPwd">
+              <el-form-item label="网站名称" prop="name">
                 <el-input v-model="form.name" style="width: 400px"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="10">
-              <el-form-item label="标题" prop="newPwd1">
+              <el-form-item label="标题" prop="title">
                 <el-input v-model="form.title" style="width: 400px"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row :gutter="24">
-            <el-col :span="10">
-              <el-form-item label="关键字" prop="newPwd2">
-                <el-input v-model="form.keyword" style="width: 400px"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="10">
-              <el-form-item label="描述" prop="newPwd1">
-                <el-input v-model="form.summary" style="width: 400px"></el-input>
+            <el-col :span="24">
+              <el-form-item label="描述" prop="description">
+                <el-input v-model="form.description" type="textarea" style="width: 400px"
+                          :autosize="{ minRows: 3, maxRows: 10}"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row :gutter="24">
             <el-col :span="10">
-              <el-form-item label="作者" prop="newPwd2">
+              <el-form-item label="作者" prop="author">
                 <el-input v-model="form.author" style="width: 400px"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="10">
-              <el-form-item label="备案号" prop="newPwd2">
+              <el-form-item label="备案号" prop="recordNum">
                 <el-input v-model="form.recordNum" style="width: 400px"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row :gutter="24">
-            <el-col :span="10">
+            <el-col :span="12">
               <el-form-item label="登录方式">
-                <el-checkbox-group v-model="form.loginTypeList">
+                <el-checkbox-group v-model="loginTypeList">
                   <el-checkbox label="1" style="margin-left: 10px">账号密码</el-checkbox>
-                  <el-checkbox label="2" style="margin-left: 10px">码云</el-checkbox>
-                  <el-checkbox label="3" style="margin-left: 10px">Github</el-checkbox>
-                  <el-checkbox label="4" style="margin-left: 10px">QQ</el-checkbox>
-                  <el-checkbox label="5" style="margin-left: 10px">微信</el-checkbox>
+                  <el-checkbox label="2" style="margin-left: 10px">Github</el-checkbox>
+                  <el-checkbox label="3" style="margin-left: 10px">QQ</el-checkbox>
+                  <el-checkbox label="4" style="margin-left: 10px">微信</el-checkbox>
+                  <el-checkbox label="5" style="margin-left: 10px">微博</el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-form-item>
-            <el-button type="primary" @click="submitForm()">保 存</el-button>
+            <el-button type="primary" @click="submitForm()" :loading="loading">保 存</el-button>
           </el-form-item>
         </el-form>
       </el-tab-pane>
+    </el-tabs>
 
 
-      <el-tab-pane>
-        <el-form-item>
-          <el-button type="primary" @click="submitForm()">保 存</el-button>
-        </el-form-item>
-      </el-tab-pane>
+    <avatar-cropper
+        :height="300"
+        :key="imageCropperKey"
+        :url="url"
+        :width="300"
+        @close="close"
+        @crop-upload-success="cropSuccess"
+        lang-type="zh"
+        v-show="imageCropperShow">
+    </avatar-cropper>
 
-
-      <CheckPhoto
-          v-if="!isFirstPhotoVisible"
-          @choose_data="getChooseData"
-          @cancelModel="cancelModel"
-          :photoVisible="photoVisible"
-          :photos="photoList"
-          :files="fileIds"
-          :limit="1"
-      ></CheckPhoto>
   </div>
 </template>
-
 <script>
-import CheckPhoto from "@/components/CheckPhoto";
-import {getToken} from '@/utils/auth'
-import {getWebConfig} from "@/api/webConfig";
-import {Loading} from 'element-ui';
-import {getSystemConfig} from "@/api/systemConfig";
-import CKEditor from "@/components/CKEditor";
-import MarkdownEditor from "@/components/MarkdownEditor";
+
+import {getWebConfig,alterWebConfig} from "@/api/system/webConfig";
+import AvatarCropper from '@/components/AvatarCropper'
 
 export default {
   data() {
     return {
       form: {
+        id: "",
         name: "",
         title: "",
-        keyword: "",
-        summary: "",
+        description: "",
         author: "",
         logo: "",
-        recordNum: "",
-        openComment: "1",
-        aliPay: "",
-        showList: [],
-        loginTypeList: []
+        recordNum: ""
       },
+      loading: false,
+      loginTypeList: [],
+      imageCropperShow: false,
+      url: process.env.GATEWAY_API + "/fs/uploadFace",
+      imageCropperKey: 0,
       systemConfig: {},
-      loadingInstance: null, // loading对象
-      fileList: [],
-      photoVisible: false, //控制图片选择器的显示
-      photoList: [],
-      fileIds: "",
-      icon: false, //控制删除图标的显示
-      otherData: {},
-      openDictList: [], //字典
-      isFirstPhotoVisible: true, // 图片选择器是否首次显示【用于懒加载】
-      rules: {
-        qqNumber: [
-          {pattern: /[1-9]([0-9]{5,11})/, message: '请输入正确的QQ号码'},
-        ],
-        qqGroup: [
-          {pattern: /-?[1-9]\d*/, message: '请输入正确的QQ群'},
-        ],
-        gitee: [
-          {pattern: /^((https|http|ftp|rtsp|mms)?:\/\/)[^\s]+/, message: '请输入正确的Gitee地址'},
-        ],
-        github: [
-          {pattern: /^((https|http|ftp|rtsp|mms)?:\/\/)[^\s]+/, message: '请输入正确的Github地址'},
-        ],
-        email: [
-          {pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/, message: '请输入正确的邮箱'},
-        ]
-      }
+      photoVisible: false,
+      icon: false,
     };
   },
-  watch: {
-    "form.aliPay": {
-      handler(newVal, oldVal) {
-        console.log("value change", oldVal, newVal);
-      },
-      deep: true
-    },
-    "form.weixinPay": {
-      handler(newVal, oldVal) {
-        console.log("value change", oldVal, newVal);
-      },
-      deep: true
-    }
-  },
+  watch: {},
   components: {
-    CheckPhoto,
-    CKEditor,
-    MarkdownEditor
+    AvatarCropper
   },
   created() {
-    // 获取配置
-    this.getWebConfigFun();
-
-    //图片上传地址
-    this.uploadPictureHost = process.env.PICTURE_API + "/file/cropperPicture";
-    // 查询字典
-    this.getDictList()
-    //其它数据
-    this.otherData = {
-      source: "picture",
-      userUid: "uid00000000000000000000000000000000",
-      adminUid: "uid00000000000000000000000000000000",
-      projectName: "blog",
-      sortName: "admin",
-      token: getToken()
-    };
-
-    // 获取系统配置
-    this.getSystemConfigList();
+    getWebConfig().then(response => {
+      this.form = response.data;
+      this.loginTypeList = this.form.loginTypeList.replace("[", "")
+          .replace("]", "")
+          .split(",");
+    });
   },
   methods: {
     handleClick(tab, event) {
 
     },
-    getWebConfigFun() {
-      getWebConfig().then(response => {
-        if (response.data.success) {
-          let data = response.data;
-          if (data.showList) {
-            let showList = JSON.parse(data.showList)
-            let loginTypeList = JSON.parse(data.loginTypeList)
-            data.showList = showList;
-            data.loginTypeList = loginTypeList;
-            this.form = data;
-          } else {
-            data.showList = []
-            this.form = data;
-          }
-          this.fileIds = this.form.logo;
-          this.photoList = this.form.photoList;
-        }
-      });
-    },
-    // 获取系统配置
-    getSystemConfigList: function () {
-      getSystemConfig().then(response => {
-        if (response.data.success) {
-          this.systemConfig = response.data;
-        }
-      });
-    },
-    getChooseData(data) {
-      const that = this;
-      this.photoVisible = false;
-      this.photoList = data.photoList;
-      this.fileIds = data.fileIds;
-      let fileId = this.fileIds.replace(",", "");
-      if (this.photoList.length >= 1) {
-        this.fileIds = fileId;
-        this.form.photoList = this.photoList;
-      }
-    },
     // 关闭模态框
     cancelModel() {
       this.photoVisible = false;
     },
-    deletePhoto: function () {
-      this.form.photoList = null;
-      this.fileIds = "";
+    deletePhoto() {
+      this.form.logo = "";
       this.icon = false;
     },
+    close() {
+      this.imageCropperShow = false
+    },
+    // 弹出选择图片框
     checkPhoto() {
-      this.photoList = [];
-      this.fileIds = "";
-      this.photoVisible = true;
-      this.isFirstPhotoVisible = false
+      this.imageCropperShow = true
+    },
+    cropSuccess(resData) {
+      this.imageCropperShow = false
+      this.imageCropperKey = this.imageCropperKey + 1
+      this.form.logo = resData;
+      this.$notify({
+        title: "成功",
+        message: '上传成功',
+        type: "success"
+      });
     },
     submitForm() {
-
-    },
-
-    beforeUpload(file) {
-      this.loadingInstance = Loading.service({fullscreen: true, text: '正在努力上传中~'});
+      this.loading = true;
+      this.form.loginTypeList = String(this.loginTypeList);
+      alterWebConfig(this.form).then((response) => {
+        this.$message.success(response.msg);
+        this.loading = false;
+      }, () => {
+        this.loading = false;
+      })
     }
   }
 };

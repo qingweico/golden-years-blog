@@ -18,7 +18,7 @@
 
 <script>
 
-import {updateUserPwd} from "../../../api/system";
+import {updateUserPwd} from "@/api/system/profile";
 import {mapGetters} from "vuex";
 
 export default {
