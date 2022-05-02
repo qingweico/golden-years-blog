@@ -25,11 +25,9 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.stereotype.Service;
@@ -52,12 +50,6 @@ public class FanServiceImpl extends BaseService implements FanService {
 
     @Resource
     private UserService userService;
-
-    @Resource
-    private Sid sid;
-
-    @Resource
-    private ElasticsearchTemplate elasticsearchTemplate;
 
     @Override
     public boolean isMeFollowThisAuthor(String authorId, String fanId) {

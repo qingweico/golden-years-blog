@@ -24,14 +24,6 @@ public class BaseService {
     public ElasticsearchTemplate elasticsearchTemplate;
     @Autowired
     public Sid sid;
-    /**
-     * 令牌有效期（默认30分钟）
-     */
-    protected int expireTime = 30;
-
-    protected static final long MILLIS_SECOND = 1000;
-
-    protected static final long MILLIS_MINUTE = 60 * MILLIS_SECOND;
 
     public PagedGridResult setterPagedGrid(List<?> list,
                                            Integer page) {

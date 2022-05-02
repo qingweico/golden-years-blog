@@ -15,7 +15,7 @@
     <result column="city" property="city" jdbcType="VARCHAR" />
     <result column="district" property="district" jdbcType="VARCHAR" />
     <result column="active_status" property="activeStatus" jdbcType="INTEGER" />
-    <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
-    <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
 </mapper>

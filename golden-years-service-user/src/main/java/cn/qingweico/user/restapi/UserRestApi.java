@@ -1,7 +1,6 @@
 package cn.qingweico.user.restapi;
 
 import cn.qingweico.enums.UserStatus;
-import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.User;

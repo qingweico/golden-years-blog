@@ -140,7 +140,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
     public List<Favorites> getFavoritesByUserId(String userId) {
         Example example = new Example(Favorites.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.USERID, userId);
+        criteria.andEqualTo(SysConf.USER_ID, userId);
         return favoritesMapper.selectByExample(example);
     }
 

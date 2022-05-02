@@ -1,12 +1,9 @@
 package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.bo.NewArticleBO;
-import cn.qingweico.pojo.vo.ArticleAdminVO;
 import cn.qingweico.util.PagedGridResult;
 
 import java.util.Date;
-import java.util.List;
-
 /**
  * 用户和管理员相关的文章服务
  *
@@ -97,6 +94,7 @@ public interface ArticleService {
      * @param articleId      文章id
      * @param articleMongoId 上传至mongodb中文章的mongoid
      */
+    @Deprecated
     void updateArticleToGridFs(String articleId, String articleMongoId);
 
     /**

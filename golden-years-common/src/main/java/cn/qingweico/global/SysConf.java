@@ -13,7 +13,6 @@ public final class SysConf {
      */
     public final static String ALL = "all";
     public final static String ID = "id";
-    public final static String USER_ID = "user_id";
     public final static String TITLE = "title";
     public final static String NAME = "name";
     public final static String VALUE = "value";
@@ -31,12 +30,17 @@ public final class SysConf {
     public final static String IS_DELETE = "isDelete";
     public final static String IS_APPOINT = "isAppoint";
     public final static String ARTICLE_STATUS = "articleStatus";
+    public final static String ACTIVE_STATUS = "activeStatus";
+    public final static String NICK_NAME = "nickname";
     public final static String CATEGORY_ID = "categoryId";
     public final static String INFLUENCE = "influence";
     public final static String AUTHOR_ID = "authorId";
-    public final static String USERID = "userId";
+    public final static String USER_ID = "userId";
+    public final static String EMAIL = "email";
+    public final static String MOBILE = "mobile";
+    public final static String LOGIN_TIME = "loginTime";
 
-
+    public final static String USERID = "user_id";
     public final static String BLOG_COUNT = "blogCount";
     public final static String USER_COUNT = "userCount";
     public final static String COMMENT_COUNT = "commentCount";

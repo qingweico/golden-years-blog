@@ -7,12 +7,10 @@ import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UserInfoBO;
-import cn.qingweico.user.clients.FavoritesClient;
 import cn.qingweico.user.mapper.UserMapper;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
@@ -53,6 +51,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             "https://cdn.qingweico.cn/blog/a21f7fc6328bcb72d1a0d9647b3b93c9.jpg",
             "https://cdn.qingweico.cn/blog/0f6087e207dd169cbe300863110f98d0.jpeg"
     };
+    private final static String DEFAULT_PASSWORD = "123456";
 
     @Override
     public PagedGridResult queryUserList(String nickname,
@@ -64,24 +63,24 @@ public class UserServiceImpl extends BaseService implements UserService {
                                          Integer pageSize) {
 
         Example example = new Example(User.class);
-        example.orderBy("createdTime").desc();
+        example.orderBy(SysConf.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
 
         if (StringUtils.isNotBlank(nickname)) {
-            criteria.andLike("nickname", "%" + nickname + "%");
+            criteria.andLike(SysConf.NICK_NAME, SysConf.DELIMITER_PERCENT + nickname + SysConf.DELIMITER_PERCENT);
         }
         if (StringUtils.isNotBlank(mobile)) {
-            criteria.andLike("mobile", "%" + mobile + "%");
+            criteria.andLike(SysConf.MOBILE, SysConf.DELIMITER_PERCENT + mobile + SysConf.DELIMITER_PERCENT);
         }
         if (UserStatus.isUserStatusValid(status)) {
-            criteria.andEqualTo("activeStatus", status);
+            criteria.andEqualTo(SysConf.ACTIVE_STATUS, status);
         }
 
         if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo("createdTime", startDate);
+            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, startDate);
         }
         if (endDate != null) {
-            criteria.andGreaterThanOrEqualTo("createdTime", endDate);
+            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, endDate);
         }
 
         PageHelper.startPage(page, pageSize);
@@ -109,7 +108,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         Example userExample = new Example(User.class);
         Example.Criteria userCriteria = userExample.createCriteria();
-        userCriteria.andEqualTo("mobile", mobile);
+        userCriteria.andEqualTo(SysConf.MOBILE, mobile);
         return userMapper.selectOneByExample(userExample);
     }
 
@@ -121,15 +120,15 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setId(userId);
         String randomFace = FACE[(int) (Math.random() * 3)];
         user.setMobile(mobile);
-        user.setNickname("用户: " + DesensitizationUtil.commonDisplay(mobile));
+        user.setNickname(DesensitizationUtil.commonDisplay(mobile));
         user.setFace(randomFace);
         // 设置默认密码
-        user.setPassword("123456");
+        user.setPassword(DEFAULT_PASSWORD);
         user.setBirthday(DateUtils.stringToDate("1990-07-01"));
         user.setActiveStatus(UserStatus.INACTIVE.type);
         user.setSex(Sex.SECRET.type);
-        user.setCreatedTime(new Date());
-        user.setUpdatedTime(new Date());
+        user.setCreateTime(new Date());
+        user.setUpdateTime(new Date());
         // 放 rabbitmq 中, 为用户创建默认的收藏夹
         rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
                 SysConf.ARTICLE_CREATE_FAVORITES_DO, userId);
@@ -155,7 +154,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         BeanUtils.copyProperties(userInfoBO, userInfo);
 
-        userInfo.setUpdatedTime(new Date());
+        userInfo.setUpdateTime(new Date());
         userInfo.setActiveStatus(UserStatus.ACTIVE.type);
 
         // 保证缓存数据双写一致性
@@ -174,7 +173,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         try {
             updateCacheLatch.await();
         } catch (InterruptedException e) {
-            log.error("{}",e.getMessage());
+            log.error("{}", e.getMessage());
         }
         // 查询数据库中最新的数据放入缓存中
         User user = queryUserById(userId);
@@ -186,9 +185,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     public User queryUserByAuth(String auth) {
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("mobile", auth);
-        criteria.orEqualTo("nickname", auth);
-        criteria.orEqualTo("email", auth);
+        criteria.andEqualTo(SysConf.MOBILE, auth);
+        criteria.orEqualTo(SysConf.NICK_NAME, auth);
+        criteria.orEqualTo(SysConf.EMAIL, auth);
         return userMapper.selectOneByExample(example);
     }
 
@@ -212,7 +211,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void resetPasswords(String userId) {
         User user = new User();
         user.setId(userId);
-        user.setPassword("123456");
+        user.setPassword(DEFAULT_PASSWORD);
         if (userMapper.updateByPrimaryKeySelective(user) > 0) {
             String key = RedisConf.REDIS_USER_INFO;
             refreshCache(key);
@@ -240,7 +239,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public Integer queryUserCounts() {
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andNotEqualTo("activeStatus", UserStatus.INACTIVE.type);
+        criteria.andNotEqualTo(SysConf.ACTIVE_STATUS, UserStatus.INACTIVE.type);
         return userMapper.selectCountByExample(example);
     }
 }

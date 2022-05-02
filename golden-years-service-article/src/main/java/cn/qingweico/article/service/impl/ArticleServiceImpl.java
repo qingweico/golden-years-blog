@@ -11,6 +11,7 @@ import cn.qingweico.enums.ArticleAppointType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.RedisConf;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.vo.ArticleAdminVO;
@@ -82,6 +83,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         article.setUpdateTime(new Date());
         List<Tag> tags = newArticleBO.getTags();
         StringBuilder tagsString = new StringBuilder();
+        // 标签提取
         tagsString.append("[");
         for (Tag tag : tags) {
 
@@ -217,6 +219,10 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 articleEo.setTags(resultTag.toString());
                 IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleEo).build();
                 elasticsearchTemplate.index(indexQuery);
+
+                // 更新主站带有文章数量的文展类别
+                String key = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
+                refreshCache(key);
             }
         }
     }
@@ -245,14 +251,14 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
     @Override
     public PagedGridResult query(String keyword,
-                                      Integer status,
-                                      String categoryId,
-                                      String tagId,
-                                      Integer deleteStatus,
-                                      Date startDateStr,
-                                      Date endDateStr,
-                                      Integer page,
-                                      Integer pageSize) {
+                                 Integer status,
+                                 String categoryId,
+                                 String tagId,
+                                 Integer deleteStatus,
+                                 Date startDateStr,
+                                 Date endDateStr,
+                                 Integer page,
+                                 Integer pageSize) {
         Example example = conditionalQueryArticle(null, keyword, categoryId, status
                 , deleteStatus, startDateStr, endDateStr);
         PageHelper.startPage(page, pageSize);
@@ -416,7 +422,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo(SysConf.USERID, userId);
+        criteria.andEqualTo(SysConf.USER_ID, userId);
         criteria.andEqualTo(SysConf.ID, articleId);
         return articleExample;
     }

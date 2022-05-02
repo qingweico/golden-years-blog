@@ -67,10 +67,10 @@ public class PassportRestApi extends BaseRestApi {
     @PostMapping("/mobile")
     @SentinelResource(value = "freePwdAuth", blockHandler = "reqFrequentError",
             blockHandlerClass = DefaultHandler.class)
-    public GraceJsonResult freePwdAuth(@RequestBody RegisterLoginBO registBO) {
+    public GraceJsonResult freePwdAuth(@RequestBody RegisterLoginBO registerBO) {
 
-        String mobile = registBO.getMobile();
-        String smsCode = registBO.getSmsCode();
+        String mobile = registerBO.getMobile();
+        String smsCode = registerBO.getSmsCode();
         // 校验手机验证码是否匹配
         String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + ":" + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
