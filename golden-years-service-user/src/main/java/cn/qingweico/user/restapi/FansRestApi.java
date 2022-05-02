@@ -2,6 +2,7 @@ package cn.qingweico.user.restapi;
 
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.enums.Sex;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.bo.FansBO;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
@@ -40,7 +41,7 @@ public class FansRestApi extends BaseRestApi {
     public GraceJsonResult follow(@RequestBody FansBO fansBO) {
         String authorId = fansBO.getAuthorId();
         String fanId = fansBO.getFanId();
-        if (Objects.equals(authorId, "") || Objects.equals(fanId, "")) {
+        if (Objects.equals(authorId, SysConf.EMPTY_STRING) || Objects.equals(fanId, SysConf.EMPTY_STRING)) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
         if (authorId.equals(fanId)) {

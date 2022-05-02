@@ -111,7 +111,7 @@ public class AdminRestApi extends BaseRestApi {
     public GraceJsonResult deleteFaceInfo(@PathVariable("id") String id){
         Admin admin = adminService.queryAdminById(id);
         client.removeGridFsFile(admin.getFaceId());
-        admin.setFaceId("");
+        admin.setFaceId(SysConf.EMPTY_STRING);
         OperatorAdminBO operatorAdminBO = new OperatorAdminBO();
         BeanUtils.copyProperties(admin, operatorAdminBO);
         adminService.updateUserProfile(operatorAdminBO);

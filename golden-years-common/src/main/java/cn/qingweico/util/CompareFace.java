@@ -26,8 +26,6 @@ public class CompareFace {
     @Resource
     private AliResource aliResource;
 
-    private static final String GATEWAY = "http://viapi-test.oss-cn-shanghai.aliyuncs.com/viapi-3.0domepic/facebody/CompareFace/";
-
     public boolean faceVerify(int type, String face1, String face2, float targetConfidence) {
         DefaultProfile profile = DefaultProfile.getProfile("cn-shanghai", aliResource.getAccessKeyId(),
                 aliResource.getAccessKeySecret());
@@ -50,11 +48,11 @@ public class CompareFace {
             return responseConfidence > targetConfidence;
 
         } catch (ServerException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         } catch (ClientException e) {
-            System.out.println("ErrCode:" + e.getErrCode());
-            System.out.println("ErrMsg:" + e.getErrMsg());
-            System.out.println("RequestId:" + e.getRequestId());
+            log.error("ErrCode:" + e.getErrCode());
+            log.error("ErrMsg:" + e.getErrMsg());
+            log.error("RequestId:" + e.getRequestId());
         }
         return false;
     }

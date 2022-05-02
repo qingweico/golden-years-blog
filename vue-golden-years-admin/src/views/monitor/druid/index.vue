@@ -9,7 +9,7 @@ export default {
   components: {iFrame},
   data() {
     return {
-      url: process.env.ADMIN_API + "/druid/login.html"
+      url: process.env.GATEWAY_API + "/druid/login.html"
     };
   },
 };

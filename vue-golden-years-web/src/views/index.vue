@@ -3,7 +3,7 @@
     <div class="blank"></div>
 
     <h1 class="t_nav" v-if="isSearchModel">
-      <span>慢生活, 不是懒惰, 放慢速度不是拖延时间, 而是让我们在生活中寻找到平衡</span>
+      <span>生活不是你活过的样子，而是你记住的样子。——麦家《人生海海》</span>
       <a href="/" class="n1">网站首页</a>
       <a href="/" class="n2" v-if="categoryId">{{ getBlogCategoryNameById(categoryId) }}</a>
       <a href="/" class="n2" v-if="tagId">{{ getBlogTagNameById(tagId) }}</a>
@@ -45,7 +45,7 @@
             </li>
             <li class="start_count">
               <span class="iconfont">&#xf010d;</span>
-              {{ item.commentCounts }}
+              {{ item.starCounts }}
             </li>
             <li class="comments">
               <span class="iconfont">&#xe891;</span>

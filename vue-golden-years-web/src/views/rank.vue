@@ -61,7 +61,7 @@
             </div>
           </div>
         </div>
-        <span v-if="!loading && total && currentPage >= totalPage">到底了</span>
+        <el-divider v-if="!loading && total && currentPage >= totalPage">到底了</el-divider>
       </div>
     </div>
     <!--blog context end-->
@@ -92,6 +92,7 @@ export default {
     };
   },
   mounted() {
+    window.addEventListener("scroll", this.handleScroll);
   },
   created() {
     getBlogCategory().then((response) => {
@@ -100,6 +101,39 @@ export default {
     this.getHotArticles();
   },
   methods: {
+    handleScroll() {
+      if (this.getScrollHeight() - (this.getClientHeight() + this.getScrollTop()) < 1) {
+        if (!this.isEnd && this.currentPage < this.total) {
+          this.loadContent();
+        }
+      }
+    },
+    //获取当前滚动条的位置
+    getScrollTop() {
+      let scrollTop = 0
+      if (document.documentElement && document.documentElement.scrollTop) {
+        scrollTop = document.documentElement.scrollTop
+      } else if (document.body) {
+        scrollTop = document.body.scrollTop
+      }
+      return scrollTop
+    },
+    //获取当前可视范围的高度
+    getClientHeight() {
+      let clientHeight = 0
+      if (document.body.clientHeight && document.documentElement.clientHeight) {
+        clientHeight = Math.min(document.body.clientHeight, document.documentElement.clientHeight)
+      } else {
+        clientHeight = Math.max(document.body.clientHeight, document.documentElement.clientHeight)
+      }
+      return clientHeight
+    },
+    //获取文档完整的高度
+    getScrollHeight() {
+      return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+    },
+
+
     // 跳转到文章详情
     goToDetail(blog) {
       let routeData = this.$router.resolve({

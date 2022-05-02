@@ -1,7 +1,6 @@
 package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.base.BaseRestApi;
-import cn.qingweico.article.clients.ArticleDetailClient;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticleService;
@@ -128,21 +127,25 @@ public class ArticleRestApi extends BaseRestApi {
                                  @RequestParam Integer page,
                                  @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        List<ArticleAdminVO> result = articleService.query(keyword, status, categoryId,tagId, deleteStatus, startDateStr, endDateStr, page, pageSize);
-        for (ArticleAdminVO articleAdminVO : result) {
+        PagedGridResult result = articleService.query(keyword,
+                status,
+                categoryId,
+                tagId,
+                deleteStatus,
+                startDateStr,
+                endDateStr,
+                page,
+                pageSize);
+        String toJson = JsonUtils.objectToJson(result.getRows());
+        List<ArticleAdminVO> articles = JsonUtils.jsonToList(toJson, ArticleAdminVO.class);
+        for (ArticleAdminVO articleAdminVO : articles) {
             Map<String, Object> authorInfo = geAuthorInfo(articleAdminVO.getAuthorId());
             articleAdminVO.setAuthorName((String) authorInfo.get("authorName"));
             articleAdminVO.setAuthorFace((String) authorInfo.get("authorFace"));
             articleAdminVO.setFansCounts((Integer) authorInfo.get("fansCounts"));
             articleAdminVO.setFollowCounts((Integer) authorInfo.get("followCounts"));
         }
-        PagedGridResult pgr = new PagedGridResult();
-        PageInfo<ArticleAdminVO> pageInfo = new PageInfo<>(result);
-        pgr.setRows(pageInfo.getList());
-        pgr.setRecords(pageInfo.getTotal());
-        pgr.setCurrentPage(pageInfo.getPageNum());
-        pgr.setTotalPage(pageInfo.getPages());
-        return GraceJsonResult.ok(pgr);
+        return GraceJsonResult.ok(result);
     }
 
     @ApiOperation(value = "管理员对文章进行审核", notes = "管理员对文章进行审核", httpMethod = "POST")

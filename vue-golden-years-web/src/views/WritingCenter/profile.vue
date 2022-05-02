@@ -50,8 +50,8 @@
         </el-form-item>
         <el-form-item label="性别" :label-width="formLabelWidth" prop="sex">
           <el-radio-group v-model="form.sex">-->
-            <el-radio :label=0>男生</el-radio>
-            <el-radio :label=1>女生</el-radio>
+            <el-radio :label=1>男生</el-radio>
+            <el-radio :label=0>女生</el-radio>
             <el-radio :label=2>保密</el-radio>
           </el-radio-group>
         </el-form-item>

@@ -111,9 +111,9 @@ public interface ArticleService {
      * @param endDateStr   文章发布时间(截止)
      * @param page         page 起始分页
      * @param pageSize     pageSize 每页的数目
-     * @return List<ArticleAdminVO>
+     * @return PagedGridResult
      */
-    List<ArticleAdminVO> query(String keyword,
+    PagedGridResult query(String keyword,
                                Integer status,
                                String categoryId,
                                String tagId,

@@ -37,14 +37,14 @@ public class Swagger3Config {
                 .title("流金岁月")
                 // 联系人信息
                 .contact(new Contact("启明",
-                        "https://blog.qingweico.cn",
+                        "http://blog.qingweico.cn",
                         "17796706221@163.com"))
                 // 详细信息
                 .description("")
                 // 文档版本号
                 .version("1.0.1")
                 // 网站地址
-                .termsOfServiceUrl("https://blog.qingweico.cn")
+                .termsOfServiceUrl("http://blog.qingweico.cn")
                 .build();
     }
 }

@@ -1,8 +1,6 @@
 package cn.qingweico.validate;
 
 import cn.qingweico.util.CheckUtils;
-import org.springframework.stereotype.Component;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 

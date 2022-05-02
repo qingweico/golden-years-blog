@@ -19,6 +19,7 @@ public final class SysConf {
     public final static String VALUE = "value";
     public static final String TAG_ID = "tagId";
     public final static String CONTENT = "content";
+    public final static String SYS = "sys";
     public final static String AVATAR = "avatar";
     public final static String STATUS = "status";
 
@@ -33,6 +34,7 @@ public final class SysConf {
     public final static String CATEGORY_ID = "categoryId";
     public final static String INFLUENCE = "influence";
     public final static String AUTHOR_ID = "authorId";
+    public final static String USERID = "userId";
 
 
     public final static String BLOG_COUNT = "blogCount";

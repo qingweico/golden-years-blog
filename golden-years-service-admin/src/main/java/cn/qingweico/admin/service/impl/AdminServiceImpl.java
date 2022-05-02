@@ -108,7 +108,7 @@ public class AdminServiceImpl extends BaseService implements AdminService {
             admin = queryAdminByUsername(user.getUsername());
             refreshCache(admin);
         } else {
-            log.error("admin updateUserProfile error");
+            log.error("admin update profile error");
             GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
     }

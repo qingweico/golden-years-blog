@@ -57,7 +57,7 @@ public class FaceVerifyUtils {
         return encodeStr;
     }
 
-    /*
+    /**
      * 计算 HmacSHA1
      */
     public static String hmacSha1(String data, String key) {
@@ -74,7 +74,7 @@ public class FaceVerifyUtils {
         return result;
     }
 
-    /*
+    /**
      * 等同于javaScript中的 new Date().toUTCString();
      */
     public static String toGmtString(Date date) {

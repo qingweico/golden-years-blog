@@ -9,7 +9,7 @@ export default {
   name: 'MoGuGit',
   data() {
     return {
-      url: process.env.BLOG_WEB_URL
+      url: "http://blog.qingweico.cn"
     }
   },
   methods: {

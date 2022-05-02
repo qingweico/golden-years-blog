@@ -8,6 +8,7 @@
     </div>
 
     <el-form ref="form" :model="form" :rules="rules" label-width="80px" style="width: 50%;">
+      <span>默认密码为123456</span>
       <el-form-item label="旧密码" prop="oldPassword">
         <el-input v-model="form.oldPassword" placeholder="请输入旧密码" type="password" show-password/>
       </el-form-item>

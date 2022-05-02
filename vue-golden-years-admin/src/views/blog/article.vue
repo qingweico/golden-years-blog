@@ -311,9 +311,6 @@ export default {
         this.blogList();
       })
     },
-    handleFind() {
-      this.blogList();
-    },
     refresh() {
       this.queryParams = {
         keyword: "",
@@ -364,20 +361,20 @@ export default {
       }
       return str;
     },
-  },
-  handleFind() {
-    this.currentPage = 1;
-    this.blogList();
-  },
-  handleCurrentChange(val) {
-    this.currentPage = val;
-    this.blogList();
+    handleFind() {
+      this.currentPage = 1;
+      this.blogList();
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.blogList();
+    },
+    // 改变多选
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    }
   },
 
-  // 改变多选
-  handleSelectionChange(val) {
-    this.multipleSelection = val;
-  }
 };
 </script>
 <style scoped>

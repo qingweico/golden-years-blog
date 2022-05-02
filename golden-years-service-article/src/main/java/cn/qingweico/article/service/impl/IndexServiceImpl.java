@@ -142,7 +142,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
         String startTime = DateUtils.dateTimeToStr(temp);
         List<Map<String, Object>> blogContributeMap = articleMapper.getBlogContributeCount(startTime, endTime);
         List<String> dateList = DateUtils.getDayBetweenDates(startTime, endTime);
-        Map<String, Object> dateMap = new HashMap<>();
+        Map<String, Object> dateMap = new HashMap<>(32);
         for (Map<String, Object> itemMap : blogContributeMap) {
             dateMap.put(itemMap.get("DATE").toString(), itemMap.get("COUNT"));
         }

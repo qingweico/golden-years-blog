@@ -23,7 +23,6 @@ import cn.qingweico.util.PagedGridResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mongodb.client.gridfs.GridFSBucket;
-import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -37,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
-import javax.xml.ws.Response;
 import java.util.*;
 
 /**
@@ -187,7 +185,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     public void updateArticleStatus(String articleId, Integer pendingStatus) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("id", articleId);
+        criteria.andEqualTo(SysConf.ID, articleId);
         Article article = new Article();
         article.setArticleStatus(pendingStatus);
 
@@ -246,7 +244,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     }
 
     @Override
-    public List<ArticleAdminVO> query(String keyword,
+    public PagedGridResult query(String keyword,
                                       Integer status,
                                       String categoryId,
                                       String tagId,
@@ -277,15 +275,22 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 list = result;
             }
         }
+        PageInfo<Article> pageInfo = new PageInfo<>(list);
+        List<Article> paged = pageInfo.getList();
         List<ArticleAdminVO> result = new ArrayList<>();
-        for (Article article : list) {
+        for (Article article : paged) {
             ArticleAdminVO articleAdminVO = new ArticleAdminVO();
             BeanUtils.copyProperties(article, articleAdminVO);
             List<Tag> tagList = articlePortalService.getTagList(article);
             articleAdminVO.setTagList(tagList);
             result.add(articleAdminVO);
         }
-        return result;
+        PagedGridResult pgr = new PagedGridResult();
+        pgr.setRows(result);
+        pgr.setCurrentPage(pageInfo.getPageNum());
+        pgr.setRecords(pageInfo.getTotal());
+        pgr.setTotalPage(pageInfo.getPages());
+        return pgr;
     }
 
     private Example conditionalQueryArticle(String userId,
@@ -296,29 +301,29 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                                             Date startDate,
                                             Date endDate) {
         Example example = new Example(Article.class);
-        example.orderBy("createTime").desc();
+        example.orderBy(SysConf.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
         if (StringUtils.isNotBlank(userId)) {
-            criteria.andEqualTo("authorId", userId);
+            criteria.andEqualTo(SysConf.AUTHOR_ID, userId);
         }
         if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike("title", "%" + keyword + "%");
+            criteria.andLike(SysConf.TITLE, SysConf.DELIMITER_PERCENT + keyword + SysConf.DELIMITER_PERCENT);
         }
 
         if (ArticleReviewStatus.isArticleStatusValid(status)) {
-            criteria.andEqualTo("articleStatus", status);
+            criteria.andEqualTo(SysConf.ARTICLE_STATUS, status);
         }
         if (StringUtils.isNotBlank(categoryId)) {
-            criteria.andEqualTo("categoryId", categoryId);
+            criteria.andEqualTo(SysConf.CATEGORY_ID, categoryId);
         }
         if (deleteStatus != null) {
-            criteria.andEqualTo("isDelete", deleteStatus);
+            criteria.andEqualTo(SysConf.IS_DELETE, deleteStatus);
         }
         if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo("createTime", startDate);
+            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, startDate);
         }
         if (endDate != null) {
-            criteria.andLessThanOrEqualTo("createTime", endDate);
+            criteria.andLessThanOrEqualTo(SysConf.CREATE_TIME, endDate);
         }
         return example;
 
@@ -330,7 +335,6 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         // 删除已通过审核的文章, 还需删除gridFs和es中的数据
         Integer articleStatus = articleMapper.selectByPrimaryKey(articleId).getArticleStatus();
         if (ArticleReviewStatus.SUCCESS.type.equals(articleStatus)) {
-            // deleteArticleHtmlForGridFs(articleId);
             elasticsearchTemplate.delete(ArticleEo.class, articleId);
         }
         articleMapper.deleteByPrimaryKey(articleId);
@@ -368,6 +372,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         }
     }
 
+    @SuppressWarnings("unused")
     private void deleteArticleHtmlForGridFs(String articleId) {
         // 查询文章的mongoId
         Article article = articleMapper.selectByPrimaryKey(articleId);
@@ -411,8 +416,8 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo("authorId", userId);
-        criteria.andEqualTo("id", articleId);
+        criteria.andEqualTo(SysConf.USERID, userId);
+        criteria.andEqualTo(SysConf.ID, articleId);
         return articleExample;
     }
 

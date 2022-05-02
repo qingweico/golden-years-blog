@@ -123,6 +123,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setMobile(mobile);
         user.setNickname("用户: " + DesensitizationUtil.commonDisplay(mobile));
         user.setFace(randomFace);
+        // 设置默认密码
+        user.setPassword("123456");
         user.setBirthday(DateUtils.stringToDate("1990-07-01"));
         user.setActiveStatus(UserStatus.INACTIVE.type);
         user.setSex(Sex.SECRET.type);

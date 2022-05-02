@@ -2,7 +2,7 @@
   <div class="main-page">
     <div class="title-box">
       <div class="title-wrapper">
-        <span class="title-word">粉丝画像</span>
+        <span class="title-word">粉丝统计</span>
       </div>
     </div>
     <div class="all-charts-wrapper">
@@ -11,6 +11,11 @@
       <div class="sex-wrapper">
 
         <div class="sex-line-wrapper">
+
+
+
+
+
           <div id="manPercent" class="sex-man-line" style="width: 60%"></div>
           <div id="womanPercent" class="sex-woman-line" style="width: 40%;"></div>
         </div>

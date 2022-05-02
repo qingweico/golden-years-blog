@@ -72,7 +72,8 @@ spring:
     nacos:
       discovery:
         # 配置 Nacos 地址
-        server-addr: 127.0.0.1:8848
+        # server-addr: 127.0.0.1:8848
+        server-addr: 106.12.136.221:8848
         # 配置 service-files 公网ip 本地部署不用开启
         ip: 119.29.35.129
         port: 8002

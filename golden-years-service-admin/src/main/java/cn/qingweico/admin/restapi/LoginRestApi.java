@@ -141,11 +141,11 @@ public class LoginRestApi extends BaseRestApi {
     public GraceJsonResult logout() {
         HttpServletRequest request = ServletReqUtils.getRequest();
         String token = request.getHeader("Authorization");
-        String adminId = "";
+        String adminId = SysConf.EMPTY_STRING;
         try {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
-                adminId = claims.get("user_id", String.class);
+                adminId = claims.get(SysConf.USER_ID, String.class);
             }
         } catch (Exception e) {
             return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);

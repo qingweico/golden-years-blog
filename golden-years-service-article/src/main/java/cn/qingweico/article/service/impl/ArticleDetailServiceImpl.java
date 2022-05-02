@@ -112,7 +112,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
         if (StringUtils.isNotBlank(favoritesDesc)) {
             favorites.setDescription(collectBO.getDescription());
         } else {
-            favorites.setDescription("");
+            favorites.setDescription("这是一个默认的收藏夹 在创建用户时创建的。默认是公开的");
         }
         favorites.setUserId(collectBO.getUserId());
         String favoritesName = collectBO.getName();
@@ -121,7 +121,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
         } else {
             favorites.setName("默认收藏夹");
         }
-        favorites.setArticles("");
+        favorites.setArticles(SysConf.EMPTY_STRING);
         Integer isOpen = collectBO.getOpen();
         if (isOpen == null) {
             favorites.setOpen(FavoritesType.PUBLIC.type);
@@ -140,7 +140,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
     public List<Favorites> getFavoritesByUserId(String userId) {
         Example example = new Example(Favorites.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("userId", userId);
+        criteria.andEqualTo(SysConf.USERID, userId);
         return favoritesMapper.selectByExample(example);
     }
 
@@ -184,6 +184,4 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
             GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
     }
-
-
 }

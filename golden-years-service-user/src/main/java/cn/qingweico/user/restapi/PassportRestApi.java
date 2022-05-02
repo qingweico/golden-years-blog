@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * 主页用户登陆接口
@@ -120,7 +121,7 @@ public class PassportRestApi extends BaseRestApi {
         if (user.getMobile().equals(auth)
                 || user.getNickname().equals(auth)
                 || user.getEmail().equals(auth)) {
-            if (user.getPassword().equals(password)) {
+            if (Objects.equals(user.getPassword(), password)) {
                 if (userStatus == UserStatus.INACTIVE.type) {
                     return new GraceJsonResult(ResponseStatusEnum.WELCOME, user.getActiveStatus());
                 }

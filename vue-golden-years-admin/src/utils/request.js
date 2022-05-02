@@ -79,18 +79,13 @@ service.interceptors.response.use(response => {
                     type: 'error',
                     duration: 5 * 1000
                 })
-                return Promise.reject(res.msg)
+                return Promise.reject('error')
             }
         }
     },
     error => {
         NProgress.done();
         console.log('错误码', error)
-        Message({
-            message: error,
-            type: 'error',
-            duration: 5 * 1000
-        })
         return Promise.reject(error)
     }
 )

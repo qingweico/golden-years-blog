@@ -3,7 +3,6 @@ package cn.qingweico.article.service.impl;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Comments;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.mapper.CommentsMapper;

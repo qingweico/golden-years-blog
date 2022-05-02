@@ -53,7 +53,7 @@
               </router-link>
             </li>
             <li>
-              <a href="http://119.29.35.129/yiqing">疫情</a>
+              <a href="http://blog.qingweico.cn/yiqing">疫情</a>
             </li>
             <li>
               <router-link to="/ssr">

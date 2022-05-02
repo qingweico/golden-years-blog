@@ -248,6 +248,7 @@ export default {
       setTimeout(() => {
         that.blogContent = this.articleDetail.content;
         that.isStarThisArticle();
+        that.isCollectThisArticle();
         that.loadingInstance.close();
         let isLogin = this.$store.state.user.isLogin;
         if (!isLogin) {

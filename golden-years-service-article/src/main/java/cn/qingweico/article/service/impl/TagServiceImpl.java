@@ -5,7 +5,7 @@ import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.TagService;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.Article;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.bo.TagBO;
 import cn.qingweico.util.JsonUtils;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
-import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.List;
 
@@ -43,16 +42,16 @@ public class TagServiceImpl extends BaseService implements TagService {
                                       Integer sys,
                                       Integer page, Integer pageSize) {
         Example example = new Example(Tag.class);
-        example.orderBy("createTime").desc();
+        example.orderBy(SysConf.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
         if (StringUtils.isNotBlank(tagName)) {
-            criteria.andLike("name", "%" + tagName + "%");
+            criteria.andLike(SysConf.NAME, SysConf.DELIMITER_PERCENT + tagName + SysConf.DELIMITER_PERCENT);
         }
         if (status != null) {
-            criteria.andEqualTo("status", status);
+            criteria.andEqualTo(SysConf.STATUS, status);
         }
         if (sys != null) {
-            criteria.andEqualTo("sys", sys);
+            criteria.andEqualTo(SysConf.SYS, sys);
         }
         PageHelper.startPage(page, pageSize);
         List<Tag> tags = tagMapper.selectByExample(example);
@@ -66,7 +65,7 @@ public class TagServiceImpl extends BaseService implements TagService {
         if (StringUtils.isBlank(tagJson)) {
             Example example = new Example(Tag.class);
             Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo("status", YesOrNo.YES.type);
+            criteria.andEqualTo(SysConf.STATUS, YesOrNo.YES.type);
             tags = tagMapper.selectByExample(example);
             redisOperator.set(RedisConf.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
             log.info("tag list has been cached");

@@ -21,14 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import oshi.util.platform.mac.SysctlUtil;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author zqw
@@ -111,7 +108,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     private PagedGridResult getPagedGridResult(String author, Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo("authorId", author);
+        criteria.andEqualTo(SysConf.AUTHOR_ID, author);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, page);
