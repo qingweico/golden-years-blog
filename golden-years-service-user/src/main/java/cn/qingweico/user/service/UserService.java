@@ -108,9 +108,15 @@ public interface UserService {
     /**
      * 更新用户密码
      *
-     * @param updatePwdBO {@link UpdatePwdBO}
      */
-    void alterPwd(UpdatePwdBO updatePwdBO);
+    void alterPwd(String userId, String newPassword);
+
+    /**
+     * 更新用户手机号
+     * @param user 用户信息
+     * @param newMobile 用户新的手机号码
+     */
+    void alterMobile(User user, String newMobile);
 
 
     /**

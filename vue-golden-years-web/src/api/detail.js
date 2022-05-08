@@ -109,3 +109,11 @@ export function createFavorites(params) {
         data: params
     })
 }
+/**增加一条文章浏览历史*/
+export function incArticleHistory(params) {
+    return request({
+        url: process.env.GATEWAY_API + '/article/history/inc',
+        method: 'post',
+        data: params
+    })
+}

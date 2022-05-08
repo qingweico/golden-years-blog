@@ -166,7 +166,6 @@ export default {
       params.append("articleId", articleId);
       getFavorites(params).then((response) => {
         this.favorites = response.data;
-        console.log(this.favorites)
       })
 
     },
@@ -179,7 +178,7 @@ export default {
       params.description = this.form.description;
       params.open = this.form.open;
       createFavorites(params).then(response => {
-        this.getFavorites(this.getUserInfo.id);
+        this.getFavorites(this.getUserInfo.id, this.articleId);
         this.dialogCreateFavorites = false;
         this.dialogChoiceFavorites = true;
         this.clearForm();

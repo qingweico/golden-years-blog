@@ -109,8 +109,8 @@ export default {
       dialog: false,
       labelPosition: "right",
       loginForm: {
-        authName: "",
-        password: ""
+        authName: "17796706221",
+        password: "123456"
       },
       // 登录类别
       loginType: {

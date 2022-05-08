@@ -54,6 +54,10 @@ public class RedisOperator {
         redisTemplate.expire(key, timeout, TimeUnit.SECONDS);
     }
 
+    public void expire(String key, long timeout, TimeUnit timeUnit) {
+        redisTemplate.expire(key, timeout, timeUnit);
+    }
+
     /**
      * 实现命令:increment key, 增加key一次
      *
@@ -133,6 +137,26 @@ public class RedisOperator {
     }
 
     /**
+     * zset add
+     *
+     * @param key   k
+     * @param value v
+     * @param score score
+     */
+    public void zsetAdd(String key, String value, double score) {
+        redisTemplate.opsForZSet().add(key, value, score);
+    }
+
+    public Set<String> zsetRevRange(String key, long l, long r) {
+        return redisTemplate.opsForZSet().reverseRange(key, l, r);
+    }
+
+    public Long zsetSize(String key) {
+        return redisTemplate.opsForZSet().size(key);
+    }
+
+
+    /**
      * 如果key不存在, 则设置, 如果存在, 则报错
      *
      * @param key   key
@@ -163,7 +187,7 @@ public class RedisOperator {
     }
 
     /**
-     * 批量查询, 对应mget
+     * 批量查询, 对应multi get
      *
      * @param keys {@code List<String>} keys
      * @return {@code List<String>} value

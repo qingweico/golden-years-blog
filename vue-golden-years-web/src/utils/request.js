@@ -2,7 +2,6 @@ import axios from 'axios'
 import router from '@/router/index'
 import {getCookie} from "@/utils/cookie";
 import {Loading, Message} from 'element-ui'
-import {resetPassword} from "../../../vue-golden-years-admin/src/api/user";
 // 创建axios实例
 const service = axios.create({
     // api 的 base_url
@@ -25,7 +24,7 @@ service.interceptors.request.use(
             config.headers.Authorization = getCookie("token")
         }
         requestNum++;
-        if (loading == null) {
+        if (loading === null) {
             loading = Loading.service({fullscreen: true, text: '正在努力加载中'});
         } else if (requestNum > 0) {
             loading = Loading.service({fullscreen: true, text: '正在努力加载中'});

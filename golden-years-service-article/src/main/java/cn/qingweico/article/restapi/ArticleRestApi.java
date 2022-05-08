@@ -263,10 +263,10 @@ public class ArticleRestApi extends BaseRestApi {
         Map<String, Object> map = new HashMap<>(4);
         UserBasicInfoVO userBasicInfo = getUserBasicInfoClient(authorId);
         if (StringUtils.isNotBlank(userBasicInfo.getId())) {
-            map.put("authorName", userBasicInfo.getNickname());
-            map.put("authorFace", userBasicInfo.getFace());
-            map.put("followCounts", userBasicInfo.getMyFollowCounts());
-            map.put("fansCounts", userBasicInfo.getMyFansCounts());
+            map.put(SysConf.AUTHOR_NAME, userBasicInfo.getNickname());
+            map.put(SysConf.AUTHOR_FACE, userBasicInfo.getFace());
+            map.put(SysConf.FOLLOW_COUNTS, userBasicInfo.getMyFollowCounts());
+            map.put(SysConf.FANS_COUNTS, userBasicInfo.getMyFansCounts());
         } else {
             GraceException.error(ResponseStatusEnum.SYSTEM_ERROR);
             log.error("用户服务不可用");

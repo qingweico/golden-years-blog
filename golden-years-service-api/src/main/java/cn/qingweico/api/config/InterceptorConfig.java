@@ -29,6 +29,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(@NotNull InterceptorRegistry registry) {
         registry.addInterceptor(smsInterceptor())
-                .addPathPatterns("/auth/getSmsCode");
+                .addPathPatterns("/u/auth/getSmsCode");
     }
 }

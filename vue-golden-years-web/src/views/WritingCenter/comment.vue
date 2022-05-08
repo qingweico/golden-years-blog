@@ -6,44 +6,26 @@
       </div>
     </div>
 
-    <div class="comment-list-wrapper" v-if="commentList.length">
-      <el-table :data="commentList"
-                style="width: 100%">
-        <el-table-column label="文章封面" width="200" align="center">
-          <template slot-scope="scope">
-            <img
-                v-if="scope.row.articleCover"
-                :src="scope.row.articleCover"
-                style="width: 130px;height: 70px;"
-                alt="">
-          </template>
-        </el-table-column>
-        <el-table-column label="文章标题" width="200" align="center">
-          <template slot-scope="scope">
-            <span @click="goToDetail(scope.row.articleId)" style="cursor:pointer;">{{ scope.row.articleTitle }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="评论内容" width="200" align="center">
-          <template slot-scope="scope">
-            <span>{{ scope.row.content }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="发布时间" width="200" align="center">
-          <template slot-scope="scope">
-            <span>{{ scope.row.createTime }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-            fixed="right"
-            label="操作"
-            width="100">
-          <template slot-scope="scope">
-            <el-button @click="deleteComment(scope.row.id)" type="text" size="small">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <div class="comment-list-wrapper" v-if="commentList.length" v-for="(comment, index) in commentList" :key="index">
+      <el-card class="box-card" shadow="hover" style="margin-bottom: 10px">
+        <el-descriptions direction="horizontal" :colon=false size="mini" :column=4>
+          <el-descriptions-item>
+            <span @click="goToDetail(comment.articleId)"
+                  style="font-weight: bold;font-size: 20px">{{ comment.articleTitle }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <span>{{ comment.content }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <span> {{ comment.createTime }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <span @click="deleteComment(comment.id)"> <i class="el-icon-delete"> 删除</i></span>
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
     </div>
-    <el-empty description="你暂时还没有发表任何评论" v-else style=" background-color: white;"></el-empty>
+    <el-empty description="你暂时还没有发表任何评论" v-if="!commentList.length" style=" background-color: white;"></el-empty>
 
 
     <!--分页-->
@@ -109,10 +91,10 @@ export default {
       });
     },
     // 跳转到文章详情
-    goToDetail(blogId) {
+    goToDetail(articleId) {
       let routeData = this.$router.resolve({
         path: "/detail",
-        query: {id: blogId}
+        query: {id: articleId}
       })
       window.open(routeData.href, '_blank');
     },
@@ -125,5 +107,26 @@ export default {
 </script>
 
 <style scoped>
+.comment-list-wrapper {
+  margin-top: 20px;
+}
+
+.el-descriptions {
+  cursor: pointer;
+  margin-left: 30px;
+  padding-top: 10px;
+  font-weight: bold;
+  color: black;
+  font-size: 16px;
+}
+
+.el-descriptions-item span {
+  float: left;
+  font-size: 16px;
+  padding: 0 0 0 10px;
+  color: #748594;
+  line-height: 1.5;
+  display: inline-block;
+}
 
 </style>

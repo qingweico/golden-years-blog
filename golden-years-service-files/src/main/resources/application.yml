@@ -20,8 +20,8 @@ spring:
   datasource:
     # mysql驱动
     driver-class-name: com.mysql.cj.jdbc.Driver
-    masterUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
-    slaveUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
+    masterUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    slaveUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
     username: root
     password: 990712
     initialization-mode: always
@@ -72,11 +72,11 @@ spring:
     nacos:
       discovery:
         # 配置 Nacos 地址
-        # server-addr: 127.0.0.1:8848
-        server-addr: 106.12.136.221:8848
+        server-addr: 127.0.0.1:8848
+        # server-addr: 106.12.136.221:8848
         # 配置 service-files 公网ip 本地部署不用开启
-        ip: 119.29.35.129
-        port: 8002
+        # ip: 119.29.35.129
+        # port: 8002
 
     sentinel:
       transport:

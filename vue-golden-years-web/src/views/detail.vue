@@ -136,7 +136,7 @@
 import {
   getArticleCollectCounts,
   getArticleStarCounts,
-  getBlogById, isCollectThisArticle,
+  getBlogById, incArticleHistory, isCollectThisArticle,
   isStarThisArticle,
   readArticle
 } from "@/api/detail";
@@ -250,6 +250,11 @@ export default {
         that.isStarThisArticle();
         that.isCollectThisArticle();
         that.loadingInstance.close();
+        let params = {};
+        params.userId = this.getUserInfo.id;
+        params.articleId = this.articleId;
+        // 添加文章浏览历史
+        incArticleHistory(params);
         let isLogin = this.$store.state.user.isLogin;
         if (!isLogin) {
           that.currentUser.avatar = that.$SysConf.defaultAvatar;

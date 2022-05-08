@@ -86,15 +86,13 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedGridResult queryHotArticle(Integer page, Integer pageSize) {
+    public List<Article> queryHotArticle() {
         Example example = new Example(Article.class);
         Example.Criteria criteria = example.createCriteria();
-        example.orderBy(SysConf.INFLUENCE).desc();
         criteria.andEqualTo(SysConf.IS_DELETE, YesOrNo.NO.type);
         criteria.andEqualTo(SysConf.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
-        return setterPagedGrid(list, page);
+        PageHelper.startPage(SysConf.NUM_ONE, SysConf.NUM_100);
+        return articleMapper.selectByExample(example);
     }
 
     @Override

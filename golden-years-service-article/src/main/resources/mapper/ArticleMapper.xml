@@ -26,7 +26,7 @@
 
 	<update id="timedPublishArticle">
 		update
-			article
+			t_article
 		set is_appoint = 0
 		where publish_time &lt;= NOW()
 		  and is_appoint = 1;

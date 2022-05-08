@@ -55,11 +55,6 @@
             <li>
               <a href="http://blog.qingweico.cn/yiqing">疫情</a>
             </li>
-            <li>
-              <router-link to="/ssr">
-                <a href="javascript:void(0);" :class="[saveTitle === '/ssr' ? 'title' : '']">订阅</a>
-              </router-link>
-            </li>
           </ul>
           <div class="search_box">
             <div id="search_bar" :class="(showSearch || keyword.length > 0)?'search_bar search_open':'search_bar'">
@@ -187,7 +182,7 @@ export default {
   },
   watch: {
     $route(to, from) {
-      this.getCurrentPageTitle()
+      this.getCurrentPageTitle();
     },
     // 判断登录状态位是否改变; 用于控制弹框
     '$store.state.app.loginMessage': function (newFlag, oldFlag) {

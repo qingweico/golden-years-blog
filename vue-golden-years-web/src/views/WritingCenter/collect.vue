@@ -142,7 +142,6 @@ export default {
       let params = {};
       params.favoritesId = this.pendingDeleteFavorites;
       params.userId = this.userId;
-      alert(JSON.stringify(params))
       deleteFavorites(params).then((response) => {
         this.$message.success(response.msg);
         this.dialogDeleteFavorites = false;
@@ -189,6 +188,7 @@ export default {
   font-weight: bold;
   color: black;
   font-size: 16px;
+  cursor: pointer;
 }
 
 .el-descriptions-item {

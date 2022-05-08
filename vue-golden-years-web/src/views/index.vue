@@ -73,7 +73,7 @@
           </div>
         </div>
         <span v-if="!loading && total && currentPage >= totalPage">我也是有底线的</span>
-        <span v-if="total === 0 && !loading">什么内容也没有</span>
+        <span v-if="!loading && total === 0">什么内容也没有</span>
       </div>
     </div>
     <!--blog context end-->
@@ -130,7 +130,7 @@ export default {
   },
   mounted() {
     // 注册scroll事件并监听
-    this.loading = false;
+   this.loading = false;
   },
   watch: {
     $route(to, from) {
@@ -185,6 +185,7 @@ export default {
     // 最新博客列表
     newBlogList() {
       let that = this;
+      that.loading = true;
       that.currentPage = 1;
       that.loadingInstance = Loading.service({
         lock: true,
@@ -203,8 +204,10 @@ export default {
           that.total = response.data.records;
           that.totalPage = response.data.totalPage;
           that.loadingInstance.close();
+          that.loading = false;
         }, () => {
           that.isEnd = true;
+          that.loading = false;
           that.loadingInstance.close();
         });
       } else if (Number(this.searchModel) === 0) {
@@ -213,8 +216,10 @@ export default {
           that.total = response.data.records;
           that.totalPage = response.data.totalPage;
           that.loadingInstance.close();
+          that.loading = false;
         }, () => {
           that.isEnd = true;
+          that.loading = false;
           that.loadingInstance.close();
         })
       }

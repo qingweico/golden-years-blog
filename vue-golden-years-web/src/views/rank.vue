@@ -13,7 +13,8 @@
         </h3>
         <span class="blog_pic">
           <a href="javascript:void(0);" @click="goToDetail(item)" title>
-             <div class="top-left-text">{{ index + 1 }}</div>
+             <div class="top-left-text" :class="[index === 0 ? 'first' :
+             index === 1 ? 'second' : index === 2 ? 'third' : '']">{{ index + 1 }}</div>
             <img v-if="item.articleCover" :src="item.articleCover" alt>
           </a>
         </span>
@@ -35,7 +36,7 @@
             </li>
             <li class="start_count">
               <span class="iconfont">&#xf010d;</span>
-              {{ item.commentCounts }}
+              {{ item.starCounts }}
             </li>
             <li class="comments">
               <span class="iconfont">&#xe891;</span>
@@ -61,12 +62,8 @@
             </div>
           </div>
         </div>
-        <el-divider v-if="!loading && total && currentPage >= totalPage">到底了</el-divider>
+        <el-divider v-if="!loading && total && currentPage >= totalPage"></el-divider>
       </div>
-    </div>
-    <!--blog context end-->
-    <div class="sidebar">
-
     </div>
   </article>
 </template>
@@ -85,6 +82,7 @@ export default {
       pageSize: 5,
       total: 0,
       totalPage: 0,
+      currentPageTitle: "",
       // 是否到底底部了
       isEnd: false,
       // 是否正在加载
@@ -93,6 +91,15 @@ export default {
   },
   mounted() {
     window.addEventListener("scroll", this.handleScroll);
+  },
+  watch: {
+    $route(to, from) {
+      this.getCurrentPageTitle();
+      alert(this.currentPageTitle)
+      if (this.currentPageTitle === "/rank") {
+        window.removeEventListener("scroll", this.handleScroll)
+      }
+    },
   },
   created() {
     getBlogCategory().then((response) => {
@@ -106,7 +113,11 @@ export default {
         if (!this.isEnd && this.currentPage < this.total) {
           this.loadContent();
         }
+        // if (!this.loading && this.total && this.currentPage >= this.totalPage) {
+        //   this.$message.warning("没有更多了")
+        // }
       }
+
     },
     //获取当前滚动条的位置
     getScrollTop() {
@@ -117,6 +128,20 @@ export default {
         scrollTop = document.body.scrollTop
       }
       return scrollTop
+    },
+    getCurrentPageTitle() {
+      let test = window.location.href;
+      let start = 0;
+      let end = test.length;
+      for (let i = 0; i < test.length; i++) {
+        if (test[i] === "#") {
+          start = i;
+        }
+        if (test[i] === "?" && i > start) {
+          end = i;
+        }
+      }
+      this.currentPageTitle = test.substring(start + 1, end);
     },
     //获取当前可视范围的高度
     getClientHeight() {
@@ -308,5 +333,17 @@ export default {
   position: absolute;
   background: #7b859a;
   line-height: 50px;
+}
+
+.first {
+  background: #FFEB73;
+}
+
+.second {
+  background: #ADD8EF;
+}
+
+.third {
+  background: #F7C1AB;
 }
 </style>

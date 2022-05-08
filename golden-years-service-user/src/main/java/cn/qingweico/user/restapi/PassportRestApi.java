@@ -8,7 +8,7 @@ import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.PasswordAuthBO;
-import cn.qingweico.pojo.bo.RegisterLoginBO;
+import cn.qingweico.pojo.bo.SmsMobileBO;
 import cn.qingweico.user.handler.DefaultHandler;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.CheckUtils;
@@ -56,7 +56,7 @@ public class PassportRestApi extends BaseRestApi {
         redisOperator.setnx60s(RedisConf.REDIS_IP + SysConf.SYMBOL_COLON + userIp, userIp);
 
 
-        String random = (int) ((Math.random() * 9 + 1) * 100000) + "";
+        String random = (int) ((Math.random() * 9 + 1) * 100000) + SysConf.EMPTY_STRING;
 
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
         redisOperator.set(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile, random, 2 * 60);
@@ -67,12 +67,12 @@ public class PassportRestApi extends BaseRestApi {
     @PostMapping("/mobile")
     @SentinelResource(value = "freePwdAuth", blockHandler = "reqFrequentError",
             blockHandlerClass = DefaultHandler.class)
-    public GraceJsonResult freePwdAuth(@RequestBody RegisterLoginBO registerBO) {
+    public GraceJsonResult freePwdAuth(@RequestBody SmsMobileBO registerBO) {
 
         String mobile = registerBO.getMobile();
         String smsCode = registerBO.getSmsCode();
         // 校验手机验证码是否匹配
-        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + ":" + mobile);
+        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
             return GraceJsonResult.errorCustom(ResponseStatusEnum.SMS_CODE_ERROR);
         }
@@ -176,6 +176,21 @@ public class PassportRestApi extends BaseRestApi {
         }
         redisOperator.del(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
         redisOperator.del(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId);
+        return GraceJsonResult.ok();
+    }
+
+    @ApiOperation(value = "检查手机验证码", notes = "检查手机验证码", httpMethod = "POST")
+    @PostMapping("/verify/smsCode")
+    public GraceJsonResult checkSmsCode(@RequestBody SmsMobileBO smsMobileBO) {
+        String smsCode = smsMobileBO.getSmsCode();
+        String mobile = smsMobileBO.getMobile();
+        if(StringUtils.isBlank(smsCode)) {
+            return new GraceJsonResult(ResponseStatusEnum.SMS_CODE_NULL);
+        }
+        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
+        if(!Objects.equals(smsCode, redisSmsCode)) {
+            return new GraceJsonResult(ResponseStatusEnum.SMS_CODE_ERROR);
+        }
         return GraceJsonResult.ok();
     }
 }

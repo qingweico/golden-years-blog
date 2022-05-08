@@ -3,7 +3,9 @@ package cn.qingweico.user.restapi;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
+import cn.qingweico.pojo.Admin;
 import cn.qingweico.pojo.User;
+import cn.qingweico.pojo.bo.UpdateMobileBO;
 import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.pojo.bo.UserInfoBO;
 import cn.qingweico.pojo.vo.UserAccountInfoVO;
@@ -191,7 +193,10 @@ public class UserRestApi extends BaseRestApi {
     @ApiOperation(value = "修改用户登录密码", notes = "修改用户登录密码", httpMethod = "POST")
     @PostMapping("/alterPwd")
     public GraceJsonResult alterPwd(@RequestBody UpdatePwdBO updatePwdBO) {
-        String userId = updatePwdBO.getUserId();
+        String tokenKey = RedisConf.REDIS_USER_TOKEN;
+        String infoKey = RedisConf.REDIS_USER_INFO;
+        User loginUser = getLoginUser(User.class, tokenKey, infoKey);
+        String userId = loginUser.getId();
         if (StringUtils.isBlank(userId)) {
             return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
         }
@@ -200,9 +205,29 @@ public class UserRestApi extends BaseRestApi {
         if (!Objects.equals(updatePwdBO.getOldPassword(), password)) {
             return new GraceJsonResult(ResponseStatusEnum.PASSWORD_WRONG);
         }
-        userService.alterPwd(updatePwdBO);
+        userService.alterPwd(userId, updatePwdBO.getNewPassword());
         return new GraceJsonResult(ResponseStatusEnum.RESET_PASSWORD_SUCCESS);
     }
+
+    @ApiOperation(value = "修改用户手机号码", notes = "修改用户手机号码", httpMethod = "POST")
+    @PostMapping("/alterMobile")
+    public GraceJsonResult alterMobile(@RequestBody UpdateMobileBO updateMobileBO) {
+        String userId = updateMobileBO.getUserId();
+        String newMobile = updateMobileBO.getNewMobile();
+        if (StringUtils.isBlank(userId)) {
+            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+        }
+        if (StringUtils.isBlank(newMobile)) {
+            return new GraceJsonResult(ResponseStatusEnum.MOBILE_NULL);
+        }
+        User user = userService.queryUserById(userId);
+        if (user == null) {
+            return new GraceJsonResult(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+        }
+        userService.alterMobile(user, newMobile);
+        return new GraceJsonResult(ResponseStatusEnum.ALTER_MOBILE_SUCCESS);
+    }
+
 
     @ApiOperation(value = "获取全站用户数量", notes = "获取全站用户数量", httpMethod = "GET")
     @GetMapping("/getUserCounts")

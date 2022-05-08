@@ -78,3 +78,20 @@ export function getSmsCode(params) {
         method: 'get',
     })
 }
+/**验证手机验证码*/
+export function verifySmsCode(params) {
+    return request({
+        url: process.env.GATEWAY_API + '/u/auth/verify/smsCode',
+        method: 'post',
+        data: params
+    })
+}
+/**用户修改手机号*/
+export function alterMobile(params) {
+    return request({
+        url: process.env.GATEWAY_API + '/user/alterMobile',
+        method: 'post',
+        data: params
+    })
+}
+

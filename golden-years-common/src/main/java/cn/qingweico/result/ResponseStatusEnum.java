@@ -24,6 +24,7 @@ public enum ResponseStatusEnum {
     FREEZE_SUCCESS(200, true, "已冻结该用户!"),
     ACTIVATE_SUCCESS(200, true, "已激活该用户!"),
     RESET_PASSWORD_SUCCESS(200, true, "重置密码成功!"),
+    ALTER_MOBILE_SUCCESS(200, true, "手机号码修改成功!"),
     FACE_PASS(200, true, "人脸识别成功!"),
     // fans
     FOLLOWED(200, true, "关注成功"),
@@ -46,6 +47,7 @@ public enum ResponseStatusEnum {
     UN_COLLECT_SUCCESS(200, true, "取消收藏成功!"),
     CREATE_FAVORITES_SUCCESS(200, true, "创建收藏夹成功!"),
     CLEAN_CACHE_SUCCESS(200, true, "清除缓存成功!"),
+    CLEAN_HISTORY_SUCCESS(200, true, "清除浏览记录成功!"),
     // 50x
     FAILED(500, false, "操作失败!"),
     UN_LOGIN(501, false, "请登录后再继续操作!"),
@@ -120,7 +122,9 @@ public enum ResponseStatusEnum {
 
 
     // else
-    CANNOT_FOLLOW_ONESELF(602, false, "不能对自己进行此操作");
+    CANNOT_FOLLOW_ONESELF(602, false, "不能对自己进行此操作!"),
+    SMS_CODE_NULL(603, false, "请输入手机验证码!"),
+    MOBILE_NULL(604, false, "请输入您的手机号!");
 
 
     /**

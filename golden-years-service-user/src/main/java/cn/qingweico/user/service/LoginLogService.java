@@ -28,7 +28,7 @@ public interface LoginLogService {
     PagedGridResult getLoginLogList(String userId, Integer page, Integer pageSize);
 
     /**
-     * 定时(一个月内)清理用户的登陆日志信息
+     * 定时清理用户的登陆日志信息(一个月内)
      */
     void cleanLoginLog();
 

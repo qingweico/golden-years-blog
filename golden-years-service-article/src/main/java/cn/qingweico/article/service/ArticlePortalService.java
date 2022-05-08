@@ -39,12 +39,9 @@ public interface ArticlePortalService {
 
     /**
      * 查询主页热门文章
-     *
-     * @param page     起始查询页面
-     * @param pageSize 每页查询的数量
      * @return PagedGridResult
      */
-    PagedGridResult queryHotArticle(Integer page, Integer pageSize);
+    List<Article> queryHotArticle();
 
     /**
      * 查询作家发布的所有文章列表

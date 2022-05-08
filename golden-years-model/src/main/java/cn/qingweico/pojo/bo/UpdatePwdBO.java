@@ -11,8 +11,6 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class UpdatePwdBO {
     @NotBlank
-    private String userId;
-    @NotBlank
     private String oldPassword;
     @NotBlank
     private String newPassword;

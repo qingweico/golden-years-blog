@@ -18,6 +18,7 @@ import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.DesensitizationUtil;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.server.Sys;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -221,17 +222,25 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public void alterPwd(UpdatePwdBO updatePwdBO) {
-        User user = new User();
-        String id = updatePwdBO.getUserId();
-        String newPassword = updatePwdBO.getNewPassword();
-        user.setId(id);
+    public void alterPwd(String userId, String newPassword) {
+        User user = queryUserById(userId);
         user.setPassword(newPassword);
         if (userMapper.updateByPrimaryKeySelective(user) > 0) {
             String key = RedisConf.REDIS_USER_INFO;
             refreshCache(key);
         } else {
             GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+        }
+    }
+
+    @Override
+    public void alterMobile(User user, String newMobile) {
+        user.setMobile(newMobile);
+        if (userMapper.updateByPrimaryKeySelective(user) > 0) {
+            String cachedUserKey = RedisConf.REDIS_USER_INFO + SysConf.DELIMITER_COLON + user.getId();
+            refreshCache(cachedUserKey);
+        } else {
+            log.error("update user mobile error");
         }
     }
 

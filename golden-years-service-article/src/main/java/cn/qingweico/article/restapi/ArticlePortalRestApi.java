@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zqw
@@ -117,7 +118,7 @@ public class ArticlePortalRestApi extends BaseRestApi {
     private AggregatedPage<ArticleEo> queryByKeyword(String keyword, Pageable pageable) {
         String preTag = "<font color='red'>";
         String postTag = "</font>";
-        String searchTitleField = "title";
+        String searchTitleField = SysConf.TITLE;
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.matchQuery(searchTitleField, keyword))
                 .withHighlightFields(new HighlightBuilder.Field(searchTitleField)
@@ -139,13 +140,13 @@ public class ArticlePortalRestApi extends BaseRestApi {
                             HighlightField highlightField = hit.getHighlightFields().get(searchTitleField);
                             String title = highlightField.getFragments()[0].toString();
 
-                            String articleId = (String) hit.getSourceAsMap().get("id");
-                            String categoryId = (String) hit.getSourceAsMap().get("categoryId");
-                            Integer articleType = (Integer) hit.getSourceAsMap().get("articleType");
-                            String articleCover = (String) hit.getSourceAsMap().get("articleCover");
-                            String summary = (String) hit.getSourceAsMap().get("summary");
-                            String author = (String) hit.getSourceAsMap().get("author");
-                            Long dateLong = (Long) hit.getSourceAsMap().get("createTime");
+                            String articleId = (String) hit.getSourceAsMap().get(SysConf.ID);
+                            String categoryId = (String) hit.getSourceAsMap().get(SysConf.CATEGORY_ID);
+                            Integer articleType = (Integer) hit.getSourceAsMap().get(SysConf.ARTICLE_TYPE);
+                            String articleCover = (String) hit.getSourceAsMap().get(SysConf.ARTICLE_COVER);
+                            String summary = (String) hit.getSourceAsMap().get(SysConf.SUMMARY);
+                            String authorId = (String) hit.getSourceAsMap().get(SysConf.AUTHOR_ID);
+                            Long dateLong = (Long) hit.getSourceAsMap().get(SysConf.CREATE_TIME);
                             Date createTime = new Date(dateLong);
 
                             ArticleEo articleEo = new ArticleEo();
@@ -155,13 +156,14 @@ public class ArticlePortalRestApi extends BaseRestApi {
                             articleEo.setArticleType(articleType);
                             articleEo.setArticleCover(articleCover);
                             articleEo.setSummary(summary);
-                            articleEo.setAuthorId(author);
+                            articleEo.setAuthorId(authorId);
                             articleEo.setCreateTime(createTime);
                             articleHighLightList.add(articleEo);
                         }
-
-                        return new AggregatedPageImpl<>((List<T>) articleHighLightList,
+                        @SuppressWarnings("unchecked")
+                        AggregatedPageImpl<T> ts = new AggregatedPageImpl<>((List<T>) articleHighLightList,
                                 pageable, searchResponse.getHits().totalHits);
+                        return ts;
                     }
 
                     @Override
@@ -198,8 +200,33 @@ public class ArticlePortalRestApi extends BaseRestApi {
     public GraceJsonResult hotList(@RequestParam Integer page,
                                    @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult result = articlePortalService.queryHotArticle(page, pageSize);
-        return GraceJsonResult.ok(rebuildArticleGrid(result));
+        long size = redisOperator.zsetSize(RedisConf.ZSET_ARTICLE_RANK);
+        // 如果zset key不存在则返回0
+        if (size == 0) {
+            List<Article> list = articlePortalService.queryHotArticle();
+            for (Article article : list) {
+                int influence = computeArticleInfluence(article.getId());
+                String articleJson = JsonUtils.objectToJson(article);
+                size = list.size();
+                redisOperator.zsetAdd(RedisConf.ZSET_ARTICLE_RANK, articleJson, influence);
+                // 并设置5分钟过期时间即文章排行榜的刷新时间为5分钟
+                redisOperator.expire(RedisConf.ZSET_ARTICLE_RANK, 5, TimeUnit.MINUTES);
+            }
+        }
+        Set<String> articleJson = redisOperator.zsetRevRange(RedisConf.ZSET_ARTICLE_RANK, (long) (page - 1) * pageSize,
+                (pageSize - 1) + (long) (page - 1) * pageSize);
+
+        List<Article> result = new ArrayList<>();
+        for (String json : articleJson) {
+            Article article = JsonUtils.jsonToPojo(json, Article.class);
+            result.add(article);
+        }
+        PagedGridResult pgr = new PagedGridResult();
+        pgr.setCurrentPage(page);
+        pgr.setRecords(size);
+        pgr.setTotalPage((size / pageSize) + 1);
+        pgr.setRows(result);
+        return GraceJsonResult.ok(rebuildArticleGrid(pgr));
     }
 
     @GetMapping("/homepage")
@@ -306,8 +333,9 @@ public class ArticlePortalRestApi extends BaseRestApi {
             idList.add(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS + SysConf.SYMBOL_COLON + article.getId());
             idList.add(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + article.getId());
 
+
         }
-        // redis mget
+        // redis multi get
         List<String> countsRedisList = redisOperator.mget(idList);
 
         List<UserBasicInfoVO> authorList = getUserInfoListByIdsClient(idSet);
@@ -350,6 +378,19 @@ public class ArticlePortalRestApi extends BaseRestApi {
         }
         gridResult.setRows(indexArticleList);
         return gridResult;
+    }
+
+    private int computeArticleInfluence(String articleId) {
+        String readCountsKey = RedisConf.REDIS_ARTICLE_READ_COUNTS + SysConf.SYMBOL_COLON + articleId;
+        String collectCountsKey = RedisConf.REDIS_ARTICLE_READ_COUNTS + SysConf.SYMBOL_COLON + articleId;
+        String starCountsKey = RedisConf.REDIS_ARTICLE_READ_COUNTS + SysConf.SYMBOL_COLON + articleId;
+        String commentCountsKey = RedisConf.REDIS_ARTICLE_READ_COUNTS + SysConf.SYMBOL_COLON + articleId;
+        int readCounts = getCountsFromRedis(readCountsKey);
+        int collectCounts = getCountsFromRedis(collectCountsKey);
+        int starCounts = getCountsFromRedis(starCountsKey);
+        int commentCounts = getCountsFromRedis(commentCountsKey);
+        double result = readCounts * 0.4 + starCounts * 0.3 + commentCounts * 0.2 + collectCounts * 0.1;
+        return (int) result * 1000;
     }
 
     private UserBasicInfoVO getAuthorInfoIfPresent(String author,

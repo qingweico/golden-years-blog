@@ -96,6 +96,24 @@ export function getTagList(params) {
         params,
     })
 }
+/**创作中心;获取用户浏览历史*/
+export function getHistoryList(params) {
+    return request({
+        url: process.env.GATEWAY_API + '/article/history/getUserHistory',
+        method: 'get',
+        params,
+    })
+}
+/**创作中心;删除用户浏览历史*/
+export function deleteHistory(params) {
+    return request({
+        url: process.env.GATEWAY_API + '/article/history/delete',
+        method: 'post',
+        data: params,
+    })
+}
+
+
 
 /**获取系统配置*/
 export function getSystemConfig(params) {

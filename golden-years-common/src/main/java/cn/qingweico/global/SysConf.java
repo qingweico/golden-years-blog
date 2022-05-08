@@ -31,7 +31,10 @@ public final class SysConf {
     public final static String IS_APPOINT = "isAppoint";
     public final static String ARTICLE_STATUS = "articleStatus";
     public final static String ACTIVE_STATUS = "activeStatus";
+    public final static String ARTICLE_TYPE = "articleType";
+    public final static String ARTICLE_COVER = "articleCover";
     public final static String NICK_NAME = "nickname";
+    public final static String SUMMARY = "summary";
     public final static String CATEGORY_ID = "categoryId";
     public final static String INFLUENCE = "influence";
     public final static String AUTHOR_ID = "authorId";
@@ -39,6 +42,10 @@ public final class SysConf {
     public final static String EMAIL = "email";
     public final static String MOBILE = "mobile";
     public final static String LOGIN_TIME = "loginTime";
+    public final static String AUTHOR_NAME = "authorName";
+    public final static String AUTHOR_FACE = "authorFace";
+    public final static String FOLLOW_COUNTS = "followCounts";
+    public final static String FANS_COUNTS = "fansCounts";
 
     public final static String USERID = "user_id";
     public final static String BLOG_COUNT = "blogCount";
@@ -169,6 +176,7 @@ public final class SysConf {
     public final static int NUM_TEN = 10;
     public final static int NUM_TWENTY = 20;
     public final static int NUM_32 = 32;
+    public final static int NUM_100 = 100;
     public final static int NUM_500 = 500;
     public final static int NUM_1000 = 1000;
     public final static int NUM_1024 = 1024;

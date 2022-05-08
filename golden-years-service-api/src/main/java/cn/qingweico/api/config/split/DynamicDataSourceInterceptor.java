@@ -26,7 +26,6 @@ import java.util.Properties;
 @Slf4j
 public class DynamicDataSourceInterceptor implements Interceptor {
     private static final String REGEX = ".*insert\\u0020.*|.*update\\0020.*|.*delete\\0020.*";
-
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         boolean synchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
@@ -50,7 +49,7 @@ public class DynamicDataSourceInterceptor implements Interceptor {
         } else {
             lookupKey = DynamicDataSourceHolder.DB_MASTER;
         }
-        log.debug("设置[{}] use[{}] strategy,SqlCommandType[{}]......", mappedStatement.getId(), lookupKey,
+        log.info("设置[{}] use[{}] strategy,SqlCommandType[{}]......", mappedStatement.getId(), lookupKey,
                 mappedStatement.getSqlCommandType().name());
         DynamicDataSourceHolder.setDbType(lookupKey);
         return invocation.proceed();
