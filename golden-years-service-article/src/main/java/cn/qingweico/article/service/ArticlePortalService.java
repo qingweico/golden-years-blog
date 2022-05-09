@@ -39,6 +39,7 @@ public interface ArticlePortalService {
 
     /**
      * 查询主页热门文章
+     *
      * @return PagedGridResult
      */
     List<Article> queryHotArticle();
@@ -59,9 +60,9 @@ public interface ArticlePortalService {
      * 查询作者主页文章排行
      *
      * @param author 作者id
-     * @return {@link PagedGridResult}
+     * @return List<Article>
      */
-    PagedGridResult queryGoodArticleListOfAuthor(String author);
+    List<Article> queryGoodArticleListOfAuthor(String author);
 
     /**
      * 文章详情
@@ -88,6 +89,7 @@ public interface ArticlePortalService {
 
     /**
      * 首页查询带有文章数量的文章类别列表
+     *
      * @return List<CategoryVO>
      */
 

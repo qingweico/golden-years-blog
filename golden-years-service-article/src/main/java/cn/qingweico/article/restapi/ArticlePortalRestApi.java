@@ -15,6 +15,7 @@ import cn.qingweico.util.PagedGridResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -242,8 +243,30 @@ public class ArticlePortalRestApi extends BaseRestApi {
     @GetMapping("rank/{id}")
     @ApiOperation(value = "查询个人中心热门文章", notes = "查询个人中心热门文章", httpMethod = "GET")
     public GraceJsonResult queryGoodArticleListOfAuthor(@PathVariable("id") String authorId) {
-        PagedGridResult gridResult = articlePortalService.queryGoodArticleListOfAuthor(authorId);
-        return GraceJsonResult.ok(gridResult);
+        long size = redisOperator.zsetSize(RedisConf.ZSET_ARTICLE_USER_RANK);
+        if (size == 0) {
+            List<Article> list = articlePortalService.queryGoodArticleListOfAuthor(authorId);
+            for (Article article : list) {
+                int influence = computeArticleInfluence(article.getId());
+                String articleJson = JsonUtils.objectToJson(article);
+                redisOperator.zsetAdd(RedisConf.ZSET_ARTICLE_USER_RANK, articleJson, influence);
+                redisOperator.expire(RedisConf.ZSET_ARTICLE_USER_RANK, 5, TimeUnit.MINUTES);
+            }
+        }
+        // 默认只展示5篇热门文章
+        Set<String> articleJson = redisOperator.zsetRevRange(RedisConf.ZSET_ARTICLE_USER_RANK, SysConf.NUM_ZERO, SysConf.NUM_FOUR);
+        List<UserArticleRank> result = new ArrayList<>();
+        for (String json : articleJson) {
+            Article article = JsonUtils.jsonToPojo(json, Article.class);
+            UserArticleRank userArticleRank = new UserArticleRank();
+            if(article == null) {
+                log.error("queryGoodArticleListOfAuthor: article is null");
+                return GraceJsonResult.error();
+            }
+            BeanUtils.copyProperties(article, userArticleRank);
+            result.add(userArticleRank);
+        }
+        return GraceJsonResult.ok(result);
     }
 
     @GetMapping("getArticleByTime")

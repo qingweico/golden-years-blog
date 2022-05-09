@@ -31,7 +31,7 @@ export default {
   created() {
     this.authorId = getUrlVars().id;
     rank(this.authorId).then(response => {
-      this.hotBlogData = response.data.rows;
+      this.hotBlogData = response.data;
     });
   },
   computed: {

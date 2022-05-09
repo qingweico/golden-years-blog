@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 /**
+ * 文章浏览历史的删除模式
  * @author zqw
  * @date 2022/5/6
  */

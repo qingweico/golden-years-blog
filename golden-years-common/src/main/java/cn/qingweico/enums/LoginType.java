@@ -1,6 +1,8 @@
 package cn.qingweico.enums;
 
 /**
+ * 用户可以使用的登录类型
+ *
  * @author zqw
  * @date 2022/4/11
  */

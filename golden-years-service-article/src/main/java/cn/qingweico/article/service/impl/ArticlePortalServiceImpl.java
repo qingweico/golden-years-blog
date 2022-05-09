@@ -113,17 +113,13 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedGridResult queryGoodArticleListOfAuthor(String author) {
+    public List<Article> queryGoodArticleListOfAuthor(String author) {
         Example example = new Example(Article.class);
-        example.orderBy(SysConf.INFLUENCE).desc();
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(SysConf.IS_DELETE, YesOrNo.NO.type);
         criteria.andEqualTo(SysConf.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
         criteria.andEqualTo(SysConf.AUTHOR_ID, author);
-        // 默认只展示5篇热门文章
-        PageHelper.startPage(SysConf.NUM_ONE, SysConf.NUM_FIVE);
-        List<Article> list = articleMapper.selectByExample(example);
-        return setterPagedGrid(list, SysConf.NUM_ONE);
+        return articleMapper.selectByExample(example);
     }
 
     @Override

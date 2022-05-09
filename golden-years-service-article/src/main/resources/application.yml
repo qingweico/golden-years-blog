@@ -18,14 +18,14 @@ spring:
   application:
     name: service-article
   datasource:
-    # mysql驱动
-    driver-class-name: com.mysql.cj.jdbc.Driver
     # Linux 119.29.35.129
     masterUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
-    slaveUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    slaveUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
     username: root
     password: 990712
     initialization-mode: always
+      # mysql驱动
+    driver-class-name: com.mysql.cj.jdbc.Driver
     # 数据源其他配置
     # 初始化连接池的大小
     initialSize: 5
@@ -56,6 +56,10 @@ spring:
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
     # 设置数据源
     type: com.alibaba.druid.pool.DruidDataSource
+  jpa:
+    show-sql: true
+    properties:
+      hibernate: true
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -122,7 +126,7 @@ management:
 mybatis:
   type-aliases-package: cn.qingweico.pojo          # 所有POJO类所在包路径
   mapper-locations: classpath:mapper/*.xml         # mapper映射文件
-  config-location: classpath:/mybatis-config.xml
+  config-location: classpath:/mybatis-config.xml   # mybatis配置文件
 
 
 ############################################################

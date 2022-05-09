@@ -21,7 +21,7 @@ public class DynamicDataSourceHolder {
     }
 
     public static void setDbType(String dbType) {
-        log.debug("所使用的数据源是:" + dbType);
+        log.info("所使用的数据源是:" + dbType);
         CONTEXT_HOLDER.set(dbType);
     }
 

@@ -35,4 +35,5 @@ public class RedisConf {
     public final static String BLOG_COUNT_BY_TAG = "blog_count_by_tag";
     public final static String BLOG_CONTRIBUTE_COUNT = "blog_contribute_count";
     public final static String ZSET_ARTICLE_RANK = "zset_article_rank";
+    public final static String ZSET_ARTICLE_USER_RANK = "zset_article_user_rank";
 }

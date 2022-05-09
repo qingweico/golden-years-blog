@@ -1,6 +1,8 @@
 package cn.qingweico.enums;
 
 /**
+ * 主站搜索模式
+ *
  * @author zqw
  * @date 2022/4/12
  */

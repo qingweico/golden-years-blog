@@ -95,7 +95,7 @@ public class LoginRestApi extends BaseRestApi {
         Set<String> secondMenuIdList = new HashSet<>();
         categoryMenuList.forEach(item -> {
             // 查询二级菜单
-            if (item.getMenuType() == MenuType.MENU && item.getMenuLevel() == SysConf.NUM_TWO) {
+            if (item.getMenuType().equals(MenuType.MENU.type) && item.getMenuLevel() == SysConf.NUM_TWO) {
                 secondMenuIdList.add(item.getId());
             }
         });
