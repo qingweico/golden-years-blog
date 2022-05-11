@@ -1,15 +1,24 @@
 package cn.qingweico.api.config;
 
+import cn.qingweico.api.config.split.DynamicDataSource;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -22,12 +31,12 @@ import java.util.Map;
  */
 @Configuration
 @EnableTransactionManagement
-public class DruidConfig {
+public class DruidDataSourceConfig {
 
     DruidConstant druidConstant;
 
     @Autowired
-    public void setDruidConfig(DruidConstant druidConstant) {
+    public void setDruidConstant(DruidConstant druidConstant) {
         this.druidConstant = druidConstant;
     }
 
@@ -69,6 +78,52 @@ public class DruidConfig {
         return druidDataSource;
     }
 
+    @Bean
+    public DynamicDataSource dynamicDataSource(@Qualifier("masterDataSource") DataSource masterDataSource,
+                                               @Qualifier("slaveDataSource") DataSource slaveDataSource) {
+        DynamicDataSource dynamicDataSource = new DynamicDataSource();
+        Map<Object, Object> map = new HashMap<>(2);
+        // 与DynamicDataSourceHolder中的DB_MASTER, DB_SLAVE保持一致
+        map.put("master", masterDataSource);
+        map.put("slave", slaveDataSource);
+        dynamicDataSource.setTargetDataSources(map);
+        dynamicDataSource.setDefaultTargetDataSource(masterDataSource);
+        return dynamicDataSource;
+    }
+
+    /**
+     * 在生成语句时才决定数据源(懒加载)
+     *
+     * @param dynamicDataSource {@link DynamicDataSource}
+     * @return {@link LazyConnectionDataSourceProxy}
+     */
+    @Bean
+    public LazyConnectionDataSourceProxy dataSource(@Qualifier("dynamicDataSource") DataSource dynamicDataSource) {
+        LazyConnectionDataSourceProxy dataSourceProxy = new LazyConnectionDataSourceProxy();
+        dataSourceProxy.setTargetDataSource(dynamicDataSource);
+        return dataSourceProxy;
+    }
+
+    @Bean
+    public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSource);
+        sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource("classpath:mybatis-config.xml"));
+        sqlSessionFactoryBean.setTypeAliasesPackage("cn.qingweico.pojo");
+        sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mapper/*.xml"));
+        return sqlSessionFactoryBean.getObject();
+    }
+
+
+    /**
+     * 用于创建事务管理器对象
+     *
+     * @return PlatformTransactionManager
+     */
+    @Bean
+    public PlatformTransactionManager createTransactionManager(@Qualifier("dataSource") DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
 
     @Bean
     public ServletRegistrationBean<StatViewServlet> statViewServlet() {

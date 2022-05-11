@@ -48,7 +48,6 @@ public class FileUploadRestApi {
 
     private static final String FACE_PIC_PATH;
 
-
     static {
         String os = System.getProperty("os.name");
         if (SysConf.OS.equals(os)) {

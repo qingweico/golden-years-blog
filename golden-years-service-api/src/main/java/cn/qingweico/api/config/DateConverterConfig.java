@@ -1,7 +1,9 @@
 package cn.qingweico.api.config;
 
 import cn.qingweico.exception.GraceException;
+import cn.qingweico.global.SysConf;
 import cn.qingweico.result.ResponseStatusEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 
@@ -20,6 +22,7 @@ import java.util.List;
  */
 
 @Configuration
+@Slf4j
 public class DateConverterConfig implements Converter<String, Date> {
 
     private static final List<String> FORMATTER_LIST = new ArrayList<>(4);
@@ -34,7 +37,7 @@ public class DateConverterConfig implements Converter<String, Date> {
     @Override
     public Date convert(String source) {
         String value = source.trim();
-        if ("".equals(value)) {
+        if (SysConf.EMPTY_STRING.equals(value)) {
             return null;
         }
         if (source.matches("^\\d{4}-\\d{1,2}$")) {
@@ -64,7 +67,7 @@ public class DateConverterConfig implements Converter<String, Date> {
             DateFormat dateFormat = new SimpleDateFormat(formatter);
             date = dateFormat.parse(dateStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("{}", e.getMessage());
         }
         return date;
     }

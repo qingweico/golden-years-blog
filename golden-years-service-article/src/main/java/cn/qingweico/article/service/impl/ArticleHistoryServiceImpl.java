@@ -92,9 +92,8 @@ public class ArticleHistoryServiceImpl extends BaseService implements ArticleHis
             }
             criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, c.getTime());
         }
-        if (historyMapper.deleteByExample(example) <= 0) {
-            log.error("delete history error, userId: {}, deleteModel: {}", userId, deleteModel);
-        }
+        int deleteNum = historyMapper.deleteByExample(example);
+        log.info("delete history, userId: {}, deleteModel: {}, deleteNum: {}", userId, deleteModel, deleteNum);
     }
 
     @Override

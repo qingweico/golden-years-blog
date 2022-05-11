@@ -56,7 +56,6 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         userLoginLog.setLoginTime(timestamp);
         userLoginLogMapper.insert(userLoginLog);
     }
-
     @Override
     public PagedGridResult getLoginLogList(String userId,
                                            Integer page,

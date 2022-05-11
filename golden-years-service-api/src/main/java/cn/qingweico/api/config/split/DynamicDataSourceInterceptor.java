@@ -1,6 +1,7 @@
 package cn.qingweico.api.config.split;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.BoundSql;
@@ -21,11 +22,16 @@ import java.util.Properties;
  * @author zqw
  * @date 2022/4/4
  */
+
 @Intercepts({@Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
-        @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class})})
+        @Signature(type = Executor.class, method = "query",
+                args = {MappedStatement.class, Object.class,
+                        RowBounds.class, ResultHandler.class,
+                        CacheKey.class,BoundSql.class})})
 @Slf4j
 public class DynamicDataSourceInterceptor implements Interceptor {
     private static final String REGEX = ".*insert\\u0020.*|.*update\\0020.*|.*delete\\0020.*";
+
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         boolean synchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();

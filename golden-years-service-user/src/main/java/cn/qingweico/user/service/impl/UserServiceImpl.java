@@ -163,8 +163,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         CountDownLatch updateCacheLatch = new CountDownLatch(1);
         lock.lock();
         try {
-            int res = userMapper.updateByPrimaryKeySelective(userInfo);
-            if (res != 1) {
+            int updatedNum = userMapper.updateByPrimaryKeySelective(userInfo);
+            if (updatedNum != 1) {
                 GraceException.error(ResponseStatusEnum.USER_UPDATE_ERROR);
             }
         } finally {

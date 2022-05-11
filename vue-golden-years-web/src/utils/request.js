@@ -6,8 +6,8 @@ import {Loading, Message} from 'element-ui'
 const service = axios.create({
     // api 的 base_url
     baseURL: '',
-    // 请求超时时间 5秒
-    timeout: 5000
+    // 请求超时时间 10秒
+    timeout: 10000
 })
 
 // 请求计数器(限制请求数)
@@ -60,17 +60,15 @@ service.interceptors.response.use(
             requestNum = 0
             loading.close();
             if (response.status === 401 || response.status === 400) {
-                router.push('404').then(() => {
+                router.push('/').then(() => {
                 });
                 return res
             } else if (response.status === 500) {
-                alert(response.status)
-                router.push('500').then(() => {
+                router.push('/').then(() => {
                 });
                 return Promise.reject('error')
             } else if (response.status === 502) {
-                alert(response.status)
-                router.push('502').then(() => {
+                router.push('/').then(() => {
                 });
                 return Promise.reject('error')
             } else {
