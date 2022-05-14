@@ -87,7 +87,7 @@ public class TagServiceImpl extends BaseService implements TagService {
             if (tagMapper.updateByPrimaryKeySelective(tag) > 0) {
                 String keys = RedisConf.REDIS_ARTICLE_TAG;
                 refreshCache(keys);
-                log.info("saveOrUpdate(refreshCache): {}", keys);
+                log.info("save or update(refreshCache): {}", keys);
             } else {
                 log.error("update tag error");
             }
@@ -124,6 +124,8 @@ public class TagServiceImpl extends BaseService implements TagService {
         for (String id : ids) {
             tagMapper.deleteByPrimaryKey(id);
         }
+        String keys = RedisConf.REDIS_ARTICLE_TAG;
+        refreshCache(keys);
     }
 
     @Override
@@ -146,7 +148,7 @@ public class TagServiceImpl extends BaseService implements TagService {
         if (tagMapper.insert(personalTag) > 0) {
             String keys = RedisConf.REDIS_ARTICLE_TAG;
             refreshCache(keys);
-            log.info("insert personalTag(refreshCache): {}", keys);
+            log.info("insert personal tag(refreshCache): {}", keys);
         } else {
             log.error("addPersonalTag error");
         }

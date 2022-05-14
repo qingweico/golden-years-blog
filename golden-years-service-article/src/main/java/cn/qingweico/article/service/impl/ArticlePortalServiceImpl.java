@@ -63,24 +63,9 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         }
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
-
         if (StringUtils.isNotBlank(tag)) {
-            List<Article> result = new ArrayList<>();
             // 标签筛选
-            for (Article article : list) {
-                String tags = article.getTags();
-                String[] tagIds = tags.replace("[", "")
-                        .replace("]", "")
-                        .replace("\"", "")
-                        .split(",");
-                for (String tagId : tagIds) {
-                    if (tag.equals(tagId)) {
-                        result.add(article);
-                        break;
-                    }
-                }
-                list = result;
-            }
+            list = filterArticleTag(list, tag);;
         }
         return setterPagedGrid(list, page);
     }

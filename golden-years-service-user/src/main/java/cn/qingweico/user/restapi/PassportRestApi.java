@@ -93,8 +93,8 @@ public class PassportRestApi extends BaseRestApi {
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
         redisOperator.del(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
-        map.put("token", jsonWebToken);
-        map.put("userStatus", user.getActiveStatus());
+        map.put(SysConf.TOKEN, jsonWebToken);
+        map.put(SysConf.USER_STATUS, user.getActiveStatus());
         if (userStatus == UserStatus.INACTIVE.type) {
             return new GraceJsonResult(ResponseStatusEnum.WELCOME, map);
         } else if (userStatus == UserStatus.ACTIVE.type) {

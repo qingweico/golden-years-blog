@@ -34,7 +34,10 @@
 	<select id="getArticleByTime" resultMap="BaseResultMap">
 		SELECT *
 		from t_article
-		where DATE_FORMAT(create_time, '%Y-%m') = #{yearAndMonth}
+		where article_status = 2
+		  AND is_appoint = 0
+		  AND is_delete = 0
+		  AND DATE_FORMAT(create_time, '%Y-%m') = #{yearAndMonth}
 	</select>
 
 	<select id="queryArchiveTimeList" resultType="java.lang.String">

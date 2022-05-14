@@ -43,7 +43,7 @@ public interface ArticleMapper extends MyMapper<Article> {
      *
      * @return [{tagName: articleCount}]
      */
-    @Select("SELECT tags, COUNT(tags) as count FROM  t_article where article_status = 2 GROUP BY tags")
+    @Select("SELECT tags, COUNT(tags) as count FROM t_article where article_status = 2 GROUP BY tags")
     List<Map<String, Object>> getBlogCountByTag();
 
     /**

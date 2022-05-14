@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 @Configuration
 public class ContextDecorator implements TaskDecorator {
     @Override
+    @Nonnull
     public Runnable decorate(@Nonnull Runnable runnable) {
         RequestAttributes context = RequestContextHolder.currentRequestAttributes();
         return () -> {

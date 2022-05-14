@@ -3,7 +3,6 @@ package cn.qingweico.user.restapi;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.Admin;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UpdateMobileBO;
 import cn.qingweico.pojo.bo.UpdatePwdBO;

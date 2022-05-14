@@ -103,8 +103,8 @@ public class FanServiceImpl extends BaseService implements FanService {
             redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
             // 删除es中的粉丝关系
             DeleteQuery deleteQuery = new DeleteQuery();
-            deleteQuery.setQuery(QueryBuilders.termQuery("authorId", authorId));
-            deleteQuery.setQuery(QueryBuilders.termQuery("fanId", fanId));
+            deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId));
+            deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.FAN_ID, fanId));
             elasticsearchTemplate.delete(deleteQuery, FansEo.class);
         } else {
             GraceException.error(ResponseStatusEnum.SYSTEM_ERROR);
@@ -128,7 +128,7 @@ public class FanServiceImpl extends BaseService implements FanService {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termsQuery("authorId", writerId))
+                .withQuery(QueryBuilders.termsQuery(SysConf.AUTHOR_ID, writerId))
                 .withPageable(pageable)
                 .build();
 
@@ -147,7 +147,6 @@ public class FanServiceImpl extends BaseService implements FanService {
         fans.setAuthor(authorId);
         fans.setSex(sex.type);
         fansMapper.select(fans);
-
         return fansMapper.selectCount(fans);
     }
 
@@ -158,7 +157,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .field("sex");
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("authorId", authorId))
+                .withQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId))
                 .addAggregation(termBuilder)
                 .build();
 
@@ -220,7 +219,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .field("province");
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery("authorId", authorId))
+                .withQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId))
                 .addAggregation(termBuilder)
                 .build();
 
@@ -281,7 +280,5 @@ public class FanServiceImpl extends BaseService implements FanService {
         } else {
             GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
-
-
     }
 }

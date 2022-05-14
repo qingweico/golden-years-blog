@@ -1,5 +1,6 @@
 package cn.qingweico.util.upload;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import java.util.zip.ZipFile;
  * @author zqw
  * @date 2021/11/6
  */
+@Slf4j
 public class FileOperation {
    private static final Logger logger = LoggerFactory.getLogger(FileOperation.class);
 
@@ -145,7 +147,7 @@ public class FileOperation {
             try {
                fileInputStream.close();
             } catch (IOException e) {
-               e.printStackTrace();
+               log.error(e.getMessage());
             }
          }
 
@@ -153,7 +155,7 @@ public class FileOperation {
             try {
                fileOutputStream.close();
             } catch (IOException e) {
-               e.printStackTrace();
+               log.error(e.getMessage());
             }
          }
       }
@@ -171,7 +173,6 @@ public class FileOperation {
    public static void copyFile(File src, File dest) throws IOException {
       FileInputStream in = new FileInputStream(src);
       FileOutputStream out = new FileOutputStream(dest);
-
       copyFile(in, out);
    }
 
@@ -261,8 +262,8 @@ public class FileOperation {
       return new ArrayList<>(set);
    }
 
-   public static long deleteFileFromDisk(String fileurl) {
-      String fileUrl = PathUtil.getStaticPath() + fileurl;
+   public static long deleteFileFromDisk(String file_url) {
+      String fileUrl = PathUtil.getStaticPath() + file_url;
       String extendName = FileUtil.getFileType(fileUrl);
       String minFileUrl = fileUrl.replace("." + extendName, "_min." + extendName);
       long filesize = getFileSize(fileUrl);
@@ -272,5 +273,4 @@ public class FileOperation {
 
       return filesize;
    }
-
 }

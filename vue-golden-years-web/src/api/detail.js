@@ -10,11 +10,13 @@ export function getBlogById(params) {
 }
 
 /**文章阅读数累加*/
-export function readArticle(params) {
+export function incPagViews(params) {
+    let data = {};
+    data.articleId = params;
     return request({
-        url: process.env.GATEWAY_API + '/portal/article/readArticle/' + params,
+        url: process.env.GATEWAY_API + '/portal/article/incPagViews?articleId=' + params,
         method: 'post',
-        data: {}
+        data: data
     })
 }
 

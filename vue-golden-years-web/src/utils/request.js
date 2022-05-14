@@ -66,12 +66,15 @@ service.interceptors.response.use(
             } else if (response.status === 500) {
                 router.push('/').then(() => {
                 });
-                return Promise.reject('error')
+                return Promise.reject('error').then(()=>{});
             } else if (response.status === 502) {
                 router.push('/').then(() => {
                 });
-                return Promise.reject('error')
+                return Promise.reject('error').then(()=>{});
             } else {
+                if(!response.data) {
+                    return;
+                }
                 Message({
                     message: res.msg,
                     type: 'error',

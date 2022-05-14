@@ -1,5 +1,6 @@
 package cn.qingweico.util.aliyun;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -11,24 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource("classpath:ali.properties")
 @ConfigurationProperties(prefix = "ali")
+@Data
 public class AliResource {
-
    private String accessKeyId;
    private String accessKeySecret;
-
-   public String getAccessKeyId() {
-      return accessKeyId;
-   }
-
-   public void setAccessKeyId(String accessKeyId) {
-      this.accessKeyId = accessKeyId;
-   }
-
-   public String getAccessKeySecret() {
-      return accessKeySecret;
-   }
-
-   public void setAccessKeySecret(String accessKeySecret) {
-      this.accessKeySecret = accessKeySecret;
-   }
 }

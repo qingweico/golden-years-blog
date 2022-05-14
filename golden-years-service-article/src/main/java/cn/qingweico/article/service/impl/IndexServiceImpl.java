@@ -60,7 +60,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
         }
 
         List<Map<String, Object>> blogCountByTagMap = articleMapper.getBlogCountByTag();
-        Map<String, Integer> tagMap = new HashMap<>();
+        Map<String, Integer> tagMap = new HashMap<>(blogCountByTagMap.size());
         for (Map<String, Object> item : blogCountByTagMap) {
             String tags = String.valueOf(item.get("tags"));
             tags = tags.replace("[", "")

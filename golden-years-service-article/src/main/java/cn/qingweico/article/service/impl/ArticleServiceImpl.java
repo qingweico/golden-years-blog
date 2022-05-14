@@ -264,22 +264,8 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         if (StringUtils.isNotBlank(tagId)) {
-            ArrayList<Article> result = new ArrayList<>();
             // 标签筛选
-            for (Article article : list) {
-                String tags = article.getTags();
-                String[] tagIds = tags.replace("[", "")
-                        .replace("]", "")
-                        .replace("\"", "")
-                        .split(",");
-                for (String tag : tagIds) {
-                    if (tag.equals(tagId)) {
-                        result.add(article);
-                        break;
-                    }
-                }
-                list = result;
-            }
+            list = filterArticleTag(list, tagId);
         }
         PageInfo<Article> pageInfo = new PageInfo<>(list);
         List<Article> paged = pageInfo.getList();
@@ -379,6 +365,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     }
 
     @SuppressWarnings("unused")
+    @Deprecated
     private void deleteArticleHtmlForGridFs(String articleId) {
         // 查询文章的mongoId
         Article article = articleMapper.selectByPrimaryKey(articleId);
@@ -412,6 +399,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
+    @Deprecated
     public void updateArticleToGridFs(String articleId, String articleMongoId) {
         Article article = new Article();
         article.setId(articleId);

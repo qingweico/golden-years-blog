@@ -32,13 +32,16 @@ public final class SysConf {
     public final static String ARTICLE_STATUS = "articleStatus";
     public final static String ACTIVE_STATUS = "activeStatus";
     public final static String ARTICLE_TYPE = "articleType";
+    public final static String ARTICLE_ID = "articleId";
     public final static String ARTICLE_COVER = "articleCover";
     public final static String NICK_NAME = "nickname";
     public final static String SUMMARY = "summary";
     public final static String CATEGORY_ID = "categoryId";
     public final static String INFLUENCE = "influence";
     public final static String AUTHOR_ID = "authorId";
+    public final static String AUTHOR = "author";
     public final static String USER_ID = "userId";
+    public final static String FAN_ID = "fanId";
     public final static String EMAIL = "email";
     public final static String MOBILE = "mobile";
     public final static String LOGIN_TIME = "loginTime";
@@ -58,6 +61,9 @@ public final class SysConf {
     public final static String ADMIN = "admin";
     public final static String ADMIN_ID = "adminId";
     public final static String CLAIMS = "claims";
+    public final static String TOKEN = "token";
+    public final static String USER_STATUS = "userStatus";
+    public final static String TAGS = "tags";
 
 
     public final static String PARENT_LIST = "parentList";
@@ -207,15 +213,11 @@ public final class SysConf {
     public final static String DATE_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
 
     public final static String DATE_FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
-
-    public static final Integer COMMON_START_PAGE = 1;
-    public static final Integer COMMON_PAGE_SIZE = 5;
     public static final String IP = "ip";
     public static final String EMPTY_STRING = "";
     public static final String OS = "Windows 10";
     public final static String CONTRIBUTE_DATE = "contributeDate";
     public final static String BLOG_CONTRIBUTE_COUNT = "blogContributeCount";
-    public static final int RESPONSE_SUCCESS = 200;
     /**
      * rabbit mq (article.*.do) routingKey
      */

@@ -1,7 +1,6 @@
 package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.config.RabbitMqConfig;
-import cn.qingweico.global.SysConf;
 import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.pojo.eo.ArticleEo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

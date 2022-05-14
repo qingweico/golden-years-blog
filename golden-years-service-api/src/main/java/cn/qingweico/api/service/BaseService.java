@@ -1,5 +1,6 @@
 package cn.qingweico.api.service;
 
+import cn.qingweico.pojo.Article;
 import cn.qingweico.util.PagedGridResult;
 import cn.qingweico.util.RedisOperator;
 import com.github.pagehelper.PageInfo;
@@ -7,9 +8,9 @@ import org.n3r.idworker.Sid;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +38,23 @@ public class BaseService {
         return gridResult;
     }
 
+    public List<Article> filterArticleTag(List<Article> list, String tag) {
+        List<Article> result = new ArrayList<>();
+        for (Article article : list) {
+            String tags = article.getTags();
+            String[] tagIds = tags.replace("[", "")
+                    .replace("]", "")
+                    .replace("\"", "")
+                    .split(",");
+            for (String tagId : tagIds) {
+                if (tag.equals(tagId)) {
+                    result.add(article);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
     public void refreshCache(String key) {
         redisOperator.del(key);
     }

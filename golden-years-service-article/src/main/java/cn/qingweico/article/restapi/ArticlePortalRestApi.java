@@ -15,7 +15,6 @@ import cn.qingweico.util.PagedGridResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -79,7 +78,7 @@ public class ArticlePortalRestApi extends BaseRestApi {
         // 按照文章类别查询
         if (StringUtils.isBlank(keyword) && !StringUtils.isBlank(category)) {
             searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(QueryBuilders.termQuery("categoryId", category))
+                    .withQuery(QueryBuilders.termQuery(SysConf.CATEGORY_ID, category))
                     .withPageable(pageable)
                     .build();
 
@@ -89,7 +88,7 @@ public class ArticlePortalRestApi extends BaseRestApi {
         if (StringUtils.isBlank(keyword) && !StringUtils.isBlank(tag)) {
             searchQuery = new NativeSearchQueryBuilder()
                     // tags: "" (string 空格隔开)
-                    .withQuery(QueryBuilders.matchQuery("tags", tag))
+                    .withQuery(QueryBuilders.matchQuery(SysConf.TAGS, tag))
                     .withPageable(pageable)
                     .build();
 

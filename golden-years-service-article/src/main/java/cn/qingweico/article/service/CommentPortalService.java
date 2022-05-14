@@ -34,12 +34,12 @@ public interface CommentPortalService {
     /**
      * 查询作者文章下所有的评论
      *
-     * @param userId 作家id
+     * @param authorId 作家id
      * @param page   分页起始
      * @param pageSize 每页显示的数目
      * @return PagedGridResult
      */
-    PagedGridResult queryUserComments(String userId,
+    PagedGridResult queryUserComments(String authorId,
                                       Integer page,
                                       Integer pageSize);
 

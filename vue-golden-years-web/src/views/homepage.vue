@@ -86,11 +86,11 @@
           </div>
           <el-row :gutter="32">
             <el-col :span="12">
-              <el-button v-if="!isFollowUser" @click="attentionOrNot">关注</el-button>
+              <el-button v-if="!isFollowUser" type="primary" @click="attentionOrNot"><i class="el-icon-plus"> 关注</i></el-button>
               <el-button v-else @click="attentionOrNot">已关注</el-button>
             </el-col>
             <el-col :span="12">
-              <el-button @click="privateLetter">私信</el-button>
+              <el-button @click="privateLetter"><i class="el-icon-message"> 私信</i></el-button>
             </el-col>
           </el-row>
         </div>

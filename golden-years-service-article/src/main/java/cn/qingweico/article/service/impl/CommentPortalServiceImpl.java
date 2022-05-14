@@ -22,6 +22,7 @@ import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -80,7 +81,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
                                                 Integer page,
                                                 Integer pageSize) {
         Map<String, Object> map = new HashMap<>(1);
-        map.put("articleId", articleId);
+        map.put(SysConf.ARTICLE_ID, articleId);
         PageHelper.startPage(page, pageSize);
         List<CommentsVO> commentList = commentsMapper.queryArticleCommentList(map);
         PageInfo<CommentsVO> pageInfo = new PageInfo<>(commentList);
@@ -114,13 +115,15 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     }
 
     @Override
-    public PagedGridResult queryUserComments(String author,
+    public PagedGridResult queryUserComments(String authorId,
                                              Integer page,
                                              Integer pageSize) {
-        Comments comments = new Comments();
-        comments.setAuthor(author);
+        Example example = new Example(Comments.class);
+        example.orderBy(SysConf.CREATE_TIME).desc();
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(SysConf.AUTHOR, authorId);
         PageHelper.startPage(page, pageSize);
-        List<Comments> res = commentsMapper.select(comments);
+        List<Comments> res = commentsMapper.selectByExample(example);
         return setterPagedGrid(res, page);
     }
 

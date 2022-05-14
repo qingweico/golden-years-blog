@@ -21,6 +21,11 @@ public class InterceptorConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public ArticlePageViewsInterceptor articlePageViewsInterceptor() {
+        return new ArticlePageViewsInterceptor();
+    }
+
+    @Bean
     public UserTokenInterceptor userTokenInterceptor() {
         return new UserTokenInterceptor();
     }
@@ -30,5 +35,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     public void addInterceptors(@NotNull InterceptorRegistry registry) {
         registry.addInterceptor(smsInterceptor())
                 .addPathPatterns("/u/auth/getSmsCode");
+        registry.addInterceptor(articlePageViewsInterceptor())
+                .addPathPatterns("/portal/article/incPagViews");
     }
 }

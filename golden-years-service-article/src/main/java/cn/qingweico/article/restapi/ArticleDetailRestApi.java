@@ -53,8 +53,8 @@ public class ArticleDetailRestApi extends BaseRestApi {
             return new GraceJsonResult(ResponseStatusEnum.ARTICLE_NOT_EXIST);
         }
         Map<String, Object> map = articleRestApi.geAuthorInfo(articleVO.getAuthorId());
-        articleVO.setAuthorName((String) map.get("authorName"));
-        articleVO.setAuthorFace((String) map.get("authorFace"));
+        articleVO.setAuthorName((String) map.get(SysConf.AUTHOR_NAME));
+        articleVO.setAuthorFace((String) map.get(SysConf.AUTHOR_FACE));
         articleVO.setStarCounts(getCountsFromRedis(RedisConf.REDIS_ARTICLE_STAR_COUNTS + SysConf.SYMBOL_COLON + articleId));
         articleVO.setCollectCounts(getCountsFromRedis(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS + SysConf.SYMBOL_COLON + articleId));
         articleVO.setCommentCounts(getCountsFromRedis(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + articleId));
@@ -63,9 +63,9 @@ public class ArticleDetailRestApi extends BaseRestApi {
 
     }
 
-    @PostMapping("readArticle/{articleId}")
+    @PostMapping("incPagViews")
     @ApiOperation(value = "文章阅读量累加", notes = "文章阅读量累加", httpMethod = "POST")
-    public GraceJsonResult readArticle(@PathVariable("articleId") String articleId) {
+    public GraceJsonResult incPagViews(@RequestParam String articleId) {
         HttpServletRequest request = ServletReqUtils.getRequest();
         String visitIp = IpUtils.getRequestIp(request);
         // 设置文章在一分钟内不可重复阅读(即不增加文章阅读量)

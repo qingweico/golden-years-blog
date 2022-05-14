@@ -136,7 +136,7 @@
 import {
   getArticleCollectCounts,
   getArticleStarCounts,
-  getBlogById, incArticleHistory, isCollectThisArticle,
+  getBlogById, incArticleHistory, incPagViews, isCollectThisArticle,
   isStarThisArticle,
   readArticle
 } from "@/api/detail";
@@ -251,10 +251,12 @@ export default {
         that.isCollectThisArticle();
         that.loadingInstance.close();
         let params = {};
-        params.userId = this.getUserInfo.id;
         params.articleId = this.articleId;
-        // 添加文章浏览历史
-        incArticleHistory(params);
+        // 假如用户登录则添加文章浏览历史 否则不做该操作
+        if (this.getUserInfo.id) {
+          params.userId = this.getUserInfo.id;
+          incArticleHistory(params);
+        }
         let isLogin = this.$store.state.user.isLogin;
         if (!isLogin) {
           that.currentUser.avatar = that.$SysConf.defaultAvatar;
@@ -293,7 +295,7 @@ export default {
       this.systemConfig = response.data;
     });
     // 文章阅读数累加
-    readArticle(this.articleId);
+    incPagViews(this.articleId);
     this.getCommentList();
     this.loadingInstance = Loading.service({
       fullscreen: true,
