@@ -200,7 +200,7 @@ export default {
   components: {},
   data() {
     return {
-      WEB_URL: "http://localhost:9527",
+      WEB_URL: "http://blog.qingweico.cn",
       // 搜索条件
       queryParams: {
         keyword: "",
@@ -316,7 +316,7 @@ export default {
         keyword: "",
         categoryId: "",
         status: "",
-        tagId:"",
+        tagId: "",
         deleteStatus: "",
         startDateStr: "",
         endDateStr: "",
@@ -399,31 +399,6 @@ export default {
   height: 105px;
   line-height: 105px;
   text-align: center;
-}
-
-.imgBody {
-  width: 195px;
-  height: 105px;
-  border: solid 2px #ffffff;
-  float: left;
-  position: relative;
-}
-
-.uploadImgBody {
-  margin-left: 5px;
-  width: 195px;
-  height: 105px;
-  border: dashed 1px #c0c0c0;
-  float: left;
-  position: relative;
-}
-
-.uploadImgBody :hover {
-  border: dashed 1px #00ccff;
-}
-
-.inputClass {
-  position: absolute;
 }
 
 .el-dialog__body {
