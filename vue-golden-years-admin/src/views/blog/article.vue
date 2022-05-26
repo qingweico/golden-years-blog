@@ -89,12 +89,12 @@
               alt="">
         </template>
       </el-table-column>
-      <el-table-column label="标题" width="160" align="center">
+      <el-table-column label="标题" width="120" align="center">
         <template slot-scope="scope">
           <span @click="onClick(scope.row)" style="cursor:pointer;">{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="作者" width="100" align="center">
+      <el-table-column label="作者" width="80" align="center">
         <template slot-scope="scope">
 
           <el-popover
@@ -163,7 +163,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="操作" fixed="right" min-width="100" align="center">
+      <el-table-column label="操作" fixed="right" min-width="150" align="center">
         <template slot-scope="scope">
           <el-button @click="handleDelete(scope.row)" type="danger" size="small">删除</el-button>
           <el-button v-if="scope.row.isDelete === 1" @click="withdrawDelete(scope.row)" type="info" size="small">撤回删除

@@ -111,12 +111,12 @@ public class IndexServiceImpl extends BaseService implements IndexService {
 
         List<Map<String, Object>> resultList = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : tagMap.entrySet()) {
-            String tagUid = entry.getKey();
-            if (tagEntityMap.get(tagUid) != null) {
-                String tagName = tagEntityMap.get(tagUid);
+            String tagId = entry.getKey();
+            if (tagEntityMap.get(tagId) != null) {
+                String tagName = tagEntityMap.get(tagId);
                 Integer count = entry.getValue();
                 Map<String, Object> itemResultMap = new HashMap<>(3);
-                itemResultMap.put(SysConf.TAG_ID, tagUid);
+                itemResultMap.put(SysConf.TAG_ID, tagId);
                 itemResultMap.put(SysConf.NAME, tagName);
                 itemResultMap.put(SysConf.VALUE, count);
                 resultList.add(itemResultMap);

@@ -1,9 +1,11 @@
 package cn.qingweico.article.service;
 
+import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.bo.NewArticleBO;
 import cn.qingweico.util.PagedGridResult;
 
 import java.util.Date;
+
 /**
  * 用户和管理员相关的文章服务
  *
@@ -95,7 +97,11 @@ public interface ArticleService {
      * @param articleMongoId 上传至mongodb中文章的mongoid
      */
     @Deprecated
-    void updateArticleToGridFs(String articleId, String articleMongoId);
+    default void updateArticleToGridFs(String articleId, String articleMongoId) {
+        Article article = new Article();
+        article.setId(articleId);
+        article.setMongoFileId(articleMongoId);
+    }
 
     /**
      * 管理员查询所有的文章列表
@@ -112,14 +118,14 @@ public interface ArticleService {
      * @return PagedGridResult
      */
     PagedGridResult query(String keyword,
-                               Integer status,
-                               String categoryId,
-                               String tagId,
-                               Integer deleteStatus,
-                               Date startDateStr,
-                               Date endDateStr,
-                               Integer page,
-                               Integer pageSize);
+                          Integer status,
+                          String categoryId,
+                          String tagId,
+                          Integer deleteStatus,
+                          Date startDateStr,
+                          Date endDateStr,
+                          Integer page,
+                          Integer pageSize);
 
     /**
      * 管理员删除文章(delete sql)

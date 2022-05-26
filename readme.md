@@ -69,7 +69,7 @@ OK, 至此, 服务端就启动成功了, 接下来需要启动项目前端
 # 安装依赖
 npm install
 
-# 在 localhost:9572 启动项目
+# 在 localhost:9527 启动项目
 npm run dev
 
 # 打包项目

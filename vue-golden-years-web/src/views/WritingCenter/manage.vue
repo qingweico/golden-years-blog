@@ -222,7 +222,8 @@
             <el-tag type="info" v-show="article.articleStatus === 4">已撤回</el-tag>
           </el-descriptions-item>
           <el-descriptions-item>
-            <el-button type="text" icon="el-icon-edit" v-show="article.articleStatus === 2"
+            <el-button type="text" icon="el-icon-edit" v-show="article.articleStatus === 2 ||
+             article.articleStatus === 3 || article.articleStatus === 4"
                        @click="handleEdit(article)">编辑
             </el-button>
             <el-button type="text" icon="el-icon-refresh-left"
@@ -230,7 +231,7 @@
                        @click="withdraw((article.id))">撤回
             </el-button>
             <el-button type="text" icon="el-icon-delete"
-                       v-show="article.articleStatus === 2 || article.articleStatus === 3"
+                       v-show="article.articleStatus === 2 || article.articleStatus === 3 || article.articleStatus === 4"
                        @click="deleteArticle(article.id)">删除
             </el-button>
           </el-descriptions-item>

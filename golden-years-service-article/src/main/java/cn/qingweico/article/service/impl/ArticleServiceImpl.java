@@ -396,21 +396,10 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         elasticsearchTemplate.delete(ArticleEo.class, articleId);
 
     }
-
-    @Transactional(rollbackFor = RuntimeException.class)
-    @Override
-    @Deprecated
-    public void updateArticleToGridFs(String articleId, String articleMongoId) {
-        Article article = new Article();
-        article.setId(articleId);
-        article.setMongoFileId(articleMongoId);
-        articleMapper.updateByPrimaryKeySelective(article);
-    }
-
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo(SysConf.USER_ID, userId);
+        criteria.andEqualTo(SysConf.AUTHOR_ID, userId);
         criteria.andEqualTo(SysConf.ID, articleId);
         return articleExample;
     }

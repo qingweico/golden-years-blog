@@ -22,7 +22,6 @@ import cn.qingweico.result.GraceJsonResult;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +62,7 @@ public class ArticleRestApi extends BaseRestApi {
                     return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_COVER_NOT_EXIST_ERROR);
                 }
             } else if (newArticleBO.getArticleType().equals(ArticleCoverType.WORDS.type)) {
-                newArticleBO.setArticleCover("");
+                newArticleBO.setArticleCover(SysConf.EMPTY_STRING);
             }
 
             // 判断分类Id是否存在 (从缓存中取出数据)
@@ -140,11 +139,12 @@ public class ArticleRestApi extends BaseRestApi {
         List<ArticleAdminVO> articles = JsonUtils.jsonToList(toJson, ArticleAdminVO.class);
         for (ArticleAdminVO articleAdminVO : articles) {
             Map<String, Object> authorInfo = geAuthorInfo(articleAdminVO.getAuthorId());
-            articleAdminVO.setAuthorName((String) authorInfo.get("authorName"));
-            articleAdminVO.setAuthorFace((String) authorInfo.get("authorFace"));
-            articleAdminVO.setFansCounts((Integer) authorInfo.get("fansCounts"));
-            articleAdminVO.setFollowCounts((Integer) authorInfo.get("followCounts"));
+            articleAdminVO.setAuthorName((String) authorInfo.get(SysConf.AUTHOR_NAME));
+            articleAdminVO.setAuthorFace((String) authorInfo.get(SysConf.AUTHOR_FACE));
+            articleAdminVO.setFansCounts((Integer) authorInfo.get(SysConf.FANS_COUNTS));
+            articleAdminVO.setFollowCounts((Integer) authorInfo.get(SysConf.FOLLOW_COUNTS));
         }
+        result.setRows(articles);
         return GraceJsonResult.ok(result);
     }
 
