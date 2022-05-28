@@ -576,11 +576,11 @@ export default {
       this.dialogFormVisible = true;
       this.form.articleId = article.id;
       this.form.title = article.title;
+      this.form.articleStatus = article.articleStatus;
       this.form.categoryId = article.categoryId;
       this.form.articleCover = article.articleCover;
       this.form.articleType = String(article.articleType);
       this.dynamicTags = article.tagList;
-
       if (this.systemConfig.editorModel === 0) {
         // rich text
         this.richTextContent = article.content;

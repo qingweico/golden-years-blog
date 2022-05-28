@@ -153,6 +153,9 @@
           <template v-if="scope.row.articleStatus === 2">
             <span>已审核</span>
           </template>
+          <template v-if="scope.row.articleStatus === 4">
+            <span>已撤回</span>
+          </template>
           <el-button v-if="scope.row.articleStatus === 1" @click="reviewStatus(scope.row, 1)" type="primary"
                      size="small">通过
           </el-button>

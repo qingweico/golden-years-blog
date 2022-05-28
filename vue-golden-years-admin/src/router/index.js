@@ -95,38 +95,6 @@ export const constantRouterMap = [
         ]
     },
     {
-        path: '/restapi',
-        component: Layout,
-        name: '接口管理',
-        meta: {title: '接口管理', icon: 'restapi'},
-        children: [
-            {
-                path: 'admin',
-                name: '管理员接口',
-                component: () => import('@/views/restapi/admin'),
-                meta: {title: '管理员接口', icon: 'table'}
-            },
-            {
-                path: 'picture',
-                name: '图片接口',
-                component: () => import('@/views/restapi/picture'),
-                meta: {title: '图片接口', icon: 'table'}
-            },
-            {
-                path: 'user',
-                name: '用户接口',
-                component: () => import('@/views/restapi/user'),
-                meta: {title: '用户接口', icon: 'table'}
-            },
-            {
-                path: 'article',
-                name: '文章接口',
-                component: () => import('@/views/restapi/article'),
-                meta: {title: '文章接口', icon: 'table'}
-            },
-        ]
-    },
-    {
         path: '/monitor',
         component: Layout,
         name: '监控中心',

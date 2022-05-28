@@ -244,6 +244,12 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         tagsString.append("]");
         tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
         article.setTags(tagsString.toString());
+        // 假如文章的状态为未通过或者为已撤回, 则修改文章后文章的状态变为审核中
+        if (ArticleReviewStatus.FAILED.type.equals(newArticleBO.getArticleStatus()) ||
+                ArticleReviewStatus.WITHDRAW.type.equals(newArticleBO.getArticleStatus()
+                )) {
+            article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
+        }
         if (articleMapper.updateByPrimaryKeySelective(article) <= 0) {
             GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
@@ -396,6 +402,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         elasticsearchTemplate.delete(ArticleEo.class, articleId);
 
     }
+
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();

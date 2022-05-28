@@ -42,6 +42,8 @@ public class NewArticleBO {
     @Max(value = 1, message = "文章发布类型不正确")
     private Integer isAppoint;
 
+    private Integer articleStatus;
+
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
