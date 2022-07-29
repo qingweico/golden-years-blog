@@ -31,8 +31,8 @@ public class JsonUtils {
     /**
      * 将对象转换成json字符串
      *
-     * @param data Object -> json
-     * @return json
+     * @param data Object -> JSON
+     * @return JSON
      */
     public static String objectToJson(Object data) {
         try {
@@ -46,9 +46,9 @@ public class JsonUtils {
     /**
      * 将json结果集转化为对象
      *
-     * @param jsonData json数据
+     * @param jsonData JSON数据
      * @param beanType 对象中的object类型
-     * @return pojo
+     * @return POJO
      */
     public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
         try {
@@ -62,7 +62,7 @@ public class JsonUtils {
     /**
      * 将json数据转换成pojo对象list
      *
-     * @param jsonData json
+     * @param jsonData JSON
      * @param beanType Class<T>
      * @return List<T>
      */
@@ -77,9 +77,9 @@ public class JsonUtils {
     }
 
     /**
-     * 将json数据转换成pojo对象map
+     * 将 JSON 数据转换成 POJO 对象 Map
      *
-     * @param jsonData json
+     * @param jsonData JSON
      * @return Map<K, V>
      */
     public static <K, V> Map<K, V> jsonToMap(String jsonData, Class<K> k, Class<V> v) {
@@ -93,7 +93,7 @@ public class JsonUtils {
     }
 
     /**
-     * json转arrayList
+     * JSON 转 ArrayList
      *
      * @param jsonArray jsonArray
      * @return ArrayList<?>
@@ -112,7 +112,7 @@ public class JsonUtils {
 
             list = gson.fromJson(jsonArray, listType);
         } catch (JsonSyntaxException e) {
-            e.printStackTrace();
+            log.error("{}", e.getMessage());
         }
         return list;
     }
@@ -131,8 +131,12 @@ public class JsonUtils {
 
             list = (ArrayList<?>) gson.fromJson(jsonArray, clazz);
         } catch (JsonSyntaxException e) {
-            e.printStackTrace();
+            log.error("{}", e.getMessage());
         }
         return list;
+    }
+
+    public static void main(String[] args) {
+
     }
 }
