@@ -1,5 +1,7 @@
 package cn.qingweico.result;
 
+import lombok.Data;
+
 import java.util.Map;
 
 /**
@@ -8,6 +10,7 @@ import java.util.Map;
  * @author zqw
  * @date 2021/9/5
  */
+@Data
 public class GraceJsonResult {
     /**
      * 响应业务状态码
@@ -71,7 +74,7 @@ public class GraceJsonResult {
      * @param map Map<?, ?>
      * @return GraceJsonResult
      */
-    public static GraceJsonResult errorMap(Map<?, ?> map) {
+    public static GraceJsonResult error(Map<?, ?> map) {
         return new GraceJsonResult(ResponseStatusEnum.INCORRECT_INFORMATION, map);
     }
 
@@ -81,18 +84,10 @@ public class GraceJsonResult {
      * @param msg String
      * @return GraceJsonResult
      */
-    public static GraceJsonResult errorMsg(String msg) {
+    public static GraceJsonResult error(String msg) {
         return new GraceJsonResult(ResponseStatusEnum.FAILED, msg);
     }
 
-    /**
-     * 错误返回,token异常,一些通用的可以在这里统一定义
-     *
-     * @return GraceJsonResult
-     */
-    public static GraceJsonResult errorTicket() {
-        return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
-    }
 
     /**
      * 自定义错误范围,需要传入一个自定义的枚举,可以到[ResponseStatusEnum.java]中自定义后再传入
@@ -100,11 +95,7 @@ public class GraceJsonResult {
      * @param responseStatus ResponseStatusEnum
      * @return GraceJsonResult
      */
-    public static GraceJsonResult errorCustom(ResponseStatusEnum responseStatus) {
-        return new GraceJsonResult(responseStatus);
-    }
-
-    public static GraceJsonResult exception(ResponseStatusEnum responseStatus) {
+    public static GraceJsonResult error(ResponseStatusEnum responseStatus) {
         return new GraceJsonResult(responseStatus);
     }
 
@@ -124,35 +115,4 @@ public class GraceJsonResult {
     public GraceJsonResult() {
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
 }

@@ -30,10 +30,10 @@ public class WebConfigServiceImpl extends BaseService implements WebConfigServic
     public WebConfig getWebConfig() {
         String webConfigRedisKey = RedisConf.REDIS_WEB_CONFIG;
         WebConfig webConfig;
-        final String cachedWebConfig = redisOperator.get(webConfigRedisKey);
+        final String cachedWebConfig = redisTemplate.get(webConfigRedisKey);
         if (StringUtils.isBlank(cachedWebConfig)) {
             webConfig = webConfigMapper.selectAll().get(0);
-            redisOperator.set(webConfigRedisKey, JsonUtils.objectToJson(webConfig));
+            redisTemplate.set(webConfigRedisKey, JsonUtils.objectToJson(webConfig));
             log.info("set webConfig cache");
         } else {
             webConfig = JsonUtils.jsonToPojo(cachedWebConfig, WebConfig.class);

@@ -60,14 +60,14 @@ public class TagServiceImpl extends BaseService implements TagService {
 
     @Override
     public List<Tag> getTagList() {
-        String tagJson = redisOperator.get(RedisConf.REDIS_ARTICLE_TAG);
+        String tagJson = redisTemplate.get(RedisConf.REDIS_ARTICLE_TAG);
         List<Tag> tags;
         if (StringUtils.isBlank(tagJson)) {
             Example example = new Example(Tag.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(SysConf.STATUS, YesOrNo.YES.type);
             tags = tagMapper.selectByExample(example);
-            redisOperator.set(RedisConf.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
+            redisTemplate.set(RedisConf.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
             log.info("tag list has been cached");
         } else {
             tags = JsonUtils.jsonToList(tagJson, Tag.class);

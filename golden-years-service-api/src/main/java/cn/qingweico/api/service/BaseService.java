@@ -2,7 +2,7 @@ package cn.qingweico.api.service;
 
 import cn.qingweico.pojo.Article;
 import cn.qingweico.util.PagedGridResult;
-import cn.qingweico.util.RedisOperator;
+import cn.qingweico.util.RedisTemplate;
 import com.github.pagehelper.PageInfo;
 import org.n3r.idworker.Sid;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -18,8 +18,8 @@ import java.util.List;
  * @date 2021/9/10
  */
 public class BaseService {
-    @Autowired
-    public RedisOperator redisOperator;
+    @Resource(name = "rt")
+    public RedisTemplate redisTemplate;
     @Autowired
     public RabbitTemplate rabbitTemplate;
     @Resource
@@ -55,7 +55,8 @@ public class BaseService {
         }
         return result;
     }
+
     public void refreshCache(String key) {
-        redisOperator.del(key);
+        redisTemplate.del(key);
     }
 }

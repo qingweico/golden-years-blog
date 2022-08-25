@@ -34,7 +34,7 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
     @Override
     public Map<String, Object>  getVisitByWeek() {
         // 从Redis中获取一周访问量
-        String weekVisitJson = redisOperator.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.WEEK_VISIT);
+        String weekVisitJson = redisTemplate.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.WEEK_VISIT);
         if (StringUtils.isNotEmpty(weekVisitJson)) {
             return JsonUtils.jsonToMap(weekVisitJson, String.class, Object.class);
         }
@@ -84,7 +84,7 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
         resultMap.put("uv", uvList);
 
         // 将一周访问量存入Redis中(过期时间10分钟)
-        redisOperator.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.WEEK_VISIT, JsonUtils.objectToJson(resultMap), 10, TimeUnit.MINUTES);
+        redisTemplate.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.WEEK_VISIT, JsonUtils.objectToJson(resultMap), 10, TimeUnit.MINUTES);
         return resultMap;
     }
 }

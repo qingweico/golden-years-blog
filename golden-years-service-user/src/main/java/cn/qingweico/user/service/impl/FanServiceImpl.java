@@ -76,9 +76,9 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setProvince(fansInfo.getProvince());
         if (fansMapper.insert(fan) > 0) {
             // redis 作者粉丝累增
-            redisOperator.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
+            redisTemplate.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累增
-            redisOperator.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
+            redisTemplate.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
             // 保存粉丝关系到es中
             FansEo fanEo = new FansEo();
             BeanUtils.copyProperties(fan, fanEo);
@@ -98,9 +98,9 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setFanId(fanId);
         if (fansMapper.delete(fan) > 0) {
             // redis 作者粉丝累减
-            redisOperator.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
+            redisTemplate.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累减
-            redisOperator.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
+            redisTemplate.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
             // 删除es中的粉丝关系
             DeleteQuery deleteQuery = new DeleteQuery();
             deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId));

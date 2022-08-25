@@ -75,15 +75,15 @@ public class FileUploadRestApi {
                         !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPEG) &&
                         !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_PNG) &&
                         !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_BLOB)) {
-                    return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_FORMATTER_FAILED);
+                    return GraceJsonResult.error(ResponseStatusEnum.FILE_FORMATTER_FAILED);
                 }
 
                 path = uploaderService.uploadFastDfs(file, fileExtension);
             } else {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
             }
         } else {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
         }
         log.info("path = {}", path);
 
@@ -91,7 +91,7 @@ public class FileUploadRestApi {
         if (StringUtils.isNotBlank(path)) {
             finalPath = fileResource.getFsHost() + path;
         } else {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
         }
         return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, finalPath);
     }

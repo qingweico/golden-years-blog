@@ -77,7 +77,7 @@ public class JwtUtils {
 
         // 生成JWT
         String compact = builder.compact();
-        log.info("generate jwt: " + compact);
+        log.info("生成 token: {}", compact);
         return compact;
     }
 }

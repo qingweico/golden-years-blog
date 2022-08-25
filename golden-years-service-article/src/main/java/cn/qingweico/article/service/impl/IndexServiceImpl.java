@@ -53,7 +53,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
     @Override
     public List<Map<String, Object>> getBlogCountByTag() {
         // 从Redis中获取标签下包含的博客数量
-        String jsonArrayList = redisOperator.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_COUNT_BY_TAG);
+        String jsonArrayList = redisTemplate.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_COUNT_BY_TAG);
         if (StringUtils.isNotEmpty(jsonArrayList)) {
             ArrayList jsonList = JsonUtils.jsonArrayToArrayList(jsonArrayList);
             return jsonList;
@@ -123,14 +123,14 @@ public class IndexServiceImpl extends BaseService implements IndexService {
             }
         }
         if (resultList.size() > 0) {
-            redisOperator.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_COUNT_BY_TAG, JsonUtils.objectToJson(resultList), 2, TimeUnit.HOURS);
+            redisTemplate.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_COUNT_BY_TAG, JsonUtils.objectToJson(resultList), 2, TimeUnit.HOURS);
         }
         return resultList;
     }
 
     @Override
     public Map<String, Object> getBlogContributeCount() {
-        String jsonMap = redisOperator.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_CONTRIBUTE_COUNT);
+        String jsonMap = redisTemplate.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_CONTRIBUTE_COUNT);
         if (StringUtils.isNotEmpty(jsonMap)) {
             return JsonUtils.jsonToMap(jsonMap, String.class, Object.class);
         }
@@ -165,7 +165,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
         contributeDateList.add(endTime);
         resultMap.put(SysConf.CONTRIBUTE_DATE, contributeDateList);
         resultMap.put(SysConf.BLOG_CONTRIBUTE_COUNT, resultList);
-        redisOperator.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_CONTRIBUTE_COUNT, JsonUtils.objectToJson(resultMap), 2, TimeUnit.HOURS);
+        redisTemplate.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_CONTRIBUTE_COUNT, JsonUtils.objectToJson(resultMap), 2, TimeUnit.HOURS);
         return resultMap;
     }
 

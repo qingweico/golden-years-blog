@@ -7,7 +7,6 @@ import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UserInfoBO;
@@ -18,7 +17,6 @@ import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.DesensitizationUtil;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
-import cn.qingweico.util.server.Sys;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -178,7 +176,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 查询数据库中最新的数据放入缓存中
         User user = queryUserById(userId);
-        redisOperator.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+        redisTemplate.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
         log.info("update user info: cache has been updated");
     }
 
@@ -196,8 +194,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Async("asyncTask")
     public void doSaveUserAuthToken(User user, String token) {
         // 保存token以及用户信息到redis中
-        redisOperator.set(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + user.getId(), token);
-        redisOperator.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
+        redisTemplate.set(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + user.getId(), token);
+        redisTemplate.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
     }
 
 

@@ -35,7 +35,7 @@ public class SmsUtil {
      */
     public void sendSms(String mobile, String code) {
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou",
-                aliResource.getAccessKeyId(), "ltRRXcPCkEljxid5DMawdop6bffr2m");
+                aliResource.getAccessKeyId(), aliResource.getAccessKeySecret());
         /* use STS Token
          DefaultProfile profile = DefaultProfile.getProfile(
          "<your-region-id>",           // The region ID

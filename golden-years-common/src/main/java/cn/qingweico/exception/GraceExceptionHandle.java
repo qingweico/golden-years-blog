@@ -31,14 +31,14 @@ public class GraceExceptionHandle {
     @ResponseBody
     public GraceJsonResult returnException(CustomException ex) {
         log.error(ExceptionUtil.getExceptionMessage(ex));
-        return GraceJsonResult.exception(ex.getResponseStatus());
+        return GraceJsonResult.error(ex.getResponseStatus());
     }
 
     @ExceptionHandler({MaxUploadSizeExceededException.class})
     @ResponseBody
     public GraceJsonResult returnMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
         log.error(ExceptionUtil.getExceptionMessage(ex));
-        return GraceJsonResult.errorCustom(ResponseStatusEnum.FILE_MAX_SIZE_ERROR);
+        return GraceJsonResult.error(ResponseStatusEnum.FILE_MAX_SIZE_ERROR);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
@@ -47,7 +47,7 @@ public class GraceExceptionHandle {
         // 判断 BindingResult 中是否保存了错误的验证信息, 如果有则返回
         BindingResult result = ex.getBindingResult();
         Map<String, String> map = getErrors(result);
-        return GraceJsonResult.errorMap(map);
+        return GraceJsonResult.error(map);
     }
 
     /**

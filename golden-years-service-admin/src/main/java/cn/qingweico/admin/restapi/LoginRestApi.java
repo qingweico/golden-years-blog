@@ -57,7 +57,7 @@ public class LoginRestApi extends BaseRestApi {
     public GraceJsonResult login(@RequestBody AdminLoginBO adminLoginBO) {
         Admin admin = adminService.queryAdminByUsername(adminLoginBO.getUsername());
         if (admin == null) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
         }
         boolean isPwdMatch = BCrypt.checkpw(adminLoginBO.getPassword(), admin.getPassword());
         if (isPwdMatch) {
@@ -67,7 +67,7 @@ public class LoginRestApi extends BaseRestApi {
             adminService.doSaveToken(admin, jsonWebToken);
             return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, jsonWebToken);
         } else {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
         }
     }
 
@@ -160,20 +160,20 @@ public class LoginRestApi extends BaseRestApi {
     public GraceJsonResult face(@RequestBody AdminLoginBO adminLoginBO) {
         // 判断用户名和faceId不为空
         if (StringUtils.isBlank(adminLoginBO.getUsername())) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_USERNAME_NULL_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_USERNAME_NULL_ERROR);
         }
         Admin admin = adminService.queryAdminByUsername(adminLoginBO.getUsername());
         if (admin == null) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_IS_NOT_PRESENT);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_IS_NOT_PRESENT);
         }
         String base64 = adminLoginBO.getImg64();
         if (StringUtils.isBlank(base64)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_NULL_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_FACE_NULL_ERROR);
         }
         // 从数据库中查询faceId
         String adminFaceId = admin.getFaceId();
         if (StringUtils.isBlank(adminFaceId)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_NOT_ENABLE);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_FACE_LOGIN_NOT_ENABLE);
         }
         // 请求文件服务, 获得人脸数据的base64数据
         GraceJsonResult result = client.getFaceBase64(adminFaceId);
@@ -185,7 +185,7 @@ public class LoginRestApi extends BaseRestApi {
         boolean pass = faceVerify.faceVerify(FaceVerifyType.BASE64.type, base64, base64Db, 60.0f);
 
         if (!pass) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
         }
         String adminId = admin.getId();
         String jsonWebToken = JwtUtils.createJwt(adminId);

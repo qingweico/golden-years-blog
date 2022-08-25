@@ -50,7 +50,7 @@ public class AdminRestApi extends BaseRestApi {
         if (StringUtils.isBlank(operatorAdminBO.getImg64())) {
             if (StringUtils.isBlank(operatorAdminBO.getPassword()) ||
                     StringUtils.isBlank(operatorAdminBO.getConfirmPassword())) {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_PASSWORD_NULL_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.ADMIN_PASSWORD_NULL_ERROR);
             }
         }
 
@@ -58,7 +58,7 @@ public class AdminRestApi extends BaseRestApi {
         if (StringUtils.isNotBlank(operatorAdminBO.getPassword())) {
             if (!operatorAdminBO.getPassword().
                     equals(operatorAdminBO.getConfirmPassword())) {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.ADMIN_PASSWORD_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.ADMIN_PASSWORD_ERROR);
 
             }
         }

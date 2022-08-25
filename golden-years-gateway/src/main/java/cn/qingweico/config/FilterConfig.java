@@ -3,7 +3,7 @@ package cn.qingweico.config;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.util.IpUtils;
-import cn.qingweico.util.RedisOperator;
+import cn.qingweico.util.RedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -27,7 +27,7 @@ import javax.annotation.Resource;
 public class FilterConfig implements GlobalFilter, Ordered {
 
     @Resource
-    private RedisOperator redisOperator;
+    private RedisTemplate redisOperator;
 
     @Value("${blackIp.continueCounts}")
     private Integer continueCounts;

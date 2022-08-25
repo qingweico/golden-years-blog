@@ -70,7 +70,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
         comments.setCreateTime(new Date());
         if (commentsMapper.insert(comments) > 0) {
             // 评论数累加
-            redisOperator.increment(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
+            redisTemplate.increment(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
         } else {
             GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }

@@ -74,7 +74,7 @@ public class PassportRestApi extends BaseRestApi {
         // 校验手机验证码是否匹配
         String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.SMS_CODE_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.SMS_CODE_ERROR);
         }
 
         // 查询数据库, 判断用户是否注册
@@ -84,7 +84,7 @@ public class PassportRestApi extends BaseRestApi {
             user = userService.createUser(mobile);
         } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
             // 如果用户不为空且状态为冻结则禁止该用户登陆
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.USER_FROZEN);
+            return GraceJsonResult.error(ResponseStatusEnum.USER_FROZEN);
         }
         String jsonWebToken = JwtUtils.createJwt(user.getId());
         userService.doSaveUserAuthToken(user, jsonWebToken);
@@ -100,7 +100,7 @@ public class PassportRestApi extends BaseRestApi {
         } else if (userStatus == UserStatus.ACTIVE.type) {
             return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, map);
         }
-        return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);
+        return GraceJsonResult.error(ResponseStatusEnum.SYSTEM_ERROR);
     }
 
 
@@ -115,7 +115,7 @@ public class PassportRestApi extends BaseRestApi {
         if (user == null) {
             return new GraceJsonResult(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
         } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.USER_FROZEN);
+            return GraceJsonResult.error(ResponseStatusEnum.USER_FROZEN);
         }
         int userStatus = user.getActiveStatus();
         if (user.getMobile().equals(auth)

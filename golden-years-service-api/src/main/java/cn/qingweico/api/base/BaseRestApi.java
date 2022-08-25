@@ -5,7 +5,7 @@ import cn.qingweico.global.SysConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.JwtUtils;
-import cn.qingweico.util.RedisOperator;
+import cn.qingweico.util.RedisTemplate;
 import cn.qingweico.util.ServletReqUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import javax.annotation.Resource;
 public class BaseRestApi {
 
     @Autowired
-    public RedisOperator redisOperator;
+    public RedisTemplate redisOperator;
 
     @Resource
     public ElasticsearchTemplate elasticsearchTemplate;

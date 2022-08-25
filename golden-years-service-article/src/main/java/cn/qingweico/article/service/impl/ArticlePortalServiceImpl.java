@@ -109,7 +109,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
     @Override
     public ArticleDetailVO queryDetail(String articleId) {
-        String cachedArticleDetail = redisOperator.get(RedisConf.REDIS_ARTICLE_DETAIL + SysConf.SYMBOL_COLON + articleId);
+        String cachedArticleDetail = redisTemplate.get(RedisConf.REDIS_ARTICLE_DETAIL + SysConf.SYMBOL_COLON + articleId);
         ArticleDetailVO articleDetail = null;
         if (StringUtils.isNotBlank(cachedArticleDetail)) {
             articleDetail = JsonUtils.jsonToPojo(cachedArticleDetail, ArticleDetailVO.class);
@@ -125,7 +125,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
                 articleDetail = new ArticleDetailVO();
                 articleDetail.setTagList(tagList);
                 BeanUtils.copyProperties(result, articleDetail);
-                redisOperator.set(RedisConf.REDIS_ARTICLE_DETAIL + SysConf.SYMBOL_COLON + articleId, JsonUtils.objectToJson(articleDetail));
+                redisTemplate.set(RedisConf.REDIS_ARTICLE_DETAIL + SysConf.SYMBOL_COLON + articleId, JsonUtils.objectToJson(articleDetail));
                 log.info("article detail has been cached, articleId: {}", articleId);
             }
         }
@@ -169,11 +169,11 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     @Override
     public List<Category> queryCategoryList() {
         // 缓存
-        String categoriesJson = redisOperator.get(RedisConf.REDIS_ARTICLE_CATEGORY);
+        String categoriesJson = redisTemplate.get(RedisConf.REDIS_ARTICLE_CATEGORY);
         List<Category> categories;
         if (StringUtils.isBlank(categoriesJson)) {
             categories = categoryMapper.selectAll();
-            redisOperator.set(RedisConf.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
+            redisTemplate.set(RedisConf.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
             log.info("article category has been cached");
         } else {
             categories = JsonUtils.jsonToList(categoriesJson, Category.class);
@@ -186,7 +186,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
         List<CategoryVO> results = new ArrayList<>();
         String cacheKey = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
-        String cache = redisOperator.get(cacheKey);
+        String cache = redisTemplate.get(cacheKey);
         if (StringUtils.isNotBlank(cache)) {
             results = JsonUtils.jsonToList(cache, CategoryVO.class);
         } else {
@@ -199,7 +199,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
                 categoryVO.setEachCategoryArticleCount(categoryCount);
                 results.add(categoryVO);
             }
-            redisOperator.set(cacheKey, JsonUtils.objectToJson(results));
+            redisTemplate.set(cacheKey, JsonUtils.objectToJson(results));
         }
         return results;
     }

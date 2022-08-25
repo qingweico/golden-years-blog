@@ -124,8 +124,8 @@ public class AdminServiceImpl extends BaseService implements AdminService {
     @Override
     @Async("asyncTask")
     public void doSaveToken(Admin admin, String token) {
-        redisOperator.set(RedisConf.REDIS_ADMIN_TOKEN + SysConf.SYMBOL_COLON + admin.getId(), token);
-        redisOperator.set(RedisConf.REDIS_ADMIN_INFO + SysConf.SYMBOL_COLON + admin.getId(), JsonUtils.objectToJson(admin));
+        redisTemplate.set(RedisConf.REDIS_ADMIN_TOKEN + SysConf.SYMBOL_COLON + admin.getId(), token);
+        redisTemplate.set(RedisConf.REDIS_ADMIN_INFO + SysConf.SYMBOL_COLON + admin.getId(), JsonUtils.objectToJson(admin));
     }
 
     @Override
@@ -146,6 +146,6 @@ public class AdminServiceImpl extends BaseService implements AdminService {
     @Async("asyncTask")
     public void refreshCache(Admin admin) {
         String key = RedisConf.REDIS_ADMIN_INFO + SysConf.SYMBOL_COLON + admin.getId();
-        redisOperator.set(key, JsonUtils.objectToJson(admin));
+        redisTemplate.set(key, JsonUtils.objectToJson(admin));
     }
 }

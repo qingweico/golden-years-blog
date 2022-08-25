@@ -5,7 +5,7 @@ import cn.qingweico.global.RedisConf;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.IpUtils;
-import cn.qingweico.util.RedisOperator;
+import cn.qingweico.util.RedisTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 public class SmsInterceptor implements HandlerInterceptor {
 
     @Autowired
-    private RedisOperator redisOperator;
+    private RedisTemplate redisOperator;
 
     @Override
     public boolean preHandle(@Nonnull HttpServletRequest request,

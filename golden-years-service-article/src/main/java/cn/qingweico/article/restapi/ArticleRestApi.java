@@ -59,7 +59,7 @@ public class ArticleRestApi extends BaseRestApi {
         if (StringUtils.isBlank(articleId)) {
             if (newArticleBO.getArticleType().equals(ArticleCoverType.ONE_IMAGE.type)) {
                 if (StringUtils.isBlank(newArticleBO.getArticleCover())) {
-                    return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_COVER_NOT_EXIST_ERROR);
+                    return GraceJsonResult.error(ResponseStatusEnum.ARTICLE_COVER_NOT_EXIST_ERROR);
                 }
             } else if (newArticleBO.getArticleType().equals(ArticleCoverType.WORDS.type)) {
                 newArticleBO.setArticleCover(SysConf.EMPTY_STRING);
@@ -69,14 +69,14 @@ public class ArticleRestApi extends BaseRestApi {
             String categoryJson = redisOperator.get(RedisConf.REDIS_ARTICLE_CATEGORY);
             List<Category> categories = JsonUtils.jsonToList(categoryJson, Category.class);
             if (categories == null) {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.SYSTEM_ERROR);
             }
             Category res = categories.stream()
                     .filter(category -> category.getId().equals(newArticleBO.getCategoryId()))
                     .collect(toList()).get(0);
 
             if (res == null) {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_CATEGORY_NOT_EXIST_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.ARTICLE_CATEGORY_NOT_EXIST_ERROR);
             }
             articleService.createArticle(newArticleBO);
             return new GraceJsonResult(ResponseStatusEnum.ARTICLE_PUBLISH_SUCCESS);
@@ -100,7 +100,7 @@ public class ArticleRestApi extends BaseRestApi {
 
 
         if (StringUtils.isBlank(userId)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_QUERY_PARAMS_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ARTICLE_QUERY_PARAMS_ERROR);
         }
         checkPagingParams(page, pageSize);
         PagedGridResult res = articleService.queryUserArticles(userId,
@@ -160,7 +160,7 @@ public class ArticleRestApi extends BaseRestApi {
         else if (YesOrNo.NO.type.equals(passOrNot)) {
             pendingStatus = ArticleReviewStatus.FAILED.type;
         } else {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
         }
         articleService.updateArticleStatus(articleId, pendingStatus);
         if (YesOrNo.YES.type.equals(passOrNot)) {

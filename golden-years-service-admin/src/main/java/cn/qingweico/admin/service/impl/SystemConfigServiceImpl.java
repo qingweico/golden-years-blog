@@ -33,10 +33,10 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
     public SystemConfig getSystemConfig() {
         String systemConfigRedisKey = RedisConf.REDIS_SYSTEM_CONFIG;
         SystemConfig systemConfig;
-        final String cachedSystemConfig = redisOperator.get(systemConfigRedisKey);
+        final String cachedSystemConfig = redisTemplate.get(systemConfigRedisKey);
         if (StringUtils.isBlank(cachedSystemConfig)) {
             systemConfig = systemConfigMapper.selectAll().get(0);
-            redisOperator.set(systemConfigRedisKey, JsonUtils.objectToJson(systemConfig));
+            redisTemplate.set(systemConfigRedisKey, JsonUtils.objectToJson(systemConfig));
             log.info("set systemConfig cache");
         } else {
             systemConfig = JsonUtils.jsonToPojo(cachedSystemConfig, SystemConfig.class);
@@ -54,12 +54,12 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
             // 清空所有key
             Set<String> keys;
             if (RedisConf.ALL.equals(item)) {
-                keys = redisOperator.keys(SysConf.SYMBOL_STAR);
+                keys = redisTemplate.keys(SysConf.SYMBOL_STAR);
             } else {
                 // 获取Redis中特定前缀
-                keys = redisOperator.keys(item + SysConf.SYMBOL_STAR);
+                keys = redisTemplate.keys(item + SysConf.SYMBOL_STAR);
             }
-            redisOperator.delete(keys);
+            redisTemplate.delete(keys);
         });
     }
 

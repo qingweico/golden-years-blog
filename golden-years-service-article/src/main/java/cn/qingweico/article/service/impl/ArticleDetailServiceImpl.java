@@ -168,14 +168,14 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
                 .split(",");
         for (String articleId : articleIds) {
             // 设置用户收藏标志位(未收藏该文章)
-            redisOperator.del(RedisConf.REDIS_ARTICLE_ALREADY_COLLECT +
+            redisTemplate.del(RedisConf.REDIS_ARTICLE_ALREADY_COLLECT +
                     SysConf.SYMBOL_COLON + articleId +
                     SysConf.SYMBOL_HYPHEN + userId +
                     SysConf.SYMBOL_HYPHEN + favoritesId);
             // 文章收藏数减少
-            redisOperator.decrement(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
+            redisTemplate.decrement(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
             // 删除收藏夹的收藏量
-            redisOperator.del(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS +
+            redisTemplate.del(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS +
                     SysConf.SYMBOL_COLON + userId +
                     SysConf.SYMBOL_HYPHEN + favoritesId);
         }

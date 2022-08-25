@@ -50,7 +50,7 @@ public class CategoryRestApi extends BaseRestApi {
             isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
                     null);
             if (isExist) {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
             } else {
                 categoryService.createCategory(pendingCategory);
             }
@@ -60,7 +60,7 @@ public class CategoryRestApi extends BaseRestApi {
             isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
                     saveCategoryBO.getOldName());
             if (isExist) {
-                return GraceJsonResult.errorCustom(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
+                return GraceJsonResult.error(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
             } else {
                 categoryService.modifyCategory(pendingCategory);
             }

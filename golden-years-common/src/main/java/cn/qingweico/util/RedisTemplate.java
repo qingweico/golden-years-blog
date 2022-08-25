@@ -1,6 +1,5 @@
 package cn.qingweico.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -17,11 +16,11 @@ import java.util.concurrent.TimeUnit;
  * @author zqw
  * @date 2021/9/5
  */
-@Component
-public class RedisOperator {
+@Component(value = "rt")
+public class RedisTemplate {
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     // Key(键)简单的key-value操作
 
@@ -32,7 +31,7 @@ public class RedisOperator {
      * @return {@code key} exist or not
      */
     public Boolean keyIsExist(String key) {
-        return redisTemplate.hasKey(key);
+        return stringRedisTemplate.hasKey(key);
     }
 
     /**
@@ -42,7 +41,7 @@ public class RedisOperator {
      * @return TTL
      */
     public Long ttl(String key) {
-        return redisTemplate.getExpire(key);
+        return stringRedisTemplate.getExpire(key);
     }
 
     /**
@@ -51,11 +50,11 @@ public class RedisOperator {
      * @param key key
      */
     public void expire(String key, long timeout) {
-        redisTemplate.expire(key, timeout, TimeUnit.SECONDS);
+        stringRedisTemplate.expire(key, timeout, TimeUnit.SECONDS);
     }
 
     public void expire(String key, long timeout, TimeUnit timeUnit) {
-        redisTemplate.expire(key, timeout, timeUnit);
+        stringRedisTemplate.expire(key, timeout, timeUnit);
     }
 
     /**
@@ -65,7 +64,7 @@ public class RedisOperator {
      * @return increment key
      */
     public Long increment(String key, long delta) {
-        return redisTemplate.opsForValue().increment(key, delta);
+        return stringRedisTemplate.opsForValue().increment(key, delta);
     }
 
     /**
@@ -74,14 +73,14 @@ public class RedisOperator {
      * @param key key
      */
     public void decrement(String key, long delta) {
-        redisTemplate.opsForValue().decrement(key, delta);
+        stringRedisTemplate.opsForValue().decrement(key, delta);
     }
 
     /**
      * 实现命令:KEYS pattern, 查找所有符合给定模式 pattern的 key
      */
     public Set<String> keys(String pattern) {
-        return redisTemplate.keys(pattern);
+        return stringRedisTemplate.keys(pattern);
     }
 
     /**
@@ -90,7 +89,7 @@ public class RedisOperator {
      * @param key key
      */
     public void del(String key) {
-        redisTemplate.delete(key);
+        stringRedisTemplate.delete(key);
     }
 
     /**
@@ -99,7 +98,7 @@ public class RedisOperator {
      * @param keys keys
      */
     public void delete(Collection<String> keys) {
-        redisTemplate.delete(keys);
+        stringRedisTemplate.delete(keys);
     }
 
 
@@ -112,7 +111,7 @@ public class RedisOperator {
      * @param value value
      */
     public void set(String key, String value) {
-        redisTemplate.opsForValue().set(key, value);
+        stringRedisTemplate.opsForValue().set(key, value);
     }
 
     /**
@@ -123,7 +122,7 @@ public class RedisOperator {
      * @param timeout (s)
      */
     public void set(String key, String value, long timeout) {
-        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
     }
 
     /**
@@ -133,7 +132,7 @@ public class RedisOperator {
      * @param value value
      */
     public void setnx60s(String key, String value) {
-        redisTemplate.opsForValue().setIfAbsent(key, value, 60, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().setIfAbsent(key, value, 60, TimeUnit.SECONDS);
     }
 
     /**
@@ -144,15 +143,15 @@ public class RedisOperator {
      * @param score score
      */
     public void zsetAdd(String key, String value, double score) {
-        redisTemplate.opsForZSet().add(key, value, score);
+        stringRedisTemplate.opsForZSet().add(key, value, score);
     }
 
     public Set<String> zsetRevRange(String key, long l, long r) {
-        return redisTemplate.opsForZSet().reverseRange(key, l, r);
+        return stringRedisTemplate.opsForZSet().reverseRange(key, l, r);
     }
 
     public Long zsetSize(String key) {
-        return redisTemplate.opsForZSet().size(key);
+        return stringRedisTemplate.opsForZSet().size(key);
     }
 
 
@@ -163,7 +162,7 @@ public class RedisOperator {
      * @param value value
      */
     public void setnx(String key, String value, long time, TimeUnit timeUnit) {
-        redisTemplate.opsForValue().setIfAbsent(key, value, time, timeUnit);
+        stringRedisTemplate.opsForValue().setIfAbsent(key, value, time, timeUnit);
     }
 
     /**
@@ -173,7 +172,7 @@ public class RedisOperator {
      * @param value value
      */
     public void setnx(String key, String value) {
-        redisTemplate.opsForValue().setIfAbsent(key, value);
+        stringRedisTemplate.opsForValue().setIfAbsent(key, value);
     }
 
     /**
@@ -183,7 +182,7 @@ public class RedisOperator {
      * @return value
      */
     public String get(String key) {
-        return redisTemplate.opsForValue().get(key);
+        return stringRedisTemplate.opsForValue().get(key);
     }
 
     /**
@@ -193,7 +192,7 @@ public class RedisOperator {
      * @return {@code List<String>} value
      */
     public List<String> mget(Collection<String> keys) {
-        return redisTemplate.opsForValue().multiGet(keys);
+        return stringRedisTemplate.opsForValue().multiGet(keys);
     }
 
     /**
@@ -206,7 +205,7 @@ public class RedisOperator {
 
         // nginx -> keepalive
         // redis -> pipeline
-        return redisTemplate.executePipelined((RedisCallback<String>) connection -> {
+        return stringRedisTemplate.executePipelined((RedisCallback<String>) connection -> {
             StringRedisConnection src = (StringRedisConnection) connection;
 
             for (String k : keys) {
@@ -227,7 +226,7 @@ public class RedisOperator {
      * @param value value
      */
     public void hset(String key, String field, Object value) {
-        redisTemplate.opsForHash().put(key, field, value);
+        stringRedisTemplate.opsForHash().put(key, field, value);
     }
 
     /**
@@ -238,7 +237,7 @@ public class RedisOperator {
      * @return value
      */
     public String hget(String key, String field) {
-        return (String) redisTemplate.opsForHash().get(key, field);
+        return (String) stringRedisTemplate.opsForHash().get(key, field);
     }
 
     /**
@@ -248,7 +247,7 @@ public class RedisOperator {
      * @param fields fields[]
      */
     public void hdel(String key, Object... fields) {
-        redisTemplate.opsForHash().delete(key, fields);
+        stringRedisTemplate.opsForHash().delete(key, fields);
     }
 
     /**
@@ -258,7 +257,7 @@ public class RedisOperator {
      * @return <field, value>
      */
     public Map<Object, Object> hgetall(String key) {
-        return redisTemplate.opsForHash().entries(key);
+        return stringRedisTemplate.opsForHash().entries(key);
     }
 
     // List(列表)
@@ -271,7 +270,7 @@ public class RedisOperator {
      * @return 执行 LPUSH命令后, 列表的长度
      */
     public Long lpush(String key, String value) {
-        return redisTemplate.opsForList().leftPush(key, value);
+        return stringRedisTemplate.opsForList().leftPush(key, value);
     }
 
     /**
@@ -281,7 +280,7 @@ public class RedisOperator {
      * @return 列表key的头元素
      */
     public String lpop(String key) {
-        return redisTemplate.opsForList().leftPop(key);
+        return stringRedisTemplate.opsForList().leftPop(key);
     }
 
     /**
@@ -292,6 +291,6 @@ public class RedisOperator {
      * @return 执行 LPUSH命令后, 列表的长度
      */
     public Long rpush(String key, String value) {
-        return redisTemplate.opsForList().rightPush(key, value);
+        return stringRedisTemplate.opsForList().rightPush(key, value);
     }
 }

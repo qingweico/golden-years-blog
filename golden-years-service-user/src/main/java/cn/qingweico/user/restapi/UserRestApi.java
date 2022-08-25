@@ -74,7 +74,7 @@ public class UserRestApi extends BaseRestApi {
     @PostMapping("/freezeOrNot")
     public GraceJsonResult freezeUserOrNot(String userId, Integer doStatus) {
         if (!UserStatus.isUserStatusValid(doStatus)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.USER_STATUS_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.USER_STATUS_ERROR);
         }
         userService.freezeUserOrNot(userId, doStatus);
         if (doStatus.equals(UserStatus.FROZEN.type)) {
@@ -82,14 +82,14 @@ public class UserRestApi extends BaseRestApi {
         } else if (doStatus.equals(UserStatus.ACTIVE.type)) {
             return new GraceJsonResult(ResponseStatusEnum.ACTIVATE_SUCCESS);
         }
-        return GraceJsonResult.errorCustom(ResponseStatusEnum.REQUEST_PARAM_ERROR);
+        return GraceJsonResult.error(ResponseStatusEnum.REQUEST_PARAM_ERROR);
     }
 
     @ApiOperation(value = "获得用户账户信息", notes = "获得用户账户信息", httpMethod = "GET")
     @GetMapping("/getAccountInfo")
     public GraceJsonResult getAccountInfo(String userId) {
         if (StringUtils.isBlank(userId)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.UN_LOGIN);
+            return GraceJsonResult.error(ResponseStatusEnum.UN_LOGIN);
         }
         // 根据用户id查询用户账户信息
         User user = getUser(userId);
@@ -103,7 +103,7 @@ public class UserRestApi extends BaseRestApi {
     public GraceJsonResult getUserBasicInfo(@RequestParam String userId) {
         // 判断参数不能为空
         if (StringUtils.isBlank(userId)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.UN_LOGIN);
+            return GraceJsonResult.error(ResponseStatusEnum.UN_LOGIN);
         }
         // 根据用户id查询用户基本信息
         User user = getUser(userId);
@@ -139,7 +139,7 @@ public class UserRestApi extends BaseRestApi {
     public GraceJsonResult queryByIds(String userIds) {
 
         if (StringUtils.isBlank(userIds)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
         }
         List<UserBasicInfoVO> userInfoList = new ArrayList<>();
         List<String> userIdList = JsonUtils.jsonToList(userIds, String.class);

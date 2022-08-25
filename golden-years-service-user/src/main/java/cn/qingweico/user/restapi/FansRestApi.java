@@ -42,7 +42,7 @@ public class FansRestApi extends BaseRestApi {
         String authorId = fansBO.getAuthorId();
         String fanId = fansBO.getFanId();
         if (Objects.equals(authorId, SysConf.EMPTY_STRING) || Objects.equals(fanId, SysConf.EMPTY_STRING)) {
-            return GraceJsonResult.errorCustom(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            return GraceJsonResult.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
         }
         if (authorId.equals(fanId)) {
             return new GraceJsonResult(ResponseStatusEnum.CANNOT_FOLLOW_ONESELF);

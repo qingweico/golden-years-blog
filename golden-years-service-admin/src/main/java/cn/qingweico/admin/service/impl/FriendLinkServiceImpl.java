@@ -9,11 +9,9 @@ import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -71,11 +69,11 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
     @Override
     public List<FriendLink> queryIndexFriendLinkList(Integer isDelete) {
         String cacheFriendLinkKey = RedisConf.REDIS_FRIEND_LINK;
-        String cache = redisOperator.get(cacheFriendLinkKey);
+        String cache = redisTemplate.get(cacheFriendLinkKey);
         List<FriendLink> friendLinkList;
         if (StringUtils.isBlank(cache)) {
             friendLinkList = repo.getAllByIsDelete(isDelete);
-            redisOperator.set(cacheFriendLinkKey, JsonUtils.objectToJson(friendLinkList));
+            redisTemplate.set(cacheFriendLinkKey, JsonUtils.objectToJson(friendLinkList));
         } else {
             friendLinkList = JsonUtils.jsonToList(cache, FriendLink.class);
         }
