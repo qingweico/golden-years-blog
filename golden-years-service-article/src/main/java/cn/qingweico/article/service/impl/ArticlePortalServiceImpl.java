@@ -14,7 +14,7 @@ import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.vo.*;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -45,11 +45,11 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     private TagMapper tagMapper;
 
     @Override
-    public PagedGridResult queryPortalArticleList(String keyword,
-                                                  String category,
-                                                  String tag,
-                                                  Integer page,
-                                                  Integer pageSize) {
+    public PagedResult queryPortalArticleList(String keyword,
+                                              String category,
+                                              String tag,
+                                              Integer page,
+                                              Integer pageSize) {
 
 
         Example example = new Example(Article.class);
@@ -81,14 +81,14 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedGridResult queryArticleListOfAuthor(String author,
-                                                    Integer page,
-                                                    Integer pageSize) {
+    public PagedResult queryArticleListOfAuthor(String author,
+                                                Integer page,
+                                                Integer pageSize) {
 
         return getPagedGridResult(author, page, pageSize);
     }
 
-    private PagedGridResult getPagedGridResult(String author, Integer page, Integer pageSize) {
+    private PagedResult getPagedGridResult(String author, Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
         criteria.andEqualTo(SysConf.AUTHOR_ID, author);
@@ -205,7 +205,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedGridResult getArticleListByTime(String yearAndMonth, Integer page, Integer pageSize) {
+    public PagedResult getArticleListByTime(String yearAndMonth, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
         List<Article> articleList = articleMapper.getArticleByTime(yearAndMonth);
         PageInfo<Article> pageInfo = new PageInfo<>(articleList);
@@ -219,7 +219,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
             articleArchiveVO.setTagList(tagList);
             archiveVOList.add(articleArchiveVO);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(archiveVOList);
         pgr.setCurrentPage(pageInfo.getPageNum());
         pgr.setRecords(pageInfo.getTotal());
@@ -233,12 +233,12 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedGridResult timeline(String userId, Integer page, Integer pageSize) {
+    public PagedResult timeline(String userId, Integer page, Integer pageSize) {
         return getPagedGridResult(userId, page, pageSize);
     }
 
     @Override
-    public PagedGridResult queryArticleListByCategoryId(String userId, String categoryId, Integer page, Integer pageSize) {
+    public PagedResult queryArticleListByCategoryId(String userId, String categoryId, Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
         criteria.andEqualTo(SysConf.AUTHOR_ID, userId);
@@ -256,7 +256,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
             articleClassifyVO.setArticleId(article.getId());
             articleClassifyVOList.add(articleClassifyVO);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(articleClassifyVOList);
         pgr.setCurrentPage(pageInfo.getPageNum());
         pgr.setRecords(pageInfo.getTotal());

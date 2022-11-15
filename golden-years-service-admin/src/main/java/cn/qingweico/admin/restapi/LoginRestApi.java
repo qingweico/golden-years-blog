@@ -13,8 +13,8 @@ import cn.qingweico.pojo.Admin;
 import cn.qingweico.pojo.CategoryMenu;
 import cn.qingweico.pojo.Role;
 import cn.qingweico.pojo.bo.AdminLoginBO;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.*;
 import io.jsonwebtoken.Claims;
 import io.swagger.annotations.Api;
@@ -54,10 +54,10 @@ public class LoginRestApi extends BaseRestApi {
 
     @ApiOperation(value = "账户登陆", notes = "账户登陆", httpMethod = "POST")
     @PostMapping("/login")
-    public GraceJsonResult login(@RequestBody AdminLoginBO adminLoginBO) {
+    public Result login(@RequestBody AdminLoginBO adminLoginBO) {
         Admin admin = adminService.queryAdminByUsername(adminLoginBO.getUsername());
         if (admin == null) {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
+            return Result.r(Response.ADMIN_NOT_EXIT_ERROR);
         }
         boolean isPwdMatch = BCrypt.checkpw(adminLoginBO.getPassword(), admin.getPassword());
         if (isPwdMatch) {
@@ -65,15 +65,15 @@ public class LoginRestApi extends BaseRestApi {
             String jsonWebToken = JwtUtils.createJwt(adminId);
             adminService.doSaveLoginLog(adminId);
             adminService.doSaveToken(admin, jsonWebToken);
-            return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, jsonWebToken);
+            return Result.ok(Response.LOGIN_SUCCESS, jsonWebToken);
         } else {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_NOT_EXIT_ERROR);
+            return Result.r(Response.ADMIN_NOT_EXIT_ERROR);
         }
     }
 
     @ApiOperation(value = "获取当前登陆用户的菜单", notes = "获取当前登陆用户的菜单")
     @GetMapping(value = "/getMenu")
-    public GraceJsonResult getMenu(HttpServletRequest request) {
+    public Result getMenu(HttpServletRequest request) {
 
         Collection<CategoryMenu> categoryMenuList;
         String name = request.getParameter(SysConf.NAME);
@@ -125,20 +125,20 @@ public class LoginRestApi extends BaseRestApi {
         Map<String, Object> map = new HashMap<>(SysConf.NUM_TWO);
         map.put(SysConf.PARENT_LIST, list);
         map.put(SysConf.SON_LIST, childCategoryMenuList);
-        return GraceJsonResult.ok(map);
+        return Result.ok(map);
     }
 
     @ApiOperation(value = "获取当前登陆用户的信息", notes = "获取当前登陆用户的信息")
     @GetMapping(value = "/getInfo")
-    public GraceJsonResult getInfo() {
+    public Result getInfo() {
         String tokenKey = RedisConf.REDIS_ADMIN_TOKEN;
         String infoKey = RedisConf.REDIS_ADMIN_INFO;
-        return GraceJsonResult.ok(getLoginUser(Admin.class, tokenKey, infoKey));
+        return Result.ok(getLoginUser(Admin.class, tokenKey, infoKey));
     }
 
     @ApiOperation(value = "退出登陆", notes = "退出登陆", httpMethod = "POST")
     @PostMapping("/logout")
-    public GraceJsonResult logout() {
+    public Result logout() {
         HttpServletRequest request = ServletReqUtils.getRequest();
         String token = request.getHeader("Authorization");
         String adminId = SysConf.EMPTY_STRING;
@@ -148,35 +148,35 @@ public class LoginRestApi extends BaseRestApi {
                 adminId = claims.get(SysConf.USER_ID, String.class);
             }
         } catch (Exception e) {
-            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+            return Result.r(Response.TICKET_INVALID);
         }
-        redisOperator.del(RedisConf.REDIS_ADMIN_INFO + SysConf.DELIMITER_COLON + adminId);
-        redisOperator.del(RedisConf.REDIS_ADMIN_TOKEN + SysConf.DELIMITER_COLON + adminId);
-        return new GraceJsonResult(ResponseStatusEnum.LOGOUT_SUCCESS);
+        redisTemplate.del(RedisConf.REDIS_ADMIN_INFO + SysConf.DELIMITER_COLON + adminId);
+        redisTemplate.del(RedisConf.REDIS_ADMIN_TOKEN + SysConf.DELIMITER_COLON + adminId);
+        return Result.r(Response.LOGOUT_SUCCESS);
     }
 
     @ApiOperation(value = "人脸登陆", notes = "人脸登陆", httpMethod = "POST")
     @PostMapping("/face")
-    public GraceJsonResult face(@RequestBody AdminLoginBO adminLoginBO) {
+    public Result face(@RequestBody AdminLoginBO adminLoginBO) {
         // 判断用户名和faceId不为空
         if (StringUtils.isBlank(adminLoginBO.getUsername())) {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_USERNAME_NULL_ERROR);
+            return Result.r(Response.ADMIN_USERNAME_NULL_ERROR);
         }
         Admin admin = adminService.queryAdminByUsername(adminLoginBO.getUsername());
         if (admin == null) {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_IS_NOT_PRESENT);
+            return Result.r(Response.ADMIN_IS_NOT_PRESENT);
         }
         String base64 = adminLoginBO.getImg64();
         if (StringUtils.isBlank(base64)) {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_FACE_NULL_ERROR);
+            return Result.r(Response.ADMIN_FACE_NULL_ERROR);
         }
         // 从数据库中查询faceId
         String adminFaceId = admin.getFaceId();
         if (StringUtils.isBlank(adminFaceId)) {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_FACE_LOGIN_NOT_ENABLE);
+            return Result.r(Response.ADMIN_FACE_LOGIN_NOT_ENABLE);
         }
         // 请求文件服务, 获得人脸数据的base64数据
-        GraceJsonResult result = client.getFaceBase64(adminFaceId);
+        Result result = client.getFaceBase64(adminFaceId);
         String base64Db = null;
         if (result != null) {
             base64Db = (String) result.getData();
@@ -185,12 +185,12 @@ public class LoginRestApi extends BaseRestApi {
         boolean pass = faceVerify.faceVerify(FaceVerifyType.BASE64.type, base64, base64Db, 60.0f);
 
         if (!pass) {
-            return GraceJsonResult.error(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
+            return Result.r(Response.ADMIN_FACE_LOGIN_ERROR);
         }
         String adminId = admin.getId();
         String jsonWebToken = JwtUtils.createJwt(adminId);
         adminService.doSaveLoginLog(adminId);
         adminService.doSaveToken(admin, jsonWebToken);
-        return new GraceJsonResult(ResponseStatusEnum.FACE_PASS, jsonWebToken);
+        return Result.ok(Response.FACE_PASS, jsonWebToken);
     }
 }

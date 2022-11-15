@@ -1,6 +1,6 @@
 package cn.qingweico.user.service;
 
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 /**
  * 用户登陆日志
@@ -25,7 +25,7 @@ public interface LoginLogService {
      * @param pageSize 每页的数量
      * @return PagedGridResult
      */
-    PagedGridResult getLoginLogList(String userId, Integer page, Integer pageSize);
+    PagedResult getLoginLogList(String userId, Integer page, Integer pageSize);
 
     /**
      * 定时清理用户的登陆日志信息(一个月内)

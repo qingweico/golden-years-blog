@@ -3,13 +3,10 @@ package cn.qingweico.article.service;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.Tag;
-import cn.qingweico.pojo.vo.ArticleArchiveVO;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
 import cn.qingweico.pojo.vo.CategoryVO;
-import cn.qingweico.util.PagedGridResult;
-import org.springframework.web.bind.annotation.RequestParam;
+import cn.qingweico.util.PagedResult;
 
-import java.util.Date;
 import java.util.List;
 
 
@@ -29,13 +26,13 @@ public interface ArticlePortalService {
      * @param tag      按照文章标签查询
      * @param page     起始查询页面
      * @param pageSize 每页查询的数量
-     * @return {@link PagedGridResult}
+     * @return {@link PagedResult}
      */
-    PagedGridResult queryPortalArticleList(String keyword,
-                                           String category,
-                                           String tag,
-                                           Integer page,
-                                           Integer pageSize);
+    PagedResult queryPortalArticleList(String keyword,
+                                       String category,
+                                       String tag,
+                                       Integer page,
+                                       Integer pageSize);
 
     /**
      * 查询主页热门文章
@@ -50,11 +47,11 @@ public interface ArticlePortalService {
      * @param author   作家id
      * @param page     起始查询页面
      * @param pageSize 每页查询的数量
-     * @return {@link PagedGridResult}
+     * @return {@link PagedResult}
      */
-    PagedGridResult queryArticleListOfAuthor(String author,
-                                             Integer page,
-                                             Integer pageSize);
+    PagedResult queryArticleListOfAuthor(String author,
+                                         Integer page,
+                                         Integer pageSize);
 
     /**
      * 查询作者主页文章排行
@@ -103,9 +100,9 @@ public interface ArticlePortalService {
      * @param pageSize     每页查询的数量
      * @return PagedGridResult
      */
-    PagedGridResult getArticleListByTime(String yearAndMonth,
-                                         Integer page,
-                                         Integer pageSize);
+    PagedResult getArticleListByTime(String yearAndMonth,
+                                     Integer page,
+                                     Integer pageSize);
 
 
     /**
@@ -124,7 +121,7 @@ public interface ArticlePortalService {
      * @param pageSize 每页查询的数量
      * @return PagedGridResult
      */
-    PagedGridResult timeline(String userId, Integer page, Integer pageSize);
+    PagedResult timeline(String userId, Integer page, Integer pageSize);
 
     /**
      * 主页分类功能
@@ -135,10 +132,10 @@ public interface ArticlePortalService {
      * @param pageSize   每页数量
      * @return PagedGridResult PagedGridResult
      */
-    PagedGridResult queryArticleListByCategoryId(String userId,
-                                                 String categoryId,
-                                                 Integer page,
-                                                 Integer pageSize);
+    PagedResult queryArticleListByCategoryId(String userId,
+                                             String categoryId,
+                                             Integer page,
+                                             Integer pageSize);
 
     /**
      * 获取文章的标签

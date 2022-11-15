@@ -7,7 +7,7 @@ import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UserInfoBO;
 import cn.qingweico.user.mapper.UserMapper;
@@ -16,7 +16,7 @@ import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.DesensitizationUtil;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -53,13 +53,13 @@ public class UserServiceImpl extends BaseService implements UserService {
     private final static String DEFAULT_PASSWORD = "123456";
 
     @Override
-    public PagedGridResult queryUserList(String nickname,
-                                         Integer status,
-                                         String mobile,
-                                         Date startDate,
-                                         Date endDate,
-                                         Integer page,
-                                         Integer pageSize) {
+    public PagedResult queryUserList(String nickname,
+                                     Integer status,
+                                     String mobile,
+                                     Date startDate,
+                                     Date endDate,
+                                     Integer page,
+                                     Integer pageSize) {
 
         Example example = new Example(User.class);
         example.orderBy(SysConf.CREATE_TIME).desc();
@@ -97,7 +97,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             String key = RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId;
             refreshCache(key);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
 
     }
@@ -133,7 +133,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 SysConf.ARTICLE_CREATE_FAVORITES_DO, userId);
         if (userMapper.insert(user) < 0) {
             log.error("create user error");
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
         return user;
     }
@@ -163,7 +163,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         try {
             int updatedNum = userMapper.updateByPrimaryKeySelective(userInfo);
             if (updatedNum != 1) {
-                GraceException.error(ResponseStatusEnum.USER_UPDATE_ERROR);
+                GraceException.error(Response.USER_UPDATE_ERROR);
             }
         } finally {
             lock.unlock();
@@ -215,7 +215,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             String key = RedisConf.REDIS_USER_INFO;
             refreshCache(key);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
@@ -227,7 +227,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             String key = RedisConf.REDIS_USER_INFO;
             refreshCache(key);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 

@@ -11,7 +11,7 @@ import java.util.List;
  * @date 2021/9/9
  */
 @Data
-public class PagedGridResult {
+public class PagedResult {
     /**
      * 当前页数
      */

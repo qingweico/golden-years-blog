@@ -2,8 +2,8 @@ package cn.qingweico.admin.restapi;
 
 import cn.qingweico.admin.service.WebConfigService;
 import cn.qingweico.pojo.WebConfig;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +26,15 @@ public class WebConfigRestApi {
 
     @ApiOperation(value = "获取网站配置", notes = "获取网站配置")
     @GetMapping("/getWebConfig")
-    public GraceJsonResult getWebConfig() {
-        return GraceJsonResult.ok(webConfigService.getWebConfig());
+    public Result getWebConfig() {
+        return Result.ok(webConfigService.getWebConfig());
     }
 
     @ApiOperation(value = "修改网站配置", notes = "修改网站配置")
     @PostMapping("/alterWebConfig")
-    public GraceJsonResult alterWebConfig(@RequestBody WebConfig webConfig) {
+    public Result alterWebConfig(@RequestBody WebConfig webConfig) {
         webConfigService.alterWebConfig(webConfig);
-        return new GraceJsonResult(ResponseStatusEnum.ALERT_SUCCESS);
+        return Result.r(Response.ALERT_SUCCESS);
     }
 }
 

@@ -2,7 +2,7 @@ package cn.qingweico.api.config;
 
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -49,7 +49,7 @@ public class DateConverterConfig implements Converter<String, Date> {
         } else if (source.matches("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}:\\d{1,2}$")) {
             return parseDate(source, FORMATTER_LIST.get(3));
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_DATE_PARSER_ERROR);
+            GraceException.error(Response.SYSTEM_DATE_PARSER_ERROR);
         }
         return null;
     }

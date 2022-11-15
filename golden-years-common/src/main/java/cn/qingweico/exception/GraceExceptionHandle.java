@@ -1,7 +1,7 @@
 package cn.qingweico.exception;
 
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
@@ -29,25 +29,27 @@ public class GraceExceptionHandle {
 
     @ExceptionHandler({CustomException.class})
     @ResponseBody
-    public GraceJsonResult returnException(CustomException ex) {
-        log.error(ExceptionUtil.getExceptionMessage(ex));
-        return GraceJsonResult.error(ex.getResponseStatus());
+    public Result returnException(CustomException ex) {
+        log.error(ExceptionUtil.getRootErrorMessage(ex));
+        return Result.r(ex.getResponseStatus());
     }
 
     @ExceptionHandler({MaxUploadSizeExceededException.class})
     @ResponseBody
-    public GraceJsonResult returnMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
-        log.error(ExceptionUtil.getExceptionMessage(ex));
-        return GraceJsonResult.error(ResponseStatusEnum.FILE_MAX_SIZE_ERROR);
+    public Result returnMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        log.error(ExceptionUtil.getRootErrorMessage(ex));
+        return Result.r(Response.FILE_MAX_SIZE_ERROR);
     }
+
+    ////JSR303 校验 中文提示 org.hibernate.validator.ValidationMessages_zh_CN.properties
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseBody
-    public GraceJsonResult returnMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public Result returnMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         // 判断 BindingResult 中是否保存了错误的验证信息, 如果有则返回
         BindingResult result = ex.getBindingResult();
         Map<String, String> map = getErrors(result);
-        return GraceJsonResult.error(map);
+        return Result.error(map);
     }
 
     /**

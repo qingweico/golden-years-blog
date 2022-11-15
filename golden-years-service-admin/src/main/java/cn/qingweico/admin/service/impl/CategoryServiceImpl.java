@@ -8,10 +8,10 @@ import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.vo.CategoryVO;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +54,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
             refreshCache(k1);
             refreshCache(k2);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
@@ -67,7 +67,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
             refreshCache(k1);
             refreshCache(k2);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
 
     }
@@ -86,7 +86,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     }
 
     @Override
-    public PagedGridResult queryCategoryList(String keyword, Boolean sort, Integer page, Integer pageSize) {
+    public PagedResult queryCategoryList(String keyword, Boolean sort, Integer page, Integer pageSize) {
         Example example = new Example(Category.class);
         example.orderBy("createTime").desc();
         Example.Criteria criteria = example.createCriteria();
@@ -116,7 +116,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
             String key = RedisConf.REDIS_ARTICLE_CATEGORY;
             refreshCache(key);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 

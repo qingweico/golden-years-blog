@@ -1,8 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.admin.restapi.SystemConfigRestApi;
 import cn.qingweico.pojo.SystemConfig;
-import cn.qingweico.result.GraceJsonResult;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ package cn.qingweico.user.service;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.pojo.vo.FansCountsVO;
 import cn.qingweico.pojo.vo.RegionRatioVO;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 import java.util.List;
 
@@ -48,9 +48,9 @@ public interface FanService {
      * @param pageSize 每页显示的条数
      * @return PagedGridResult
      */
-    PagedGridResult getMyFansList(String authorId,
-                                  Integer page,
-                                  Integer pageSize);
+    PagedResult getMyFansList(String authorId,
+                              Integer page,
+                              Integer pageSize);
 
     /**
      * 作者查询我的所有粉丝(elasticSearch)
@@ -60,9 +60,9 @@ public interface FanService {
      * @param pageSize 每页显示的条数
      * @return PagedGridResult
      */
-    PagedGridResult getMyFansListViaEs(String authorId,
-                                       Integer page,
-                                       Integer pageSize);
+    PagedResult getMyFansListViaEs(String authorId,
+                                   Integer page,
+                                   Integer pageSize);
 
 
     /**

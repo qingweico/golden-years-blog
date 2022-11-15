@@ -1,7 +1,7 @@
 package cn.qingweico.article.clients;
 
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 public class ArticleDetailClientFallback implements ArticleDetailClient {
 
     @Override
-    public GraceJsonResult getArticleDetail(String articleId) {
+    public Result getArticleDetail(String articleId) {
         log.warn("{}, get article detail, 文章服务不可用", DateUtils.dateToStringWithTime());
-        return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR);
+        return Result.r(Response.SYSTEM_ERROR);
     }
 }

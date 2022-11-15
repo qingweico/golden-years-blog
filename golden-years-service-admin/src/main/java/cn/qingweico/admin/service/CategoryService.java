@@ -1,7 +1,7 @@
 package cn.qingweico.admin.service;
 
 import cn.qingweico.pojo.Category;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public interface CategoryService {
      * @param pageSize 每页的数量
      * @return PagedGridResult
      */
-    PagedGridResult queryCategoryList(String keyword, Boolean sort, Integer page, Integer pageSize);
+    PagedResult queryCategoryList(String keyword, Boolean sort, Integer page, Integer pageSize);
 
 
     /**

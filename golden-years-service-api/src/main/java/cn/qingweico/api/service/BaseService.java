@@ -1,7 +1,7 @@
 package cn.qingweico.api.service;
 
 import cn.qingweico.pojo.Article;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.RedisTemplate;
 import com.github.pagehelper.PageInfo;
 import org.n3r.idworker.Sid;
@@ -22,15 +22,15 @@ public class BaseService {
     public RedisTemplate redisTemplate;
     @Autowired
     public RabbitTemplate rabbitTemplate;
-    @Resource
-    public ElasticsearchTemplate elasticsearchTemplate;
+    @Autowired
+    public ElasticsearchTemplate esTemplate;
     @Autowired
     public Sid sid;
 
-    public PagedGridResult setterPagedGrid(List<?> list,
-                                           Integer page) {
+    public PagedResult setterPagedGrid(List<?> list,
+                                       Integer page) {
         PageInfo<?> pageList = new PageInfo<>(list);
-        PagedGridResult gridResult = new PagedGridResult();
+        PagedResult gridResult = new PagedResult();
         gridResult.setRows(list);
         gridResult.setCurrentPage(page);
         gridResult.setRecords(pageList.getTotal());

@@ -110,12 +110,6 @@ spring:
       transport:
         dashboard: 106.12.136.221:8888
         port: 8719
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-
 feign:
   sentinel:
     enabled: true

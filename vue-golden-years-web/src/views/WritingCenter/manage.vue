@@ -649,11 +649,11 @@ export default {
       }
       this.$refs.form.validate((valid) => {
         if (valid) {
-          publishOrUpdate(this.form).then(response => {
+          publishOrUpdate(this.form).then(res => {
             if (this.isEdit) {
-              this.$message.success(response.msg)
+              this.$message.success(res.msg)
             } else {
-              this.$message.success(response.msg)
+              this.$message.success(res.msg)
             }
             this.queryArticleList();
             this.clearStatus();

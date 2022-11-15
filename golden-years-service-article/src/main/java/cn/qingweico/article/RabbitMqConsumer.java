@@ -22,6 +22,7 @@ public class RabbitMqConsumer {
     private ArticleDetailRestApi articleDetailRestApi;
     @RabbitListener(queues = {RabbitMqConfig.QUEUE_ARTICLE})
     public void listenQueue(String payLoad, Message message) {
+        log.info("payLoad: ---> {}, message: ---> {}", payLoad, message.toString());
         String routingKey = message.getMessageProperties().getReceivedRoutingKey();
         // 为新用户创建默认收藏夹
         if (SysConf.ARTICLE_CREATE_FAVORITES_DO.equals(routingKey)) {

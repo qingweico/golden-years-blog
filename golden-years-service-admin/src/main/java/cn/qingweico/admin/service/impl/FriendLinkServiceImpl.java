@@ -6,7 +6,7 @@ import cn.qingweico.api.service.BaseService;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.mo.FriendLink;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
     }
 
     @Override
-    public PagedGridResult getFriendLinkList(String linkName, Integer iDelete, Integer page, Integer pageSize) {
+    public PagedResult getFriendLinkList(String linkName, Integer iDelete, Integer page, Integer pageSize) {
         // start 0 not 1
         Pageable pageable = PageRequest.of(--page, pageSize);
         FriendLink fl = new FriendLink();
@@ -44,7 +44,7 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
 
         Example<FriendLink> example = Example.of(fl, exampleMatcher);
         Page<FriendLink> friendLinkPage = repo.findAll(example, pageable);
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(friendLinkPage.getContent());
         pgr.setRecords(friendLinkPage.getTotalElements());
         pgr.setCurrentPage(friendLinkPage.getNumber());

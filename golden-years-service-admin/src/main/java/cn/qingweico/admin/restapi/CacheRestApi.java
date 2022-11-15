@@ -1,8 +1,8 @@
 package cn.qingweico.admin.restapi;
 
 
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.RedisCallback;
@@ -28,7 +28,7 @@ public class CacheRestApi {
     private RedisTemplate<String, String> redisTemplate;
 
     @GetMapping()
-    public GraceJsonResult getInfo() {
+    public Result getInfo() {
         Properties info = (Properties) redisTemplate.execute((RedisCallback<Object>) RedisServerCommands::info);
         Properties commandStats = (Properties) redisTemplate.execute((RedisCallback<Object>) connection -> connection.info("commandstats"));
         Object dbSize = redisTemplate.execute((RedisCallback<Object>) RedisServerCommands::dbSize);
@@ -39,7 +39,7 @@ public class CacheRestApi {
 
         List<Map<String, String>> pieList = new ArrayList<>();
         if (commandStats == null) {
-            return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR);
+            return Result.r(Response.SYSTEM_ERROR);
         }
         commandStats.stringPropertyNames().forEach(key -> {
             Map<String, String> data = new HashMap<>(2);
@@ -49,6 +49,6 @@ public class CacheRestApi {
             pieList.add(data);
         });
         result.put("commandStats", pieList);
-        return GraceJsonResult.ok(result);
+        return Result.ok(result);
     }
 }

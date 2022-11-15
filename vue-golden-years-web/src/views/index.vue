@@ -108,7 +108,7 @@ export default {
     return {
       loadingInstance: null,
       // 初始化默认使用es
-      searchModel: 1,
+      searchModel: 0,
       isSearchModel: false,
       systemConfig: {},
       // 最新文章

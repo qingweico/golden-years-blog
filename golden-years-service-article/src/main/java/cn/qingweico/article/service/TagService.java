@@ -2,8 +2,7 @@ package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.bo.TagBO;
-import cn.qingweico.util.PagedGridResult;
-import org.springframework.web.bind.annotation.RequestParam;
+import cn.qingweico.util.PagedResult;
 
 import java.util.List;
 
@@ -23,11 +22,11 @@ public interface TagService {
      * @param pageSize 每页的数量
      * @return PagedGridResult
      */
-    PagedGridResult getTagList(String tagName,
-                               Integer status,
-                               Integer sys,
-                               Integer page,
-                               Integer pageSize);
+    PagedResult getTagList(String tagName,
+                           Integer status,
+                           Integer sys,
+                           Integer page,
+                           Integer pageSize);
 
     /**
      * 获取标签列表

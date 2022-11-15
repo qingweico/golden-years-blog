@@ -4,22 +4,20 @@ import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.PasswordAuthBO;
 import cn.qingweico.pojo.bo.SmsMobileBO;
 import cn.qingweico.user.handler.DefaultHandler;
 import cn.qingweico.user.service.UserService;
-import cn.qingweico.util.CheckUtils;
-import cn.qingweico.util.IpUtils;
-import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.JwtUtils;
+import cn.qingweico.util.*;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import io.jsonwebtoken.Claims;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,39 +40,38 @@ public class PassportRestApi extends BaseRestApi {
 
     @Resource
     private UserService userService;
+    @Resource
+    private SmsUtil smsUtil;
 
     @ApiOperation(value = "获得短信验证码", notes = "获得短信验证码", httpMethod = "GET")
     @GetMapping("/getSmsCode")
-    public GraceJsonResult getSmsCode(@RequestParam String mobile, HttpServletRequest request) {
+    public Result getSmsCode(@RequestParam String mobile, HttpServletRequest request) {
         if (!CheckUtils.checkMobileNumber(mobile)) {
-            return new GraceJsonResult(ResponseStatusEnum.ILLEGAL_MOBILE_NUMBER_FORMAT);
+            return Result.r(Response.ILLEGAL_MOBILE_NUMBER_FORMAT);
         }
         // 获取用户的ip
         String userIp = IpUtils.getRequestIp(request);
-
         // 根据用户的ip进行限制, 限制用户在60s内只能获得一次验证码
-        redisOperator.setnx60s(RedisConf.REDIS_IP + SysConf.SYMBOL_COLON + userIp, userIp);
-
-
-        String random = (int) ((Math.random() * 9 + 1) * 100000) + SysConf.EMPTY_STRING;
-
+        redisTemplate.setnx60s(RedisConf.REDIS_IP + SysConf.SYMBOL_COLON + userIp, userIp);
+        String random = RandomStringUtils.random(6,false,true);
+        smsUtil.sendSms(mobile, random);
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
-        redisOperator.set(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile, random, 2 * 60);
-        return new GraceJsonResult(ResponseStatusEnum.SMS_SEND_SUCCESS, random);
+        redisTemplate.set(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile, random, 2 * 60);
+        return Result.r(Response.SMS_SEND_SUCCESS);
     }
 
     @ApiOperation(value = "手机号码登陆", notes = "手机号码登陆", httpMethod = "POST")
     @PostMapping("/mobile")
     @SentinelResource(value = "freePwdAuth", blockHandler = "reqFrequentError",
             blockHandlerClass = DefaultHandler.class)
-    public GraceJsonResult freePwdAuth(@RequestBody SmsMobileBO registerBO) {
+    public Result freePwdAuth(@RequestBody SmsMobileBO registerBO) {
 
         String mobile = registerBO.getMobile();
         String smsCode = registerBO.getSmsCode();
         // 校验手机验证码是否匹配
-        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
+        String redisSmsCode = redisTemplate.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
-            return GraceJsonResult.error(ResponseStatusEnum.SMS_CODE_ERROR);
+            return Result.r(Response.SMS_CODE_ERROR);
         }
 
         // 查询数据库, 判断用户是否注册
@@ -84,23 +81,23 @@ public class PassportRestApi extends BaseRestApi {
             user = userService.createUser(mobile);
         } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
             // 如果用户不为空且状态为冻结则禁止该用户登陆
-            return GraceJsonResult.error(ResponseStatusEnum.USER_FROZEN);
+            return Result.r(Response.USER_FROZEN);
         }
         String jsonWebToken = JwtUtils.createJwt(user.getId());
         userService.doSaveUserAuthToken(user, jsonWebToken);
         userService.doSaveLoginLog(user.getId());
         int userStatus = user.getActiveStatus();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
-        redisOperator.del(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
+        redisTemplate.del(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put(SysConf.TOKEN, jsonWebToken);
         map.put(SysConf.USER_STATUS, user.getActiveStatus());
         if (userStatus == UserStatus.INACTIVE.type) {
-            return new GraceJsonResult(ResponseStatusEnum.WELCOME, map);
+            return Result.ok(Response.WELCOME, map);
         } else if (userStatus == UserStatus.ACTIVE.type) {
-            return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, map);
+            return Result.ok(Response.LOGIN_SUCCESS, map);
         }
-        return GraceJsonResult.error(ResponseStatusEnum.SYSTEM_ERROR);
+        return Result.r(Response.SYSTEM_ERROR);
     }
 
 
@@ -108,14 +105,14 @@ public class PassportRestApi extends BaseRestApi {
     @PostMapping("/passwd")
     @SentinelResource(value = "withPwdAuth", blockHandler = "reqFrequentError",
             blockHandlerClass = DefaultHandler.class)
-    public GraceJsonResult withPwdAuth(@RequestBody PasswordAuthBO passwordAuthBO) {
+    public Result withPwdAuth(@RequestBody PasswordAuthBO passwordAuthBO) {
         String auth = passwordAuthBO.getAuth();
         String password = passwordAuthBO.getPassword();
         User user = userService.queryUserByAuth(auth);
         if (user == null) {
-            return new GraceJsonResult(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+            return Result.r(Response.USER_NOT_EXIST_ERROR);
         } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
-            return GraceJsonResult.error(ResponseStatusEnum.USER_FROZEN);
+            return Result.r(Response.USER_FROZEN);
         }
         int userStatus = user.getActiveStatus();
         if (user.getMobile().equals(auth)
@@ -123,48 +120,48 @@ public class PassportRestApi extends BaseRestApi {
                 || user.getEmail().equals(auth)) {
             if (Objects.equals(user.getPassword(), password)) {
                 if (userStatus == UserStatus.INACTIVE.type) {
-                    return new GraceJsonResult(ResponseStatusEnum.WELCOME, user.getActiveStatus());
+                    return Result.ok(Response.WELCOME, user.getActiveStatus());
                 }
                 if (userStatus == UserStatus.ACTIVE.type) {
                     String jsonWebToken = JwtUtils.createJwt(user.getId());
                     userService.doSaveUserAuthToken(user, jsonWebToken);
                     userService.doSaveLoginLog(user.getId());
-                    return new GraceJsonResult(ResponseStatusEnum.LOGIN_SUCCESS, jsonWebToken);
+                    return Result.ok(Response.LOGIN_SUCCESS, jsonWebToken);
                 }
             }
         }
-        return new GraceJsonResult(ResponseStatusEnum.AUTH_FAIL);
+        return Result.r(Response.AUTH_FAIL);
     }
 
 
     @ApiOperation(value = "验证JWT", notes = "验证JWT", httpMethod = "GET")
     @GetMapping("/verify")
-    public GraceJsonResult authVerify(@RequestParam String token) {
+    public Result authVerify(@RequestParam String token) {
         String userId = SysConf.EMPTY_STRING;
         User user = null;
         try {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
                 userId = claims.get(SysConf.USER_ID, String.class);
-                user = JsonUtils.jsonToPojo(redisOperator.get(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId), User.class);
+                user = JsonUtils.jsonToPojo(redisTemplate.get(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId), User.class);
             }
         } catch (Exception e) {
-            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+            return Result.r(Response.TICKET_INVALID);
         }
         if (!StringUtils.isEmpty(userId)) {
-            String redisToken = redisOperator.get(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
+            String redisToken = redisTemplate.get(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
             if (StringUtils.isEmpty(redisToken)) {
-                return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+                return Result.r(Response.TICKET_INVALID);
             }
         } else {
-            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+            return Result.r(Response.TICKET_INVALID);
         }
-        return GraceJsonResult.ok(user);
+        return Result.ok(user);
     }
 
     @ApiOperation(value = "删除用户token", notes = "删除用户token", httpMethod = "POST")
     @PostMapping("/delete")
-    public GraceJsonResult deleteUserAccessToken(@RequestBody String token) {
+    public Result deleteUserAccessToken(@RequestBody String token) {
         String userId = SysConf.EMPTY_STRING;
         try {
             Claims claims = JwtUtils.parseJwt(token);
@@ -172,25 +169,25 @@ public class PassportRestApi extends BaseRestApi {
                 userId = claims.get(SysConf.USER_ID, String.class);
             }
         } catch (Exception e) {
-            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+            return Result.r(Response.TICKET_INVALID);
         }
-        redisOperator.del(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
-        redisOperator.del(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId);
-        return GraceJsonResult.ok();
+        redisTemplate.del(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + userId);
+        redisTemplate.del(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId);
+        return Result.ok();
     }
 
     @ApiOperation(value = "检查手机验证码", notes = "检查手机验证码", httpMethod = "POST")
     @PostMapping("/verify/smsCode")
-    public GraceJsonResult checkSmsCode(@RequestBody SmsMobileBO smsMobileBO) {
+    public Result checkSmsCode(@RequestBody SmsMobileBO smsMobileBO) {
         String smsCode = smsMobileBO.getSmsCode();
         String mobile = smsMobileBO.getMobile();
-        if(StringUtils.isBlank(smsCode)) {
-            return new GraceJsonResult(ResponseStatusEnum.SMS_CODE_NULL);
+        if (StringUtils.isBlank(smsCode)) {
+            return Result.r(Response.SMS_CODE_NULL);
         }
-        String redisSmsCode = redisOperator.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
-        if(!Objects.equals(smsCode, redisSmsCode)) {
-            return new GraceJsonResult(ResponseStatusEnum.SMS_CODE_ERROR);
+        String redisSmsCode = redisTemplate.get(RedisConf.MOBILE_SMS_CODE + SysConf.SYMBOL_COLON + mobile);
+        if (!Objects.equals(smsCode, redisSmsCode)) {
+            return Result.r(Response.SMS_CODE_ERROR);
         }
-        return GraceJsonResult.ok();
+        return Result.ok();
     }
 }

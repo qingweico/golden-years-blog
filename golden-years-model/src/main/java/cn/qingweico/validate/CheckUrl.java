@@ -8,6 +8,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 自定义校验注解
+ *
  * @author zqw
  * @date 2021/9/10
  */
@@ -15,6 +17,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = CheckUrlValidate.class)
 public @interface CheckUrl {
+   /// 满足 JSR303 规范
    String message() default "Url不正确";
    Class<?>[] groups() default {};
    Class<? extends Payload>[] payload() default {};

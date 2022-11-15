@@ -1,7 +1,7 @@
 package cn.qingweico.user.clients;
 
 import cn.qingweico.pojo.bo.CollectBO;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,5 +19,5 @@ public interface FavoritesClient {
      * @return GraceJsonResult
      */
     @PostMapping("createFavorites")
-    GraceJsonResult createFavorites(@RequestBody CollectBO collectBO);
+    Result createFavorites(@RequestBody CollectBO collectBO);
 }

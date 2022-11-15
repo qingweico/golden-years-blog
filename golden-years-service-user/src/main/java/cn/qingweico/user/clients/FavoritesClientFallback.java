@@ -1,8 +1,8 @@
 package cn.qingweico.user.clients;
 
 import cn.qingweico.pojo.bo.CollectBO;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Component
 public class FavoritesClientFallback implements FavoritesClient {
     @Override
-    public GraceJsonResult createFavorites(@RequestBody CollectBO collectBO) {
+    public Result createFavorites(@RequestBody CollectBO collectBO) {
         log.warn("{}, create favorites, 文章服务不可用", DateUtils.dateToStringWithTime());
-        return new GraceJsonResult(ResponseStatusEnum.SYSTEM_ERROR);
+        return Result.r(Response.SYSTEM_ERROR);
     }
 }

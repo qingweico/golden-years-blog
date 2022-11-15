@@ -1,7 +1,6 @@
 package cn.qingweico.admin.restapi;
 
-import cn.qingweico.global.SysConf;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import cn.qingweico.util.server.ServerInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,9 +21,9 @@ public class ServerMonitorRestApi {
 
     @ApiOperation(value = "获取服务信息", notes = "获取服务信息")
     @GetMapping("/getServerInfo")
-    public GraceJsonResult getInfo() {
+    public Result getInfo() {
         ServerInfo server = new ServerInfo();
         server.copyTo();
-        return GraceJsonResult.ok(server);
+        return Result.ok(server);
     }
 }

@@ -7,11 +7,11 @@ import cn.qingweico.article.service.IndexService;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.vo.*;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.eo.ArticleEo;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -53,11 +53,11 @@ public class ArticlePortalRestApi extends BaseRestApi {
 
     @ApiOperation(value = "首页查询文章列表(elasticSearch)", notes = "首页查询文章列表(elasticSearch)", httpMethod = "GET")
     @GetMapping("es/search")
-    public GraceJsonResult articleListByElasticSearch(@RequestParam String keyword,
-                                                      @RequestParam String category,
-                                                      @RequestParam String tag,
-                                                      @RequestParam Integer page,
-                                                      @RequestParam Integer pageSize) {
+    public Result articleListByElasticSearch(@RequestParam String keyword,
+                                             @RequestParam String category,
+                                             @RequestParam String tag,
+                                             @RequestParam Integer page,
+                                             @RequestParam Integer pageSize) {
         page--;
         Pageable pageable = PageRequest.of(page, pageSize);
 
@@ -107,12 +107,12 @@ public class ArticlePortalRestApi extends BaseRestApi {
             BeanUtils.copyProperties(articleEo, article);
             res.add(article);
         }
-        PagedGridResult gridResult = new PagedGridResult();
+        PagedResult gridResult = new PagedResult();
         gridResult.setRows(res);
         gridResult.setCurrentPage(page + 1);
         gridResult.setTotalPage(pagedArticle.getTotalPages());
         gridResult.setRecords(pagedArticle.getTotalElements());
-        return GraceJsonResult.ok(rebuildArticleGrid(gridResult));
+        return Result.ok(rebuildArticleGrid(gridResult));
     }
 
     private AggregatedPage<ArticleEo> queryByKeyword(String keyword, Pageable pageable) {
@@ -175,32 +175,32 @@ public class ArticlePortalRestApi extends BaseRestApi {
 
     @ApiOperation(value = "首页查询文章列表(sql)", notes = "首页查询文章列表(sql)", httpMethod = "GET")
     @GetMapping("search")
-    public GraceJsonResult articleListBySql(@RequestParam String keyword,
-                                            @RequestParam String category,
-                                            @RequestParam String tag,
-                                            @RequestParam Integer page,
-                                            @RequestParam Integer pageSize) {
+    public Result articleListBySql(@RequestParam String keyword,
+                                   @RequestParam String category,
+                                   @RequestParam String tag,
+                                   @RequestParam Integer page,
+                                   @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult res = articlePortalService.queryPortalArticleList(keyword,
+        PagedResult res = articlePortalService.queryPortalArticleList(keyword,
                 category,
                 tag,
                 page,
                 pageSize);
-        return GraceJsonResult.ok(rebuildArticleGrid(res));
+        return Result.ok(rebuildArticleGrid(res));
     }
 
     @ApiOperation(value = "首页查询分类列表", notes = "首页查询分类列表", httpMethod = "GET")
     @GetMapping("getCategoryList")
-    public GraceJsonResult getCategoryList() {
-        return GraceJsonResult.ok(articlePortalService.queryCategoryList());
+    public Result getCategoryList() {
+        return Result.ok(articlePortalService.queryCategoryList());
     }
 
     @ApiOperation(value = "首页文章排行", notes = "首页文章排行", httpMethod = "GET")
     @GetMapping("/rank")
-    public GraceJsonResult hotList(@RequestParam Integer page,
-                                   @RequestParam Integer pageSize) {
+    public Result hotList(@RequestParam Integer page,
+                          @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        long size = redisOperator.zsetSize(RedisConf.ZSET_ARTICLE_RANK);
+        long size = redisTemplate.zsetSize(RedisConf.ZSET_ARTICLE_RANK);
         // 如果zset key不存在则返回0
         if (size == 0) {
             List<Article> list = articlePortalService.queryHotArticle();
@@ -208,12 +208,12 @@ public class ArticlePortalRestApi extends BaseRestApi {
                 int influence = computeArticleInfluence(article.getId());
                 String articleJson = JsonUtils.objectToJson(article);
                 size = list.size();
-                redisOperator.zsetAdd(RedisConf.ZSET_ARTICLE_RANK, articleJson, influence);
+                redisTemplate.zsetAdd(RedisConf.ZSET_ARTICLE_RANK, articleJson, influence);
                 // 并设置5分钟过期时间即文章排行榜的刷新时间为5分钟
-                redisOperator.expire(RedisConf.ZSET_ARTICLE_RANK, 5, TimeUnit.MINUTES);
+                redisTemplate.expire(RedisConf.ZSET_ARTICLE_RANK, 5, TimeUnit.MINUTES);
             }
         }
-        Set<String> articleJson = redisOperator.zsetRevRange(RedisConf.ZSET_ARTICLE_RANK, (long) (page - 1) * pageSize,
+        Set<String> articleJson = redisTemplate.zsetRevRange(RedisConf.ZSET_ARTICLE_RANK, (long) (page - 1) * pageSize,
                 (pageSize - 1) + (long) (page - 1) * pageSize);
 
         List<Article> result = new ArrayList<>();
@@ -221,86 +221,86 @@ public class ArticlePortalRestApi extends BaseRestApi {
             Article article = JsonUtils.jsonToPojo(json, Article.class);
             result.add(article);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setCurrentPage(page);
         pgr.setRecords(size);
         pgr.setTotalPage((size / pageSize) + 1);
         pgr.setRows(result);
-        return GraceJsonResult.ok(rebuildArticleGrid(pgr));
+        return Result.ok(rebuildArticleGrid(pgr));
     }
 
     @GetMapping("/homepage")
     @ApiOperation(value = "查询作者发布的所有文章列表", notes = "查询作者发布的所有文章列表", httpMethod = "GET")
-    public GraceJsonResult queryArticleListByAuthorId(@RequestParam String authorId,
-                                                      @RequestParam Integer page,
-                                                      @RequestParam Integer pageSize) {
+    public Result queryArticleListByAuthorId(@RequestParam String authorId,
+                                             @RequestParam Integer page,
+                                             @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult gridResult = articlePortalService.queryArticleListOfAuthor(authorId, page, pageSize);
-        return GraceJsonResult.ok(rebuildArticleGrid(gridResult));
+        PagedResult gridResult = articlePortalService.queryArticleListOfAuthor(authorId, page, pageSize);
+        return Result.ok(rebuildArticleGrid(gridResult));
     }
 
     @GetMapping("rank/{id}")
     @ApiOperation(value = "查询个人中心热门文章", notes = "查询个人中心热门文章", httpMethod = "GET")
-    public GraceJsonResult queryGoodArticleListOfAuthor(@PathVariable("id") String authorId) {
-        long size = redisOperator.zsetSize(RedisConf.ZSET_ARTICLE_USER_RANK);
+    public Result queryGoodArticleListOfAuthor(@PathVariable("id") String authorId) {
+        long size = redisTemplate.zsetSize(RedisConf.ZSET_ARTICLE_USER_RANK);
         if (size == 0) {
             List<Article> list = articlePortalService.queryGoodArticleListOfAuthor(authorId);
             for (Article article : list) {
                 int influence = computeArticleInfluence(article.getId());
                 String articleJson = JsonUtils.objectToJson(article);
-                redisOperator.zsetAdd(RedisConf.ZSET_ARTICLE_USER_RANK, articleJson, influence);
-                redisOperator.expire(RedisConf.ZSET_ARTICLE_USER_RANK, 5, TimeUnit.MINUTES);
+                redisTemplate.zsetAdd(RedisConf.ZSET_ARTICLE_USER_RANK, articleJson, influence);
+                redisTemplate.expire(RedisConf.ZSET_ARTICLE_USER_RANK, 5, TimeUnit.MINUTES);
             }
         }
         // 默认只展示5篇热门文章
-        Set<String> articleJson = redisOperator.zsetRevRange(RedisConf.ZSET_ARTICLE_USER_RANK, SysConf.NUM_ZERO, SysConf.NUM_FOUR);
+        Set<String> articleJson = redisTemplate.zsetRevRange(RedisConf.ZSET_ARTICLE_USER_RANK, SysConf.NUM_ZERO, SysConf.NUM_FOUR);
         List<UserArticleRank> result = new ArrayList<>();
         for (String json : articleJson) {
             Article article = JsonUtils.jsonToPojo(json, Article.class);
             UserArticleRank userArticleRank = new UserArticleRank();
             if(article == null) {
                 log.error("queryGoodArticleListOfAuthor: article is null");
-                return GraceJsonResult.error();
+                return Result.error();
             }
             BeanUtils.copyProperties(article, userArticleRank);
             result.add(userArticleRank);
         }
-        return GraceJsonResult.ok(result);
+        return Result.ok(result);
     }
 
     @GetMapping("getArticleByTime")
     @ApiOperation(value = "通过时间归类文章", notes = "通过时间归类文章", httpMethod = "GET")
-    public GraceJsonResult queryArticleByTime(@RequestParam Integer page,
-                                              @RequestParam Integer pageSize,
-                                              @RequestParam String monthAndYear) {
+    public Result queryArticleByTime(@RequestParam Integer page,
+                                     @RequestParam Integer pageSize,
+                                     @RequestParam String monthAndYear) {
         checkPagingParams(page, pageSize);
-        PagedGridResult articleArchiveVOList = articlePortalService.getArticleListByTime(monthAndYear, page, pageSize);
-        return GraceJsonResult.ok(articleArchiveVOList);
+        PagedResult articleArchiveVOList = articlePortalService.getArticleListByTime(monthAndYear, page, pageSize);
+        return Result.ok(articleArchiveVOList);
     }
 
     @GetMapping("getArchiveTimeList")
     @ApiOperation(value = "获取归档时间列表", notes = "获取归档时间列表", httpMethod = "GET")
-    public GraceJsonResult getArchiveTimeList(@RequestParam String userId) {
-        return GraceJsonResult.ok(articlePortalService.queryArchiveTimeList(userId));
+    public Result getArchiveTimeList(@RequestParam String userId) {
+        return Result.ok(articlePortalService.queryArchiveTimeList(userId));
     }
 
     @GetMapping("timeline")
     @ApiOperation(value = "主页文章时间线功能", notes = "主页文章时间线功能", httpMethod = "GET")
-    public GraceJsonResult timeline(@RequestParam String userId,
-                                    @RequestParam Integer page,
-                                    @RequestParam Integer pageSize) {
+    public Result timeline(@RequestParam String userId,
+                           @RequestParam Integer page,
+                           @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult result = articlePortalService.timeline(userId, page, pageSize);
-        return GraceJsonResult.ok(result);
+        PagedResult result = articlePortalService.timeline(userId, page, pageSize);
+        return Result.ok(result);
     }
 
     @GetMapping("getArticleListByCategoryId")
     @ApiOperation(value = "主页分类功能", notes = "主页分类功能", httpMethod = "GET")
-    public GraceJsonResult getArticleListByCategoryId(@RequestParam String userId,
-                                                      @RequestParam String categoryId,
-                                                      @RequestParam Integer page,
-                                                      @RequestParam Integer pageSize) {
-        return GraceJsonResult.ok(articlePortalService.queryArticleListByCategoryId(userId,
+    public Result getArticleListByCategoryId(@RequestParam String userId,
+                                             @RequestParam String categoryId,
+                                             @RequestParam Integer page,
+                                             @RequestParam Integer pageSize) {
+        return Result.ok(articlePortalService.queryArticleListByCategoryId(userId,
                 categoryId,
                 page, pageSize));
     }
@@ -324,25 +324,25 @@ public class ArticlePortalRestApi extends BaseRestApi {
 
     @ApiOperation(value = "获取每个标签下文章数目", notes = "获取每个标签下文章数目")
     @GetMapping(value = "/getBlogCountByTag")
-    public GraceJsonResult getBlogCountByTag() {
-        return GraceJsonResult.ok(indexService.getBlogCountByTag());
+    public Result getBlogCountByTag() {
+        return Result.ok(indexService.getBlogCountByTag());
     }
 
     @ApiOperation(value = "获取一年内的文章贡献数", notes = "获取一年内的文章贡献数")
     @GetMapping(value = "/getBlogContributeCount")
-    public GraceJsonResult getBlogContributeCount() {
-        return GraceJsonResult.ok(indexService.getBlogContributeCount());
+    public Result getBlogContributeCount() {
+        return Result.ok(indexService.getBlogContributeCount());
     }
 
     @ApiOperation(value = "首页查询带有文章数量的文章类别列表", notes = "首页查询带有文章数量的文章类别列表", httpMethod = "GET")
     @GetMapping("category/getCategoryListWithArticleCount")
-    public GraceJsonResult queryEachCategoryArticleCount() {
-        return GraceJsonResult.ok(articlePortalService.getCategoryListWithArticleCount());
+    public Result queryEachCategoryArticleCount() {
+        return Result.ok(articlePortalService.getCategoryListWithArticleCount());
     }
 
     // ########################################### 辅助函数 ###########################################
 
-    private PagedGridResult rebuildArticleGrid(PagedGridResult gridResult) {
+    private PagedResult rebuildArticleGrid(PagedResult gridResult) {
         String articleListJson = JsonUtils.objectToJson(gridResult.getRows());
         List<Article> rows = JsonUtils.jsonToList(articleListJson, Article.class);
         Set<String> idSet = new HashSet<>();
@@ -358,7 +358,7 @@ public class ArticlePortalRestApi extends BaseRestApi {
 
         }
         // redis multi get
-        List<String> countsRedisList = redisOperator.mget(idList);
+        List<String> countsRedisList = redisTemplate.mget(idList);
 
         List<UserBasicInfoVO> authorList = getUserInfoListByIdsClient(idSet);
         List<IndexArticleVO> indexArticleList = new ArrayList<>();
@@ -434,7 +434,7 @@ public class ArticlePortalRestApi extends BaseRestApi {
 
     public List<UserBasicInfoVO> getUserInfoListByIdsClient(Set<?> idSet) {
         List<UserBasicInfoVO> userBasicInfoVOList;
-        GraceJsonResult result = client.queryByIds(JsonUtils.objectToJson(idSet));
+        Result result = client.queryByIds(JsonUtils.objectToJson(idSet));
         if (result != null) {
             String userJson = JsonUtils.objectToJson(result.getData());
             userBasicInfoVOList = JsonUtils.jsonToList(userJson, UserBasicInfoVO.class);

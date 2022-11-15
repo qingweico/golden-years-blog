@@ -1,6 +1,6 @@
 package cn.qingweico.admin.clients;
 
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,7 +18,7 @@ public interface FaceBase64Client {
     * @return GraceJsonResult
     */
    @GetMapping("readFace64InGridFS")
-   GraceJsonResult getFaceBase64(@RequestParam("faceId")String faceId);
+   Result getFaceBase64(@RequestParam("faceId")String faceId);
 
    /**
     * 根据faceId删除GridFs中的人脸信息
@@ -26,5 +26,5 @@ public interface FaceBase64Client {
     * @return GraceJsonResult
     */
    @GetMapping("removeGridFsFile")
-   GraceJsonResult removeGridFsFile(@RequestParam("faceId")String faceId);
+   Result removeGridFsFile(@RequestParam("faceId")String faceId);
 }

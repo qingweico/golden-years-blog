@@ -1,7 +1,7 @@
 package cn.qingweico.user.handler;
 
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DefaultHandler {
-    public static GraceJsonResult reqFrequentError(BlockException e) {
+    public static Result reqFrequentError(BlockException e) {
         log.warn("{}", e.getMessage());
-        return new GraceJsonResult(ResponseStatusEnum.SYSTEM_REQUEST_REFUSE);
+        return Result.r(Response.SYSTEM_REQUEST_REFUSE);
     }
 }

@@ -6,7 +6,7 @@ import cn.qingweico.pojo.UserLoginLog;
 import cn.qingweico.user.mapper.UserLoginLogMapper;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.util.AddressUtil;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.ServletReqUtils;
 import com.github.pagehelper.PageHelper;
 import eu.bitwalker.useragentutils.UserAgent;
@@ -57,9 +57,9 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         userLoginLogMapper.insert(userLoginLog);
     }
     @Override
-    public PagedGridResult getLoginLogList(String userId,
-                                           Integer page,
-                                           Integer pageSize) {
+    public PagedResult getLoginLogList(String userId,
+                                       Integer page,
+                                       Integer pageSize) {
 
         Example loginLogExample = new Example(UserLoginLog.class);
         loginLogExample.orderBy(SysConf.LOGIN_TIME).desc();

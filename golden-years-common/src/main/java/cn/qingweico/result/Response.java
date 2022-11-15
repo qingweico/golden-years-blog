@@ -7,7 +7,7 @@ package cn.qingweico.result;
  * @date 2021/9/5
  */
 
-public enum ResponseStatusEnum {
+public enum Response {
 
     // 200
     SUCCESS(200, true, "操作成功!"),
@@ -107,6 +107,7 @@ public enum ResponseStatusEnum {
     ARTICLE_WITHDRAW_ERROR(585, false, "文章撤回失败!"),
     ARTICLE_REVIEW_ERROR(586, false, "文章审核出错!"),
     ARTICLE_NOT_EXIST(587, false, "文章不存在!"),
+    CHECK_INFO(588, false, "请检查您输入的信息!"),
 
 
     // 系统错误,未预期的错误 55x
@@ -130,7 +131,7 @@ public enum ResponseStatusEnum {
     /**
      * 响应业务状态
      */
-    private final Integer status;
+    private final Integer code;
     /**
      * 调用是否成功
      */
@@ -140,14 +141,14 @@ public enum ResponseStatusEnum {
      */
     private final String msg;
 
-    ResponseStatusEnum(Integer status, Boolean success, String msg) {
-        this.status = status;
+    Response(Integer code, Boolean success, String msg) {
+        this.code = code;
         this.success = success;
         this.msg = msg;
     }
 
-    public Integer status() {
-        return status;
+    public Integer code() {
+        return code;
     }
 
     public Boolean success() {

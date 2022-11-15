@@ -62,11 +62,6 @@ spring:
         # 配置 service-gateway 公网ip 本地部署不用开启
         # ip: 106.12.136.221
         # port: 7000
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
 # ip请求限制的参数配置
 blackIp:
   continueCounts: ${counts:50}     # ip连续请求的次数

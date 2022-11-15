@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * RabbitMq 配置
+ *
  * @author zqw
  * @date 2021/9/14
  */

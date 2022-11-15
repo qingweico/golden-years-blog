@@ -9,6 +9,10 @@ import javax.validation.ConstraintValidatorContext;
  * @date 2021/9/10
  */
 public class CheckUrlValidate implements ConstraintValidator<CheckUrl, String> {
+    @Override
+    public void initialize(CheckUrl constraintAnnotation) {
+        ConstraintValidator.super.initialize(constraintAnnotation);
+    }
 
     @Override
     public boolean isValid(String linkUrl, ConstraintValidatorContext context) {

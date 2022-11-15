@@ -16,11 +16,11 @@ import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.vo.ArticleAdminVO;
 import cn.qingweico.pojo.vo.CenterArticleVO;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.bo.NewArticleBO;
 import cn.qingweico.pojo.eo.ArticleEo;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -126,7 +126,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
 
         int res = articleMapper.insert(article);
         if (res != 1) {
-            GraceException.error(ResponseStatusEnum.ARTICLE_CREATE_ERROR);
+            GraceException.error(Response.ARTICLE_CREATE_ERROR);
         }
         updateArticleStatus(articleId, ArticleReviewStatus.REVIEWING.type);
     }
@@ -146,19 +146,19 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         article.setIsAppoint(ArticleAppointType.IMMEDIATELY.type);
         if (articleMapper.updateByPrimaryKeySelective(article) < 0) {
             log.error("timelyPublishArticle error");
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
     @Override
-    public PagedGridResult queryUserArticles(String userId,
-                                             String keyword,
-                                             String categoryId,
-                                             Integer status,
-                                             Date startDate,
-                                             Date endDate,
-                                             Integer page,
-                                             Integer pageSize) {
+    public PagedResult queryUserArticles(String userId,
+                                         String keyword,
+                                         String categoryId,
+                                         Integer status,
+                                         Date startDate,
+                                         Date endDate,
+                                         Integer page,
+                                         Integer pageSize) {
 
         Example example = conditionalQueryArticle(userId, keyword, categoryId, status
                 , YesOrNo.NO.type, startDate, endDate);
@@ -174,7 +174,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
             centerArticleVO.setTagList(tagList);
             result.add(centerArticleVO);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(result);
         pgr.setCurrentPage(pageInfo.getPageNum());
         pgr.setRecords(pageInfo.getTotal());
@@ -194,7 +194,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         int res = articleMapper.updateByExampleSelective(article, example);
 
         if (res != 1) {
-            GraceException.error(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
+            GraceException.error(Response.ARTICLE_REVIEW_ERROR);
         }
 
         // 如果审核通过, 则查询article相关的字段并放入es中
@@ -218,7 +218,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 articleEo.setSummary(summary);
                 articleEo.setTags(resultTag.toString());
                 IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleEo).build();
-                elasticsearchTemplate.index(indexQuery);
+                esTemplate.index(indexQuery);
 
                 // 更新主站带有文章数量的文展类别
                 String key = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
@@ -251,20 +251,20 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
             article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
         }
         if (articleMapper.updateByPrimaryKeySelective(article) <= 0) {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
     @Override
-    public PagedGridResult query(String keyword,
-                                 Integer status,
-                                 String categoryId,
-                                 String tagId,
-                                 Integer deleteStatus,
-                                 Date startDateStr,
-                                 Date endDateStr,
-                                 Integer page,
-                                 Integer pageSize) {
+    public PagedResult query(String keyword,
+                             Integer status,
+                             String categoryId,
+                             String tagId,
+                             Integer deleteStatus,
+                             Date startDateStr,
+                             Date endDateStr,
+                             Integer page,
+                             Integer pageSize) {
         Example example = conditionalQueryArticle(null, keyword, categoryId, status
                 , deleteStatus, startDateStr, endDateStr);
         PageHelper.startPage(page, pageSize);
@@ -283,7 +283,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
             articleAdminVO.setTagList(tagList);
             result.add(articleAdminVO);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(result);
         pgr.setCurrentPage(pageInfo.getPageNum());
         pgr.setRecords(pageInfo.getTotal());
@@ -333,7 +333,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         // 删除已通过审核的文章, 还需删除gridFs和es中的数据
         Integer articleStatus = articleMapper.selectByPrimaryKey(articleId).getArticleStatus();
         if (ArticleReviewStatus.SUCCESS.type.equals(articleStatus)) {
-            elasticsearchTemplate.delete(ArticleEo.class, articleId);
+            esTemplate.delete(ArticleEo.class, articleId);
         }
         articleMapper.deleteByPrimaryKey(articleId);
     }
@@ -366,7 +366,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         // 删除未审核过的文章; 直接设置is_delete = 1
         int result = articleMapper.updateByExampleSelective(pending, articleExample);
         if (result != 1) {
-            GraceException.error(ResponseStatusEnum.ARTICLE_DELETE_ERROR);
+            GraceException.error(Response.ARTICLE_DELETE_ERROR);
         }
     }
 
@@ -397,9 +397,9 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         pending.setArticleStatus(ArticleReviewStatus.WITHDRAW.type);
         int result = articleMapper.updateByExampleSelective(pending, articleExample);
         if (result != 1) {
-            GraceException.error(ResponseStatusEnum.ARTICLE_WITHDRAW_ERROR);
+            GraceException.error(Response.ARTICLE_WITHDRAW_ERROR);
         }
-        elasticsearchTemplate.delete(ArticleEo.class, articleId);
+        esTemplate.delete(ArticleEo.class, articleId);
 
     }
 

@@ -7,7 +7,7 @@ import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.SystemConfig;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +70,7 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
             String key = RedisConf.REDIS_SYSTEM_CONFIG;
             refreshCache(key);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 }

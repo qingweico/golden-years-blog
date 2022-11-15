@@ -2,7 +2,7 @@ package cn.qingweico.admin.clients;
 
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 /**
@@ -37,7 +37,7 @@ public interface ArticleClient {
      * @return 每个标签下文章数目 [{tagName: xxx, articleCount: xxx}]
      */
     @GetMapping("/getBlogCountByTag")
-    GraceJsonResult getBlogCountByTag();
+    Result getBlogCountByTag();
 
     /**
      * 首页查询每个类别的文章数量
@@ -45,7 +45,7 @@ public interface ArticleClient {
      * @return GraceJsonResult
      */
     @GetMapping("/category/getCategoryListWithArticleCount")
-    GraceJsonResult getCategoryListWithArticleCount();
+    Result getCategoryListWithArticleCount();
 
     /**
      * 获取一年内的文章贡献数
@@ -53,5 +53,5 @@ public interface ArticleClient {
      * @return GraceJsonResult
      */
     @GetMapping("/getBlogContributeCount")
-    GraceJsonResult getBlogContributeCount();
+    Result getBlogContributeCount();
 }

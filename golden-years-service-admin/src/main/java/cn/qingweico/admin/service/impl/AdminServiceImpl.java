@@ -6,7 +6,7 @@ import cn.qingweico.api.service.BaseService;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.global.RedisConf;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.pojo.Admin;
 import cn.qingweico.pojo.bo.OperatorAdminBO;
 import cn.qingweico.util.*;
@@ -75,12 +75,12 @@ public class AdminServiceImpl extends BaseService implements AdminService {
         admin.setUpdateTime(new Date());
         int res = adminMapper.insert(admin);
         if (res != 1) {
-            GraceException.error(ResponseStatusEnum.ADMIN_CREATE_ERROR);
+            GraceException.error(Response.ADMIN_CREATE_ERROR);
         }
     }
 
     @Override
-    public PagedGridResult queryAdminList(Integer page, Integer pageSize) {
+    public PagedResult queryAdminList(Integer page, Integer pageSize) {
         Example adminExample = new Example(Admin.class);
         adminExample.orderBy("createTime").desc();
         PageHelper.startPage(page, pageSize);
@@ -109,7 +109,7 @@ public class AdminServiceImpl extends BaseService implements AdminService {
             refreshCache(admin);
         } else {
             log.error("admin update profile error");
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
@@ -117,7 +117,7 @@ public class AdminServiceImpl extends BaseService implements AdminService {
     public void checkUsernameIsPresent(String username) {
         Admin admin = queryAdminByUsername(username);
         if (admin != null) {
-            GraceException.error(ResponseStatusEnum.ADMIN_USERNAME_EXIST_ERROR);
+            GraceException.error(Response.ADMIN_USERNAME_EXIST_ERROR);
         }
     }
 
@@ -133,7 +133,7 @@ public class AdminServiceImpl extends BaseService implements AdminService {
         Admin admin = new Admin();
         admin.setId(id);
         admin.setLastLoginTime(new Date());
-        String[] str = AddressUtil.getRealAddress().split(",");
+        String[] str = AddressUtil.getRealAddress().split(SysConf.SYMBOL_COMMA);
         // 获取登陆ip
         String ip = str[0];
         // 获取登陆位置

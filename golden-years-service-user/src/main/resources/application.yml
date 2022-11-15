@@ -65,9 +65,9 @@ spring:
     mongodb:
       uri: mongodb://root:root@119.29.35.129:27017
       database: golden-years
-    elasticsearch:
-      cluster-name: golden-years-es
-      cluster-nodes: 119.29.35.129:9300
+    #elasticsearch:
+      #cluster-name: golden-years-es
+      #cluster-nodes: 119.29.35.129:9300
   redis:
     database: 0
     host: 119.29.35.129
@@ -101,11 +101,6 @@ spring:
       transport:
         dashboard: 106.12.136.221:8888
         port: 8719
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
 
 ############################################################
 #

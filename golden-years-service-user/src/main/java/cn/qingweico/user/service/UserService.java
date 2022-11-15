@@ -2,9 +2,8 @@ package cn.qingweico.user.service;
 
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.pojo.User;
-import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.pojo.bo.UserInfoBO;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 import java.util.Date;
 
@@ -26,13 +25,13 @@ public interface UserService {
      * @param pageSize  每页数目
      * @return 用户列表
      */
-    PagedGridResult queryUserList(String nickname,
-                                  Integer status,
-                                  String mobile,
-                                  Date startDate,
-                                  Date endDate,
-                                  Integer page,
-                                  Integer pageSize);
+    PagedResult queryUserList(String nickname,
+                              Integer status,
+                              String mobile,
+                              Date startDate,
+                              Date endDate,
+                              Integer page,
+                              Integer pageSize);
 
 
     /**

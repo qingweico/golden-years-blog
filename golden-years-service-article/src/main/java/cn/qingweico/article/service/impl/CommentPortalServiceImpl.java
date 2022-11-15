@@ -14,8 +14,8 @@ import cn.qingweico.pojo.bo.Visitor;
 import cn.qingweico.pojo.vo.ArticleDetailVO;
 import cn.qingweico.pojo.vo.CommentVo;
 import cn.qingweico.pojo.vo.CommentsVO;
-import cn.qingweico.result.ResponseStatusEnum;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.result.Response;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.n3r.idworker.Sid;
@@ -72,14 +72,14 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
             // 评论数累加
             redisTemplate.increment(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
     @Override
-    public PagedGridResult queryArticleComments(String articleId,
-                                                Integer page,
-                                                Integer pageSize) {
+    public PagedResult queryArticleComments(String articleId,
+                                            Integer page,
+                                            Integer pageSize) {
         Map<String, Object> map = new HashMap<>(1);
         map.put(SysConf.ARTICLE_ID, articleId);
         PageHelper.startPage(page, pageSize);
@@ -106,7 +106,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
             commentVo.setVisitor(visitor);
             list.add(commentVo);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(list);
         pgr.setCurrentPage(pageInfo.getPageNum());
         pgr.setRecords(pageInfo.getTotal());
@@ -115,9 +115,9 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     }
 
     @Override
-    public PagedGridResult queryUserComments(String authorId,
-                                             Integer page,
-                                             Integer pageSize) {
+    public PagedResult queryUserComments(String authorId,
+                                         Integer page,
+                                         Integer pageSize) {
         Example example = new Example(Comments.class);
         example.orderBy(SysConf.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();

@@ -1,7 +1,7 @@
 package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.config.RabbitMqConfig;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import cn.qingweico.pojo.eo.ArticleEo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -14,6 +14,8 @@ import javax.annotation.Resource;
 import java.util.Date;
 
 /**
+ *
+ * MQ test 生产消息
  * @author zqw
  * @date 2021/9/14
  */
@@ -28,22 +30,22 @@ public class ProducerRestApi {
     private RabbitTemplate rabbitTemplate;
 
     @GetMapping("send")
-    public GraceJsonResult send() {
+    public Result send() {
         rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
                 "article.hello",
                 "这是一条消息!");
-        return GraceJsonResult.ok();
+        return Result.ok();
     }
 
     @GetMapping("delay")
-    public GraceJsonResult delay() {
+    public Result delay() {
         System.out.println("生产者发送的延迟消息:" + new Date());
-        return GraceJsonResult.ok();
+        return Result.ok();
     }
 
     @GetMapping("delete/{articleId}")
-    public GraceJsonResult delete(@PathVariable("articleId") String articleId) {
+    public Result delete(@PathVariable("articleId") String articleId) {
         elasticsearchTemplate.delete(ArticleEo.class, articleId);
-        return GraceJsonResult.ok();
+        return Result.ok();
     }
 }

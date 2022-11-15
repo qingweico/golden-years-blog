@@ -1,7 +1,7 @@
 package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.bo.CommentReplyBO;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 /**
  * 主页评论服务
@@ -27,9 +27,9 @@ public interface CommentPortalService {
      * @param pageSize  每页显示的数目
      * @return PagedGridResult
      */
-    PagedGridResult queryArticleComments(String articleId,
-                                         Integer page,
-                                         Integer pageSize);
+    PagedResult queryArticleComments(String articleId,
+                                     Integer page,
+                                     Integer pageSize);
 
     /**
      * 查询作者文章下所有的评论
@@ -39,9 +39,9 @@ public interface CommentPortalService {
      * @param pageSize 每页显示的数目
      * @return PagedGridResult
      */
-    PagedGridResult queryUserComments(String authorId,
-                                      Integer page,
-                                      Integer pageSize);
+    PagedResult queryUserComments(String authorId,
+                                  Integer page,
+                                  Integer pageSize);
 
     /**
      * 作者删除评论

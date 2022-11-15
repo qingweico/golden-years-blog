@@ -5,8 +5,8 @@ import cn.qingweico.files.resource.FileResource;
 import cn.qingweico.files.service.UploaderService;
 import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.bo.GridFsBO;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.FileUtils;
 import com.mongodb.client.gridfs.GridFSFindIterable;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -59,7 +59,7 @@ public class FileUploadRestApi {
 
     @ApiOperation(value = "上传用户头像", notes = "上传用户头像", httpMethod = "POST")
     @PostMapping("/uploadFace")
-    public GraceJsonResult uploadFace(MultipartFile file) throws IOException {
+    public Result uploadFace(MultipartFile file) throws IOException {
         String path;
 
         if (file != null) {
@@ -69,21 +69,21 @@ public class FileUploadRestApi {
             // 判断文件名不能为空
             if (StringUtils.isNotBlank(fileName)) {
                 // 获得文件扩展名
-                String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+                String fileExtension = fileName.substring(fileName.lastIndexOf(SysConf.SYMBOL_POINT) + 1);
                 // 判断文件扩展名类型
                 if (!fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPG) &&
                         !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_JPEG) &&
                         !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_PNG) &&
                         !fileExtension.equalsIgnoreCase(SysConf.FILE_SUFFIX_BLOB)) {
-                    return GraceJsonResult.error(ResponseStatusEnum.FILE_FORMATTER_FAILED);
+                    return Result.r(Response.FILE_FORMATTER_FAILED);
                 }
 
                 path = uploaderService.uploadFastDfs(file, fileExtension);
             } else {
-                return GraceJsonResult.error(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+                return Result.r(Response.FILE_UPLOAD_NULL_ERROR);
             }
         } else {
-            return GraceJsonResult.error(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+            return Result.r(Response.FILE_UPLOAD_NULL_ERROR);
         }
         log.info("path = {}", path);
 
@@ -91,15 +91,15 @@ public class FileUploadRestApi {
         if (StringUtils.isNotBlank(path)) {
             finalPath = fileResource.getFsHost() + path;
         } else {
-            return GraceJsonResult.error(ResponseStatusEnum.FILE_UPLOAD_NULL_ERROR);
+            return Result.r(Response.FILE_UPLOAD_NULL_ERROR);
         }
-        return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, finalPath);
+        return Result.ok(Response.UPLOAD_SUCCESS, finalPath);
     }
 
 
     @ApiOperation(value = "上传文件到mongodb的GridFs中", notes = "上传文件到mongodb的GridFs中", httpMethod = "POST")
     @PostMapping("/uploadToGridFs")
-    public GraceJsonResult uploadToGridFs(@RequestBody GridFsBO gridFsBO) throws IOException {
+    public Result uploadToGridFs(@RequestBody GridFsBO gridFsBO) throws IOException {
 
         // 获得图片的base64字符串
         String file64 = gridFsBO.getImg64();
@@ -111,7 +111,7 @@ public class FileUploadRestApi {
         ObjectId id = gridFsBucket.uploadFromStream(gridFsBO.getUsername() + SysConf.SYMBOL_POINT + SysConf.FILE_SUFFIX_PNG, inputStream);
         // 获得文件在gridFS中的主键id
         String fileId = id.toString();
-        return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, fileId);
+        return Result.ok(Response.UPLOAD_SUCCESS, fileId);
     }
 
     @ApiOperation(value = "从mongodb的GridFS中读取图片内容", notes = "从mongodb的GridFS中读取图片内容", httpMethod = "GET")
@@ -119,7 +119,7 @@ public class FileUploadRestApi {
     public void readInGridFs(String faceId, HttpServletResponse resp) throws IOException {
 
         if (StringUtils.isBlank(faceId)) {
-            GraceException.error(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
+            GraceException.error(Response.FILE_NOT_EXIST_ERROR);
         }
 
         // 从gridFS中读取文件
@@ -131,19 +131,19 @@ public class FileUploadRestApi {
 
     @ApiOperation(value = "从mongodb的GridFS中读取图片内容, 并且返回base64", notes = "从mongodb的GridFS中读取图片内容, 并且返回base64", httpMethod = "GET")
     @GetMapping("/readFace64InGridFS")
-    public GraceJsonResult readFace64InGridFs(String faceId) throws IOException {
+    public Result readFace64InGridFs(String faceId) throws IOException {
 
         // 获得GridFs中人脸数据文件
         File face = readGridFsByFaceId(faceId);
 
         // 转换人脸为base64
         String base64Face = FileUtils.fileToBase64(face);
-        return GraceJsonResult.ok(base64Face);
+        return Result.ok(base64Face);
     }
 
     @ApiOperation(value = "上传多个文件", notes = "上传多个文件", httpMethod = "POST")
     @PostMapping("/uploadSomeFiles")
-    public GraceJsonResult uploadSomeFiles(MultipartFile[] files) throws IOException {
+    public Result uploadSomeFiles(MultipartFile[] files) throws IOException {
 
         List<String> imageUrlList = new ArrayList<>();
 
@@ -182,7 +182,7 @@ public class FileUploadRestApi {
                 imageUrlList.add(finalPath);
             }
         }
-        return new GraceJsonResult(ResponseStatusEnum.UPLOAD_SUCCESS, imageUrlList);
+        return Result.ok(Response.UPLOAD_SUCCESS, imageUrlList);
     }
 
     private File readGridFsByFaceId(String faceId) throws FileNotFoundException {
@@ -191,7 +191,7 @@ public class FileUploadRestApi {
                 find(Filters.eq("_id", new ObjectId((faceId))));
         GridFSFile gridFs = gridFsFiles.first();
         if (gridFs == null) {
-            GraceException.error(ResponseStatusEnum.FILE_NOT_EXIST_ERROR);
+            GraceException.error(Response.FILE_NOT_EXIST_ERROR);
         }
         String fileName = gridFs.getFilename();
         // 获取文件流; 保存到本地或者服务器的临时目录
@@ -204,9 +204,9 @@ public class FileUploadRestApi {
     }
     @ApiOperation(value = "根据faceId删除GridFs中的人脸信息", notes = "根据faceId删除GridFs中的人脸信息", httpMethod = "GET")
     @GetMapping("/removeGridFsFile")
-    public GraceJsonResult removeGridFsFile(String faceId){
+    public Result removeGridFsFile(String faceId){
         gridFsBucket.delete(new ObjectId(faceId));
-        return GraceJsonResult.ok();
+        return Result.ok();
     }
 }
 

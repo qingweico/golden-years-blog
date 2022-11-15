@@ -1,7 +1,6 @@
 package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.base.BaseRestApi;
-import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.service.ArticleHistoryService;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.global.SysConf;
@@ -10,9 +9,9 @@ import cn.qingweico.pojo.History;
 import cn.qingweico.pojo.bo.DeleteArticleHistory;
 import cn.qingweico.pojo.bo.IdBO;
 import cn.qingweico.pojo.vo.ArticleHistoryVO;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.xml.ws.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,21 +42,21 @@ public class ArticleHistoryRestApi extends BaseRestApi {
 
     @PostMapping("inc")
     @ApiOperation(value = "用户浏览文章, 增加一条浏览记录", notes = "用户浏览文章, 增加一条浏览记录", httpMethod = "POST")
-    public GraceJsonResult add(@RequestBody IdBO idBO) {
+    public Result add(@RequestBody IdBO idBO) {
         String userId = idBO.getUserId();
         String articleId = idBO.getArticleId();
         if (StringUtils.isBlank(userId) || StringUtils.isBlank(articleId)) {
-            return GraceJsonResult.error();
+            return Result.error();
         }
         historyService.addHistory(userId, articleId);
-        return GraceJsonResult.ok();
+        return Result.ok();
     }
 
 
     @GetMapping("getUserHistory")
     @ApiOperation(value = "获取用户的浏览历史", notes = "获取用户的浏览历史", httpMethod = "GET")
-    public GraceJsonResult getUserHistory(@RequestParam String userId, @RequestParam Integer pageNum,
-                                          @RequestParam Integer pageSize) {
+    public Result getUserHistory(@RequestParam String userId, @RequestParam Integer pageNum,
+                                 @RequestParam Integer pageSize) {
         checkPagingParams(pageNum, pageSize);
         PageInfo<History> pageInfo = historyService.getHistoryList(userId, pageNum, pageSize);
         List<ArticleHistoryVO> result = new ArrayList<>();
@@ -84,23 +82,23 @@ public class ArticleHistoryRestApi extends BaseRestApi {
             articleHistoryVO.setArticleCommentCounts(commentCounts);
             result.add(articleHistoryVO);
         }
-        PagedGridResult pgr = new PagedGridResult();
+        PagedResult pgr = new PagedResult();
         pgr.setRows(result);
         pgr.setCurrentPage(pageInfo.getPageNum());
         pgr.setRecords(pageInfo.getTotal());
         pgr.setTotalPage(pageInfo.getPages());
-        return GraceJsonResult.ok(pgr);
+        return Result.ok(pgr);
     }
 
     @PostMapping("delete")
     @ApiOperation(value = "删除用户的浏览历史", notes = "删除用户的浏览历史", httpMethod = "POST")
-    public GraceJsonResult delete(@RequestBody DeleteArticleHistory history) {
+    public Result delete(@RequestBody DeleteArticleHistory history) {
         String userId = history.getUserId();
         if (StringUtils.isBlank(userId)) {
-            return GraceJsonResult.error();
+            return Result.error();
         }
         Integer deleteModel = history.getDeleteModel();
         historyService.deleteHistory(userId, deleteModel);
-        return new GraceJsonResult(ResponseStatusEnum.CLEAN_HISTORY_SUCCESS);
+        return Result.r(Response.CLEAN_HISTORY_SUCCESS);
     }
 }

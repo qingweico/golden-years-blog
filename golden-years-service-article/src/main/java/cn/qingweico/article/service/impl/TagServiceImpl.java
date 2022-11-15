@@ -9,7 +9,7 @@ import cn.qingweico.global.SysConf;
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.bo.TagBO;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,10 +37,10 @@ public class TagServiceImpl extends BaseService implements TagService {
     private Sid sid;
 
     @Override
-    public PagedGridResult getTagList(String tagName,
-                                      Integer status,
-                                      Integer sys,
-                                      Integer page, Integer pageSize) {
+    public PagedResult getTagList(String tagName,
+                                  Integer status,
+                                  Integer sys,
+                                  Integer page, Integer pageSize) {
         Example example = new Example(Tag.class);
         example.orderBy(SysConf.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();

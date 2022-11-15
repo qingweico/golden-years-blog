@@ -2,7 +2,7 @@ package cn.qingweico.util;
 
 import cn.qingweico.enums.FaceVerifyType;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.aliyun.AliResource;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
@@ -36,7 +36,7 @@ public class CompareFace {
             request.setImageDataA(face1);
             request.setImageDataB(face2);
         } else {
-            GraceException.error(ResponseStatusEnum.FACE_VERIFY_TYPE_ERROR);
+            GraceException.error(Response.FACE_VERIFY_TYPE_ERROR);
         }
 
         try {

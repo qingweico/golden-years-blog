@@ -9,13 +9,13 @@ import cn.qingweico.pojo.bo.UpdatePwdBO;
 import cn.qingweico.pojo.bo.UserInfoBO;
 import cn.qingweico.pojo.vo.UserAccountInfoVO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.api.base.BaseRestApi;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -45,65 +45,65 @@ public class UserRestApi extends BaseRestApi {
 
     @ApiOperation(value = "查询网站的所有注册用户", notes = "查询网站的所有注册用户", httpMethod = "POST")
     @GetMapping("/query")
-    public GraceJsonResult query(@RequestParam String nickname,
-                                 @RequestParam Integer status,
-                                 @RequestParam String mobile,
-                                 @RequestParam Date startDate,
-                                 @RequestParam Date endDate,
-                                 @RequestParam Integer page,
-                                 @RequestParam Integer pageSize) {
+    public Result query(@RequestParam String nickname,
+                        @RequestParam Integer status,
+                        @RequestParam String mobile,
+                        @RequestParam Date startDate,
+                        @RequestParam Date endDate,
+                        @RequestParam Integer page,
+                        @RequestParam Integer pageSize) {
 
         checkPagingParams(page, pageSize);
-        PagedGridResult pagedGridResult = userService.queryUserList(nickname,
+        PagedResult pagedResult = userService.queryUserList(nickname,
                 status,
                 mobile,
                 startDate,
                 endDate,
                 page,
                 pageSize);
-        return GraceJsonResult.ok(pagedGridResult);
+        return Result.ok(pagedResult);
     }
 
     @ApiOperation(value = "查看用户详情", notes = "查看用户详情", httpMethod = "GET")
     @GetMapping("/detail")
-    public GraceJsonResult userDetail(String userId) {
-        return GraceJsonResult.ok(userService.queryUserById(userId));
+    public Result userDetail(String userId) {
+        return Result.ok(userService.queryUserById(userId));
     }
 
     @ApiOperation(value = "冻结或者解冻用户", notes = "冻结或者解冻用户", httpMethod = "POST")
     @PostMapping("/freezeOrNot")
-    public GraceJsonResult freezeUserOrNot(String userId, Integer doStatus) {
+    public Result freezeUserOrNot(String userId, Integer doStatus) {
         if (!UserStatus.isUserStatusValid(doStatus)) {
-            return GraceJsonResult.error(ResponseStatusEnum.USER_STATUS_ERROR);
+            return Result.r(Response.USER_STATUS_ERROR);
         }
         userService.freezeUserOrNot(userId, doStatus);
         if (doStatus.equals(UserStatus.FROZEN.type)) {
-            return new GraceJsonResult(ResponseStatusEnum.FREEZE_SUCCESS);
+            return Result.r(Response.FREEZE_SUCCESS);
         } else if (doStatus.equals(UserStatus.ACTIVE.type)) {
-            return new GraceJsonResult(ResponseStatusEnum.ACTIVATE_SUCCESS);
+            return Result.r(Response.ACTIVATE_SUCCESS);
         }
-        return GraceJsonResult.error(ResponseStatusEnum.REQUEST_PARAM_ERROR);
+        return Result.r(Response.REQUEST_PARAM_ERROR);
     }
 
     @ApiOperation(value = "获得用户账户信息", notes = "获得用户账户信息", httpMethod = "GET")
     @GetMapping("/getAccountInfo")
-    public GraceJsonResult getAccountInfo(String userId) {
+    public Result getAccountInfo(String userId) {
         if (StringUtils.isBlank(userId)) {
-            return GraceJsonResult.error(ResponseStatusEnum.UN_LOGIN);
+            return Result.r(Response.UN_LOGIN);
         }
         // 根据用户id查询用户账户信息
         User user = getUser(userId);
         UserAccountInfoVO userAccountInfoVO = new UserAccountInfoVO();
         BeanUtils.copyProperties(user, userAccountInfoVO);
-        return GraceJsonResult.ok(userAccountInfoVO);
+        return Result.ok(userAccountInfoVO);
     }
 
     @ApiOperation(value = "获得用户基本信息", notes = "获得用户基本信息", httpMethod = "GET")
     @GetMapping("/getUserBasicInfo")
-    public GraceJsonResult getUserBasicInfo(@RequestParam String userId) {
+    public Result getUserBasicInfo(@RequestParam String userId) {
         // 判断参数不能为空
         if (StringUtils.isBlank(userId)) {
-            return GraceJsonResult.error(ResponseStatusEnum.UN_LOGIN);
+            return Result.r(Response.UN_LOGIN);
         }
         // 根据用户id查询用户基本信息
         User user = getUser(userId);
@@ -119,27 +119,27 @@ public class UserRestApi extends BaseRestApi {
 
         Integer userStatus = userVO.getActiveStatus();
         if (userStatus.equals(UserStatus.INACTIVE.type)) {
-            return new GraceJsonResult(ResponseStatusEnum.WELCOME, userVO);
+            return Result.ok(Response.WELCOME, userVO);
         } else if (userStatus.equals(UserStatus.FROZEN.type)) {
-            return new GraceJsonResult(ResponseStatusEnum.ACCOUNT_ILLEGAL, userVO);
+            return Result.ok(Response.ACCOUNT_ILLEGAL, userVO);
         }
-        return GraceJsonResult.ok(userVO);
+        return Result.ok(userVO);
     }
 
     @ApiOperation(value = "更新用户信息", notes = "更新用户信息", httpMethod = "POST")
     @PostMapping("/updateUserInfo")
-    public GraceJsonResult updateUserInfo(@RequestBody @Valid UserInfoBO userInfoBO) {
+    public Result updateUserInfo(@RequestBody @Valid UserInfoBO userInfoBO) {
         // 执行更新操作
         userService.updateUserInfo(userInfoBO);
-        return new GraceJsonResult(ResponseStatusEnum.UPDATE_SUCCESS);
+        return Result.r(Response.UPDATE_SUCCESS);
     }
 
     @ApiOperation(value = "根据用户ids查询用户信息", notes = "根据用户ids查询用户信息", httpMethod = "GET")
     @GetMapping("/queryByIds")
-    public GraceJsonResult queryByIds(String userIds) {
+    public Result queryByIds(String userIds) {
 
         if (StringUtils.isBlank(userIds)) {
-            return GraceJsonResult.error(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+            return Result.r(Response.USER_NOT_EXIST_ERROR);
         }
         List<UserBasicInfoVO> userInfoList = new ArrayList<>();
         List<String> userIdList = JsonUtils.jsonToList(userIds, String.class);
@@ -149,31 +149,31 @@ public class UserRestApi extends BaseRestApi {
             BeanUtils.copyProperties(user, vo);
             userInfoList.add(vo);
         }
-        return GraceJsonResult.ok(userInfoList);
+        return Result.ok(userInfoList);
     }
 
     @ApiOperation(value = "查询用户的登陆日志列表", notes = "查询用户的登陆日志列表", httpMethod = "GET")
     @GetMapping("/getLoginLogList")
-    public GraceJsonResult getLoginLogList(@RequestParam String userId,
-                                           @RequestParam Integer page,
-                                           @RequestParam Integer pageSize) {
+    public Result getLoginLogList(@RequestParam String userId,
+                                  @RequestParam Integer page,
+                                  @RequestParam Integer pageSize) {
 
         checkPagingParams(page, pageSize);
-        PagedGridResult res = loginLogService.getLoginLogList(userId, page, pageSize);
-        return GraceJsonResult.ok(res);
+        PagedResult res = loginLogService.getLoginLogList(userId, page, pageSize);
+        return Result.ok(res);
     }
 
     private User getUser(String userId) {
         User user;
         // 缓存用户信息
-        String jsonUser = redisOperator.get(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId);
+        String jsonUser = redisTemplate.get(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId);
         if (StringUtils.isNotBlank(jsonUser)) {
             user = JsonUtils.jsonToPojo(jsonUser, User.class);
         } else {
             user = userService.queryUserById(userId);
             if (user != null) {
                 // 判断user 不为空, 避免出现jsonUser = "null"的bug
-                redisOperator.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+                redisTemplate.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
             } else {
                 log.error("query user by id is null");
             }
@@ -183,48 +183,48 @@ public class UserRestApi extends BaseRestApi {
 
     @ApiOperation(value = "重置用户登录密码", notes = "重置用户登录密码", httpMethod = "POST")
     @PostMapping("/resetPassword/{id}")
-    public GraceJsonResult resetPassword(@PathVariable("id") String userId) {
+    public Result resetPassword(@PathVariable("id") String userId) {
         userService.resetPasswords(userId);
-        return new GraceJsonResult(ResponseStatusEnum.RESET_PASSWORD_SUCCESS);
+        return Result.r(Response.RESET_PASSWORD_SUCCESS);
 
     }
 
     @ApiOperation(value = "修改用户登录密码", notes = "修改用户登录密码", httpMethod = "POST")
     @PostMapping("/alterPwd")
-    public GraceJsonResult alterPwd(@RequestBody UpdatePwdBO updatePwdBO) {
+    public Result alterPwd(@RequestBody UpdatePwdBO updatePwdBO) {
         String tokenKey = RedisConf.REDIS_USER_TOKEN;
         String infoKey = RedisConf.REDIS_USER_INFO;
         User loginUser = getLoginUser(User.class, tokenKey, infoKey);
         String userId = loginUser.getId();
         if (StringUtils.isBlank(userId)) {
-            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+            return Result.r(Response.TICKET_INVALID);
         }
         User user = userService.queryUserById(userId);
         String password = user.getPassword();
         if (!Objects.equals(updatePwdBO.getOldPassword(), password)) {
-            return new GraceJsonResult(ResponseStatusEnum.PASSWORD_WRONG);
+            return Result.r(Response.PASSWORD_WRONG);
         }
         userService.alterPwd(userId, updatePwdBO.getNewPassword());
-        return new GraceJsonResult(ResponseStatusEnum.RESET_PASSWORD_SUCCESS);
+        return Result.r(Response.RESET_PASSWORD_SUCCESS);
     }
 
     @ApiOperation(value = "修改用户手机号码", notes = "修改用户手机号码", httpMethod = "POST")
     @PostMapping("/alterMobile")
-    public GraceJsonResult alterMobile(@RequestBody UpdateMobileBO updateMobileBO) {
+    public Result alterMobile(@RequestBody UpdateMobileBO updateMobileBO) {
         String userId = updateMobileBO.getUserId();
         String newMobile = updateMobileBO.getNewMobile();
         if (StringUtils.isBlank(userId)) {
-            return new GraceJsonResult(ResponseStatusEnum.TICKET_INVALID);
+            return Result.r(Response.TICKET_INVALID);
         }
         if (StringUtils.isBlank(newMobile)) {
-            return new GraceJsonResult(ResponseStatusEnum.MOBILE_NULL);
+            return Result.r(Response.MOBILE_NULL);
         }
         User user = userService.queryUserById(userId);
         if (user == null) {
-            return new GraceJsonResult(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+            return Result.r(Response.USER_NOT_EXIST_ERROR);
         }
         userService.alterMobile(user, newMobile);
-        return new GraceJsonResult(ResponseStatusEnum.ALTER_MOBILE_SUCCESS);
+        return Result.r(Response.ALTER_MOBILE_SUCCESS);
     }
 
 

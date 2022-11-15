@@ -2,11 +2,11 @@ package cn.qingweico.article.restapi;
 
 import cn.qingweico.api.base.BaseRestApi;
 import cn.qingweico.article.service.CommentPortalService;
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import cn.qingweico.pojo.bo.CommentReplyBO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
-import cn.qingweico.result.ResponseStatusEnum;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.result.Response;
+import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +33,7 @@ public class CommentRestApi extends BaseRestApi {
 
     @ApiOperation(value = "发布新评论", notes = "发布新评论", httpMethod = "POST")
     @PostMapping("/publish")
-    public GraceJsonResult publish(@RequestBody @Valid CommentReplyBO commentReplyBO) {
+    public Result publish(@RequestBody @Valid CommentReplyBO commentReplyBO) {
 
         String userId = commentReplyBO.getCommentUserId();
         Set<String> set = new HashSet<>();
@@ -46,37 +46,37 @@ public class CommentRestApi extends BaseRestApi {
         commentReplyBO.setCommentUserNickname(nickname);
         commentReplyBO.setCommentUserFace(face);
         commentPortalService.publishComment(commentReplyBO);
-        return new GraceJsonResult(ResponseStatusEnum.COMMENT_SUCCESS);
+        return Result.r(Response.COMMENT_SUCCESS);
     }
 
     @ApiOperation(value = "查看文章的评论列表", notes = "查看文章的评论列表", httpMethod = "GET")
     @GetMapping("/list")
-    public GraceJsonResult list(@RequestParam String articleId,
-                                @RequestParam Integer page,
-                                @RequestParam Integer pageSize) {
+    public Result list(@RequestParam String articleId,
+                       @RequestParam Integer page,
+                       @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult res = commentPortalService.queryArticleComments(articleId,
+        PagedResult res = commentPortalService.queryArticleComments(articleId,
                 page,
                 pageSize);
-        return GraceJsonResult.ok(res);
+        return Result.ok(res);
     }
 
     @ApiOperation(value = "作者查看我的评论管理列表", notes = "作者查看我的评论管理列表", httpMethod = "GET")
     @GetMapping("/user/list")
-    public GraceJsonResult userCommentList(@RequestParam String userId,
-                                           @RequestParam Integer page,
-                                           @RequestParam Integer pageSize) {
+    public Result userCommentList(@RequestParam String userId,
+                                  @RequestParam Integer page,
+                                  @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedGridResult res = commentPortalService.queryUserComments(userId,
+        PagedResult res = commentPortalService.queryUserComments(userId,
                 page,
                 pageSize);
-        return GraceJsonResult.ok(res);
+        return Result.ok(res);
     }
 
     @ApiOperation(value = "作者删除评论", notes = "作者删除评论", httpMethod = "POST")
     @PostMapping("/user/delete/{id}")
-    public GraceJsonResult deleteComment(@PathVariable("id") String commentId) {
+    public Result deleteComment(@PathVariable("id") String commentId) {
         commentPortalService.delete(commentId);
-        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
+        return Result.r(Response.DELETE_SUCCESS);
     }
 }

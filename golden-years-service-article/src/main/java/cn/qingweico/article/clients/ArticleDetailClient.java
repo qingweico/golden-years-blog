@@ -1,6 +1,6 @@
 package cn.qingweico.article.clients;
 
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,5 +17,5 @@ public interface ArticleDetailClient {
      * @return GraceJsonResult
      */
     @GetMapping("detail")
-    GraceJsonResult getArticleDetail(@RequestParam("articleId") String articleId);
+    Result getArticleDetail(@RequestParam("articleId") String articleId);
 }

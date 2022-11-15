@@ -10,7 +10,7 @@ import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.Favorites;
 import cn.qingweico.pojo.bo.CollectBO;
 import cn.qingweico.pojo.bo.FavoritesBO;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -65,7 +65,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
             favorites.setArticles(builder.toString());
             if (favoritesMapper.updateByPrimaryKeySelective(favorites) < 0) {
                 log.error("collect article error");
-                GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+                GraceException.error(Response.SYSTEM_OPERATION_ERROR);
             }
         }
     }
@@ -132,7 +132,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
         favorites.setUpdateTime(new Date());
         if (favoritesMapper.insert(favorites) < 0) {
             log.error("create favorites error");
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 
@@ -151,7 +151,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
         favorites.setUpdateTime(new Date());
         if (favoritesMapper.updateByPrimaryKeySelective(favorites) < 0) {
             log.error("update favorites error");
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
 
         }
     }
@@ -181,7 +181,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
         }
         if (favoritesMapper.deleteByPrimaryKey(favoritesId) < 0) {
             log.error("delete favorites error");
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 }

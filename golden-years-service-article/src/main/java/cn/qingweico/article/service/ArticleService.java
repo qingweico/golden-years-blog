@@ -2,7 +2,7 @@ package cn.qingweico.article.service;
 
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.bo.NewArticleBO;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 import java.util.Date;
 
@@ -48,14 +48,14 @@ public interface ArticleService {
      * @param pageSize   pageSize
      * @return PagedGridResult
      */
-    PagedGridResult queryUserArticles(String userId,
-                                      String keyword,
-                                      String categoryId,
-                                      Integer status,
-                                      Date startDate,
-                                      Date endDate,
-                                      Integer page,
-                                      Integer pageSize);
+    PagedResult queryUserArticles(String userId,
+                                  String keyword,
+                                  String categoryId,
+                                  Integer status,
+                                  Date startDate,
+                                  Date endDate,
+                                  Integer page,
+                                  Integer pageSize);
 
 
     /**
@@ -117,15 +117,15 @@ public interface ArticleService {
      * @param pageSize     pageSize 每页的数目
      * @return PagedGridResult
      */
-    PagedGridResult query(String keyword,
-                          Integer status,
-                          String categoryId,
-                          String tagId,
-                          Integer deleteStatus,
-                          Date startDateStr,
-                          Date endDateStr,
-                          Integer page,
-                          Integer pageSize);
+    PagedResult query(String keyword,
+                      Integer status,
+                      String categoryId,
+                      String tagId,
+                      Integer deleteStatus,
+                      Date startDateStr,
+                      Date endDateStr,
+                      Integer page,
+                      Integer pageSize);
 
     /**
      * 管理员删除文章(delete sql)

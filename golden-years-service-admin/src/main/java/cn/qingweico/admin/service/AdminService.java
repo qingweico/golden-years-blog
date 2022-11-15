@@ -2,7 +2,7 @@ package cn.qingweico.admin.service;
 
 import cn.qingweico.pojo.Admin;
 import cn.qingweico.pojo.bo.OperatorAdminBO;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 
 /**
  * @author zqw
@@ -41,7 +41,7 @@ public interface AdminService {
      * @param pageSize 每页显示的数目
      * @return PagedGridResult
      */
-    PagedGridResult queryAdminList(Integer page, Integer pageSize);
+    PagedResult queryAdminList(Integer page, Integer pageSize);
 
     /**
      * 更改管理员账户密码

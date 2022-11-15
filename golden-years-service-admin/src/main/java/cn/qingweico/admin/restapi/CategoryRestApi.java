@@ -2,11 +2,11 @@ package cn.qingweico.admin.restapi;
 
 import cn.qingweico.admin.service.CategoryService;
 import cn.qingweico.api.base.BaseRestApi;
-import cn.qingweico.result.GraceJsonResult;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Result;
+import cn.qingweico.result.Response;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.bo.SaveCategoryBO;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
@@ -28,17 +28,17 @@ public class CategoryRestApi extends BaseRestApi {
 
     @ApiOperation(value = "查询分类列表", notes = "查询分类列表", httpMethod = "GET")
     @GetMapping("/getCategoryList")
-    public GraceJsonResult getCategoryList(@RequestParam String keyword,
-                                           @RequestParam Boolean sort,
-                                           @RequestParam Integer page,
-                                           @RequestParam Integer pageSize) {
-        PagedGridResult result = categoryService.queryCategoryList(keyword,sort, page, pageSize);
-        return GraceJsonResult.ok(result);
+    public Result getCategoryList(@RequestParam String keyword,
+                                  @RequestParam Boolean sort,
+                                  @RequestParam Integer page,
+                                  @RequestParam Integer pageSize) {
+        PagedResult result = categoryService.queryCategoryList(keyword,sort, page, pageSize);
+        return Result.ok(result);
     }
 
     @ApiOperation(value = "新增或者修改文章分类", notes = "新增或者修改文章分类", httpMethod = "POST")
     @PostMapping("/saveOrUpdateCategory")
-    public GraceJsonResult saveOrUpdateCategory(@RequestBody SaveCategoryBO saveCategoryBO) {
+    public Result saveOrUpdateCategory(@RequestBody SaveCategoryBO saveCategoryBO) {
 
         boolean isExist;
         Category pendingCategory = new Category();
@@ -50,7 +50,7 @@ public class CategoryRestApi extends BaseRestApi {
             isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
                     null);
             if (isExist) {
-                return GraceJsonResult.error(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
+                return Result.r(Response.CATEGORY_EXIST_ERROR);
             } else {
                 categoryService.createCategory(pendingCategory);
             }
@@ -60,29 +60,29 @@ public class CategoryRestApi extends BaseRestApi {
             isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
                     saveCategoryBO.getOldName());
             if (isExist) {
-                return GraceJsonResult.error(ResponseStatusEnum.CATEGORY_EXIST_ERROR);
+                return Result.r(Response.CATEGORY_EXIST_ERROR);
             } else {
                 categoryService.modifyCategory(pendingCategory);
             }
         }
 
         if (pendingCategoryId == null) {
-            return new GraceJsonResult(ResponseStatusEnum.APPEND_SUCCESS);
+            return Result.r(Response.APPEND_SUCCESS);
         } else {
-            return new GraceJsonResult(ResponseStatusEnum.ALERT_SUCCESS);
+            return Result.r(Response.ALERT_SUCCESS);
         }
     }
 
     @ApiOperation(value = "删除类别", notes = "删除类别", httpMethod = "POST")
     @PostMapping("/deleteCategory/{id}")
-    public GraceJsonResult deleteCategory(@PathVariable("id") String categoryId) {
+    public Result deleteCategory(@PathVariable("id") String categoryId) {
         categoryService.deleteCategory(categoryId);
-        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
+        return Result.r(Response.DELETE_SUCCESS);
     }
     @ApiOperation(value = "批量删除类别", notes = "批量删除类别", httpMethod = "POST")
     @PostMapping("/delete")
-    public GraceJsonResult batchDeleteCategory(@RequestBody List<String> ids) {
+    public Result batchDeleteCategory(@RequestBody List<String> ids) {
         categoryService.deleteAll(ids);
-        return new GraceJsonResult(ResponseStatusEnum.DELETE_SUCCESS);
+        return Result.r(Response.DELETE_SUCCESS);
     }
 }

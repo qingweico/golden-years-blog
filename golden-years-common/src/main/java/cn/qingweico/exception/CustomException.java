@@ -1,6 +1,6 @@
 package cn.qingweico.exception;
 
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 
 /**
  * 自定义异常
@@ -9,15 +9,15 @@ import cn.qingweico.result.ResponseStatusEnum;
  * @date 2021/9/6
  */
 public class CustomException extends RuntimeException {
-    private final ResponseStatusEnum responseStatus;
+    private final Response responseStatus;
 
-    public CustomException(ResponseStatusEnum responseStatus) {
-        super("异常状态码为: " + responseStatus.status() + ";" +
+    public CustomException(Response responseStatus) {
+        super("异常状态码为: " + responseStatus.code() + ";" +
                 "具体异常信息为: " + responseStatus.msg());
         this.responseStatus = responseStatus;
     }
 
-    public ResponseStatusEnum getResponseStatus() {
+    public Response getResponseStatus() {
         return responseStatus;
     }
 }

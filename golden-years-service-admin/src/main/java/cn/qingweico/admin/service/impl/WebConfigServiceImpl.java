@@ -6,7 +6,7 @@ import cn.qingweico.api.service.BaseService;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConf;
 import cn.qingweico.pojo.WebConfig;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +53,7 @@ public class WebConfigServiceImpl extends BaseService implements WebConfigServic
             String key = RedisConf.REDIS_WEB_CONFIG;
             refreshCache(key);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 }

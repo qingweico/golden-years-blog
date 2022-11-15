@@ -10,11 +10,11 @@ import cn.qingweico.pojo.Fans;
 import cn.qingweico.pojo.eo.FansEo;
 import cn.qingweico.pojo.vo.FansCountsVO;
 import cn.qingweico.pojo.vo.RegionRatioVO;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.user.mapper.FansMapper;
 import cn.qingweico.user.service.FanService;
 import cn.qingweico.user.service.UserService;
-import cn.qingweico.util.PagedGridResult;
+import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -85,9 +85,9 @@ public class FanServiceImpl extends BaseService implements FanService {
             IndexQuery indexQuery = new IndexQueryBuilder()
                     .withObject(fanEo)
                     .build();
-            elasticsearchTemplate.index(indexQuery);
+            esTemplate.index(indexQuery);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_ERROR);
+            GraceException.error(Response.SYSTEM_ERROR);
         }
     }
 
@@ -105,15 +105,15 @@ public class FanServiceImpl extends BaseService implements FanService {
             DeleteQuery deleteQuery = new DeleteQuery();
             deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId));
             deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.FAN_ID, fanId));
-            elasticsearchTemplate.delete(deleteQuery, FansEo.class);
+            esTemplate.delete(deleteQuery, FansEo.class);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_ERROR);
+            GraceException.error(Response.SYSTEM_ERROR);
         }
 
     }
 
     @Override
-    public PagedGridResult getMyFansList(String authorId, Integer page, Integer pageSize) {
+    public PagedResult getMyFansList(String authorId, Integer page, Integer pageSize) {
         Fans fan = new Fans();
         fan.setAuthor(authorId);
         List<Fans> fansList = fansMapper.select(fan);
@@ -122,9 +122,9 @@ public class FanServiceImpl extends BaseService implements FanService {
     }
 
     @Override
-    public PagedGridResult getMyFansListViaEs(String writerId,
-                                              Integer page,
-                                              Integer pageSize) {
+    public PagedResult getMyFansListViaEs(String writerId,
+                                          Integer page,
+                                          Integer pageSize) {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
@@ -132,8 +132,8 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .withPageable(pageable)
                 .build();
 
-        AggregatedPage<FansEo> pagedFans = elasticsearchTemplate.queryForPage(searchQuery, FansEo.class);
-        PagedGridResult gridResult = new PagedGridResult();
+        AggregatedPage<FansEo> pagedFans = esTemplate.queryForPage(searchQuery, FansEo.class);
+        PagedResult gridResult = new PagedResult();
         gridResult.setRows(pagedFans.getContent());
         gridResult.setTotalPage(pagedFans.getTotalPages());
         gridResult.setRecords(pagedFans.getTotalElements());
@@ -161,7 +161,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .addAggregation(termBuilder)
                 .build();
 
-        Aggregations agg = elasticsearchTemplate.query(searchQuery, SearchResponse::getAggregations);
+        Aggregations agg = esTemplate.query(searchQuery, SearchResponse::getAggregations);
 
         Map<String, Aggregation> aggregationMap = agg.asMap();
         LongTerms longTerms = (LongTerms) aggregationMap.get("sex_counts");
@@ -223,7 +223,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .addAggregation(termBuilder)
                 .build();
 
-        Aggregations agg = elasticsearchTemplate.query(searchQuery, SearchResponse::getAggregations);
+        Aggregations agg = esTemplate.query(searchQuery, SearchResponse::getAggregations);
 
         Map<String, Aggregation> aggregationMap = agg.asMap();
         StringTerms stringTerms = (StringTerms) aggregationMap.get("region_counts");
@@ -276,9 +276,9 @@ public class FanServiceImpl extends BaseService implements FanService {
                     .withId(relationId)
                     .withIndexRequest(indexRequest)
                     .build();
-            elasticsearchTemplate.update(updateQuery);
+            esTemplate.update(updateQuery);
         } else {
-            GraceException.error(ResponseStatusEnum.SYSTEM_OPERATION_ERROR);
+            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
 }

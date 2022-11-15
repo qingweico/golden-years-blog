@@ -1,6 +1,6 @@
 package cn.qingweico.article.clients;
 
-import cn.qingweico.result.GraceJsonResult;
+import cn.qingweico.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,7 +18,7 @@ public interface UserBaseInfoClient {
      * @return GraceJsonResult
      */
     @GetMapping("queryByIds")
-    GraceJsonResult queryByIds(@RequestParam("userIds") String userIds);
+    Result queryByIds(@RequestParam("userIds") String userIds);
 
     /**
      * 查询用户基本信息
@@ -27,5 +27,5 @@ public interface UserBaseInfoClient {
      * @return GraceJsonResult
      */
     @GetMapping("getUserBasicInfo")
-    GraceJsonResult getUserBasicInfo(@RequestParam String userId);
+    Result getUserBasicInfo(@RequestParam String userId);
 }

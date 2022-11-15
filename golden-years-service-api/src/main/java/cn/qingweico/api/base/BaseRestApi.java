@@ -2,7 +2,7 @@ package cn.qingweico.api.base;
 
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConf;
-import cn.qingweico.result.ResponseStatusEnum;
+import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.JwtUtils;
 import cn.qingweico.util.RedisTemplate;
@@ -24,14 +24,14 @@ import javax.annotation.Resource;
 @EnableFeignClients
 public class BaseRestApi {
 
-    @Autowired
-    public RedisTemplate redisOperator;
+    @Resource(name = "rt")
+    public RedisTemplate redisTemplate;
 
-    @Resource
+    @Autowired
     public ElasticsearchTemplate elasticsearchTemplate;
 
     public Integer getCountsFromRedis(String key) {
-        String counts = redisOperator.get(key);
+        String counts = redisTemplate.get(key);
         if (StringUtils.isBlank(counts)) {
             counts = "0";
         }
@@ -41,12 +41,12 @@ public class BaseRestApi {
     public void checkPagingParams(Integer page, Integer pageSize) {
         if (page == null || page <= 0) {
             log.error("page: {}", page);
-            GraceException.error(ResponseStatusEnum.FAILED);
+            GraceException.error(Response.FAILED);
         }
 
         if (pageSize == null || pageSize <= 0) {
             log.error("pageSize: {}", pageSize);
-            GraceException.error(ResponseStatusEnum.FAILED);
+            GraceException.error(Response.FAILED);
         }
     }
 
@@ -59,18 +59,18 @@ public class BaseRestApi {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
                 id = claims.get(SysConf.USER_ID, String.class);
-                t = JsonUtils.jsonToPojo(redisOperator.get(infoKey + SysConf.SYMBOL_COLON + id), loginUserType);
+                t = JsonUtils.jsonToPojo(redisTemplate.get(infoKey + SysConf.SYMBOL_COLON + id), loginUserType);
             }
         } catch (Exception e) {
-            GraceException.error(ResponseStatusEnum.TICKET_INVALID);
+            GraceException.error(Response.TICKET_INVALID);
         }
         if (!StringUtils.isEmpty(id)) {
-            String redisToken = redisOperator.get(tokenKey + SysConf.SYMBOL_COLON + id);
+            String redisToken = redisTemplate.get(tokenKey + SysConf.SYMBOL_COLON + id);
             if (StringUtils.isEmpty(redisToken) || !token.equals(redisToken)) {
-                GraceException.error(ResponseStatusEnum.TICKET_INVALID);
+                GraceException.error(Response.TICKET_INVALID);
             }
         } else {
-            GraceException.error(ResponseStatusEnum.TICKET_INVALID);
+            GraceException.error(Response.TICKET_INVALID);
         }
         return t;
     }

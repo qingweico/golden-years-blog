@@ -1,9 +1,5 @@
 package cn.qingweico.util;
 
-import cn.qingweico.enums.FaceVerifyType;
-import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.result.ResponseStatusEnum;
 import cn.qingweico.util.aliyun.AliResource;
 import com.aliyuncs.utils.Base64Helper;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +12,10 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 import java.util.SimpleTimeZone;
 
 /**
@@ -30,6 +24,7 @@ import java.util.SimpleTimeZone;
  */
 @Slf4j
 @Component
+@Deprecated
 public class FaceVerifyUtils {
     @Resource
     private AliResource aliResource;
