@@ -32,23 +32,23 @@
 
 项目主站效果图
 
-![image-20220520193405096](https://cdn.qingweico.cn/image-20220520193405096.png)
+![image-20220520193405096](http://cdn.qingweico.cn/image-20220520193405096.png)
 
 用户创作中心效果图
 
-![image-20220520193429193](https://cdn.qingweico.cn/image-20220520193429193.png)
+![image-20220520193429193](http://cdn.qingweico.cn/image-20220520193429193.png)
 
 管理员登录界面
 
-![image-20220520193739894](https://cdn.qingweico.cn/image-20220520193739894.png)
+![image-20220520193739894](http://cdn.qingweico.cn/image-20220520193739894.png)
 
 管理员人脸登录界面
 
-![image-20220520193916820](https://cdn.qingweico.cn/image-20220520193916820.png)
+![image-20220520193916820](http://cdn.qingweico.cn/image-20220520193916820.png)
 
 管理员文章管理界面
 
-![image-20220520193846764](https://cdn.qingweico.cn/image-20220520193846764.png)
+![image-20220520193846764](http://cdn.qingweico.cn/image-20220520193846764.png)
 
 ...
 
