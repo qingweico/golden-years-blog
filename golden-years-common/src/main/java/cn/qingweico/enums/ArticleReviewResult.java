@@ -1,11 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 文章审核结果
  *
  * @author zqw
  * @date 2021/9/11
  */
+@AllArgsConstructor
 public enum ArticleReviewResult {
 
     /**
@@ -20,9 +23,4 @@ public enum ArticleReviewResult {
 
     public final String type;
     public final String value;
-
-    ArticleReviewResult(String type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

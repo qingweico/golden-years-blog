@@ -3,8 +3,8 @@ package cn.qingweico.user.service.impl;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConst;
+import cn.qingweico.global.RedisConst;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.Fans;
 import cn.qingweico.pojo.eo.FansEo;
@@ -66,7 +66,7 @@ public class FanServiceImpl extends BaseService implements FanService {
         // 获得粉丝信息
         User fansInfo = userService.queryUserById(fanId);
         Fans fan = new Fans();
-        fan.setId(sid.nextShort());
+        fan.setId("");
         fan.setAuthor(authorId);
         fan.setFanId(fanId);
 
@@ -76,9 +76,9 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setProvince(fansInfo.getProvince());
         if (fansMapper.insert(fan) > 0) {
             // redis 作者粉丝累增
-            redisTemplate.increment(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
+            redisTemplate.increment(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累增
-            redisTemplate.increment(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
+            redisTemplate.increment(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + fanId, 1);
             // 保存粉丝关系到es中
             FansEo fanEo = new FansEo();
             BeanUtils.copyProperties(fan, fanEo);
@@ -98,13 +98,13 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setFanId(fanId);
         if (fansMapper.delete(fan) > 0) {
             // redis 作者粉丝累减
-            redisTemplate.decrement(RedisConf.REDIS_AUTHOR_FANS_COUNTS + SysConf.SYMBOL_COLON + authorId, 1);
+            redisTemplate.decrement(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累减
-            redisTemplate.decrement(RedisConf.REDIS_MY_FOLLOW_COUNTS + SysConf.SYMBOL_COLON + fanId, 1);
+            redisTemplate.decrement(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + fanId, 1);
             // 删除es中的粉丝关系
             DeleteQuery deleteQuery = new DeleteQuery();
-            deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId));
-            deleteQuery.setQuery(QueryBuilders.termQuery(SysConf.FAN_ID, fanId));
+            deleteQuery.setQuery(QueryBuilders.termQuery(SysConst.AUTHOR_ID, authorId));
+            deleteQuery.setQuery(QueryBuilders.termQuery(SysConst.FAN_ID, fanId));
             esTemplate.delete(deleteQuery, FansEo.class);
         } else {
             GraceException.error(Response.SYSTEM_ERROR);
@@ -128,7 +128,7 @@ public class FanServiceImpl extends BaseService implements FanService {
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termsQuery(SysConf.AUTHOR_ID, writerId))
+                .withQuery(QueryBuilders.termsQuery(SysConst.AUTHOR_ID, writerId))
                 .withPageable(pageable)
                 .build();
 
@@ -157,7 +157,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .field("sex");
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId))
+                .withQuery(QueryBuilders.termQuery(SysConst.AUTHOR_ID, authorId))
                 .addAggregation(termBuilder)
                 .build();
 
@@ -219,7 +219,7 @@ public class FanServiceImpl extends BaseService implements FanService {
                 .field("province");
 
         SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.termQuery(SysConf.AUTHOR_ID, authorId))
+                .withQuery(QueryBuilders.termQuery(SysConst.AUTHOR_ID, authorId))
                 .addAggregation(termBuilder)
                 .build();
 

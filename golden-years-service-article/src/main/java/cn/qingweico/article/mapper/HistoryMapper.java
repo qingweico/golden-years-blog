@@ -1,6 +1,6 @@
 package cn.qingweico.article.mapper;
 
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.History;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/5/6
  */
 @Repository
-public interface HistoryMapper extends MyMapper<History> {
+public interface HistoryMapper extends CommonMapper<History> {
 }

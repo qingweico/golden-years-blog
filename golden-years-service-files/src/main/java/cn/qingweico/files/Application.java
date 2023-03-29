@@ -16,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
         DruidDataSourceAutoConfigure.class,
         DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
-@ComponentScan(basePackages = {"cn.qingweico", "org.n3r.idworker"})
+@ComponentScan(basePackages = {"cn.qingweico"})
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

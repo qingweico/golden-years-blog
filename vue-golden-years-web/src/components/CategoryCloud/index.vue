@@ -17,7 +17,7 @@ export default {
   data() {
     return {
       categoryList: [],
-      systemConfig:{}
+      sysConfig:{}
     };
   },
   created() {
@@ -25,13 +25,13 @@ export default {
       this.categoryList = response.data;
     });
     getSystemConfig().then((response) => {
-      this.systemConfig = response.data;
+      this.sysConfig = response.data;
     });
   },
   methods: {
     //跳转到类别列表详情页
     goToList(id) {
-      this.$router.push({path: "/", query: {categoryId: id,searchModel: this.systemConfig.searchModel}});
+      this.$router.push({path: "/", query: {categoryId: id,searchModel: this.sysConfig.searchModel}});
     },
   }
 };

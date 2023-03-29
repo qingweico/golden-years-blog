@@ -1,6 +1,6 @@
 package cn.qingweico.util;
 
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.SysConst;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -66,7 +66,7 @@ public class JwtUtils {
         JwtBuilder builder = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setHeaderParam("alg", "HS256")
-                .claim(SysConf.USER_ID, userId)
+                .claim(SysConst.USER_ID, userId)
                 .signWith(signatureAlgorithm, signingKey);
         // 添加Token过期时间
         if (EXPIRES_SECOND >= 0) {

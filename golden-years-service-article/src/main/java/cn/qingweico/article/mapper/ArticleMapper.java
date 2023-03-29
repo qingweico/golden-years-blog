@@ -1,6 +1,6 @@
 package cn.qingweico.article.mapper;
 
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.Article;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @date 2021/9/11
  */
 @Repository
-public interface ArticleMapper extends MyMapper<Article> {
+public interface ArticleMapper extends CommonMapper<Article> {
 
     /**
      * 定时发布文章(采用定时任务)

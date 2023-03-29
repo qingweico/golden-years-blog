@@ -18,6 +18,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAsync
 public class AsyncConfig {
 
+    // 注意避免所有的业务逻辑共用一个线程池
+
+
+    // 最佳线程数目 : [1 / (程序运行时间 / CPU 总运行时间)] * CPU 核数
+
     @Bean("asyncTask")
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

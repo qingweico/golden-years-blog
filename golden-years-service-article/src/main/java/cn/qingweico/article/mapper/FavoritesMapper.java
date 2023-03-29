@@ -1,6 +1,6 @@
 package cn.qingweico.article.mapper;
 
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.Favorites;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/4/16
  */
 @Repository
-public interface FavoritesMapper extends MyMapper<Favorites> {
+public interface FavoritesMapper extends CommonMapper<Favorites> {
 }

@@ -1,7 +1,7 @@
 package cn.qingweico.api.interceptor;
 
-import cn.qingweico.global.RedisConf;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.util.IpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -21,9 +21,9 @@ public class ArticlePageViewsInterceptor extends BaseInterceptor implements Hand
                              @Nonnull HttpServletResponse response,
                              @Nonnull Object handler) {
 
-        String articleId = request.getParameter(SysConf.ARTICLE_ID);
+        String articleId = request.getParameter(SysConst.ARTICLE_ID);
         String visitIp = IpUtils.getRequestIp(request);
-        boolean isPresent = redisOperator.keyIsExist(RedisConf.REDIS_ARTICLE_ALREADY_READ + SysConf.SYMBOL_COLON + articleId + SysConf.SYMBOL_COLON + visitIp);
+        boolean isPresent = redisOperator.keyIsExist(RedisConst.REDIS_ARTICLE_ALREADY_READ + SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_COLON + visitIp);
         return !isPresent;
     }
 }

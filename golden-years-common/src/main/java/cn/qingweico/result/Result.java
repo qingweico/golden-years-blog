@@ -141,18 +141,6 @@ public class Result {
     }
 
     /**
-     * 返回无数据 自定义提示信息
-     *
-     * @param r   Response
-     * @param msg 提示信息
-     */
-    private Result(Response r, String msg) {
-        this.code = r.code();
-        this.msg = msg;
-        this.success = r.success();
-    }
-
-    /**
      * 自定义数据和响应信息
      *
      * @param r    Response

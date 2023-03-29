@@ -1,6 +1,6 @@
 package cn.qingweico.api.interceptor;
 
-import cn.qingweico.api.base.BaseRestApi;
+import cn.qingweico.api.base.BaseController;
 import cn.qingweico.util.RedisTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,6 +13,6 @@ public class BaseInterceptor {
     @Autowired
     public RedisTemplate redisOperator;
 
-    public BaseRestApi baseRestApi = new BaseRestApi();
+    public BaseController baseRestApi = new BaseController();
 
 }

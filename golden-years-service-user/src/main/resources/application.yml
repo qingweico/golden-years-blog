@@ -9,6 +9,9 @@ server:
   tomcat:
     uri-encoding: UTF-8
     max-swallow-size: -1  # tomcat默认大小2M,超过2M的文件不会被捕获,需要调整此处大小为100MB或者-1即可
+    max-threads: 20
+    # 配置过大会导致OOM
+    # max-http-header-size: 8
 
 ############################################################
 #
@@ -21,11 +24,40 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver          # mysql驱动
     # 公网ip: 本地部署使用本地SQL(119.29.35.129)
-    masterUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
-    slaveUrl: jdbc:mysql://106.12.136.221:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    # time_zone : 设置  set global time_zone = "+8:00";
+    masterUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    slaveUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
     username: root
     password: 990712
     initialization-mode: always
+#    druid:
+#      initial-size: 5
+#      min-idle: 5
+#      max-active: 20
+#      max-wait: 60000
+#      time-between-eviction-runs-millis: 60000
+#      min-evictable-idle-time-millis: 300000
+#      validation-query: SELECT 1 FROM DUAL
+#      test-while-idle: true
+#      test-on-borrow: false
+#      test-on-return: false
+#      pool-prepared-statements: true
+#      filters: stat,wall,log4j2
+#      max-pool-prepared-statement-per-connection-size: 20
+#      use-global-data-source-stat: true
+#      # 可配置数据库密码加密操作
+#      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+#      filter:
+#        config:
+#          enabled: true
+#        # SQL 防注入
+#        wall:
+#          config:
+#            alter-table-allow: false
+#            delete-allow: false
+#            drop-table-allow: false
+#          enabled: true
+#          db-type: mysql
     # 数据源其他配置
     # 初始化连接池的大小
     initialSize: 5
@@ -63,14 +95,14 @@ spring:
     active: dev
   data:
     mongodb:
-      uri: mongodb://root:root@119.29.35.129:27017
+      uri: mongodb://root:root@106.12.136.221:27017
       database: golden-years
-    #elasticsearch:
-      #cluster-name: golden-years-es
-      #cluster-nodes: 119.29.35.129:9300
+    elasticsearch:
+      cluster-name: golden-years-es
+      cluster-nodes: 106.12.136.221:9300
   redis:
     database: 0
-    host: 119.29.35.129
+    host: 106.12.136.221
     port: 6379
     password: 990712
     timeout: 3000
@@ -83,7 +115,7 @@ spring:
         # 最大等待时间:当没有可用连接时, 连接池等待连接被归还的最大时间(以毫秒计数), 超过时间则抛出异常
         max-wait: 300
   rabbitmq:
-    host: 119.29.35.129
+    host: 106.12.136.221
     port: 5672
     username: admin
     password: admin
@@ -102,13 +134,13 @@ spring:
         dashboard: 106.12.136.221:8888
         port: 8719
 
-############################################################
-#
-# mybatis 配置
-#
-############################################################
-# SqlSessionFactoryBean配置; 多数据源已转移到cn.qingweico.api.config.DruidDataSourceConfig
-# mybatis:
+  ############################################################
+  #
+  # mybatis 配置
+  #
+  ############################################################
+  # SqlSessionFactoryBean配置; 多数据源已转移到cn.qingweico.api.config.DruidDataSourceConfig
+  # mybatis:
   # type-aliases-package: cn.qingweico.pojo          # 所有POJO类所在包路径
   # mapper-locations: classpath:mapper/*.xml         # mapper映射文件
   # config-location: classpath:/mybatis-config.xml   # mybatis配置文件
@@ -121,7 +153,7 @@ spring:
 ############################################################
 # 通用 Mapper 配置
 mapper:
-  mappers: cn.qingweico.mapper.MyMapper
+  mappers: cn.qingweico.api.mapper.CommonMapper
   not-empty: false    # 在进行数据库操作的的时候, 判断表达式 username != null, 是否追加 username != ''
   identity: MYSQL
 # 分页插件配置

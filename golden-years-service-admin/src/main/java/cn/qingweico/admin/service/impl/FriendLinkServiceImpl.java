@@ -3,7 +3,8 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.repository.FriendLinkRepository;
 import cn.qingweico.admin.service.FriendLinkService;
 import cn.qingweico.api.service.BaseService;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.mo.FriendLink;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
+ * 友情连接Service
  * @author zqw
  * @date 2021/9/10
  */
@@ -38,12 +40,13 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
         fl.setLinkName(linkName);
         fl.setIsDelete(iDelete);
         // 条件查询
-        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
-                .withMatcher("linkName", ExampleMatcher.GenericPropertyMatchers.contains())
-                .withMatcher("isDelete", ExampleMatcher.GenericPropertyMatchers.exact());
 
-        Example<FriendLink> example = Example.of(fl, exampleMatcher);
-        Page<FriendLink> friendLinkPage = repo.findAll(example, pageable);
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                .withMatcher(SysConst.LINK_NAME, ExampleMatcher.GenericPropertyMatchers.contains())
+                .withMatcher(SysConst.IS_DELETE, ExampleMatcher.GenericPropertyMatchers.exact());
+
+        Example<FriendLink> ex = Example.of(fl, exampleMatcher);
+        Page<FriendLink> friendLinkPage = repo.findAll(ex, pageable);
         PagedResult pgr = new PagedResult();
         pgr.setRows(friendLinkPage.getContent());
         pgr.setRecords(friendLinkPage.getTotalElements());
@@ -55,7 +58,7 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
     @Override
     public void delete(String linkId) {
         repo.deleteById(linkId);
-        refreshCache(RedisConf.REDIS_FRIEND_LINK);
+        refreshCache(RedisConst.REDIS_FRIEND_LINK);
     }
 
     @Override
@@ -63,12 +66,12 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
         for (String id : ids) {
             repo.deleteById(id);
         }
-        refreshCache(RedisConf.REDIS_FRIEND_LINK);
+        refreshCache(RedisConst.REDIS_FRIEND_LINK);
     }
 
     @Override
     public List<FriendLink> queryIndexFriendLinkList(Integer isDelete) {
-        String cacheFriendLinkKey = RedisConf.REDIS_FRIEND_LINK;
+        String cacheFriendLinkKey = RedisConst.REDIS_FRIEND_LINK;
         String cache = redisTemplate.get(cacheFriendLinkKey);
         List<FriendLink> friendLinkList;
         if (StringUtils.isBlank(cache)) {

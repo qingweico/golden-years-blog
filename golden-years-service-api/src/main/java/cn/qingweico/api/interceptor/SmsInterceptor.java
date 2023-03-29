@@ -1,8 +1,8 @@
 package cn.qingweico.api.interceptor;
 
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.RedisConf;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.IpUtils;
 import cn.qingweico.util.RedisTemplate;
@@ -28,7 +28,7 @@ public class SmsInterceptor implements HandlerInterceptor {
                              @Nonnull Object handler) {
         // 获取用户的ip
         String userIp = IpUtils.getRequestIp(request);
-        boolean keyIsPresent = redisOperator.keyIsExist(RedisConf.REDIS_IP + SysConf.SYMBOL_COLON + userIp);
+        boolean keyIsPresent = redisOperator.keyIsExist(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp);
         if (keyIsPresent) {
             GraceException.error(Response.SMS_NEED_WAIT_ERROR);
             return false;

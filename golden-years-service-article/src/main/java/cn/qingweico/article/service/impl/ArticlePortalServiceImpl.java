@@ -7,8 +7,8 @@ import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
-import cn.qingweico.global.RedisConf;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.pojo.Tag;
@@ -56,10 +56,10 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         Example.Criteria criteria = setDefaultArticleExample(example);
 
         if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike(SysConf.TITLE, SysConf.DELIMITER_PERCENT + keyword + SysConf.DELIMITER_PERCENT);
+            criteria.andLike(SysConst.TITLE, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
         }
         if (StringUtils.isNotBlank(category)) {
-            criteria.andEqualTo(SysConf.CATEGORY_ID, category);
+            criteria.andEqualTo(SysConst.CATEGORY_ID, category);
         }
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
@@ -74,9 +74,9 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     public List<Article> queryHotArticle() {
         Example example = new Example(Article.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.IS_DELETE, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConf.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
-        PageHelper.startPage(SysConf.NUM_ONE, SysConf.NUM_100);
+        criteria.andEqualTo(SysConst.IS_DELETE, YesOrNo.NO.type);
+        criteria.andEqualTo(SysConst.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
+        PageHelper.startPage(SysConst.NUM_ONE, SysConst.NUM_100);
         return articleMapper.selectByExample(example);
     }
 
@@ -91,7 +91,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     private PagedResult getPagedGridResult(String author, Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo(SysConf.AUTHOR_ID, author);
+        criteria.andEqualTo(SysConst.AUTHOR_ID, author);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         return setterPagedGrid(list, page);
@@ -101,15 +101,15 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     public List<Article> queryGoodArticleListOfAuthor(String author) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.IS_DELETE, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConf.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
-        criteria.andEqualTo(SysConf.AUTHOR_ID, author);
+        criteria.andEqualTo(SysConst.IS_DELETE, YesOrNo.NO.type);
+        criteria.andEqualTo(SysConst.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
+        criteria.andEqualTo(SysConst.AUTHOR_ID, author);
         return articleMapper.selectByExample(example);
     }
 
     @Override
     public ArticleDetailVO queryDetail(String articleId) {
-        String cachedArticleDetail = redisTemplate.get(RedisConf.REDIS_ARTICLE_DETAIL + SysConf.SYMBOL_COLON + articleId);
+        String cachedArticleDetail = redisTemplate.get(RedisConst.REDIS_ARTICLE_DETAIL + SysConst.SYMBOL_COLON + articleId);
         ArticleDetailVO articleDetail = null;
         if (StringUtils.isNotBlank(cachedArticleDetail)) {
             articleDetail = JsonUtils.jsonToPojo(cachedArticleDetail, ArticleDetailVO.class);
@@ -125,7 +125,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
                 articleDetail = new ArticleDetailVO();
                 articleDetail.setTagList(tagList);
                 BeanUtils.copyProperties(result, articleDetail);
-                redisTemplate.set(RedisConf.REDIS_ARTICLE_DETAIL + SysConf.SYMBOL_COLON + articleId, JsonUtils.objectToJson(articleDetail));
+                redisTemplate.set(RedisConst.REDIS_ARTICLE_DETAIL + SysConst.SYMBOL_COLON + articleId, JsonUtils.objectToJson(articleDetail));
                 log.info("article detail has been cached, articleId: {}", articleId);
             }
         }
@@ -158,22 +158,22 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     private Example.Criteria setDefaultArticleExample(Example example) {
-        example.orderBy(SysConf.CREATE_TIME).desc();
+        example.orderBy(SysConst.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.IS_DELETE, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConf.IS_APPOINT, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConf.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
+        criteria.andEqualTo(SysConst.IS_DELETE, YesOrNo.NO.type);
+        criteria.andEqualTo(SysConst.IS_APPOINT, YesOrNo.NO.type);
+        criteria.andEqualTo(SysConst.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
         return criteria;
     }
 
     @Override
     public List<Category> queryCategoryList() {
         // 缓存
-        String categoriesJson = redisTemplate.get(RedisConf.REDIS_ARTICLE_CATEGORY);
+        String categoriesJson = redisTemplate.get(RedisConst.REDIS_ARTICLE_CATEGORY);
         List<Category> categories;
         if (StringUtils.isBlank(categoriesJson)) {
             categories = categoryMapper.selectAll();
-            redisTemplate.set(RedisConf.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
+            redisTemplate.set(RedisConst.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
             log.info("article category has been cached");
         } else {
             categories = JsonUtils.jsonToList(categoriesJson, Category.class);
@@ -185,7 +185,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     public List<CategoryVO> getCategoryListWithArticleCount() {
 
         List<CategoryVO> results = new ArrayList<>();
-        String cacheKey = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
+        String cacheKey = RedisConst.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
         String cache = redisTemplate.get(cacheKey);
         if (StringUtils.isNotBlank(cache)) {
             results = JsonUtils.jsonToList(cache, CategoryVO.class);
@@ -241,8 +241,8 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     public PagedResult queryArticleListByCategoryId(String userId, String categoryId, Integer page, Integer pageSize) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo(SysConf.AUTHOR_ID, userId);
-        criteria.andEqualTo(SysConf.CATEGORY_ID, categoryId);
+        criteria.andEqualTo(SysConst.AUTHOR_ID, userId);
+        criteria.andEqualTo(SysConst.CATEGORY_ID, categoryId);
         PageHelper.startPage(page, pageSize);
         List<Article> list = articleMapper.selectByExample(example);
         PageInfo<Article> pageInfo = new PageInfo<>(list);

@@ -1,7 +1,7 @@
 package cn.qingweico.user.service.impl;
 
 import cn.qingweico.api.service.BaseService;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.UserLoginLog;
 import cn.qingweico.user.mapper.UserLoginLogMapper;
 import cn.qingweico.user.service.LoginLogService;
@@ -45,7 +45,7 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         // 获取客户端浏览器
         String browser = userAgent.getBrowser().getName();
         Date timestamp = new Date();
-        String id = sid.nextShort();
+        String id = "";
         UserLoginLog userLoginLog = new UserLoginLog();
         userLoginLog.setId(id);
         userLoginLog.setUserId(userId);
@@ -62,15 +62,15 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
                                        Integer pageSize) {
 
         Example loginLogExample = new Example(UserLoginLog.class);
-        loginLogExample.orderBy(SysConf.LOGIN_TIME).desc();
+        loginLogExample.orderBy(SysConst.LOGIN_TIME).desc();
         Example.Criteria criteria = loginLogExample.createCriteria();
-        criteria.andEqualTo(SysConf.USER_ID, userId);
+        criteria.andEqualTo(SysConst.USER_ID, userId);
         Calendar c = Calendar.getInstance();
 
         // 只展示用户最近一周的登陆日志
         c.setTime(new Date());
         c.add(Calendar.DATE, -7);
-        criteria.andGreaterThanOrEqualTo(SysConf.LOGIN_TIME, c.getTime());
+        criteria.andGreaterThanOrEqualTo(SysConst.LOGIN_TIME, c.getTime());
         PageHelper.startPage(page, pageSize);
         List<UserLoginLog> userLoginLogList = userLoginLogMapper.selectByExample(loginLogExample);
         return setterPagedGrid(userLoginLogList, page);
@@ -83,7 +83,7 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         c.add(Calendar.MONTH, -1);
-        criteria.andLessThanOrEqualTo(SysConf.LOGIN_TIME, c.getTime());
+        criteria.andLessThanOrEqualTo(SysConst.LOGIN_TIME, c.getTime());
         userLoginLogMapper.deleteByExample(loginLogExample);
     }
 }

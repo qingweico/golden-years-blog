@@ -5,7 +5,7 @@ import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.HistoryMapper;
 import cn.qingweico.article.service.ArticleHistoryService;
 import cn.qingweico.enums.ArticleHistoryDeleteType;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.History;
 import com.github.pagehelper.PageHelper;
@@ -36,9 +36,9 @@ public class ArticleHistoryServiceImpl extends BaseService implements ArticleHis
     @Override
     public PageInfo<History> getHistoryList(String userId, Integer pageNum, Integer pageSize) {
         Example example = new Example(History.class);
-        example.orderBy(SysConf.CREATE_TIME).desc();
+        example.orderBy(SysConst.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.USER_ID, userId);
+        criteria.andEqualTo(SysConst.USER_ID, userId);
         PageHelper.startPage(pageNum, pageSize);
         List<History> list = historyMapper.selectByExample(example);
         return new PageInfo<>(list);
@@ -73,7 +73,7 @@ public class ArticleHistoryServiceImpl extends BaseService implements ArticleHis
     public void deleteHistory(String userId, Integer deleteModel) {
         Example example = new Example(History.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.USER_ID, userId);
+        criteria.andEqualTo(SysConst.USER_ID, userId);
         if (deleteModel != null) {
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
@@ -90,7 +90,7 @@ public class ArticleHistoryServiceImpl extends BaseService implements ArticleHis
                 // 清理一周内文章浏览记录
                 c.add(Calendar.DAY_OF_WEEK, -7);
             }
-            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, c.getTime());
+            criteria.andGreaterThanOrEqualTo(SysConst.CREATE_TIME, c.getTime());
         }
         int deleteNum = historyMapper.deleteByExample(example);
         log.info("delete history, userId: {}, deleteModel: {}, deleteNum: {}", userId, deleteModel, deleteNum);

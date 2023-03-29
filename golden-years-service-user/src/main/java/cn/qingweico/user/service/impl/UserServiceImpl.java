@@ -5,8 +5,8 @@ import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConst;
+import cn.qingweico.global.RedisConst;
 import cn.qingweico.result.Response;
 import cn.qingweico.pojo.User;
 import cn.qingweico.pojo.bo.UserInfoBO;
@@ -62,24 +62,24 @@ public class UserServiceImpl extends BaseService implements UserService {
                                      Integer pageSize) {
 
         Example example = new Example(User.class);
-        example.orderBy(SysConf.CREATE_TIME).desc();
+        example.orderBy(SysConst.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
 
         if (StringUtils.isNotBlank(nickname)) {
-            criteria.andLike(SysConf.NICK_NAME, SysConf.DELIMITER_PERCENT + nickname + SysConf.DELIMITER_PERCENT);
+            criteria.andLike(SysConst.NICK_NAME, SysConst.DELIMITER_PERCENT + nickname + SysConst.DELIMITER_PERCENT);
         }
         if (StringUtils.isNotBlank(mobile)) {
-            criteria.andLike(SysConf.MOBILE, SysConf.DELIMITER_PERCENT + mobile + SysConf.DELIMITER_PERCENT);
+            criteria.andLike(SysConst.MOBILE, SysConst.DELIMITER_PERCENT + mobile + SysConst.DELIMITER_PERCENT);
         }
         if (UserStatus.isUserStatusValid(status)) {
-            criteria.andEqualTo(SysConf.ACTIVE_STATUS, status);
+            criteria.andEqualTo(SysConst.ACTIVE_STATUS, status);
         }
 
         if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, startDate);
+            criteria.andGreaterThanOrEqualTo(SysConst.CREATE_TIME, startDate);
         }
         if (endDate != null) {
-            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, endDate);
+            criteria.andGreaterThanOrEqualTo(SysConst.CREATE_TIME, endDate);
         }
 
         PageHelper.startPage(page, pageSize);
@@ -94,7 +94,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setId(userId);
         user.setActiveStatus(doStatus);
         if (userMapper.updateByPrimaryKeySelective(user) > 0) {
-            String key = RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId;
+            String key = RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId;
             refreshCache(key);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
@@ -107,14 +107,14 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         Example userExample = new Example(User.class);
         Example.Criteria userCriteria = userExample.createCriteria();
-        userCriteria.andEqualTo(SysConf.MOBILE, mobile);
+        userCriteria.andEqualTo(SysConst.MOBILE, mobile);
         return userMapper.selectOneByExample(userExample);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public User createUser(String mobile) {
-        String userId = sid.nextShort();
+        String userId = "";
         User user = new User();
         user.setId(userId);
         String randomFace = FACE[(int) (Math.random() * 3)];
@@ -130,7 +130,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setUpdateTime(new Date());
         // 放 rabbitmq 中, 为用户创建默认的收藏夹
         rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
-                SysConf.ARTICLE_CREATE_FAVORITES_DO, userId);
+                SysConst.ARTICLE_CREATE_FAVORITES_DO, userId);
         if (userMapper.insert(user) < 0) {
             log.error("create user error");
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
@@ -176,7 +176,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 查询数据库中最新的数据放入缓存中
         User user = queryUserById(userId);
-        redisTemplate.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+        redisTemplate.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
         log.info("update user info: cache has been updated");
     }
 
@@ -184,9 +184,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     public User queryUserByAuth(String auth) {
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.MOBILE, auth);
-        criteria.orEqualTo(SysConf.NICK_NAME, auth);
-        criteria.orEqualTo(SysConf.EMAIL, auth);
+        criteria.andEqualTo(SysConst.MOBILE, auth);
+        criteria.orEqualTo(SysConst.NICK_NAME, auth);
+        criteria.orEqualTo(SysConst.EMAIL, auth);
         return userMapper.selectOneByExample(example);
     }
 
@@ -194,8 +194,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Async("asyncTask")
     public void doSaveUserAuthToken(User user, String token) {
         // 保存token以及用户信息到redis中
-        redisTemplate.set(RedisConf.REDIS_USER_TOKEN + SysConf.SYMBOL_COLON + user.getId(), token);
-        redisTemplate.set(RedisConf.REDIS_USER_INFO + SysConf.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
+        redisTemplate.set(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + user.getId(), token);
+        redisTemplate.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
     }
 
 
@@ -212,7 +212,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setId(userId);
         user.setPassword(DEFAULT_PASSWORD);
         if (userMapper.updateByPrimaryKeySelective(user) > 0) {
-            String key = RedisConf.REDIS_USER_INFO;
+            String key = RedisConst.REDIS_USER_INFO;
             refreshCache(key);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
@@ -224,7 +224,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         User user = queryUserById(userId);
         user.setPassword(newPassword);
         if (userMapper.updateByPrimaryKeySelective(user) > 0) {
-            String key = RedisConf.REDIS_USER_INFO;
+            String key = RedisConst.REDIS_USER_INFO;
             refreshCache(key);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
@@ -235,7 +235,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void alterMobile(User user, String newMobile) {
         user.setMobile(newMobile);
         if (userMapper.updateByPrimaryKeySelective(user) > 0) {
-            String cachedUserKey = RedisConf.REDIS_USER_INFO + SysConf.DELIMITER_COLON + user.getId();
+            String cachedUserKey = RedisConst.REDIS_USER_INFO + SysConst.DELIMITER_COLON + user.getId();
             refreshCache(cachedUserKey);
         } else {
             log.error("update user mobile error");
@@ -246,7 +246,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public Integer queryUserCounts() {
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andNotEqualTo(SysConf.ACTIVE_STATUS, UserStatus.INACTIVE.type);
+        criteria.andNotEqualTo(SysConst.ACTIVE_STATUS, UserStatus.INACTIVE.type);
         return userMapper.selectCountByExample(example);
     }
 }

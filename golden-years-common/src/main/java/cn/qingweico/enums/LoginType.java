@@ -1,11 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 用户可以使用的登录类型
  *
  * @author zqw
  * @date 2022/4/11
  */
+@AllArgsConstructor
 public enum LoginType {
     /**
      * 密码登录
@@ -31,9 +34,4 @@ public enum LoginType {
 
     public final Integer type;
     public final String value;
-
-    LoginType(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

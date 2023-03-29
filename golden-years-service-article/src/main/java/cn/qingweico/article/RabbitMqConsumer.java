@@ -1,8 +1,8 @@
 package cn.qingweico.article;
 
 import cn.qingweico.api.config.RabbitMqConfig;
-import cn.qingweico.article.restapi.ArticleDetailRestApi;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.article.controller.ArticleDetailController;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.bo.CollectBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
@@ -19,13 +19,13 @@ import javax.annotation.Resource;
 @Component
 public class RabbitMqConsumer {
     @Resource
-    private ArticleDetailRestApi articleDetailRestApi;
+    private ArticleDetailController articleDetailRestApi;
     @RabbitListener(queues = {RabbitMqConfig.QUEUE_ARTICLE})
     public void listenQueue(String payLoad, Message message) {
         log.info("payLoad: ---> {}, message: ---> {}", payLoad, message.toString());
         String routingKey = message.getMessageProperties().getReceivedRoutingKey();
         // 为新用户创建默认收藏夹
-        if (SysConf.ARTICLE_CREATE_FAVORITES_DO.equals(routingKey)) {
+        if (SysConst.ARTICLE_CREATE_FAVORITES_DO.equals(routingKey)) {
             String userId = payLoad.split(",")[0];
             try {
                 CollectBO collectBO = new CollectBO();

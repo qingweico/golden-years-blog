@@ -1,11 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 是否
  *
  * @author zqw
  * @date 2021/9/11
  */
+@AllArgsConstructor
 public enum YesOrNo {
     /**
      * 否
@@ -18,9 +21,4 @@ public enum YesOrNo {
 
     public final Integer type;
     public final String value;
-
-    YesOrNo(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

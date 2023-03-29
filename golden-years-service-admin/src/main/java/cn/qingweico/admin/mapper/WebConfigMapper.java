@@ -1,7 +1,6 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.mapper.MyMapper;
-import cn.qingweico.pojo.Admin;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.WebConfig;
 import org.springframework.stereotype.Repository;
 
@@ -10,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/4/11
  */
 @Repository
-public interface WebConfigMapper extends MyMapper<WebConfig> {
+public interface WebConfigMapper extends CommonMapper<WebConfig> {
 }

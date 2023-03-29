@@ -1,6 +1,6 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.Category;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2021/9/13
  */
 @Repository
-public interface CategoryMapper extends MyMapper<Category> {
+public interface CategoryMapper extends CommonMapper<Category> {
 }

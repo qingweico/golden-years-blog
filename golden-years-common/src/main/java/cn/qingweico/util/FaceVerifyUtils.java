@@ -21,19 +21,22 @@ import java.util.SimpleTimeZone;
 /**
  * @author zqw
  * @date 2021/9/10
+ * @see CompareFace
  */
 @Slf4j
 @Component
 @Deprecated
+@SuppressWarnings("unused")
 public class FaceVerifyUtils {
     @Resource
     private AliResource aliResource;
 
-    private static final String GATEWAY = "http://viapi-test.oss-cn-shanghai.aliyuncs.com/viapi-3.0domepic/facebody/CompareFace";
+    private static final String GATEWAY = "https://viapi-test.oss-cn-shanghai.aliyuncs.com/viapi-3.0domepic/facebody/CompareFace";
 
     /*
      * 计算MD5+BASE64
      */
+
     public static String md5Base64(String s) {
         if (s == null) {
             return null;

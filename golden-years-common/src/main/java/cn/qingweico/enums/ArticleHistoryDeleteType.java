@@ -1,10 +1,13 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 文章浏览历史的删除模式
  * @author zqw
  * @date 2022/5/6
  */
+@AllArgsConstructor
 public enum ArticleHistoryDeleteType {
     /**
      * 过去的一小时
@@ -26,9 +29,4 @@ public enum ArticleHistoryDeleteType {
 
     public final Integer type;
     public final String value;
-
-    ArticleHistoryDeleteType(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

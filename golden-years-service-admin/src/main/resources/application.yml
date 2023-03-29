@@ -18,10 +18,11 @@ spring:
   application:
     name: service-admin
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver          # mysql驱动
-    # Linux 119.29.35.129
-    masterUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
-    slaveUrl: jdbc:mysql://106.12.136.221:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    # mysql驱动
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Linux xxx
+    masterUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    slaveUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
     username: root
     password: 990712
     initialization-mode: always
@@ -62,14 +63,14 @@ spring:
     active: dev
   data:
     mongodb:
-      uri: mongodb://root:root@119.29.35.129:27017
+      uri: mongodb://root:root@106.12.136.221:27017
       database: golden-years
     elasticsearch:
       cluster-name: golden-years-es
-      cluster-nodes: 119.29.35.129:9300
+      cluster-nodes: 106.12.136.221:9300
   redis:
     database: 0
-    host: 119.29.35.129
+    host: 106.12.136.221
     port: 6379
     password: 990712
     timeout: 3000
@@ -114,7 +115,7 @@ spring:
 ############################################################
 # 通用 Mapper 配置
 mapper:
-  mappers: cn.qingweico.mapper.MyMapper
+  mappers: cn.qingweico.api.mapper.CommonMapper
   not-empty: false    # 在进行数据库操作的的时候, 判断表达式 username != null, 是否追加 username != ''
   identity: MYSQL
 # 分页插件配置

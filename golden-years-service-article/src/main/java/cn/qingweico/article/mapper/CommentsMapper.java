@@ -1,7 +1,7 @@
 package cn.qingweico.article.mapper;
 
 import cn.qingweico.pojo.Comments;
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.vo.CommentsVO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +13,7 @@ import java.util.*;
  * @date 2021/9/13
  */
 @Repository
-public interface CommentsMapper extends MyMapper<Comments> {
+public interface CommentsMapper extends CommonMapper<Comments> {
 
     /**
      * 查询文章评论列表

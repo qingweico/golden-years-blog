@@ -4,7 +4,8 @@ import cn.qingweico.admin.mapper.WebConfigMapper;
 import cn.qingweico.admin.service.WebConfigService;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.WebConfig;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
@@ -28,13 +29,13 @@ public class WebConfigServiceImpl extends BaseService implements WebConfigServic
 
     @Override
     public WebConfig getWebConfig() {
-        String webConfigRedisKey = RedisConf.REDIS_WEB_CONFIG;
+        String webConfigRedisKey = RedisConst.REDIS_WEB_CONFIG;
         WebConfig webConfig;
         final String cachedWebConfig = redisTemplate.get(webConfigRedisKey);
         if (StringUtils.isBlank(cachedWebConfig)) {
             webConfig = webConfigMapper.selectAll().get(0);
             redisTemplate.set(webConfigRedisKey, JsonUtils.objectToJson(webConfig));
-            log.info("set webConfig cache");
+            log.info("set web config cache");
         } else {
             webConfig = JsonUtils.jsonToPojo(cachedWebConfig, WebConfig.class);
         }
@@ -44,13 +45,13 @@ public class WebConfigServiceImpl extends BaseService implements WebConfigServic
     @Override
     public void alterWebConfig(WebConfig webConfig) {
         String loginTypes = webConfig.getLoginTypeList();
-        String result = "[" +
+        String result =  SysConst.SYMBOL_LEFT_CENTER_BRACKET +
                 loginTypes +
-                "]";
+                SysConst.SYMBOL_RIGHT_CENTER_BRACKET;
         webConfig.setLoginTypeList(result);
             webConfig.setUpdateTime(new Date());
         if (webConfigMapper.updateByPrimaryKeySelective(webConfig) > 0) {
-            String key = RedisConf.REDIS_WEB_CONFIG;
+            String key = RedisConst.REDIS_WEB_CONFIG;
             refreshCache(key);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);

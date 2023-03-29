@@ -4,7 +4,6 @@ import cn.qingweico.pojo.Article;
 import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.RedisTemplate;
 import com.github.pagehelper.PageInfo;
-import org.n3r.idworker.Sid;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -24,8 +23,6 @@ public class BaseService {
     public RabbitTemplate rabbitTemplate;
     @Autowired
     public ElasticsearchTemplate esTemplate;
-    @Autowired
-    public Sid sid;
 
     public PagedResult setterPagedGrid(List<?> list,
                                        Integer page) {

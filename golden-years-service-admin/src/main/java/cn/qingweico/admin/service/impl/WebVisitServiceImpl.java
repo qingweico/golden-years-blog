@@ -3,8 +3,8 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.mapper.WebVisitMapper;
 import cn.qingweico.admin.service.WebVisitService;
 import cn.qingweico.api.service.BaseService;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConst;
+import cn.qingweico.global.RedisConst;
 import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +34,7 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
     @Override
     public Map<String, Object>  getVisitByWeek() {
         // 从Redis中获取一周访问量
-        String weekVisitJson = redisTemplate.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.WEEK_VISIT);
+        String weekVisitJson = redisTemplate.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.WEEK_VISIT);
         if (StringUtils.isNotEmpty(weekVisitJson)) {
             return JsonUtils.jsonToMap(weekVisitJson, String.class, Object.class);
         }
@@ -45,7 +45,7 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
         Date sevenDaysDate = DateUtils.getDate(todayEndTime, -6);
         String sevenDays = DateUtils.getOneDayStartTime(sevenDaysDate);
         // 获取最近七天的数组列表
-        List<String> sevenDaysList = DateUtils.getDaysByN(7, "yyyy-MM-dd");
+        List<String> sevenDaysList = DateUtils.getDaysByN(7, SysConst.DATE_FORMAT_YYYY_MM_DD);
         // 获得最近七天的访问量
         List<Map<String, Object>> pvMap = webVisitMapper.getPvByWeek(sevenDays, todayEndTime);
         // 获得最近七天的独立用户
@@ -76,15 +76,15 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
                 uvList.add(0);
             }
         }
-        Map<String, Object> resultMap = new HashMap<>(SysConf.NUM_THREE);
+        Map<String, Object> resultMap = new HashMap<>(SysConst.NUM_THREE);
         // 不含年份的数组格式
-        List<String> resultSevenDaysList = DateUtils.getDaysByN(7, "MM-dd");
+        List<String> resultSevenDaysList = DateUtils.getDaysByN(7, SysConst.DATE_FORMAT_MM_DD);
         resultMap.put("date", resultSevenDaysList);
         resultMap.put("pv", pvList);
         resultMap.put("uv", uvList);
 
         // 将一周访问量存入Redis中(过期时间10分钟)
-        redisTemplate.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.WEEK_VISIT, JsonUtils.objectToJson(resultMap), 10, TimeUnit.MINUTES);
+        redisTemplate.setnx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.WEEK_VISIT, JsonUtils.objectToJson(resultMap), 10, TimeUnit.MINUTES);
         return resultMap;
     }
 }

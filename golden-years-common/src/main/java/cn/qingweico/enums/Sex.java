@@ -1,11 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 用户性别
  *
  * @author zqw
  * @date 2021/9/6
  */
+@AllArgsConstructor
 public enum Sex {
     /**
      * 女
@@ -22,9 +25,4 @@ public enum Sex {
 
     public final Integer type;
     public final String value;
-
-    Sex(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

@@ -1,6 +1,6 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.WebVisit;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @date 2022/4/18
  */
 @Repository
-public interface WebVisitMapper extends MyMapper<WebVisit> {
+public interface WebVisitMapper extends CommonMapper<WebVisit> {
     /**
      * 获取IP数目
      *

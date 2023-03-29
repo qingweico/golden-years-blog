@@ -174,11 +174,11 @@
         </el-row>
         <el-form-item label="内容" :label-width="formLabelWidth" prop="content">
           <!--富文本编辑器-->
-          <quill-editor v-if="systemConfig.editorModel === 0" ref="textEditor"
+          <quill-editor v-if="sysConfig.editorModel === 0" ref="textEditor"
                         @change="onEditorChange" v-model="richTextContent" class="editor"
                         :options="editorOption"></quill-editor>
           <!--Markdown编辑器-->
-          <mavon-editor v-if="systemConfig.editorModel === 1" ref="md" :value="initContent"
+          <mavon-editor v-if="sysConfig.editorModel === 1" ref="md" :value="initContent"
                         autofocus @imgAdd="$imgAdd" @change="change" class="editor"/>
         </el-form-item>
         <div class="publish-bottom">
@@ -296,7 +296,7 @@ export default {
       newTagValue: "",
       dynamicTags: [],
       dateRange: "",
-      systemConfig: {},
+      sysConfig: {},
       // 监听表单内容是否改变
       isChange: false,
       appointWords: "定时发布",
@@ -366,7 +366,7 @@ export default {
   created() {
     this.userInfo = this.getUserInfo;
     getSystemConfig().then((response) => {
-      this.systemConfig = response.data;
+      this.sysConfig = response.data;
     })
     getBlogCategory().then(res => {
       this.articleCategoryList = res.data;
@@ -559,10 +559,10 @@ export default {
     handleAdd() {
       this.navTitle = "增加博客";
       this.dialogFormVisible = true;
-      if (this.systemConfig.editorModel === 0) {
+      if (this.sysConfig.editorModel === 0) {
         // rich text
         this.richTextContent = "";
-      } else if (this.systemConfig.editorModel === 1) {
+      } else if (this.sysConfig.editorModel === 1) {
         // markdown
         this.initContent = "";
         this.markdownContent = "";
@@ -581,10 +581,10 @@ export default {
       this.form.articleCover = article.articleCover;
       this.form.articleType = String(article.articleType);
       this.dynamicTags = article.tagList;
-      if (this.systemConfig.editorModel === 0) {
+      if (this.sysConfig.editorModel === 0) {
         // rich text
         this.richTextContent = article.content;
-      } else if (this.systemConfig.editorModel === 1) {
+      } else if (this.sysConfig.editorModel === 1) {
         // markdown
         this.initContent = article.content;
       }
@@ -630,9 +630,9 @@ export default {
       this.form.authorId = this.userInfo.id;
       this.form.isAppoint = this.isAppoint;
       this.form.createTime = this.timingDate;
-      if (this.systemConfig.editorModel === 0) {
+      if (this.sysConfig.editorModel === 0) {
         this.form.content = this.richTextContent
-      } else if (this.systemConfig.editorModel === 1) {
+      } else if (this.sysConfig.editorModel === 1) {
         this.form.content = this.markdownContent;
       }
       this.form.tags = this.dynamicTags;

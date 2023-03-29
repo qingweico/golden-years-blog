@@ -17,7 +17,7 @@ export default {
   data() {
     return {
       hotTagData: [],
-      systemConfig: {}
+      sysConfig: {}
     };
   },
   created() {
@@ -25,13 +25,13 @@ export default {
       this.hotTagData = response.data;
     });
     getSystemConfig().then((response) => {
-      this.systemConfig = response.data;
+      this.sysConfig = response.data;
     });
   },
   methods: {
     //跳转到搜索详情页
     goToList(tagId) {
-      this.$router.push({path: "/", query: {tagId: tagId, searchModel: this.systemConfig.searchModel}});
+      this.$router.push({path: "/", query: {tagId: tagId, searchModel: this.sysConfig.searchModel}});
     },
   }
 };

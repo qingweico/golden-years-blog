@@ -5,8 +5,8 @@ import cn.qingweico.article.mapper.FavoritesMapper;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.enums.FavoritesType;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConst;
+import cn.qingweico.global.RedisConst;
 import cn.qingweico.pojo.Favorites;
 import cn.qingweico.pojo.bo.CollectBO;
 import cn.qingweico.pojo.bo.FavoritesBO;
@@ -105,7 +105,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void createFavorites(CollectBO collectBO) {
-        String id = sid.nextShort();
+        String id = "";
         Favorites favorites = new Favorites();
         favorites.setId(id);
         String favoritesDesc = collectBO.getDescription();
@@ -121,7 +121,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
         } else {
             favorites.setName("默认收藏夹");
         }
-        favorites.setArticles(SysConf.EMPTY_STRING);
+        favorites.setArticles(SysConst.EMPTY_STRING);
         Integer isOpen = collectBO.getOpen();
         if (isOpen == null) {
             favorites.setOpen(FavoritesType.PUBLIC.type);
@@ -140,7 +140,7 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
     public List<Favorites> getFavoritesByUserId(String userId) {
         Example example = new Example(Favorites.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.USER_ID, userId);
+        criteria.andEqualTo(SysConst.USER_ID, userId);
         return favoritesMapper.selectByExample(example);
     }
 
@@ -168,16 +168,16 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
                 .split(",");
         for (String articleId : articleIds) {
             // 设置用户收藏标志位(未收藏该文章)
-            redisTemplate.del(RedisConf.REDIS_ARTICLE_ALREADY_COLLECT +
-                    SysConf.SYMBOL_COLON + articleId +
-                    SysConf.SYMBOL_HYPHEN + userId +
-                    SysConf.SYMBOL_HYPHEN + favoritesId);
+            redisTemplate.del(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
+                    SysConst.SYMBOL_COLON + articleId +
+                    SysConst.SYMBOL_HYPHEN + userId +
+                    SysConst.SYMBOL_HYPHEN + favoritesId);
             // 文章收藏数减少
-            redisTemplate.decrement(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
+            redisTemplate.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
             // 删除收藏夹的收藏量
-            redisTemplate.del(RedisConf.REDIS_ARTICLE_COLLECT_COUNTS +
-                    SysConf.SYMBOL_COLON + userId +
-                    SysConf.SYMBOL_HYPHEN + favoritesId);
+            redisTemplate.del(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
+                    SysConst.SYMBOL_COLON + userId +
+                    SysConst.SYMBOL_HYPHEN + favoritesId);
         }
         if (favoritesMapper.deleteByPrimaryKey(favoritesId) < 0) {
             log.error("delete favorites error");

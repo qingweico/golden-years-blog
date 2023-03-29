@@ -1,6 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.SystemConfig;
+import cn.qingweico.pojo.SysConfig;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface SystemConfigService {
      *
      * @return SystemConfig
      */
-    SystemConfig getSystemConfig();
+    SysConfig getSystemConfig();
 
     /**
      * 通过Key前缀清空Redis缓存
@@ -26,7 +26,7 @@ public interface SystemConfigService {
 
     /**
      * 修改系统配置
-     * @param systemConfig SystemConfig
+     * @param sysConfig SystemConfig
      */
-    void alterSystemConfig(SystemConfig systemConfig);
+    void alterSystemConfig(SysConfig sysConfig);
 }

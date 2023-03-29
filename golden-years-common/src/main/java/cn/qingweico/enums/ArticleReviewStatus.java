@@ -1,5 +1,7 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 文章审核状态
  * 文章状态:
@@ -11,6 +13,7 @@ package cn.qingweico.enums;
  * @author zqw
  * @date 2021/9/11
  */
+@AllArgsConstructor
 public enum ArticleReviewStatus {
     /**
      * 审核中(用户已提交)
@@ -34,23 +37,18 @@ public enum ArticleReviewStatus {
     public final Integer type;
     public final String value;
 
-    ArticleReviewStatus(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
-
     /**
      * 判断传入的审核状态是不是有效的值
      *
-     * @param tempStatus 文章状态
+     * @param value 文章状态
      * @return boolean -> 文章状态是否有效
      */
-    public static boolean isArticleStatusValid(Integer tempStatus) {
-        if (tempStatus != null) {
-            return tempStatus.equals(REVIEWING.type)
-                    || tempStatus.equals(SUCCESS.type)
-                    || tempStatus.equals(FAILED.type)
-                    || tempStatus.equals(WITHDRAW.type);
+    public static boolean isArticleStatusValid(Integer value) {
+        if (value != null) {
+            return value.equals(REVIEWING.type)
+                    || value.equals(SUCCESS.type)
+                    || value.equals(FAILED.type)
+                    || value.equals(WITHDRAW.type);
         }
         return false;
     }

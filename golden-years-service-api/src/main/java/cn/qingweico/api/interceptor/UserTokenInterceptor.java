@@ -1,7 +1,7 @@
 package cn.qingweico.api.interceptor;
 
-import cn.qingweico.global.RedisConf;
-import cn.qingweico.pojo.Admin;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.pojo.SysUser;
 import cn.qingweico.pojo.User;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,14 +25,14 @@ public class UserTokenInterceptor extends BaseInterceptor implements HandlerInte
             return false;
         }
         // 如果是管理员则允许操作
-        String tokenKey = RedisConf.REDIS_ADMIN_TOKEN;
-        String infoKey = RedisConf.REDIS_ADMIN_INFO;
+        String tokenKey = RedisConst.REDIS_ADMIN_TOKEN;
+        String infoKey = RedisConst.REDIS_ADMIN_INFO;
 
-        String userTokenKey = RedisConf.REDIS_USER_TOKEN;
-        String userInfoKey = RedisConf.REDIS_USER_INFO;
+        String userTokenKey = RedisConst.REDIS_USER_TOKEN;
+        String userInfoKey = RedisConst.REDIS_USER_INFO;
         try {
-            Admin admin = baseRestApi.getLoginUser(Admin.class, tokenKey, infoKey);
-            if (admin != null) {
+            SysUser sysUser = baseRestApi.getLoginUser(SysUser.class, tokenKey, infoKey);
+            if (sysUser != null) {
                 return true;
             }
         } catch (Exception e) {

@@ -1,7 +1,7 @@
 package cn.qingweico.api.config;
 
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +37,7 @@ public class DateConverterConfig implements Converter<String, Date> {
     @Override
     public Date convert(String source) {
         String value = source.trim();
-        if (SysConf.EMPTY_STRING.equals(value)) {
+        if (SysConst.EMPTY_STRING.equals(value)) {
             return null;
         }
         if (source.matches("^\\d{4}-\\d{1,2}$")) {

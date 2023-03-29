@@ -1,11 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 收藏夹可见状态
  *
  * @author zqw
  * @date 2022/4/15
  */
+@AllArgsConstructor
 public enum FavoritesType {
     /**
      * 公开
@@ -17,9 +20,4 @@ public enum FavoritesType {
     SECRET(0, "私密");
     public final Integer type;
     public final String value;
-
-    FavoritesType(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

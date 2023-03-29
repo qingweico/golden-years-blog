@@ -110,7 +110,7 @@ export default {
       // 初始化默认使用es
       searchModel: 0,
       isSearchModel: false,
-      systemConfig: {},
+      sysConfig: {},
       // 最新文章
       newBlogData: [],
       keyword: "",
@@ -168,7 +168,7 @@ export default {
       this.tagList = response.data;
     });
     getSystemConfig().then((response) => {
-      this.systemConfig = response.data;
+      this.sysConfig = response.data;
     });
     // 获取最新博客
     this.newBlogList();
@@ -289,7 +289,7 @@ export default {
     goToList(categoryId) {
       this.$router.push({
         path: "/",
-        query: {categoryId: categoryId, searchModel: this.systemConfig.searchModel}
+        query: {categoryId: categoryId, searchModel: this.sysConfig.searchModel}
       });
     },
     goToAuthor(authorId) {

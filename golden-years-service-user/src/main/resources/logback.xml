@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
-    <!-- 指定日志文件的存储地址,使用绝对路径 -->
-    <property name="LOG_HOME" value="C:/logs/golden-years/service-files"/>
+    <!-- 指定日志文件的存储地址 -->
+    <property name="LOG_HOME" value="/logs/golden-years/service-files"/>
 
     <!-- Console 输出设置 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

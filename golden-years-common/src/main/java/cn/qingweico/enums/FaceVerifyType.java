@@ -1,12 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 人脸比对类型
  *
  * @author zqw
  * @date 2021/9/10
  */
-
+@AllArgsConstructor
 public enum FaceVerifyType {
     /**
      * 图片Base64对比
@@ -19,9 +21,4 @@ public enum FaceVerifyType {
 
     public final Integer type;
     public final String value;
-
-    FaceVerifyType(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

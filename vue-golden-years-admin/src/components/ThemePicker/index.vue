@@ -10,21 +10,21 @@
 const version = require('element-ui/package.json').version // element-ui version from node_modules
 const ORIGINAL_THEME = '#409EFF' // default color
 
-import {getSystemConfig, editSystemConfig} from "@/api/system/systemConfig";
+import {getSystemConfig, editSystemConfig} from "@/api/system/sysConfig";
 export default {
   data() {
     return {
       chalk: '', // content of theme-chalk css
       theme: ORIGINAL_THEME,
-      systemConfig: {},
+      sysConfig: {},
       isEdit: false
     }
   },
   watch: {
     theme(val, oldVal) {
       if(this.isEdit) {
-        // this.systemConfig.themeColor = val
-        // editSystemConfig(this.systemConfig).then(res => {
+        // this.sysConfig.themeColor = val
+        // editSystemConfig(this.sysConfig).then(res => {
         //   if (res.code = this.$ECode.SUCCESS) {
         //     this.updateColorStyle(val, oldVal)
         //   }
@@ -40,8 +40,8 @@ export default {
       // var that = this
       // getSystemConfig().then(response => {
       //   if (response.code == this.$ECode.SUCCESS) {
-      //     this.systemConfig = response.data;
-      //     let themeColor = this.systemConfig.themeColor ? this.systemConfig.themeColor:ORIGINAL_THEME
+      //     this.sysConfig = response.data;
+      //     let themeColor = this.sysConfig.themeColor ? this.sysConfig.themeColor:ORIGINAL_THEME
       //     this.theme = themeColor
       //     this.updateColorStyle(themeColor, ORIGINAL_THEME)
       //     // 调整状态位，避免初始化请求后台

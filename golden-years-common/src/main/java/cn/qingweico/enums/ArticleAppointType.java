@@ -1,11 +1,14 @@
 package cn.qingweico.enums;
 
+import lombok.AllArgsConstructor;
+
 /**
  * 文章发布类型
  *
  * @author zqw
  * @date 2021/9/11
  */
+@AllArgsConstructor
 public enum ArticleAppointType {
 
     /**
@@ -20,9 +23,4 @@ public enum ArticleAppointType {
 
     public final Integer type;
     public final String value;
-
-    ArticleAppointType(Integer type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 }

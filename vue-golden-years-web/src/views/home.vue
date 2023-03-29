@@ -142,7 +142,7 @@ export default {
       webInfo: {},
       // 默认头像
       defaultAvatar: this.$SysConf.defaultAvatar,
-      systemConfig: {},
+      sysConfig: {},
       saveTitle: "",
       keyword: "",
       // 控制搜索框的弹出
@@ -199,7 +199,7 @@ export default {
       this.webInfo = response.data;
     });
     getSystemConfig().then((response) => {
-      this.systemConfig = response.data;
+      this.sysConfig = response.data;
     });
   },
   methods: {
@@ -210,7 +210,7 @@ export default {
         this.$refs.searchInput.focus();
         return;
       }
-      this.$router.push({path: "/", query: {keyword: this.keyword, searchModel: this.systemConfig.searchModel}});
+      this.$router.push({path: "/", query: {keyword: this.keyword, searchModel: this.sysConfig.searchModel}});
     },
     getCurrentPageTitle() {
       let test = window.location.href;

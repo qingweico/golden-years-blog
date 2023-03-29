@@ -20,21 +20,21 @@ public class Role {
     @Id
     private String id;
 
+    /**
+     * 角色编码
+     */
+    private String code;
 
     /**
      * 角色名称
      */
-    private String roleName;
+    private String name;
 
     /**
-     * 介绍
+     * 角色描述
      */
-    private String summary;
+    private String description;
 
-    /**
-     * 该角色所能操控的菜单范围
-     */
-    private String categoryMenuIds;
     /**
      * 状态 0: 禁用  1: 启用
      */

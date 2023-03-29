@@ -11,8 +11,8 @@ import cn.qingweico.enums.ArticleAppointType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.RedisConf;
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.Tag;
 import cn.qingweico.pojo.vo.ArticleAdminVO;
 import cn.qingweico.pojo.vo.CenterArticleVO;
@@ -117,7 +117,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 return message;
             };
             rabbitTemplate.convertAndSend(RabbitMqDelayConfig.EXCHANGE_DELAY,
-                    SysConf.ARTICLE_DELAY_PUBLISH_SUCCESS_DO,
+                    SysConst.ARTICLE_DELAY_PUBLISH_SUCCESS_DO,
                     articleId,
                     messagePostProcessor);
         } else if (article.getIsAppoint().equals(ArticleAppointType.IMMEDIATELY.type)) {
@@ -187,7 +187,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     public void updateArticleStatus(String articleId, Integer pendingStatus) {
         Example example = new Example(Article.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.ID, articleId);
+        criteria.andEqualTo(SysConst.ID, articleId);
         Article article = new Article();
         article.setArticleStatus(pendingStatus);
 
@@ -221,7 +221,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                 esTemplate.index(indexQuery);
 
                 // 更新主站带有文章数量的文展类别
-                String key = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
+                String key = RedisConst.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
                 refreshCache(key);
             }
         }
@@ -299,29 +299,29 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                                             Date startDate,
                                             Date endDate) {
         Example example = new Example(Article.class);
-        example.orderBy(SysConf.CREATE_TIME).desc();
+        example.orderBy(SysConst.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
         if (StringUtils.isNotBlank(userId)) {
-            criteria.andEqualTo(SysConf.AUTHOR_ID, userId);
+            criteria.andEqualTo(SysConst.AUTHOR_ID, userId);
         }
         if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike(SysConf.TITLE, SysConf.DELIMITER_PERCENT + keyword + SysConf.DELIMITER_PERCENT);
+            criteria.andLike(SysConst.TITLE, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
         }
 
         if (ArticleReviewStatus.isArticleStatusValid(status)) {
-            criteria.andEqualTo(SysConf.ARTICLE_STATUS, status);
+            criteria.andEqualTo(SysConst.ARTICLE_STATUS, status);
         }
         if (StringUtils.isNotBlank(categoryId)) {
-            criteria.andEqualTo(SysConf.CATEGORY_ID, categoryId);
+            criteria.andEqualTo(SysConst.CATEGORY_ID, categoryId);
         }
         if (deleteStatus != null) {
-            criteria.andEqualTo(SysConf.IS_DELETE, deleteStatus);
+            criteria.andEqualTo(SysConst.IS_DELETE, deleteStatus);
         }
         if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo(SysConf.CREATE_TIME, startDate);
+            criteria.andGreaterThanOrEqualTo(SysConst.CREATE_TIME, startDate);
         }
         if (endDate != null) {
-            criteria.andLessThanOrEqualTo(SysConf.CREATE_TIME, endDate);
+            criteria.andLessThanOrEqualTo(SysConst.CREATE_TIME, endDate);
         }
         return example;
 
@@ -406,8 +406,8 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private Example makeExampleCriteria(String userId, String articleId) {
         Example articleExample = new Example(Article.class);
         Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo(SysConf.AUTHOR_ID, userId);
-        criteria.andEqualTo(SysConf.ID, articleId);
+        criteria.andEqualTo(SysConst.AUTHOR_ID, userId);
+        criteria.andEqualTo(SysConst.ID, articleId);
         return articleExample;
     }
 

@@ -10,10 +10,11 @@ import java.util.List;
  */
 public interface RoleService {
    /**
-    * 根据角色ids获取角色信息
+    * 根据sysUserId查询用户对应的角色(集合)
     *
-    * @param ids ids
+    * @param sysUserId sysUserId
     * @return List<Role>
     */
-   List<Role> listByIds(List<String> ids);
+
+   List<Role> queryRoleBySysUserId(String sysUserId);
 }

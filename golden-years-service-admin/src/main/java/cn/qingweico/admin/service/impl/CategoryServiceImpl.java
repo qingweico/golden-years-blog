@@ -6,12 +6,14 @@ import cn.qingweico.admin.service.CategoryService;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.RedisConst;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.vo.CategoryVO;
 import cn.qingweico.result.Response;
 import cn.qingweico.pojo.Category;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
+import cn.qingweico.util.SnowflakeIdWorker;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * 博客类别Service
  * @author zqw
  * @date 2021/9/10
  */
@@ -43,14 +46,14 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void createCategory(Category category) {
-        String id = sid.nextShort();
+        String id = SnowflakeIdWorker.nextId();
         category.setId(id);
         category.setStatus(YesOrNo.YES.type);
         category.setCreateTime(new Date());
         category.setUpdateTime(new Date());
         if (categoryMapper.insert(category) > 0) {
-            String k1 = RedisConf.REDIS_ARTICLE_CATEGORY;
-            String k2 = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
+            String k1 = RedisConst.REDIS_ARTICLE_CATEGORY;
+            String k2 = RedisConst.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
             refreshCache(k1);
             refreshCache(k2);
         } else {
@@ -62,8 +65,8 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     public void modifyCategory(Category category) {
         category.setUpdateTime(new Date());
         if (categoryMapper.updateByPrimaryKeySelective(category) > 0) {
-            String k1 = RedisConf.REDIS_ARTICLE_CATEGORY;
-            String k2 = RedisConf.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
+            String k1 = RedisConst.REDIS_ARTICLE_CATEGORY;
+            String k2 = RedisConst.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
             refreshCache(k1);
             refreshCache(k2);
         } else {
@@ -75,26 +78,26 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     @Override
     public boolean queryCategoryIsPresent(String categoryName, String oldCategoryName) {
 
-        Example example = new Example(Category.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("name", categoryName);
+        Example ex = new Example(Category.class);
+        Example.Criteria criteria = ex.createCriteria();
+        criteria.andEqualTo(SysConst.NAME, categoryName);
         if (StringUtils.isNoneBlank(oldCategoryName)) {
-            criteria.andNotEqualTo("name", oldCategoryName);
+            criteria.andNotEqualTo(SysConst.NAME, oldCategoryName);
         }
-        List<Category> categoryList = categoryMapper.selectByExample(example);
+        List<Category> categoryList = categoryMapper.selectByExample(ex);
         return categoryList != null && !categoryList.isEmpty();
     }
 
     @Override
     public PagedResult queryCategoryList(String keyword, Boolean sort, Integer page, Integer pageSize) {
-        Example example = new Example(Category.class);
-        example.orderBy("createTime").desc();
-        Example.Criteria criteria = example.createCriteria();
+        Example ex = new Example(Category.class);
+        ex.orderBy(SysConst.CREATE_TIME).desc();
+        Example.Criteria criteria = ex.createCriteria();
         if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike("name", "%" + keyword + "%");
+            criteria.andLike(SysConst.NAME, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
         }
         PageHelper.startPage(page, pageSize);
-        List<Category> list = categoryMapper.selectByExample(example);
+        List<Category> list = categoryMapper.selectByExample(ex);
         List<CategoryVO> result = new ArrayList<>();
         getCategoryListWithArticleCount();
         for (Category category : list) {
@@ -113,7 +116,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     @Override
     public void deleteCategory(String categoryId) {
         if (categoryMapper.deleteByPrimaryKey(categoryId) > 0) {
-            String key = RedisConf.REDIS_ARTICLE_CATEGORY;
+            String key = RedisConst.REDIS_ARTICLE_CATEGORY;
             refreshCache(key);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);

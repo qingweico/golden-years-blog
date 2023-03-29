@@ -1,8 +1,8 @@
 package cn.qingweico.article.service.impl;
 
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConst;
+import cn.qingweico.global.RedisConst;
 import cn.qingweico.pojo.Comments;
 import cn.qingweico.api.service.BaseService;
 import cn.qingweico.article.mapper.CommentsMapper;
@@ -18,7 +18,6 @@ import cn.qingweico.result.Response;
 import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +69,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
         comments.setCreateTime(new Date());
         if (commentsMapper.insert(comments) > 0) {
             // 评论数累加
-            redisTemplate.increment(RedisConf.REDIS_ARTICLE_COMMENT_COUNTS + SysConf.SYMBOL_COLON + articleId, 1);
+            redisTemplate.increment(RedisConst.REDIS_ARTICLE_COMMENT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
@@ -81,7 +80,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
                                             Integer page,
                                             Integer pageSize) {
         Map<String, Object> map = new HashMap<>(1);
-        map.put(SysConf.ARTICLE_ID, articleId);
+        map.put(SysConst.ARTICLE_ID, articleId);
         PageHelper.startPage(page, pageSize);
         List<CommentsVO> commentList = commentsMapper.queryArticleCommentList(map);
         PageInfo<CommentsVO> pageInfo = new PageInfo<>(commentList);
@@ -119,9 +118,9 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
                                          Integer page,
                                          Integer pageSize) {
         Example example = new Example(Comments.class);
-        example.orderBy(SysConf.CREATE_TIME).desc();
+        example.orderBy(SysConst.CREATE_TIME).desc();
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConf.AUTHOR, authorId);
+        criteria.andEqualTo(SysConst.AUTHOR, authorId);
         PageHelper.startPage(page, pageSize);
         List<Comments> res = commentsMapper.selectByExample(example);
         return setterPagedGrid(res, page);

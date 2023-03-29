@@ -118,7 +118,7 @@ export default {
       imageCropperShow: false,
       url: process.env.GATEWAY_API + "/fs/uploadFace",
       imageCropperKey: 0,
-      systemConfig: {},
+      sysConfig: {},
       photoVisible: false,
       icon: false,
     };

@@ -3,7 +3,7 @@ package cn.qingweico.util.upload;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import static cn.qingweico.global.SysConf.SYMBOL_POINT;
+import static cn.qingweico.global.SysConst.SYMBOL_POINT;
 
 /**
  * @author zqw

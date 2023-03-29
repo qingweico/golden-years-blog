@@ -1,6 +1,6 @@
 package cn.qingweico.util.upload;
 
-import cn.qingweico.global.SysConf;
+import cn.qingweico.global.SysConst;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
@@ -89,9 +89,9 @@ public class PathUtil {
     * @return string
     */
    private static String getFileExt(String fileName) {
-      if (fileName.lastIndexOf(SysConf.SYMBOL_POINT) == -1) {
+      if (fileName.lastIndexOf(SysConst.SYMBOL_POINT) == -1) {
          return ".png";
       }
-      return fileName.substring(fileName.lastIndexOf(SysConf.SYMBOL_POINT));
+      return fileName.substring(fileName.lastIndexOf(SysConst.SYMBOL_POINT));
    }
 }

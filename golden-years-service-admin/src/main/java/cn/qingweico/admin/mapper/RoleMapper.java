@@ -1,6 +1,6 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.mapper.MyMapper;
+import cn.qingweico.api.mapper.CommonMapper;
 import cn.qingweico.pojo.Role;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/3/23
  */
 @Repository
-public interface RoleMapper extends MyMapper<Role> {
+public interface RoleMapper extends CommonMapper<Role> {
 }

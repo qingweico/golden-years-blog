@@ -203,7 +203,7 @@ export default {
       articleDetail: {},
       dialogPictureVisible: false,
       dialogImageUrl: "",
-      systemConfig: {}
+      sysConfig: {}
     };
   },
   computed: {
@@ -292,7 +292,7 @@ export default {
   },
   created() {
     getSystemConfig().then((response) => {
-      this.systemConfig = response.data;
+      this.sysConfig = response.data;
     });
     // 文章阅读数累加
     incPagViews(this.articleId);

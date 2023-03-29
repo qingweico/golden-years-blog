@@ -18,13 +18,14 @@ spring:
   application:
     name: service-files
   datasource:
-    # mysql驱动
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    masterUrl: jdbc:mysql://119.29.35.129:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
-    slaveUrl: jdbc:mysql://106.12.136.221:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    # Linux xxx
+    masterUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+    slaveUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
     username: root
     password: 990712
     initialization-mode: always
+    # mysql驱动
+    driver-class-name: com.mysql.cj.jdbc.Driver
     # 数据源其他配置
     # 初始化连接池的大小
     initialSize: 5
@@ -66,7 +67,7 @@ spring:
       max-request-size: 2MB
   data:
     mongodb:
-      uri: mongodb://root:root@119.29.35.129:27017
+      uri: mongodb://root:root@106.12.136.221:27017
       database: golden-years
   cloud:
     nacos:
@@ -89,4 +90,4 @@ spring:
 fdfs:
   connect-timeout: 300
   so-timeout: 300
-  tracker-list: 119.29.35.129:22122
+  tracker-list: xxx:22122

@@ -136,7 +136,7 @@ export default {
       tagNameArray: [],
       blogSortNameArray: [],
       lineChartData: {},
-      systemConfig: {},
+      sysConfig: {},
     };
   },
   created() {

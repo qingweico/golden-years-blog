@@ -20,7 +20,7 @@ spring:
     name: service-gateway
   redis:
     database: 0
-    host: 119.29.35.129
+    host: 106.12.136.221
     port: 6379
     password: 990712
     timeout: 3000

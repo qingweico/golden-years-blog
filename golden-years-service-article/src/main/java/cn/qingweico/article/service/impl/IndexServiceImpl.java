@@ -7,8 +7,8 @@ import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.IndexService;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
-import cn.qingweico.global.SysConf;
-import cn.qingweico.global.RedisConf;
+import cn.qingweico.global.SysConst;
+import cn.qingweico.global.RedisConst;
 import cn.qingweico.pojo.Article;
 import cn.qingweico.pojo.Comments;
 import cn.qingweico.pojo.Tag;
@@ -53,7 +53,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
     @Override
     public List<Map<String, Object>> getBlogCountByTag() {
         // 从Redis中获取标签下包含的博客数量
-        String jsonArrayList = redisTemplate.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_COUNT_BY_TAG);
+        String jsonArrayList = redisTemplate.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_COUNT_BY_TAG);
         if (StringUtils.isNotEmpty(jsonArrayList)) {
             ArrayList jsonList = JsonUtils.jsonArrayToArrayList(jsonArrayList);
             return jsonList;
@@ -116,21 +116,21 @@ public class IndexServiceImpl extends BaseService implements IndexService {
                 String tagName = tagEntityMap.get(tagId);
                 Integer count = entry.getValue();
                 Map<String, Object> itemResultMap = new HashMap<>(3);
-                itemResultMap.put(SysConf.TAG_ID, tagId);
-                itemResultMap.put(SysConf.NAME, tagName);
-                itemResultMap.put(SysConf.VALUE, count);
+                itemResultMap.put(SysConst.TAG_ID, tagId);
+                itemResultMap.put(SysConst.NAME, tagName);
+                itemResultMap.put(SysConst.VALUE, count);
                 resultList.add(itemResultMap);
             }
         }
         if (resultList.size() > 0) {
-            redisTemplate.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_COUNT_BY_TAG, JsonUtils.objectToJson(resultList), 2, TimeUnit.HOURS);
+            redisTemplate.setnx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_COUNT_BY_TAG, JsonUtils.objectToJson(resultList), 2, TimeUnit.HOURS);
         }
         return resultList;
     }
 
     @Override
     public Map<String, Object> getBlogContributeCount() {
-        String jsonMap = redisTemplate.get(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_CONTRIBUTE_COUNT);
+        String jsonMap = redisTemplate.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_CONTRIBUTE_COUNT);
         if (StringUtils.isNotEmpty(jsonMap)) {
             return JsonUtils.jsonToMap(jsonMap, String.class, Object.class);
         }
@@ -159,13 +159,13 @@ public class IndexServiceImpl extends BaseService implements IndexService {
             resultList.add(objectList);
         }
 
-        Map<String, Object> resultMap = new HashMap<>(SysConf.NUM_TWO);
+        Map<String, Object> resultMap = new HashMap<>(SysConst.NUM_TWO);
         List<String> contributeDateList = new ArrayList<>();
         contributeDateList.add(startTime);
         contributeDateList.add(endTime);
-        resultMap.put(SysConf.CONTRIBUTE_DATE, contributeDateList);
-        resultMap.put(SysConf.BLOG_CONTRIBUTE_COUNT, resultList);
-        redisTemplate.setnx(RedisConf.DASHBOARD + SysConf.SYMBOL_COLON + RedisConf.BLOG_CONTRIBUTE_COUNT, JsonUtils.objectToJson(resultMap), 2, TimeUnit.HOURS);
+        resultMap.put(SysConst.CONTRIBUTE_DATE, contributeDateList);
+        resultMap.put(SysConst.BLOG_CONTRIBUTE_COUNT, resultList);
+        redisTemplate.setnx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_CONTRIBUTE_COUNT, JsonUtils.objectToJson(resultMap), 2, TimeUnit.HOURS);
         return resultMap;
     }
 
