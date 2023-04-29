@@ -10,7 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
 public class RoleMenuRel extends BaseEntity {
     /**
      * 角色id
