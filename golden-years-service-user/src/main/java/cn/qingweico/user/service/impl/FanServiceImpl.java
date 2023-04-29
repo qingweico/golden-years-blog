@@ -1,6 +1,6 @@
 package cn.qingweico.user.service.impl;
 
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConst;
@@ -76,9 +76,9 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setProvince(fansInfo.getProvince());
         if (fansMapper.insert(fan) > 0) {
             // redis 作者粉丝累增
-            redisTemplate.increment(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + authorId, 1);
+            redisCache.increment(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累增
-            redisTemplate.increment(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + fanId, 1);
+            redisCache.increment(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + fanId, 1);
             // 保存粉丝关系到es中
             FansEo fanEo = new FansEo();
             BeanUtils.copyProperties(fan, fanEo);
@@ -98,9 +98,9 @@ public class FanServiceImpl extends BaseService implements FanService {
         fan.setFanId(fanId);
         if (fansMapper.delete(fan) > 0) {
             // redis 作者粉丝累减
-            redisTemplate.decrement(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + authorId, 1);
+            redisCache.decrement(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + authorId, 1);
             // redis 当前用户的(我的)关注数累减
-            redisTemplate.decrement(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + fanId, 1);
+            redisCache.decrement(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + fanId, 1);
             // 删除es中的粉丝关系
             DeleteQuery deleteQuery = new DeleteQuery();
             deleteQuery.setQuery(QueryBuilders.termQuery(SysConst.AUTHOR_ID, authorId));

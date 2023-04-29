@@ -1,6 +1,6 @@
 package cn.qingweico.user.controller;
 
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.bo.FansBO;

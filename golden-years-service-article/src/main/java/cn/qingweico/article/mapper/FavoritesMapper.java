@@ -1,6 +1,6 @@
 package cn.qingweico.article.mapper;
 
-import cn.qingweico.api.mapper.CommonMapper;
+import cn.qingweico.core.mapper.CommonMapper;
 import cn.qingweico.pojo.Favorites;
 import org.springframework.stereotype.Repository;
 

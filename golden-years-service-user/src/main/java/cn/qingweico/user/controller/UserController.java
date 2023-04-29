@@ -10,7 +10,7 @@ import cn.qingweico.pojo.bo.UserInfoBO;
 import cn.qingweico.pojo.vo.UserAccountInfoVO;
 import cn.qingweico.pojo.vo.UserBasicInfoVO;
 import cn.qingweico.result.Response;
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.result.Result;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
@@ -166,14 +166,14 @@ public class UserController extends BaseController {
     private User getUser(String userId) {
         User user;
         // 缓存用户信息
-        String jsonUser = redisTemplate.get(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId);
+        String jsonUser = redisCache.get(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId);
         if (StringUtils.isNotBlank(jsonUser)) {
             user = JsonUtils.jsonToPojo(jsonUser, User.class);
         } else {
             user = userService.queryUserById(userId);
             if (user != null) {
                 // 判断user 不为空, 避免出现jsonUser = "null"的bug
-                redisTemplate.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+                redisCache.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
             } else {
                 log.error("query user by id is null");
             }

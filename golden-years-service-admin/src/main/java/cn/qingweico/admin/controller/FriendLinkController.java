@@ -1,7 +1,7 @@
 package cn.qingweico.admin.controller;
 
 import cn.qingweico.admin.service.FriendLinkService;
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;

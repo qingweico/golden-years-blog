@@ -1,16 +1,17 @@
 package cn.qingweico.admin.controller;
 
 import cn.qingweico.admin.clients.FaceBase64Client;
+import cn.qingweico.admin.model.bo.OperatorSysUserBO;
 import cn.qingweico.admin.service.SysUserService;
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
+import cn.qingweico.entity.SysUser;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.SysUser;
+
 import cn.qingweico.pojo.bo.UpdatePwdBO;
-import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
-import cn.qingweico.pojo.bo.OperatorSysUserBO;
+import cn.qingweico.result.Result;
 import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,14 +33,14 @@ import javax.validation.Valid;
 @RestController
 public class SysUserController extends BaseController {
     @Resource
-    private SysUserService adminService;
+    private SysUserService sysUserService;
     @Resource
     private FaceBase64Client client;
 
     @ApiOperation(value = "查询系统用户名是否存在", notes = "查询系统用户名是否存在", httpMethod = "POST")
     @PostMapping("/present")
     public Result present(String username) {
-        adminService.checkUsernamePresent(username);
+        sysUserService.checkUsernamePresent(username);
         return Result.ok();
     }
 
@@ -63,9 +64,9 @@ public class SysUserController extends BaseController {
             }
         }
         // 校验用户名唯一性
-        adminService.checkUsernamePresent(operatorSysUserBO.getUsername());
+        sysUserService.checkUsernamePresent(operatorSysUserBO.getUsername());
         // 执行admin信息入库操作
-        adminService.createSysUser(operatorSysUserBO);
+        sysUserService.createSysUser(operatorSysUserBO);
         return Result.r(Response.APPEND_SUCCESS);
     }
 
@@ -75,7 +76,7 @@ public class SysUserController extends BaseController {
     public Result list(@ApiParam(name = "page", value = "分页查询下一页的第几页") @RequestParam Integer page,
                        @ApiParam(name = "pageSize", value = "分页查询每一页显示的条数") @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedResult res = adminService.querySysUserList(page, pageSize);
+        PagedResult res = sysUserService.querySysUserList(page, pageSize);
         return Result.ok(res);
     }
 
@@ -90,7 +91,7 @@ public class SysUserController extends BaseController {
             GraceException.error(Response.ADMIN_PASSWORD_ERROR);
         }
         String encryptedPwd = BCrypt.hashpw(updatePwdBO.getNewPassword(), BCrypt.gensalt());
-        adminService.alterPwd(id, encryptedPwd);
+        sysUserService.alterPwd(id, encryptedPwd);
         return Result.r(Response.ALERT_SUCCESS);
     }
 
@@ -103,18 +104,18 @@ public class SysUserController extends BaseController {
         String id = loginUser.getId();
         user.setId(id);
         // TODO 检擦手机号码和邮箱是否唯一
-        adminService.updateSysUserProfile(user);
+        sysUserService.updateSysUserProfile(user);
         return Result.r(Response.UPDATE_SUCCESS);
     }
     @ApiOperation(value = "删除管理员人脸信息", notes = "删除管理员人脸信息", httpMethod = "POST")
     @PostMapping("/deleteFaceInfo/{id}")
     public Result deleteFaceInfo(@PathVariable("id") String id){
-        SysUser sysUser = adminService.querySysUserById(id);
+        SysUser sysUser = sysUserService.querySysUserById(id);
         client.removeGridFsFile(sysUser.getFaceId());
         sysUser.setFaceId(SysConst.EMPTY_STRING);
         OperatorSysUserBO operatorSysUserBO = new OperatorSysUserBO();
         BeanUtils.copyProperties(sysUser, operatorSysUserBO);
-        adminService.updateSysUserProfile(operatorSysUserBO);
+        sysUserService.updateSysUserProfile(operatorSysUserBO);
         return Result.ok();
     }
 }

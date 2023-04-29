@@ -1,6 +1,6 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.FavoritesMapper;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.enums.FavoritesType;
@@ -168,14 +168,14 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
                 .split(",");
         for (String articleId : articleIds) {
             // 设置用户收藏标志位(未收藏该文章)
-            redisTemplate.del(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
+            redisCache.del(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
                     SysConst.SYMBOL_COLON + articleId +
                     SysConst.SYMBOL_HYPHEN + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId);
             // 文章收藏数减少
-            redisTemplate.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+            redisCache.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
             // 删除收藏夹的收藏量
-            redisTemplate.del(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
+            redisCache.del(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
                     SysConst.SYMBOL_COLON + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId);
         }

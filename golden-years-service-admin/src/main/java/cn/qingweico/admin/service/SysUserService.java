@@ -1,7 +1,7 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.SysUser;
-import cn.qingweico.pojo.bo.OperatorSysUserBO;
+import cn.qingweico.admin.model.bo.OperatorSysUserBO;
+import cn.qingweico.entity.SysUser;
 import cn.qingweico.util.PagedResult;
 
 /**

@@ -96,12 +96,12 @@ public class Result {
 
 
     /**
-     * 参数校验失败
+     * 自定义的错误响应信息
      *
      * @return Result
      */
-    public static Result fail() {
-        return new Result(Response.REQUEST_PARAM_ERROR);
+    public static Result fail(Response r) {
+        return new Result(r);
     }
 
     /**
@@ -154,7 +154,7 @@ public class Result {
     }
 
     /**
-     * 返回 响应 200 的自定义提示信息;无数据
+     * 返回 响应 200 的自定义的提示信息;无数据
      *
      * @param msg 提示信息
      */

@@ -1,7 +1,7 @@
 package cn.qingweico.user.service.impl;
 
-import cn.qingweico.api.config.RabbitMqConfig;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.config.RabbitMqConfig;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.exception.GraceException;
@@ -14,7 +14,7 @@ import cn.qingweico.user.mapper.UserMapper;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.DateUtils;
-import cn.qingweico.util.DesensitizationUtil;
+import cn.qingweico.util.text.DesensitizationUtil;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
 import com.github.pagehelper.PageHelper;
@@ -176,7 +176,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 查询数据库中最新的数据放入缓存中
         User user = queryUserById(userId);
-        redisTemplate.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
+        redisCache.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
         log.info("update user info: cache has been updated");
     }
 
@@ -194,8 +194,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Async("asyncTask")
     public void doSaveUserAuthToken(User user, String token) {
         // 保存token以及用户信息到redis中
-        redisTemplate.set(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + user.getId(), token);
-        redisTemplate.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
+        redisCache.set(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + user.getId(), token);
+        redisCache.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
     }
 
 

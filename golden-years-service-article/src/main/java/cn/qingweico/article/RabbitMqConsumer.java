@@ -1,6 +1,6 @@
 package cn.qingweico.article;
 
-import cn.qingweico.api.config.RabbitMqConfig;
+import cn.qingweico.core.config.RabbitMqConfig;
 import cn.qingweico.article.controller.ArticleDetailController;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.bo.CollectBO;

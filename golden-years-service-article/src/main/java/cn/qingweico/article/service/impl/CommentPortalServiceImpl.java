@@ -4,7 +4,7 @@ import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.pojo.Comments;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.CommentsMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.CommentPortalService;
@@ -40,9 +40,6 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     @Resource
     private ArticlePortalService articlePortalService;
 
-    @Resource
-    private Sid sid;
-
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void publishComment(CommentReplyBO commentReplyBO) {
@@ -55,7 +52,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
         ArticleDetailVO articleDetailVO = articlePortalService.queryDetail(articleId);
 
         Comments comments = new Comments();
-        comments.setId(sid.nextShort());
+        comments.setId("");
         comments.setAuthor(articleDetailVO.getAuthorId());
         comments.setArticleCover(articleDetailVO.getArticleCover());
         comments.setArticleTitle(articleDetailVO.getTitle());
@@ -69,7 +66,7 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
         comments.setCreateTime(new Date());
         if (commentsMapper.insert(comments) > 0) {
             // 评论数累加
-            redisTemplate.increment(RedisConst.REDIS_ARTICLE_COMMENT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+            redisCache.increment(RedisConst.REDIS_ARTICLE_COMMENT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }

@@ -55,7 +55,7 @@
 ## 快速部署
 
 - clone 项目到本地 `https://github.com/qingweico/golden-years-blog`
-- 导入数据库脚本`golden-years-blo.sql`
+- 导入数据库脚本`golden-years-blog.sql`
 - 提前准备好 Redis，在项目的 application.yml 文件中，将 Redis 配置改为自己的地址和密码
 - MySQL采用MySQL 8.0，同样在application.yml 文件中将MySQL配置信息修改为自己的
 - 其他中间件比如RabbitMQ、ElasticSearch、MongoDB、FastDFS也需要修改配置信息

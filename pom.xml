@@ -9,8 +9,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<modules>
 		<module>golden-years-common</module>
-		<module>golden-years-model</module>
-		<module>golden-years-service-api</module>
+		<module>golden-years-service-core</module>
 		<module>golden-years-service-user</module>
 		<module>golden-years-service-files</module>
 		<module>golden-years-service-admin</module>

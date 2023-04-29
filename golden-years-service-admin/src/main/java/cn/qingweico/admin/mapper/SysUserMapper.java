@@ -1,7 +1,7 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.api.mapper.CommonMapper;
-import cn.qingweico.pojo.SysUser;
+import cn.qingweico.core.mapper.CommonMapper;
+import cn.qingweico.entity.SysUser;
 import org.springframework.stereotype.Repository;
 /**
  * @author zqw

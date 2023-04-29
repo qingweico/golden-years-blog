@@ -3,10 +3,11 @@ package cn.qingweico.admin.controller;
 import cn.qingweico.admin.service.RoleService;
 import cn.qingweico.admin.service.SysMenuService;
 import cn.qingweico.admin.service.SysUserService;
+import cn.qingweico.entity.SysMenu;
+import cn.qingweico.entity.SysUser;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.Role;
-import cn.qingweico.pojo.SysMenu;
-import cn.qingweico.pojo.SysUser;
+import cn.qingweico.result.Response;
 import cn.qingweico.result.Result;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +47,7 @@ public class SysMenuController {
         String name = request.getParameter(SysConst.NAME);
         SysUser sysUser = sysUserService.querySysUserByUsername(name);
         if (StringUtils.isEmpty(sysUser.getId())) {
-            return Result.fail();
+            return Result.fail(Response.REQUEST_PARAM_ERROR);
         }
         // 根据用户id获取对应的角色
         Collection<Role> roles = roleService.queryRoleBySysUserId(sysUser.getId());

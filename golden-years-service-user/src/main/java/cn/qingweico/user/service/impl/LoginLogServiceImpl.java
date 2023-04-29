@@ -1,6 +1,6 @@
 package cn.qingweico.user.service.impl;
 
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.UserLoginLog;
 import cn.qingweico.user.mapper.UserLoginLogMapper;

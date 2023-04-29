@@ -9,7 +9,7 @@ import cn.qingweico.pojo.bo.GridFsBO;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.FileUtils;
-import cn.qingweico.util.QiniuUtil;
+import cn.qingweico.util.upload.QiniuUtil;
 import com.mongodb.client.gridfs.GridFSFindIterable;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.model.Filters;

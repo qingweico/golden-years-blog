@@ -40,7 +40,8 @@ public class JwtUtils {
         try {
             return Jwts.parser()
                     .setSigningKey(DatatypeConverter.parseBase64Binary(BASE_64_SECRET))
-                    .parseClaimsJws(jsonWebToken).getBody();
+                    .parseClaimsJws(jsonWebToken)
+                    .getBody();
         } catch (Exception ex) {
             return null;
         }
@@ -79,5 +80,15 @@ public class JwtUtils {
         String compact = builder.compact();
         log.info("生成 token: {}", compact);
         return compact;
+    }
+
+
+    /**
+     * JWT 是否过期
+     * @param claims Claims
+     * @return JWT : true 过期 | false 未过期
+     */
+    public boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
     }
 }

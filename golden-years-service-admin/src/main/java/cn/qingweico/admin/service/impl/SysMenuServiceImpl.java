@@ -3,14 +3,16 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.mapper.RoleMenuRelMapper;
 import cn.qingweico.admin.mapper.SysMenuMapper;
 import cn.qingweico.admin.service.SysMenuService;
-import cn.qingweico.pojo.SysMenu;
-import cn.qingweico.pojo.RoleMenuRel;
+import cn.qingweico.entity.RoleMenuRel;
+import cn.qingweico.entity.SysMenu;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zqw

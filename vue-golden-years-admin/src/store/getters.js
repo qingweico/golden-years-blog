@@ -1,27 +1,19 @@
 const getters = {
   sidebar: state => state.app.sidebar,
+  size: state => state.app.size,
   device: state => state.app.device,
+  dict: state => state.dict.dict,
   visitedViews: state => state.tagsView.visitedViews,
+  cachedViews: state => state.tagsView.cachedViews,
   token: state => state.user.token,
   avatar: state => state.user.avatar,
   name: state => state.user.name,
+  introduction: state => state.user.introduction,
   roles: state => state.user.roles,
-  menu: state => state.user.menu,
-  user: state => state.user.userInfo,
-
-  operaColumnExpand: (state) =>
-    state.networkDisk.operaColumnExpand !== null
-      ? Number(state.networkDisk.operaColumnExpand)
-      : document.body.clientWidth > 1280
-      ? 1
-      : 0,
-  isFolder: (state) => Number(state.networkDisk.isFolder),
-  selectedColumnList: (state) =>
-    state.networkDisk.selectedColumnList
-      ? state.networkDisk.selectedColumnList.split(",")
-        // 列显隐
-      : ["extendName", "fileSize", "createTime"],
-  // 图片类型页面是否展示为网格模式; 0不是, 1是
-  imageModel: (state) => Number(state.networkDisk.imageModel)
+  permissions: state => state.user.permissions,
+  permission_routes: state => state.permission.routes,
+  topbarRouters:state => state.permission.topbarRouters,
+  defaultRoutes:state => state.permission.defaultRoutes,
+  sidebarRouters:state => state.permission.sidebarRouters,
 }
 export default getters

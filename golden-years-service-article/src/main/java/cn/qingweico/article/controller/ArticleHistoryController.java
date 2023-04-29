@@ -1,6 +1,6 @@
 package cn.qingweico.article.controller;
 
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.ArticleHistoryService;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;

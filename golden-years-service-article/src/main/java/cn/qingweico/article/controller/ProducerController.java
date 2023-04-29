@@ -1,6 +1,6 @@
 package cn.qingweico.article.controller;
 
-import cn.qingweico.api.config.RabbitMqConfig;
+import cn.qingweico.core.config.RabbitMqConfig;
 import cn.qingweico.result.Result;
 import cn.qingweico.pojo.eo.ArticleEo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

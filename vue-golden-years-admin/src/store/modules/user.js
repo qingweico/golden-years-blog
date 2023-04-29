@@ -1,130 +1,96 @@
-import {login, logout, getInfo, getMenu} from '@/api/login'
-import {getToken, setToken, removeToken} from '@/utils/auth'
-import {face} from "@/api/login";
+import { login, logout, getInfo } from '@/api/login'
+import { getToken, setToken, removeToken } from '@/utils/auth'
+
 const user = {
-    state: {
-        token: getToken(),
-        name: '',
-        avatar: '',
-        roles: [],
-        menu: {},
-        buttonMap: {},
-        userInfo: {}
+  state: {
+    token: getToken(),
+    name: '',
+    avatar: '',
+    roles: [],
+    permissions: []
+  },
+
+  mutations: {
+    SET_TOKEN: (state, token) => {
+      state.token = token
     },
-
-    mutations: {
-        SET_TOKEN: (state, token) => {
-            state.token = token
-        },
-        SET_NAME: (state, name) => {
-            state.name = name
-        },
-        SET_AVATAR: (state, avatar) => {
-            state.avatar = avatar
-        },
-        SET_ROLES: (state, roles) => {
-            state.roles = roles
-        },
-        SET_MENU: (state, menu) => {
-            state.menu = menu
-        },
-        SET_USER_INFO: (state, user) => {
-            state.userInfo = user
-        },
+    SET_NAME: (state, name) => {
+      state.name = name
     },
-
-    actions: {
-        // 登录
-        Login({commit}, userInfo) {
-            const username = userInfo.username.trim()
-            const password = userInfo.password.trim()
-            const isRememberMe = userInfo.isRememberMe
-            return new Promise((resolve, reject) => {
-                let params = {username, password};
-                login(params).then(response => {
-                    if (response.success) {
-                        const token = response.data
-                        // 向cookie中设置token
-                        setToken(token);
-                        // 向store中设置cookie
-                        commit('SET_TOKEN', token);
-                    }
-                    resolve(response)
-                }).catch(error => {
-                    reject(error)
-                })
-            })
-        },
-
-        // 人脸登录
-        Face({commit}, data) {
-            return new Promise((resolve, reject) => {
-                face(data).then(response => {
-                    if (response.success) {
-                        const token = response.data;
-                        // 向cookie中设置token
-                        setToken(token);
-                        // 向store中设置cookie
-                        commit('SET_TOKEN', token);
-                    }
-                    resolve(response)
-                }).catch(error => {
-                    reject(error)
-                })
-            })
-        },
-
-        // 获取菜单列表
-        GetMenu({commit, state}) {
-            return new Promise((resolve, reject) => {
-                getMenu(state.name).then(response => {
-                    const menu = response.data;
-                    commit('SET_MENU', menu)
-                    resolve(response)
-                }).catch(error => {
-                    reject(error)
-                })
-            })
-        },
-
-        // 获取用户信息
-        GetInfo({commit}) {
-            return new Promise((resolve, reject) => {
-                getInfo().then(response => {
-                    const data = response.data;
-                    commit('SET_NAME', data.username);
-                    commit('SET_AVATAR', data.avatar);
-                    commit('SET_USER_INFO', data)
-                    resolve(response)
-                }).catch(error => {
-                    reject(error)
-                })
-            })
-        },
-
-        // 登出
-        LogOut({commit, state}) {
-            return new Promise((resolve, reject) => {
-                logout(state.token).then((response) => {
-                    commit('SET_TOKEN', '')
-                    commit('SET_ROLES', [])
-                    removeToken()
-                    resolve(response)
-                }).catch(error => {
-                    reject(error)
-                })
-            })
-        },
-
-        // 前端 登出
-        FedLogOut({commit}) {
-            return new Promise(resolve => {
-                commit('SET_TOKEN', '')
-                removeToken()
-                resolve()
-            })
-        }
+    SET_AVATAR: (state, avatar) => {
+      state.avatar = avatar
+    },
+    SET_ROLES: (state, roles) => {
+      state.roles = roles
+    },
+    SET_PERMISSIONS: (state, permissions) => {
+      state.permissions = permissions
     }
+  },
+
+  actions: {
+    // 登录
+    Login({ commit }, userInfo) {
+      const username = userInfo.username.trim()
+      const password = userInfo.password
+      const code = userInfo.code
+      const uuid = userInfo.uuid
+      return new Promise((resolve, reject) => {
+        login(username, password, code, uuid).then(res => {
+          setToken(res.token)
+          commit('SET_TOKEN', res.token)
+          resolve()
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+
+    // 获取用户信息
+    GetInfo({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        getInfo().then(res => {
+          const user = res.user
+          const avatar = (user.avatar == "" || user.avatar == null) ? require("@/assets/images/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
+          if (res.roles && res.roles.length > 0) { // 验证返回的roles是否是一个非空数组
+            commit('SET_ROLES', res.roles)
+            commit('SET_PERMISSIONS', res.permissions)
+          } else {
+            commit('SET_ROLES', ['ROLE_DEFAULT'])
+          }
+          commit('SET_NAME', user.userName)
+          commit('SET_AVATAR', avatar)
+          resolve(res)
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+
+    // 退出系统
+    LogOut({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        logout(state.token).then(() => {
+          commit('SET_TOKEN', '')
+          commit('SET_ROLES', [])
+          commit('SET_PERMISSIONS', [])
+          removeToken()
+          resolve()
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+
+    // 前端 登出
+    FedLogOut({ commit }) {
+      return new Promise(resolve => {
+        commit('SET_TOKEN', '')
+        removeToken()
+        resolve()
+      })
+    }
+  }
 }
 
 export default user

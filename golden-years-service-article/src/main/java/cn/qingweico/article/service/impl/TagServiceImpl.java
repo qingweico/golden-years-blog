@@ -1,6 +1,6 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.TagService;
 import cn.qingweico.enums.YesOrNo;
@@ -57,14 +57,14 @@ public class TagServiceImpl extends BaseService implements TagService {
 
     @Override
     public List<Tag> getTagList() {
-        String tagJson = redisTemplate.get(RedisConst.REDIS_ARTICLE_TAG);
+        String tagJson = redisCache.get(RedisConst.REDIS_ARTICLE_TAG);
         List<Tag> tags;
         if (StringUtils.isBlank(tagJson)) {
             Example example = new Example(Tag.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(SysConst.STATUS, YesOrNo.YES.type);
             tags = tagMapper.selectByExample(example);
-            redisTemplate.set(RedisConst.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
+            redisCache.set(RedisConst.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
             log.info("tag list has been cached");
         } else {
             tags = JsonUtils.jsonToList(tagJson, Tag.class);

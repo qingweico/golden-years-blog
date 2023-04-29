@@ -1,7 +1,8 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.api.mapper.CommonMapper;
-import cn.qingweico.pojo.SysMenu;
+
+import cn.qingweico.core.mapper.CommonMapper;
+import cn.qingweico.entity.SysMenu;
 import org.springframework.stereotype.Repository;
 
 /**

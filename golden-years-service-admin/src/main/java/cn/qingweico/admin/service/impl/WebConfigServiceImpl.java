@@ -2,7 +2,7 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.WebConfigMapper;
 import cn.qingweico.admin.service.WebConfigService;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
@@ -31,10 +31,10 @@ public class WebConfigServiceImpl extends BaseService implements WebConfigServic
     public WebConfig getWebConfig() {
         String webConfigRedisKey = RedisConst.REDIS_WEB_CONFIG;
         WebConfig webConfig;
-        final String cachedWebConfig = redisTemplate.get(webConfigRedisKey);
+        final String cachedWebConfig = redisCache.get(webConfigRedisKey);
         if (StringUtils.isBlank(cachedWebConfig)) {
             webConfig = webConfigMapper.selectAll().get(0);
-            redisTemplate.set(webConfigRedisKey, JsonUtils.objectToJson(webConfig));
+            redisCache.set(webConfigRedisKey, JsonUtils.objectToJson(webConfig));
             log.info("set web config cache");
         } else {
             webConfig = JsonUtils.jsonToPojo(cachedWebConfig, WebConfig.class);

@@ -1,13 +1,13 @@
 package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.SysUserMapper;
+import cn.qingweico.admin.model.bo.OperatorSysUserBO;
 import cn.qingweico.admin.service.SysUserService;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
+import cn.qingweico.entity.SysUser;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.SysUser;
-import cn.qingweico.pojo.bo.OperatorSysUserBO;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.AddressUtil;
 import cn.qingweico.util.JsonUtils;
@@ -121,8 +121,8 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
     @Override
     @Async("asyncTask")
     public void doSaveToken(SysUser sysUser, String token) {
-        redisTemplate.set(RedisConst.REDIS_ADMIN_TOKEN + SysConst.SYMBOL_COLON + sysUser.getId(), token);
-        redisTemplate.set(RedisConst.REDIS_ADMIN_INFO + SysConst.SYMBOL_COLON + sysUser.getId(), JsonUtils.objectToJson(sysUser));
+        redisCache.set(RedisConst.REDIS_ADMIN_TOKEN + SysConst.SYMBOL_COLON + sysUser.getId(), token);
+        redisCache.set(RedisConst.REDIS_ADMIN_INFO + SysConst.SYMBOL_COLON + sysUser.getId(), JsonUtils.objectToJson(sysUser));
     }
 
     @Override
@@ -143,6 +143,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
     @Async("asyncTask")
     public void refreshCache(SysUser sysUser) {
         String key = RedisConst.REDIS_ADMIN_INFO + SysConst.SYMBOL_COLON + sysUser.getId();
-        redisTemplate.set(key, JsonUtils.objectToJson(sysUser));
+        redisCache.set(key, JsonUtils.objectToJson(sysUser));
     }
 }

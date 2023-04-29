@@ -1,6 +1,6 @@
 package cn.qingweico.article;
 
-import cn.qingweico.api.config.RabbitMqDelayConfig;
+import cn.qingweico.core.config.RabbitMqDelayConfig;
 import cn.qingweico.article.service.ArticleService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

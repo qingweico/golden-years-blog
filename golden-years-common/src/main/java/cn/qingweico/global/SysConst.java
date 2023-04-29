@@ -182,6 +182,11 @@ public final class SysConst {
     public final static int NUM_5000 = 5000;
 
     /**
+     * 字符编码
+     */
+    public static final String UTF8 = "UTF-8";
+
+    /**
      * 字符串数字 0~10
      */
     public final static String STR_ZERO = "0";
@@ -227,5 +232,15 @@ public final class SysConst {
     public static final String WINDOWS_FACE_PIC_PATH = "C://facePic";
 
     public static final String LINUX_FACE_PIC_PATH = "/home/java/facePic";
+
+    /**
+     * TOKEN_PREFIX
+     */
+    public static final String TOKEN_PREFIX = "GoldenYears";
+
+    /**
+     * 注销
+     */
+    public static final String LOGOUT = "Logout";
 
 }

@@ -14,7 +14,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>cn.qingweico</groupId>
-			<artifactId>golden-years-service-api</artifactId>
+			<artifactId>golden-years-service-core</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

@@ -35,6 +35,23 @@ public class RedisConst {
     public final static String WEEK_VISIT = "week_visit";
     public final static String BLOG_COUNT_BY_TAG = "blog_count_by_tag";
     public final static String BLOG_CONTRIBUTE_COUNT = "blog_contribute_count";
-    public final static String ZSET_ARTICLE_RANK = "zset_article_rank";
-    public final static String ZSET_ARTICLE_USER_RANK = "zset_article_user_rank";
+    public final static String Z_SET_ARTICLE_RANK = "z_set_article_rank";
+    public final static String Z_SET_ARTICLE_USER_RANK = "z_set_article_user_rank";
+    public final static long CACHE_NULL_TTL = 2;
+
+    public final static long LOCK_TTL = 2;
+    public final static String LOCK = "LOCK";
+    public final static String LOCK_VALUE = "LOCK_VALUE";
+    public final static long LOCK_TIME = 10;
+
+
+    /**
+     * 令牌前缀
+     */
+    public static final String LOGIN_USER_KEY = "login_user_key";
+
+    /**
+     * 登录用户 redis key
+     */
+    public static final String LOGIN_TOKEN_KEY = "login_tokens";
 }

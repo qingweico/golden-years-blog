@@ -2,4 +2,4 @@ ${AnsiColor.GREEN}
  __   __        __   ___              ___       __   __
 / _` /  \ |    |  \ |__  |\ | __ \ / |__   /\  |__) /__`
 \__> \__/ |___ |__/ |___ | \|     |  |___ /~~\ |  \ .__/
-
+Spring Boot Version: ${spring-boot.version}

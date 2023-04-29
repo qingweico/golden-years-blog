@@ -13,6 +13,6 @@
         <setting name="useColumnLabel" value="true"/>
     </settings>
     <plugins>
-        <plugin interceptor="cn.qingweico.api.config.split.DynamicDataSourceInterceptor"/>
+        <plugin interceptor="cn.qingweico.core.config.split.DynamicDataSourceInterceptor"/>
     </plugins>
 </configuration>

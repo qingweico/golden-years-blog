@@ -3,7 +3,7 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.clients.ArticleClient;
 import cn.qingweico.admin.mapper.CategoryMapper;
 import cn.qingweico.admin.service.CategoryService;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;

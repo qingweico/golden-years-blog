@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'MoGuGit',
+  name: 'qingweico',
   data() {
     return {
       url: "http://blog.qingweico.cn"

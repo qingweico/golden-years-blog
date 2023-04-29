@@ -2,7 +2,7 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.repository.FriendLinkRepository;
 import cn.qingweico.admin.service.FriendLinkService;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.mo.FriendLink;
@@ -72,11 +72,11 @@ public class FriendLinkServiceImpl extends BaseService implements FriendLinkServ
     @Override
     public List<FriendLink> queryIndexFriendLinkList(Integer isDelete) {
         String cacheFriendLinkKey = RedisConst.REDIS_FRIEND_LINK;
-        String cache = redisTemplate.get(cacheFriendLinkKey);
+        String cache = redisCache.get(cacheFriendLinkKey);
         List<FriendLink> friendLinkList;
         if (StringUtils.isBlank(cache)) {
             friendLinkList = repo.getAllByIsDelete(isDelete);
-            redisTemplate.set(cacheFriendLinkKey, JsonUtils.objectToJson(friendLinkList));
+            redisCache.set(cacheFriendLinkKey, JsonUtils.objectToJson(friendLinkList));
         } else {
             friendLinkList = JsonUtils.jsonToList(cache, FriendLink.class);
         }

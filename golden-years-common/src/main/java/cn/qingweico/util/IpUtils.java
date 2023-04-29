@@ -19,6 +19,17 @@ public class IpUtils {
 
     private static final String UNKNOWN = "unknown";
 
+
+    /**
+     * 获取客户端IP
+     *
+     * @return IP地址
+     */
+    public static String getIpAddr()
+    {
+        return getRequestIp(ServletUtils.getRequest());
+    }
+
     /**
      * 获取请求IP:
      * 用户的真实IP不能使用request.getRemoteAddr()

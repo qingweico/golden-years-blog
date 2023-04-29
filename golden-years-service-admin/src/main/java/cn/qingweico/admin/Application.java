@@ -13,7 +13,7 @@ import tk.mybatis.spring.annotation.MapperScan;
  */
 @SpringBootApplication
 @MapperScan(basePackages = "cn.qingweico.admin.mapper")
-@ComponentScan(basePackages = {"cn.qingweico", "org.n3r.idworker"})
+@ComponentScan(basePackages = {"cn.qingweico"})
 @EnableFeignClients
 @EnableAsync
 public class Application {

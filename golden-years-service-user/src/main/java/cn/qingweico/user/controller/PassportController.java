@@ -1,6 +1,6 @@
 package cn.qingweico.user.controller;
 
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
@@ -52,11 +52,11 @@ public class PassportController extends BaseController {
         // 获取用户的ip
         String userIp = IpUtils.getRequestIp(request);
         // 根据用户的ip进行限制, 限制用户在60s内只能获得一次验证码
-        redisTemplate.setnx60s(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp, userIp);
+        redisCache.setNx60s(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp, userIp);
         String random = RandomStringUtils.random(6,false,true);
         smsUtil.sendSms(mobile, random);
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
-        redisTemplate.set(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile, random, 2 * 60);
+        redisCache.set(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile, random, 2 * 60);
         return Result.r(Response.SMS_SEND_SUCCESS);
     }
 
@@ -69,7 +69,7 @@ public class PassportController extends BaseController {
         String mobile = registerBO.getMobile();
         String smsCode = registerBO.getSmsCode();
         // 校验手机验证码是否匹配
-        String redisSmsCode = redisTemplate.get(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
+        String redisSmsCode = redisCache.get(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
         if (StringUtils.isBlank(redisSmsCode) || !redisSmsCode.equalsIgnoreCase(smsCode)) {
             return Result.r(Response.SMS_CODE_ERROR);
         }
@@ -88,7 +88,7 @@ public class PassportController extends BaseController {
         userService.doSaveLoginLog(user.getId());
         int userStatus = user.getActiveStatus();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
-        redisTemplate.del(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
+        redisCache.del(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put(SysConst.TOKEN, jsonWebToken);
         map.put(SysConst.USER_STATUS, user.getActiveStatus());
@@ -143,13 +143,13 @@ public class PassportController extends BaseController {
             Claims claims = JwtUtils.parseJwt(token);
             if (claims != null) {
                 userId = claims.get(SysConst.USER_ID, String.class);
-                user = JsonUtils.jsonToPojo(redisTemplate.get(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId), User.class);
+                user = JsonUtils.jsonToPojo(redisCache.get(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId), User.class);
             }
         } catch (Exception e) {
             return Result.r(Response.TICKET_INVALID);
         }
         if (!StringUtils.isEmpty(userId)) {
-            String redisToken = redisTemplate.get(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + userId);
+            String redisToken = redisCache.get(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + userId);
             if (StringUtils.isEmpty(redisToken)) {
                 return Result.r(Response.TICKET_INVALID);
             }
@@ -171,8 +171,8 @@ public class PassportController extends BaseController {
         } catch (Exception e) {
             return Result.r(Response.TICKET_INVALID);
         }
-        redisTemplate.del(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + userId);
-        redisTemplate.del(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId);
+        redisCache.del(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + userId);
+        redisCache.del(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId);
         return Result.ok();
     }
 
@@ -184,7 +184,7 @@ public class PassportController extends BaseController {
         if (StringUtils.isBlank(smsCode)) {
             return Result.r(Response.SMS_CODE_NULL);
         }
-        String redisSmsCode = redisTemplate.get(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
+        String redisSmsCode = redisCache.get(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
         if (!Objects.equals(smsCode, redisSmsCode)) {
             return Result.r(Response.SMS_CODE_ERROR);
         }

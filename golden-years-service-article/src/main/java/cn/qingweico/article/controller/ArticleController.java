@@ -1,6 +1,6 @@
 package cn.qingweico.article.controller;
 
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticleService;
@@ -66,7 +66,7 @@ public class ArticleController extends BaseController {
             }
 
             // 判断分类Id是否存在 (从缓存中取出数据)
-            String categoryJson = redisTemplate.get(RedisConst.REDIS_ARTICLE_CATEGORY);
+            String categoryJson = redisCache.get(RedisConst.REDIS_ARTICLE_CATEGORY);
             List<Category> categories = JsonUtils.jsonToList(categoryJson, Category.class);
             if (categories == null) {
                 return Result.r(Response.SYSTEM_ERROR);

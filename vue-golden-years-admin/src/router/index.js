@@ -1,174 +1,177 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Router from 'vue-router'
 
-Vue.use(VueRouter)
+Vue.use(Router)
+
 /* Layout */
-import Layout from '../views/layout/Layout'
+import Layout from '@/layout'
 
-export const constantRouterMap = [
-    {path: '/login', component: () => import('../views/login/index'), hidden: true},
-    {path: '/404', component: () => import('../views/404'), hidden: true},
-    {path: '/face', component: () => import('../views/login/face'), hidden: true},
+/**
+ * Note: 路由配置项
+ *
+ * hidden: true                     // 当设置 true 的时候该路由不会再侧边栏出现 如401，login等页面，或者如一些编辑页面/edit/1
+ * alwaysShow: true                 // 当你一个路由下面的 children 声明的路由大于1个时，自动会变成嵌套的模式--如组件页面
+ *                                  // 只有一个时，会将那个子路由当做根路由显示在侧边栏--如引导页面
+ *                                  // 若你想不管路由下面的 children 声明的个数都显示你的根路由
+ *                                  // 你可以设置 alwaysShow: true，这样它就会忽略之前定义的规则，一直显示根路由
+ * redirect: noRedirect             // 当设置 noRedirect 的时候该路由在面包屑导航中不可被点击
+ * name:'router-name'               // 设定路由的名字，一定要填写不然使用<keep-alive>时会出现各种问题
+ * query: '{"id": 1, "name": "ry"}' // 访问路由的默认传递参数
+ * roles: ['admin', 'common']       // 访问路由的角色权限
+ * permissions: ['a:a:a', 'b:b:b']  // 访问路由的菜单权限
+ * meta : {
+    noCache: true                   // 如果设置为true，则不会被 <keep-alive> 缓存(默认 false)
+    title: 'title'                  // 设置该路由在侧边栏和面包屑中展示的名字
+    icon: 'svg-name'                // 设置该路由的图标，对应路径src/assets/icons/svg
+    breadcrumb: false               // 如果设置为false，则不会在breadcrumb面包屑中显示
+    activeMenu: '/system/user'      // 当路由设置了该属性，则会高亮相对应的侧边栏。
+  }
+ */
 
-    {
-        path: '/',
-        component: Layout,
-        redirect: '/dashboard',
-        name: '首页',
-        children: [{
-            path: 'dashboard',
-            component: () => import('@/views/dashboard/index'),
-            meta: {title: '仪表盘', icon: 'dashboard'}
-        }]
-    },
-    {
-        path: '/blog',
-        component: Layout,
-        redirect: '/blog/article',
-        name: '博客管理',
-        meta: {title: '博客管理', icon: 'edit'},
-        children: [
-            {
-                path: 'article',
-                name: '文章管理',
-                component: () => import('@/views/blog/article'),
-                meta: {title: '文章管理', icon: 'edit'}
-            },
-            {
-                path: 'category',
-                name: '分类管理',
-                component: () => import('@/views/blog/category'),
-                meta: {title: '分类管理', icon: 'sort'}
-            },
-            {
-                path: 'tag',
-                name: '标签管理',
-                component: () => import('@/views/blog/tag'),
-                meta: {title: '标签管理', icon: 'sort'}
-            }
-        ]
-    },
-
-
-    {
-        path: '/resource',
-        component: Layout,
-        redirect: '/resource/resourceSort',
-        name: '资源管理',
-        meta: {title: '资源管理', icon: 'resource'},
-        children: [
-            {
-                path: 'file',
-                name: '网盘管理',
-                component: () => import('@/views/resource/file/File'),
-                meta: {title: '网盘管理', icon: 'table'}
-            }
-        ]
-    },
-    {
-        path: '/user',
-        component: Layout,
-        redirect: '/user/user',
-        meta: {title: '用户管理'},
-        children: [
-            {
-                path: 'user',
-                name: '用户管理',
-                component: () => import('@/views/user/user'),
-                meta: {title: '用户管理', icon: 'table'}
-            }
-        ]
-    },
-    {
-        path: '/message',
-        component: Layout,
-        redirect: '/message/comment',
-        name: '消息管理',
-        meta: {title: '消息管理'},
-        children: [
-            {
-                path: 'comment',
-                name: '评论管理',
-                component: () => import('@/views/message/comment'),
-                meta: {title: '评论管理', icon: 'table'}
-            }
-        ]
-    },
-    {
-        path: '/monitor',
-        component: Layout,
-        name: '监控中心',
-        meta: {title: '监控中心', icon: 'log'},
-        children: [
-            {
-                path: 'server',
-                name: '服务器监控',
-                component: () => import('@/views/monitor/server'),
-                meta: {title: '服务器监控'}
-            },
-            {
-                path: 'cache',
-                name: '缓存监控',
-                component: () => import('@/views/monitor/cache'),
-                meta: {title: '缓存监控'}
-            },
-            {
-                path: 'druid',
-                name: '数据监控',
-                component: () => import('@/views/monitor/druid'),
-                meta: {title: '数据监控'}
-            },
-            {
-                path: 'elasticsearch',
-                name: 'elasticsearch',
-                component: () => import('@/views/monitor/elasticsearch'),
-                meta: {title: 'elasticsearch'}
-            },
-        ]
-    },
-    {
-        path: '/system',
-        component: Layout,
-        children: [
-            {
-                path: 'profile',
-                name: '个人信息',
-                component: () => import('@/views/system/profile'),
-                meta: {title: '个人信息'}
-            },
-            {
-                path: 'fl',
-                name: '友情链接',
-                component: () => import('@/views/system/fl'),
-                meta: {title: '友情链接'}
-            },
-            {
-                path: 'systemConfig',
-                name: '系统配置',
-                component: () => import('@/views/system/SystemConfig'),
-                meta: {title: '系统配置'}
-            },
-            {
-                path: 'webConfig',
-                name: '网站配置',
-                component: () => import('@/views/system/WebConfig'),
-                meta: {title: '网站配置'}
-            }
-        ]
-    },
-    {path: '*', redirect: '/404', hidden: true}
+// 公共路由
+export const constantRoutes = [
+  {
+    path: '/redirect',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/redirect/:path(.*)',
+        component: () => import('@/views/redirect')
+      }
+    ]
+  },
+  {
+    path: '/login',
+    component: () => import('@/views/login'),
+    hidden: true
+  },
+  {
+    path: '/register',
+    component: () => import('@/views/register'),
+    hidden: true
+  },
+  {
+    path: '/404',
+    component: () => import('@/views/error/404'),
+    hidden: true
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/error/401'),
+    hidden: true
+  },
+  {
+    path: '',
+    component: Layout,
+    redirect: 'index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/index'),
+        name: 'Index',
+        meta: { title: '首页', icon: 'dashboard', affix: true }
+      }
+    ]
+  },
+  {
+    path: '/user',
+    component: Layout,
+    hidden: true,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'profile',
+        component: () => import('@/views/system/user/profile/index'),
+        name: 'Profile',
+        meta: { title: '个人中心', icon: 'user' }
+      }
+    ]
+  }
 ]
 
-const router = new VueRouter({
-    // mode: 'history',
-    scrollBehavior: () => ({y: 0}),
-    routes: constantRouterMap
-})
+// 动态路由，基于用户权限动态去加载
+export const dynamicRoutes = [
+  {
+    path: '/system/user-auth',
+    component: Layout,
+    hidden: true,
+    permissions: ['system:user:edit'],
+    children: [
+      {
+        path: 'role/:userId(\\d+)',
+        component: () => import('@/views/system/user/authRole'),
+        name: 'AuthRole',
+        meta: { title: '分配角色', activeMenu: '/system/user' }
+      }
+    ]
+  },
+  {
+    path: '/system/role-auth',
+    component: Layout,
+    hidden: true,
+    permissions: ['system:role:edit'],
+    children: [
+      {
+        path: 'user/:roleId(\\d+)',
+        component: () => import('@/views/system/role/authUser'),
+        name: 'AuthUser',
+        meta: { title: '分配用户', activeMenu: '/system/role' }
+      }
+    ]
+  },
+  {
+    path: '/system/dict-data',
+    component: Layout,
+    hidden: true,
+    permissions: ['system:dict:list'],
+    children: [
+      {
+        path: 'index/:dictId(\\d+)',
+        component: () => import('@/views/system/dict/data'),
+        name: 'Data',
+        meta: { title: '字典数据', activeMenu: '/system/dict' }
+      }
+    ]
+  },
+  {
+    path: '/monitor/job-log',
+    component: Layout,
+    hidden: true,
+    permissions: ['monitor:job:list'],
+    children: [
+      {
+        path: 'index/:jobId(\\d+)',
+        component: () => import('@/views/monitor/job/log'),
+        name: 'JobLog',
+        meta: { title: '调度日志', activeMenu: '/monitor/job' }
+      }
+    ]
+  },
+  {
+    path: '/tool/gen-edit',
+    component: Layout,
+    hidden: true,
+    permissions: ['tool:gen:edit'],
+    children: [
+      {
+        path: 'index/:tableId(\\d+)',
+        component: () => import('@/views/tool/gen/editTable'),
+        name: 'GenEdit',
+        meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
+      }
+    ]
+  }
+]
 
-const originalPush = VueRouter.prototype.push;
-VueRouter.prototype.push = function push(location, onResolve, onReject) {
-    if (onResolve || onReject)
-        return originalPush.call(this, location, onResolve, onReject);
-    return originalPush.call(this, location).catch((err) => err);
+// 防止连续点击多次路由报错
+let routerPush = Router.prototype.push;
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(err => err)
 }
-export default router
+
+export default new Router({
+  mode: 'history', // 去掉url中的#
+  scrollBehavior: () => ({ y: 0 }),
+  routes: constantRoutes
+})

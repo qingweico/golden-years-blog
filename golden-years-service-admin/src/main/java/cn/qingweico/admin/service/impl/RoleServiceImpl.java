@@ -3,8 +3,8 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.mapper.RoleMapper;
 import cn.qingweico.admin.mapper.UserRoleRelMapper;
 import cn.qingweico.admin.service.RoleService;
+import cn.qingweico.entity.SysUserRoleRel;
 import cn.qingweico.pojo.Role;
-import cn.qingweico.pojo.SysUserRoleRel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 

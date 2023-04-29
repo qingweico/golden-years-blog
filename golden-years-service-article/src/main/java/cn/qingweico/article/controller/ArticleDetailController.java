@@ -1,6 +1,6 @@
 package cn.qingweico.article.controller;
 
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.global.SysConst;
@@ -69,8 +69,8 @@ public class ArticleDetailController extends BaseController {
         HttpServletRequest request = ServletReqUtils.getRequest();
         String visitIp = IpUtils.getRequestIp(request);
         // 设置文章在一分钟内不可重复阅读(即不增加文章阅读量)
-        redisTemplate.setnx60s(RedisConst.REDIS_ARTICLE_ALREADY_READ + SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_COLON + visitIp, visitIp);
-        redisTemplate.increment(RedisConst.REDIS_ARTICLE_READ_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+        redisCache.setNx60s(RedisConst.REDIS_ARTICLE_ALREADY_READ + SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_COLON + visitIp, visitIp);
+        redisCache.increment(RedisConst.REDIS_ARTICLE_READ_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
         return Result.ok();
     }
 
@@ -80,10 +80,10 @@ public class ArticleDetailController extends BaseController {
         String articleId = idBO.getArticleId();
         String userId = idBO.getUserId();
         // 设置用户点赞标志位(已点赞)
-        redisTemplate.set(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
+        redisCache.set(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
                 SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_HYPHEN + userId, "true");
         // 点赞数增加
-        redisTemplate.increment(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+        redisCache.increment(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
         return Result.r(Response.STAR_SUCCESS);
     }
 
@@ -93,10 +93,10 @@ public class ArticleDetailController extends BaseController {
         String articleId = idBO.getArticleId();
         String userId = idBO.getUserId();
         // 设置用户点赞标志位(未点赞)
-        redisTemplate.del(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
+        redisCache.del(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
                 SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_HYPHEN + userId);
         // 点赞数减少
-        redisTemplate.decrement(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+        redisCache.decrement(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
         return Result.r(Response.UN_STAR_SUCCESS);
     }
 
@@ -104,7 +104,7 @@ public class ArticleDetailController extends BaseController {
     @GetMapping("getArticleStarCounts")
     @ApiOperation(value = "获取文章点赞量", notes = "获取文章点赞量", httpMethod = "GET")
     public Result getArticleStarCounts(@RequestParam String articleId) {
-        String articleStarCounts = redisTemplate.get(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId);
+        String articleStarCounts = redisCache.get(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId);
         return Result.ok(articleStarCounts);
     }
 
@@ -113,7 +113,7 @@ public class ArticleDetailController extends BaseController {
     public Result isStar(@RequestBody IdBO idBO) {
         String articleId = idBO.getArticleId();
         String userId = idBO.getUserId();
-        String isStar = redisTemplate.get(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
+        String isStar = redisCache.get(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
                 SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_HYPHEN + userId);
         return Result.ok(StringUtils.isNotBlank(isStar));
     }
@@ -129,14 +129,14 @@ public class ArticleDetailController extends BaseController {
         }
         articleDetailService.collectArticle(collectBO);
         // 设置用户收藏标志位(已收藏)
-        redisTemplate.set(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
+        redisCache.set(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
                 SysConst.SYMBOL_COLON + articleId +
                 SysConst.SYMBOL_HYPHEN + userId +
                 SysConst.SYMBOL_HYPHEN + favoritesId, "true");
         // 文章收藏数增加
-        redisTemplate.increment(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+        redisCache.increment(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
         // 用户收藏夹收藏数增加
-        redisTemplate.increment(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
+        redisCache.increment(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
                 SysConst.SYMBOL_COLON + userId +
                 SysConst.SYMBOL_HYPHEN + favoritesId, 1);
         return Result.r(Response.COLLECT_SUCCESS);
@@ -150,18 +150,18 @@ public class ArticleDetailController extends BaseController {
         // redis_article_already_collect:articleId-userId-*
         // 收藏夹中存在一个即为收藏;通配所有的favoritesId
         // 获取Redis中特定前缀
-        Set<String> keys = redisTemplate.keys(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
+        Set<String> keys = redisCache.keys(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
                 SysConst.SYMBOL_COLON + articleId +
                 SysConst.SYMBOL_HYPHEN + userId +
                 SysConst.SYMBOL_HYPHEN + SysConst.SYMBOL_STAR);
-        List<String> isCollect = redisTemplate.mget(keys);
+        List<String> isCollect = redisCache.mGet(keys);
         return Result.ok(!isCollect.isEmpty());
     }
 
     @GetMapping("getArticleCollectCounts")
     @ApiOperation(value = "获取文章收藏量", notes = "获取文章收藏量", httpMethod = "GET")
     public Result getArticleCollectCounts(@RequestParam String articleId) {
-        String articleCollectCounts = redisTemplate.get(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId);
+        String articleCollectCounts = redisCache.get(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId);
         return Result.ok(articleCollectCounts);
     }
 
@@ -174,14 +174,14 @@ public class ArticleDetailController extends BaseController {
         boolean cancelCollect = articleDetailService.cancelCollectArticle(collectBO);
         if (cancelCollect) {
             // 设置用户收藏标志位(未收藏)
-            redisTemplate.del(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
+            redisCache.del(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
                     SysConst.SYMBOL_COLON + articleId +
                     SysConst.SYMBOL_HYPHEN + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId);
             // 文章收藏数减少
-            redisTemplate.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
+            redisCache.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
             // 用户收藏夹收藏数减少
-            redisTemplate.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
+            redisCache.decrement(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
                     SysConst.SYMBOL_COLON + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId, 1);
             return Result.r(Response.UN_COLLECT_SUCCESS);
@@ -200,7 +200,7 @@ public class ArticleDetailController extends BaseController {
             BeanUtils.copyProperties(favorite, favoritesVO);
             String favoritesId = favorite.getId();
             // 精确匹配favoritesId
-            String isFavoritesCollect = redisTemplate.get(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
+            String isFavoritesCollect = redisCache.get(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
                     SysConst.SYMBOL_COLON + articleId +
                     SysConst.SYMBOL_HYPHEN + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId);

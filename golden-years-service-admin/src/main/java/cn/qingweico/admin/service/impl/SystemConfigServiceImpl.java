@@ -2,11 +2,11 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.SysConfigMapper;
 import cn.qingweico.admin.service.SystemConfigService;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
+import cn.qingweico.entity.SysConfig;
 import cn.qingweico.exception.GraceException;
-import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.SysConfig;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +33,10 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
     public SysConfig getSystemConfig() {
         String systemConfigRedisKey = RedisConst.REDIS_SYSTEM_CONFIG;
         SysConfig sysConfig;
-        final String cachedSystemConfig = redisTemplate.get(systemConfigRedisKey);
+        final String cachedSystemConfig = redisCache.get(systemConfigRedisKey);
         if (StringUtils.isBlank(cachedSystemConfig)) {
             sysConfig = sysConfigMapper.selectAll().get(0);
-            redisTemplate.set(systemConfigRedisKey, JsonUtils.objectToJson(sysConfig));
+            redisCache.set(systemConfigRedisKey, JsonUtils.objectToJson(sysConfig));
             log.info("set system config cache");
         } else {
             sysConfig = JsonUtils.jsonToPojo(cachedSystemConfig, SysConfig.class);
@@ -54,12 +54,12 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
             // 清空所有key
             Set<String> keys;
             if (RedisConst.ALL.equals(item)) {
-                keys = redisTemplate.keys(SysConst.SYMBOL_STAR);
+                keys = redisCache.keys(SysConst.SYMBOL_STAR);
             } else {
                 // 获取Redis中特定前缀
-                keys = redisTemplate.keys(item + SysConst.SYMBOL_STAR);
+                keys = redisCache.keys(item + SysConst.SYMBOL_STAR);
             }
-            redisTemplate.delete(keys);
+            redisCache.delete(keys);
         });
     }
 

@@ -309,7 +309,7 @@ public final class DateUtils {
             } else {
                 df = new SimpleDateFormat(format);
             }
-            // setLenient avoids allowing dates like 9/32/2001
+            // setLenient avoids allowing dates like "9/32/2001"
             // which would otherwise parse to 10/2/2001
             df.setLenient(false);
             return df.parse(dateText);

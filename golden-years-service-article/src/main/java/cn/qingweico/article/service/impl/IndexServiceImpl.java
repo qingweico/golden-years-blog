@@ -1,6 +1,6 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.CommentsMapper;
 import cn.qingweico.article.mapper.TagMapper;
@@ -53,7 +53,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
     @Override
     public List<Map<String, Object>> getBlogCountByTag() {
         // 从Redis中获取标签下包含的博客数量
-        String jsonArrayList = redisTemplate.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_COUNT_BY_TAG);
+        String jsonArrayList = redisCache.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_COUNT_BY_TAG);
         if (StringUtils.isNotEmpty(jsonArrayList)) {
             ArrayList jsonList = JsonUtils.jsonArrayToArrayList(jsonArrayList);
             return jsonList;
@@ -123,14 +123,14 @@ public class IndexServiceImpl extends BaseService implements IndexService {
             }
         }
         if (resultList.size() > 0) {
-            redisTemplate.setnx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_COUNT_BY_TAG, JsonUtils.objectToJson(resultList), 2, TimeUnit.HOURS);
+            redisCache.setNx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_COUNT_BY_TAG, JsonUtils.objectToJson(resultList), 2, TimeUnit.HOURS);
         }
         return resultList;
     }
 
     @Override
     public Map<String, Object> getBlogContributeCount() {
-        String jsonMap = redisTemplate.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_CONTRIBUTE_COUNT);
+        String jsonMap = redisCache.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_CONTRIBUTE_COUNT);
         if (StringUtils.isNotEmpty(jsonMap)) {
             return JsonUtils.jsonToMap(jsonMap, String.class, Object.class);
         }
@@ -165,7 +165,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
         contributeDateList.add(endTime);
         resultMap.put(SysConst.CONTRIBUTE_DATE, contributeDateList);
         resultMap.put(SysConst.BLOG_CONTRIBUTE_COUNT, resultList);
-        redisTemplate.setnx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_CONTRIBUTE_COUNT, JsonUtils.objectToJson(resultMap), 2, TimeUnit.HOURS);
+        redisCache.setNx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.BLOG_CONTRIBUTE_COUNT, JsonUtils.objectToJson(resultMap), 2, TimeUnit.HOURS);
         return resultMap;
     }
 

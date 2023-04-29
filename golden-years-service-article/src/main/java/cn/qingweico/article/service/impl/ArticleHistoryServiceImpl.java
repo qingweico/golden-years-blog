@@ -1,6 +1,6 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.HistoryMapper;
 import cn.qingweico.article.service.ArticleHistoryService;
@@ -58,7 +58,7 @@ public class ArticleHistoryServiceImpl extends BaseService implements ArticleHis
             }
         } else {
             one = new History();
-            String id = sid.nextShort();
+            String id = "";
             one.setId(id);
             one.setUserId(userId);
             one.setArticleId(articleId);

@@ -1,5 +1,6 @@
 package cn.qingweico.util;
 
+import cn.qingweico.util.http.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

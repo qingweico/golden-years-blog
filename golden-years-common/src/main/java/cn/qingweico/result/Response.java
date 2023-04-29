@@ -1,5 +1,7 @@
 package cn.qingweico.result;
 
+import cn.qingweico.global.HttpStatus;
+
 /**
  * 统一响应状态信息
  *
@@ -83,7 +85,7 @@ public enum Response {
     SYSTEM_CLASS_CAST(548, false, "系统错误,类型强制转换错误!"),
     SYSTEM_PARSER_ERROR(549, false, "系统错误,解析出错!"),
 
-    // admin 管理系统 56x ~ 57x
+    // 管理系统 56x ~ 57x
     CATEGORY_EXIST_ERROR(560, false, "文章分类已存在,请换一个分类名!"),
     ADMIN_USERNAME_NULL_ERROR(561, false, "用户名不能为空!"),
     SYS_USERNAME_EXIST_ERROR(562, false, "用户名已存在!"),
@@ -91,7 +93,7 @@ public enum Response {
     ADMIN_PASSWORD_ERROR(564, false, "密码错误!"),
     SYS_USER_CREATE_ERROR(565, false, "添加系统用户失败!"),
     ADMIN_PASSWORD_NULL_ERROR(566, false, "密码不能为空!"),
-    ADMIN_NOT_EXIT_ERROR(567, false, "管理员不存在或密码错误!"),
+    SYS_USER_NOT_EXIT(567, false, "该用户不存在!"),
     ADMIN_FACE_NULL_ERROR(568, false, "人脸信息不能为空!"),
     ADMIN_FACE_LOGIN_ERROR(569, false, "人脸识别失败,请重试!"),
     ADMIN_EMAIL_IS_PRESENT(570, false, "邮箱已存在!"),
@@ -122,10 +124,18 @@ public enum Response {
     FACE_VERIFY_LOGIN_ERROR(601, false, "人脸登录失败!"),
 
 
-    // else
+    // other
     CANNOT_FOLLOW_ONESELF(602, false, "不能对自己进行此操作!"),
     SMS_CODE_NULL(603, false, "请输入手机验证码!"),
-    MOBILE_NULL(604, false, "请输入您的手机号!");
+    MOBILE_NULL(604, false, "请输入您的手机号!"),
+
+    TOKEN_EXPIRATION(605, false, "Token已过期!"),
+
+    // 权限相关
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, false, "认证失败, 无权访问");
+
+
+
 
 
     /**

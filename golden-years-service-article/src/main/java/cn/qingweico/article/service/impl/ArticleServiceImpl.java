@@ -1,8 +1,8 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.api.config.RabbitMqConfig;
-import cn.qingweico.api.config.RabbitMqDelayConfig;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.config.RabbitMqConfig;
+import cn.qingweico.core.config.RabbitMqDelayConfig;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.ArticleService;
@@ -65,7 +65,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     @Override
     public void createArticle(NewArticleBO newArticleBO) {
 
-        String articleId = sid.nextShort();
+        String articleId = "";
         Article article = new Article();
         // 文章概要
         String summary = getArticleSummary(newArticleBO.getContent());

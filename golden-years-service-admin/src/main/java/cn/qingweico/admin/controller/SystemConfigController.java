@@ -1,9 +1,9 @@
 package cn.qingweico.admin.controller;
 
 import cn.qingweico.admin.service.SystemConfigService;
-import cn.qingweico.pojo.SysConfig;
-import cn.qingweico.result.Result;
+import cn.qingweico.entity.SysConfig;
 import cn.qingweico.result.Response;
+import cn.qingweico.result.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

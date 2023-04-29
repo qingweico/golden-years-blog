@@ -1,8 +1,8 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.SysMenu;
 
-import java.util.Collection;
+import cn.qingweico.entity.SysMenu;
+
 import java.util.List;
 
 /**
@@ -25,10 +25,23 @@ public interface SysMenuService {
      */
     List<SysMenu> buildTreeMenu(List<SysMenu> sysMenuList);
 
+    /**
+     * 根据菜单id获取某个菜单详情
+     * @param id menu id
+     * @return
+     */
     SysMenu getById(String id);
 
 
+    /**
+     * 新建菜单
+     * @param sysMenu
+     */
     void createMenu(SysMenu sysMenu);
 
+    /**
+     * 编辑菜单
+     * @param sysMenu
+     */
     void editMenu(SysMenu sysMenu);
 }

@@ -1,6 +1,6 @@
 package cn.qingweico.article.controller;
 
-import cn.qingweico.api.base.BaseController;
+import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.IndexService;
@@ -200,7 +200,7 @@ public class ArticlePortalController extends BaseController {
     public Result hotList(@RequestParam Integer page,
                           @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        long size = redisTemplate.zsetSize(RedisConst.ZSET_ARTICLE_RANK);
+        long size = redisCache.zSetSize(RedisConst.Z_SET_ARTICLE_RANK);
         // 如果zset key不存在则返回0
         if (size == 0) {
             List<Article> list = articlePortalService.queryHotArticle();
@@ -208,12 +208,12 @@ public class ArticlePortalController extends BaseController {
                 int influence = computeArticleInfluence(article.getId());
                 String articleJson = JsonUtils.objectToJson(article);
                 size = list.size();
-                redisTemplate.zsetAdd(RedisConst.ZSET_ARTICLE_RANK, articleJson, influence);
+                redisCache.zSetAdd(RedisConst.Z_SET_ARTICLE_RANK, articleJson, influence);
                 // 并设置5分钟过期时间即文章排行榜的刷新时间为5分钟
-                redisTemplate.expire(RedisConst.ZSET_ARTICLE_RANK, 5, TimeUnit.MINUTES);
+                redisCache.expire(RedisConst.Z_SET_ARTICLE_RANK, 5, TimeUnit.MINUTES);
             }
         }
-        Set<String> articleJson = redisTemplate.zsetRevRange(RedisConst.ZSET_ARTICLE_RANK, (long) (page - 1) * pageSize,
+        Set<String> articleJson = redisCache.zSetRevRange(RedisConst.Z_SET_ARTICLE_RANK, (long) (page - 1) * pageSize,
                 (pageSize - 1) + (long) (page - 1) * pageSize);
 
         List<Article> result = new ArrayList<>();
@@ -242,18 +242,18 @@ public class ArticlePortalController extends BaseController {
     @GetMapping("rank/{id}")
     @ApiOperation(value = "查询个人中心热门文章", notes = "查询个人中心热门文章", httpMethod = "GET")
     public Result queryGoodArticleListOfAuthor(@PathVariable("id") String authorId) {
-        long size = redisTemplate.zsetSize(RedisConst.ZSET_ARTICLE_USER_RANK);
+        long size = redisCache.zSetSize(RedisConst.Z_SET_ARTICLE_USER_RANK);
         if (size == 0) {
             List<Article> list = articlePortalService.queryGoodArticleListOfAuthor(authorId);
             for (Article article : list) {
                 int influence = computeArticleInfluence(article.getId());
                 String articleJson = JsonUtils.objectToJson(article);
-                redisTemplate.zsetAdd(RedisConst.ZSET_ARTICLE_USER_RANK, articleJson, influence);
-                redisTemplate.expire(RedisConst.ZSET_ARTICLE_USER_RANK, 5, TimeUnit.MINUTES);
+                redisCache.zSetAdd(RedisConst.Z_SET_ARTICLE_USER_RANK, articleJson, influence);
+                redisCache.expire(RedisConst.Z_SET_ARTICLE_USER_RANK, 5, TimeUnit.MINUTES);
             }
         }
         // 默认只展示5篇热门文章
-        Set<String> articleJson = redisTemplate.zsetRevRange(RedisConst.ZSET_ARTICLE_USER_RANK, SysConst.NUM_ZERO, SysConst.NUM_FOUR);
+        Set<String> articleJson = redisCache.zSetRevRange(RedisConst.Z_SET_ARTICLE_USER_RANK, SysConst.NUM_ZERO, SysConst.NUM_FOUR);
         List<UserArticleRank> result = new ArrayList<>();
         for (String json : articleJson) {
             Article article = JsonUtils.jsonToPojo(json, Article.class);
@@ -358,7 +358,7 @@ public class ArticlePortalController extends BaseController {
 
         }
         // redis multi get
-        List<String> countsRedisList = redisTemplate.mget(idList);
+        List<String> countsRedisList = redisCache.mGet(idList);
 
         List<UserBasicInfoVO> authorList = getUserInfoListByIdsClient(idSet);
         List<IndexArticleVO> indexArticleList = new ArrayList<>();

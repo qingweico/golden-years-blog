@@ -1,6 +1,6 @@
 package cn.qingweico.user.mapper;
 
-import cn.qingweico.api.mapper.CommonMapper;
+import cn.qingweico.core.mapper.CommonMapper;
 import cn.qingweico.pojo.Fans;
 import org.springframework.stereotype.Repository;
 

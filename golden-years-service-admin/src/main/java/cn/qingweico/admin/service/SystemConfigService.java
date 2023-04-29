@@ -1,6 +1,7 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.SysConfig;
+
+import cn.qingweico.entity.SysConfig;
 
 import java.util.List;
 

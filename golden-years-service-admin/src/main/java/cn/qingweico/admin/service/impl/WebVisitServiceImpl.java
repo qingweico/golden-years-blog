@@ -2,7 +2,7 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.WebVisitMapper;
 import cn.qingweico.admin.service.WebVisitService;
-import cn.qingweico.api.service.BaseService;
+import cn.qingweico.core.service.BaseService;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.util.DateUtils;
@@ -34,7 +34,7 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
     @Override
     public Map<String, Object>  getVisitByWeek() {
         // 从Redis中获取一周访问量
-        String weekVisitJson = redisTemplate.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.WEEK_VISIT);
+        String weekVisitJson = redisCache.get(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.WEEK_VISIT);
         if (StringUtils.isNotEmpty(weekVisitJson)) {
             return JsonUtils.jsonToMap(weekVisitJson, String.class, Object.class);
         }
@@ -84,7 +84,7 @@ public class WebVisitServiceImpl extends BaseService implements WebVisitService 
         resultMap.put("uv", uvList);
 
         // 将一周访问量存入Redis中(过期时间10分钟)
-        redisTemplate.setnx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.WEEK_VISIT, JsonUtils.objectToJson(resultMap), 10, TimeUnit.MINUTES);
+        redisCache.setNx(RedisConst.DASHBOARD + SysConst.SYMBOL_COLON + RedisConst.WEEK_VISIT, JsonUtils.objectToJson(resultMap), 10, TimeUnit.MINUTES);
         return resultMap;
     }
 }
