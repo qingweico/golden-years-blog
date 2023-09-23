@@ -1,9 +1,10 @@
 package cn.qingweico.user.service;
 
+import cn.qingweico.entity.User;
+import cn.qingweico.entity.model.UserInfoBO;
 import cn.qingweico.enums.UserStatus;
-import cn.qingweico.pojo.User;
-import cn.qingweico.pojo.bo.UserInfoBO;
 import cn.qingweico.util.PagedResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Date;
 
@@ -11,7 +12,7 @@ import java.util.Date;
  * @author zqw
  * @date 2021/9/6
  */
-public interface UserService {
+public interface UserService extends IService<User> {
     /**
      * 查询所有用户
      * 根据条件进行筛选
@@ -43,12 +44,12 @@ public interface UserService {
     void freezeUserOrNot(String userId, Integer doStatus);
 
     /**
-     * 判断用户是否存在, 存在则返回user信息
+     * 判断手机是否存在
      *
      * @param mobile 用户手机号
-     * @return user
+     * @return 用户信息
      */
-    User queryMobileIsPresent(String mobile);
+    User queryUserByMobile(String mobile);
 
     /**
      * 创建用户 新增一条用户记录到数据库
@@ -106,7 +107,8 @@ public interface UserService {
 
     /**
      * 更新用户密码
-     *
+     * @param userId 用户ID
+     * @param newPassword 新的密码
      */
     void alterPwd(String userId, String newPassword);
 
@@ -120,7 +122,7 @@ public interface UserService {
 
     /**
      * 获取全站用户的数量
-     * {@link UserStatus} 只获取已激活和冻结的用户
+     * {@link UserStatus}
      *
      * @return {@code Integer} 全站用户的数量
      */

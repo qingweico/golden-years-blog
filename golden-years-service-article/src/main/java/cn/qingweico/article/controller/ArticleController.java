@@ -4,20 +4,17 @@ import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticleService;
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.Category;
+import cn.qingweico.entity.Favorites;
+import cn.qingweico.entity.model.NewArticleBO;
+import cn.qingweico.entity.model.UserBasicInfoVO;
 import cn.qingweico.enums.ArticleCoverType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.Category;
-import cn.qingweico.pojo.Favorites;
-import cn.qingweico.pojo.bo.CollectBO;
-import cn.qingweico.pojo.bo.FavoritesBO;
-import cn.qingweico.pojo.bo.NewArticleBO;
-import cn.qingweico.pojo.vo.ArticleAdminVO;
-import cn.qingweico.pojo.vo.FavoritesVO;
-import cn.qingweico.pojo.vo.UserBasicInfoVO;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
@@ -57,11 +54,11 @@ public class ArticleController extends BaseController {
         String articleId = newArticleBO.getArticleId();
         // 添加文章
         if (StringUtils.isBlank(articleId)) {
-            if (newArticleBO.getArticleType().equals(ArticleCoverType.ONE_IMAGE.type)) {
+            if (newArticleBO.getArticleType().equals(ArticleCoverType.ONE_IMAGE.getVal())) {
                 if (StringUtils.isBlank(newArticleBO.getArticleCover())) {
                     return Result.r(Response.ARTICLE_COVER_NOT_EXIST_ERROR);
                 }
-            } else if (newArticleBO.getArticleType().equals(ArticleCoverType.WORDS.type)) {
+            } else if (newArticleBO.getArticleType().equals(ArticleCoverType.WORDS.getVal())) {
                 newArticleBO.setArticleCover(SysConst.EMPTY_STRING);
             }
 
@@ -71,11 +68,11 @@ public class ArticleController extends BaseController {
             if (categories == null) {
                 return Result.r(Response.SYSTEM_ERROR);
             }
-            Category res = categories.stream()
-                    .filter(category -> category.getId().equals(newArticleBO.getCategoryId()))
+            Category category = categories.stream()
+                    .filter(e -> e.getId().equals(newArticleBO.getCategoryId()))
                     .collect(toList()).get(0);
 
-            if (res == null) {
+            if (category == null) {
                 return Result.r(Response.ARTICLE_CATEGORY_NOT_EXIST_ERROR);
             }
             articleService.createArticle(newArticleBO);
@@ -114,7 +111,7 @@ public class ArticleController extends BaseController {
         return Result.ok(res);
     }
 
-    @ApiOperation(value = "管理员查询用户的所有文章列表", notes = "管理员查询用户的所有文章列表", httpMethod = "GET")
+    @ApiOperation(value = "后台查询用户的所有文章列表", notes = "后台查询用户的所有文章列表", httpMethod = "GET")
     @GetMapping("/admin/query")
     public Result query(@RequestParam String keyword,
                         @RequestParam Integer status,
@@ -136,14 +133,7 @@ public class ArticleController extends BaseController {
                 page,
                 pageSize);
         String toJson = JsonUtils.objectToJson(result.getRows());
-        List<ArticleAdminVO> articles = JsonUtils.jsonToList(toJson, ArticleAdminVO.class);
-        for (ArticleAdminVO articleAdminVO : articles) {
-            Map<String, Object> authorInfo = geAuthorInfo(articleAdminVO.getAuthorId());
-            articleAdminVO.setAuthorName((String) authorInfo.get(SysConst.AUTHOR_NAME));
-            articleAdminVO.setAuthorFace((String) authorInfo.get(SysConst.AUTHOR_FACE));
-            articleAdminVO.setFansCounts((Integer) authorInfo.get(SysConst.FANS_COUNTS));
-            articleAdminVO.setFollowCounts((Integer) authorInfo.get(SysConst.FOLLOW_COUNTS));
-        }
+        List<Article> articles = JsonUtils.jsonToList(toJson, Article.class);
         result.setRows(articles);
         return Result.ok(result);
     }

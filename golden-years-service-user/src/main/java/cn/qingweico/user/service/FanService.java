@@ -1,18 +1,21 @@
 package cn.qingweico.user.service;
 
 
+import cn.qingweico.entity.Fans;
 import cn.qingweico.enums.Sex;
-import cn.qingweico.pojo.vo.FansCountsVO;
-import cn.qingweico.pojo.vo.RegionRatioVO;
+import cn.qingweico.user.entity.FansCountsVO;
+import cn.qingweico.user.entity.RegionRatioVO;
 import cn.qingweico.util.PagedResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+
 
 /**
  * @author zqw
  * @date 2021/9/12
  */
-public interface FanService {
+public interface FanService extends IService<Fans> {
 
 
     /**

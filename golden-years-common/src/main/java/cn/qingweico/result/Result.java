@@ -83,6 +83,14 @@ public class Result {
     public static Result error() {
         return new Result(Response.FAILED);
     }
+    /**
+     * 自定义提示信息 错误返回 代码异常
+     *
+     * @return Result
+     */
+    public static Result error(String msg) {
+        return new Result(Response.FAILED, msg);
+    }
 
     /**
      * 错误返回 主要用于 JSR303 数据校验
@@ -161,6 +169,17 @@ public class Result {
     private Result(String msg) {
         this.code = Response.SUCCESS.code();
         this.success = Response.SUCCESS.success();
+        this.msg = msg;
+    }
+
+    /**
+     * 自定义提示信息 错误返回 代码异常
+     * @param r Response
+     * @param msg 提示信息
+     */
+    private Result(Response r, String msg) {
+        this.code = r.code();
+        this.success = r.success();
         this.msg = msg;
     }
 }

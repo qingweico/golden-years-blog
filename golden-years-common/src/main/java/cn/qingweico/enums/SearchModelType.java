@@ -18,6 +18,6 @@ public enum SearchModelType {
      * ElasticSearch搜索
      */
     ElasticSearch(1, "ElasticSearch搜索");
-    public final Integer type;
-    public final String value;
+    public final Integer val;
+    public final String desc;
 }

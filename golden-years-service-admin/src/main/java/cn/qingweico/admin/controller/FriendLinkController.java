@@ -1,12 +1,12 @@
 package cn.qingweico.admin.controller;
 
+import cn.qingweico.admin.model.bo.SaveFriendLinkBO;
+import cn.qingweico.admin.model.mo.FriendLink;
 import cn.qingweico.admin.service.FriendLinkService;
 import cn.qingweico.core.base.BaseController;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
-import cn.qingweico.pojo.bo.SaveFriendLinkBO;
-import cn.qingweico.pojo.mo.FriendLink;
 import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

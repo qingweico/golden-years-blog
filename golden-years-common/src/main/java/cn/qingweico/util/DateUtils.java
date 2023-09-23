@@ -85,8 +85,8 @@ public final class DateUtils {
         if (month > 12) {
             month = month - 12;
         }
-
-        int year = (int) (C - 4715); //(if Month is January or February) or C-4716 (otherwise)
+        //(if Month is January or February) or C-4716 (otherwise)
+        int year = (int) (C - 4715);
 
         if (month > 2) {
             year--;
@@ -94,7 +94,8 @@ public final class DateUtils {
 
         Calendar c = Calendar.getInstance();
         c.set(Calendar.YEAR, year);
-        c.set(Calendar.MONTH, month - 1); // damn 0 offsets
+        // damn 0 offsets
+        c.set(Calendar.MONTH, month - 1);
         c.set(Calendar.DATE, day);
 
         return c.getTime();

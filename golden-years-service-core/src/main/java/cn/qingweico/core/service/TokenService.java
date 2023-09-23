@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * token验证处理
  *
- * @author ruoyi
+ * @author zqw
+ * @date 2023-04-29
  */
 @Component
 public class TokenService {

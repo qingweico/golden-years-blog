@@ -1,8 +1,8 @@
 package cn.qingweico.user.clients;
 
-import cn.qingweico.pojo.bo.CollectBO;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
+import cn.qingweico.user.entity.CollectBO;
 import cn.qingweico.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

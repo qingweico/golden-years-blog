@@ -1,94 +1,56 @@
 import router from './router'
 import store from './store'
-// Progress 进度条
+import { Message } from 'element-ui'
 import NProgress from 'nprogress'
-// Progress 进度条样式
 import 'nprogress/nprogress.css'
-import {Message} from 'element-ui'
-// 验权
-import {getToken} from '@/utils/auth'
-import {constantRouterMap} from './router/index'
-// 不重定向白名单
-const whiteList = ['/login', '/face']
-const whiteListActiveList = ['/', '/dashboard', '/404', '/401']
-const allList = []
+import { getToken } from '@/utils/auth'
+import { isRelogin } from '@/utils/request'
+
+NProgress.configure({ showSpinner: false })
+
+const whiteList = ['/login', '/register']
 
 router.beforeEach((to, from, next) => {
-    if (allList.length === 0) {
-        for (let a = 0; a < constantRouterMap.length; a++) {
-            if (constantRouterMap[a].children) {
-                let childrenList = constantRouterMap[a].children
-                for (let b = 0; b < childrenList.length; b++) {
-                    allList.push(constantRouterMap[a].path + '/' + childrenList[b].path)
-                }
-            } else {
-                allList.push(constantRouterMap[a].path)
-            }
-        }
-    }
-
-    // 向白名单中添加内容
-    const activeList = []
-    if (store.getters.menu.sonList) {
-        const sonList = store.getters.menu.sonList
-        for (let c = 0; c < sonList.length; c++) {
-            activeList.push(sonList[c].url)
-        }
-    }
-
-    NProgress.start()
-    if (getToken()) {
-        if (to.path === '/login') {
-            next({path: '/'})
-            // if current page is dashboard will not trigger
-            // afterEach hook, so manually handle it.
-            NProgress.done()
-        } else {
-            if (store.getters.roles.length === 0) {
-                // 拉取用户信息
-                store.dispatch('GetInfo').then(() => {
-                    next()
-                }).catch((err) => {
-                    store.dispatch('FedLogOut').then(() => {
-                        Message.error(err || 'Verification failed, please login again')
-                        next({path: '/'})
-                    })
-                })
-
-                store.dispatch('GetMenu').then(() => { // 菜单信息
-                    next()
-                }).catch((err) => {
-                    store.dispatch('FedLogOut').then(() => {
-                        Message.error(err || 'Verification failed, please login again')
-                        next({path: '/'})
-                    })
-                })
-            } else {
-                if (whiteListActiveList.indexOf(to.path) !== -1) {
-                    next()
-                } else if (activeList.indexOf(to.path) !== -1) {
-                    next()
-                } else {
-                    if (allList.indexOf(to.path) !== -1) {
-                        next({path: '/401'})
-                    } else {
-                        next({path: '/404'})
-                    }
-                }
-            }
-        }
+  NProgress.start()
+  if (getToken()) {
+    to.meta.title && store.dispatch('settings/setTitle', to.meta.title)
+    /* has token*/
+    if (to.path === '/login') {
+      next({ path: '/' })
+      NProgress.done()
     } else {
-        if (whiteList.indexOf(to.path) !== -1) {
-            next()
-        } else {
-            // 否则全部重定向到登录页
-            next(`/login?redirect=${to.path}`)
-            NProgress.done()
-        }
+      if (store.getters.roles.length === 0) {
+        isRelogin.show = true
+        // 判断当前用户是否已拉取完user_info信息
+        store.dispatch('GetInfo').then(() => {
+          isRelogin.show = false
+          store.dispatch('GenerateRoutes').then(accessRoutes => {
+            // 根据roles权限生成可访问的路由表
+            router.addRoutes(accessRoutes) // 动态添加可访问路由表
+            next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
+          })
+        }).catch(err => {
+          store.dispatch('LogOut').then(() => {
+            Message.error(err)
+            next({ path: '/' })
+          })
+        })
+      } else {
+        next()
+      }
     }
+  } else {
+    // 没有token
+    if (whiteList.indexOf(to.path) !== -1) {
+      // 在免登录白名单，直接进入
+      next()
+    } else {
+      next(`/login?redirect=${encodeURIComponent(to.fullPath)}`) // 否则全部重定向到登录页
+      NProgress.done()
+    }
+  }
 })
 
 router.afterEach(() => {
-    // 结束Progress
-    NProgress.done()
+  NProgress.done()
 })

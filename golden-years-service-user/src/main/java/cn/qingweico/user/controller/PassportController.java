@@ -1,14 +1,14 @@
 package cn.qingweico.user.controller;
 
 import cn.qingweico.core.base.BaseController;
+import cn.qingweico.entity.User;
+import cn.qingweico.entity.model.PasswordAuthBO;
+import cn.qingweico.entity.model.SmsMobileBO;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
-import cn.qingweico.pojo.User;
-import cn.qingweico.pojo.bo.PasswordAuthBO;
-import cn.qingweico.pojo.bo.SmsMobileBO;
 import cn.qingweico.user.handler.DefaultHandler;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.*;
@@ -75,26 +75,26 @@ public class PassportController extends BaseController {
         }
 
         // 查询数据库, 判断用户是否注册
-        User user = userService.queryMobileIsPresent(mobile);
+        User user = userService.queryUserByMobile(mobile);
         if (user == null) {
             // 如果用户没有注册过, 则为null, 需要注册信息入库
             user = userService.createUser(mobile);
-        } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
+        } else if (UserStatus.DISABLE.type.equals(user.getAvailable())) {
             // 如果用户不为空且状态为冻结则禁止该用户登陆
             return Result.r(Response.USER_FROZEN);
         }
         String jsonWebToken = JwtUtils.createJwt(user.getId());
         userService.doSaveUserAuthToken(user, jsonWebToken);
         userService.doSaveLoginLog(user.getId());
-        int userStatus = user.getActiveStatus();
+        int userStatus = user.getAvailable();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
         redisCache.del(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put(SysConst.TOKEN, jsonWebToken);
-        map.put(SysConst.USER_STATUS, user.getActiveStatus());
-        if (userStatus == UserStatus.INACTIVE.type) {
+        map.put(SysConst.USER_STATUS, user.getAvailable());
+        if (userStatus == UserStatus.DISABLE.type) {
             return Result.ok(Response.WELCOME, map);
-        } else if (userStatus == UserStatus.ACTIVE.type) {
+        } else if (userStatus == UserStatus.AVAILABLE.type) {
             return Result.ok(Response.LOGIN_SUCCESS, map);
         }
         return Result.r(Response.SYSTEM_ERROR);
@@ -111,18 +111,18 @@ public class PassportController extends BaseController {
         User user = userService.queryUserByAuth(auth);
         if (user == null) {
             return Result.r(Response.USER_NOT_EXIST_ERROR);
-        } else if (UserStatus.FROZEN.type.equals(user.getActiveStatus())) {
+        } else if (UserStatus.DISABLE.type.equals(user.getAvailable())) {
             return Result.r(Response.USER_FROZEN);
         }
-        int userStatus = user.getActiveStatus();
+        int userStatus = user.getAvailable();
         if (user.getMobile().equals(auth)
                 || user.getNickname().equals(auth)
                 || user.getEmail().equals(auth)) {
             if (Objects.equals(user.getPassword(), password)) {
-                if (userStatus == UserStatus.INACTIVE.type) {
-                    return Result.ok(Response.WELCOME, user.getActiveStatus());
+                if (userStatus == UserStatus.DISABLE.type) {
+                    return Result.ok(Response.WELCOME, user.getAvailable());
                 }
-                if (userStatus == UserStatus.ACTIVE.type) {
+                if (userStatus == UserStatus.AVAILABLE.type) {
                     String jsonWebToken = JwtUtils.createJwt(user.getId());
                     userService.doSaveUserAuthToken(user, jsonWebToken);
                     userService.doSaveLoginLog(user.getId());

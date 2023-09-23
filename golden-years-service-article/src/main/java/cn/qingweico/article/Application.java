@@ -1,10 +1,10 @@
 package cn.qingweico.article;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
-import tk.mybatis.spring.annotation.MapperScan;
 
 /**
  * @author zqw
@@ -12,7 +12,7 @@ import tk.mybatis.spring.annotation.MapperScan;
  */
 @SpringBootApplication
 @MapperScan(basePackages = {"cn.qingweico.article.mapper"})
-@ComponentScan(basePackages = {"cn.qingweico", "org.n3r.idworker"})
+@ComponentScan(basePackages = {"cn.qingweico"})
 @EnableFeignClients
 public class Application {
    public static void main(String[] args) {

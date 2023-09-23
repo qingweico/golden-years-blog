@@ -23,7 +23,7 @@ public class ArticlePageViewsInterceptor extends BaseInterceptor implements Hand
 
         String articleId = request.getParameter(SysConst.ARTICLE_ID);
         String visitIp = IpUtils.getRequestIp(request);
-        boolean isPresent = redisOperator.keyIsExist(RedisConst.REDIS_ARTICLE_ALREADY_READ + SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_COLON + visitIp);
+        boolean isPresent = redisOperator.keyPresent(RedisConst.REDIS_ARTICLE_ALREADY_READ + SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_COLON + visitIp);
         return !isPresent;
     }
 }

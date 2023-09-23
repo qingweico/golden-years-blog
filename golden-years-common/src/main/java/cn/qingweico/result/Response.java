@@ -87,18 +87,18 @@ public enum Response {
 
     // 管理系统 56x ~ 57x
     CATEGORY_EXIST_ERROR(560, false, "文章分类已存在,请换一个分类名!"),
-    ADMIN_USERNAME_NULL_ERROR(561, false, "用户名不能为空!"),
+    USERNAME_EMPTY_ERROR(561, false, "用户名不能为空!"),
     SYS_USERNAME_EXIST_ERROR(562, false, "用户名已存在!"),
     ADMIN_MOBILE_IS_PRESENT(563, false, "手机号已存在!"),
     ADMIN_PASSWORD_ERROR(564, false, "密码错误!"),
     SYS_USER_CREATE_ERROR(565, false, "添加系统用户失败!"),
     ADMIN_PASSWORD_NULL_ERROR(566, false, "密码不能为空!"),
     SYS_USER_NOT_EXIT(567, false, "该用户不存在!"),
-    ADMIN_FACE_NULL_ERROR(568, false, "人脸信息不能为空!"),
-    ADMIN_FACE_LOGIN_ERROR(569, false, "人脸识别失败,请重试!"),
+    FACE_EMPTY_ERROR(568, false, "人脸信息不能为空!"),
+    FACE_LOGIN_ERROR(569, false, "人脸识别失败,请重试!"),
     ADMIN_EMAIL_IS_PRESENT(570, false, "邮箱已存在!"),
-    ADMIN_IS_NOT_PRESENT(571, false, "管理员不存在!"),
-    ADMIN_FACE_LOGIN_NOT_ENABLE(572, false, "人脸登录未开启!"),
+    FACE_LOGIN_NOT_ENABLE(572, false, "人脸登录未开启!"),
+    ACCOUNT_LOCKED(573, false, "密码输错次数过多, 已被锁定30分钟!"),
 
     // 创作中心 58x
     ARTICLE_COVER_NOT_EXIST_ERROR(580, false, "文章封面不存在,请选择一个!"),

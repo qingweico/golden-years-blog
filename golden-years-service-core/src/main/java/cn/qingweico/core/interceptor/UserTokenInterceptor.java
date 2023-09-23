@@ -1,8 +1,8 @@
 package cn.qingweico.core.interceptor;
 
 import cn.qingweico.entity.SysUser;
+import cn.qingweico.entity.User;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.User;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 

@@ -1,6 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.mo.FriendLink;
+import cn.qingweico.admin.model.mo.FriendLink;
 import cn.qingweico.util.PagedResult;
 
 import java.util.List;

@@ -13,7 +13,6 @@ import cn.qingweico.util.AddressUtil;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.SnowflakeIdWorker;
-import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -21,7 +20,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -119,7 +117,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
     }
 
     @Override
-    @Async("asyncTask")
     public void doSaveToken(SysUser sysUser, String token) {
         redisCache.set(RedisConst.REDIS_ADMIN_TOKEN + SysConst.SYMBOL_COLON + sysUser.getId(), token);
         redisCache.set(RedisConst.REDIS_ADMIN_INFO + SysConst.SYMBOL_COLON + sysUser.getId(), JsonUtils.objectToJson(sysUser));
@@ -140,7 +137,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         sysUserMapper.updateByPrimaryKeySelective(sysUser);
     }
 
-    @Async("asyncTask")
     public void refreshCache(SysUser sysUser) {
         String key = RedisConst.REDIS_ADMIN_INFO + SysConst.SYMBOL_COLON + sysUser.getId();
         redisCache.set(key, JsonUtils.objectToJson(sysUser));

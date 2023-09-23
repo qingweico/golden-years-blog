@@ -1,11 +1,11 @@
 package cn.qingweico.admin.service.impl;
 
+import cn.qingweico.admin.model.mo.FriendLink;
 import cn.qingweico.admin.repository.FriendLinkRepository;
 import cn.qingweico.admin.service.FriendLinkService;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.mo.FriendLink;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
 import org.apache.commons.lang3.StringUtils;

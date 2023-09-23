@@ -1,6 +1,6 @@
 package cn.qingweico.admin.repository;
 
-import cn.qingweico.pojo.mo.FriendLink;
+import cn.qingweico.admin.model.mo.FriendLink;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

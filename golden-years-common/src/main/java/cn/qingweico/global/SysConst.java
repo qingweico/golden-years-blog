@@ -243,4 +243,9 @@ public final class SysConst {
      */
     public static final String LOGOUT = "Logout";
 
+    /**
+     * 验证码有效期（分钟）
+     */
+    public static final Integer CAPTCHA_EXPIRATION = 2;
+
 }

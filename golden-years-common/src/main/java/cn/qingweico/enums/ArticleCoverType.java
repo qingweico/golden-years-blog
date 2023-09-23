@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 文章封面类型
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/11
  */
 @AllArgsConstructor
+@Getter
 public enum ArticleCoverType {
     /**
      * 文章封面 - 单图
@@ -19,6 +21,6 @@ public enum ArticleCoverType {
      */
     WORDS(2, "纯文字");
 
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 }

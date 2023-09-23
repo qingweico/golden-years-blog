@@ -6,6 +6,7 @@ import lombok.Data;
  * 用户登录对象
  *
  * @author zqw
+ * @date 2023-09-23
  */
 @Data
 public class LoginBody

@@ -1,9 +1,8 @@
 package cn.qingweico.core.service;
 
-import cn.qingweico.pojo.Article;
+import cn.qingweico.entity.Article;
 import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.redis.RedisCache;
-import com.github.pagehelper.PageInfo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
@@ -51,9 +50,5 @@ public class BaseService {
             }
         }
         return result;
-    }
-
-    public void refreshCache(String key) {
-        redisCache.del(key);
     }
 }

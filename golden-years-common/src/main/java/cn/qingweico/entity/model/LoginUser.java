@@ -3,10 +3,14 @@ package cn.qingweico.entity.model;
 
 import cn.qingweico.entity.SysUser;
 import com.alibaba.fastjson.annotation.JSONField;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -17,8 +21,11 @@ import java.util.Set;
  * @date 2023-04-04
  */
 @Data
-public class LoginUser implements UserDetails {
-    private static final long serialVersionUID = 1L;
+@Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
+public class LoginUser implements UserDetails, Serializable {
+    private static final long serialVersionUID = 4361335035602828836L;
 
     /**
      * 用户ID

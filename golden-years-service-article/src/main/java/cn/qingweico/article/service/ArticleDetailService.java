@@ -1,5 +1,6 @@
 package cn.qingweico.article.service;
 
+import cn.qingweico.entity.Favorites;
 import cn.qingweico.pojo.Favorites;
 import cn.qingweico.pojo.bo.CollectBO;
 import cn.qingweico.pojo.bo.FavoritesBO;
@@ -16,7 +17,7 @@ public interface ArticleDetailService {
      *
      * @param collectBO {@link Favorites}
      */
-    void collectArticle(CollectBO collectBO);
+    void collectArticle(Favorites favorites);
 
     /**
      * 取消收藏文章
@@ -24,14 +25,14 @@ public interface ArticleDetailService {
      * @param collectBO {@link Favorites}
      * @return 取消收藏是否成功
      */
-    boolean cancelCollectArticle(CollectBO collectBO);
+    boolean cancelCollectArticle(Favorites favorites);
 
     /**
      * 创建收藏夹
      *
      * @param collectBO {@link Favorites}
      */
-    void createFavorites(CollectBO collectBO);
+    void createFavorites(Favorites favorites);
 
     /**
      * 根据用户id获取我的收藏夹
@@ -45,14 +46,14 @@ public interface ArticleDetailService {
     /**
      * 修改收藏夹信息
      *
-     * @param favoritesBO {@link FavoritesBO}
+     * @param favorites {@link Favorites}
      */
-    void editFavorites(FavoritesBO favoritesBO);
+    void editFavorites(Favorites favorites);
 
     /**
      * 删除收藏夹
      *
-     * @param collectBO {@link CollectBO}
+     * @param favorites {@link Favorites}
      */
-    void deleteFavorites(CollectBO collectBO);
+    void deleteFavorites(Favorites favorites);
 }

@@ -14,7 +14,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>cn.qingweico</groupId>
-			<artifactId>golden-years-model</artifactId>
+			<artifactId>golden-years-common</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<!-- 解析客户端操作系统、浏览器等 -->
@@ -34,13 +34,13 @@
 			<artifactId>springfox-boot-starter</artifactId>
 			<version>${swagger.starter.version}</version>
 		</dependency>
-		<!-- FastDfs -->
+		<!-- Fast DFS -->
 		<dependency>
 			<groupId>com.github.tobato</groupId>
 			<artifactId>fastdfs-client</artifactId>
 			<version>${fastdfs.version}</version>
 		</dependency>
-		<!-- Spring Cloud -->
+		<!-- Nacos -->
 		<dependency>
 			<groupId>com.alibaba.cloud</groupId>
 			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>

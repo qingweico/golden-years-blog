@@ -1,7 +1,7 @@
 package cn.qingweico.article.service;
 
-import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.bo.NewArticleBO;
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.model.NewArticleBO;
 import cn.qingweico.util.PagedResult;
 
 import java.util.Date;

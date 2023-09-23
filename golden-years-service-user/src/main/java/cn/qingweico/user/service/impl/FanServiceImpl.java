@@ -1,21 +1,20 @@
 package cn.qingweico.user.service.impl;
 
-import cn.qingweico.core.service.BaseService;
+import cn.qingweico.entity.Fans;
+import cn.qingweico.entity.User;
 import cn.qingweico.enums.Sex;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.User;
-import cn.qingweico.pojo.Fans;
-import cn.qingweico.pojo.eo.FansEo;
-import cn.qingweico.pojo.vo.FansCountsVO;
-import cn.qingweico.pojo.vo.RegionRatioVO;
 import cn.qingweico.result.Response;
+import cn.qingweico.user.entity.FansCountsVO;
+import cn.qingweico.user.entity.RegionRatioVO;
 import cn.qingweico.user.mapper.FansMapper;
 import cn.qingweico.user.service.FanService;
 import cn.qingweico.user.service.UserService;
 import cn.qingweico.util.PagedResult;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -28,7 +27,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +41,7 @@ import java.util.Map;
  * @date 2021/9/12
  */
 @Service
-public class FanServiceImpl extends BaseService implements FanService {
+public class FanServiceImpl extends ServiceImpl<FansMapper, Fans> implements FanService {
 
     @Resource
     private FansMapper fansMapper;
@@ -53,11 +51,9 @@ public class FanServiceImpl extends BaseService implements FanService {
 
     @Override
     public boolean isMeFollowThisAuthor(String authorId, String fanId) {
-
-        Fans fans = new Fans();
-        fans.setAuthor(authorId);
-        fans.setFanId(fanId);
-        int count = fansMapper.selectCount(fans);
+        LambdaQueryWrapper<Fans> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Fans::getAuthorId, authorId).eq(Fans::getFanId, fanId);
+        int count = fansMapper.selectCount(lqw);
         return count > 0;
     }
 

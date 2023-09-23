@@ -7,3 +7,5 @@ export function getServer() {
     method: 'get'
   })
 }
+
+export default { getServer}

@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 用户状态:
@@ -13,19 +14,16 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/6
  */
 @AllArgsConstructor
+@Getter
 public enum UserStatus {
     /**
-     * 未激活
+     * 禁用
      */
-    INACTIVE(0, "未激活"),
+    DISABLE(0, "禁用"),
     /**
-     * 已激活
+     * 可用
      */
-    ACTIVE(1, "已激活"),
-    /**
-     * 已冻结
-     */
-    FROZEN(2, "已冻结");
+    AVAILABLE(1, "可用");
 
     public final Integer type;
     public final String value;
@@ -38,9 +36,8 @@ public enum UserStatus {
      */
     public static boolean isUserStatusValid(Integer val) {
         if (val != null) {
-            return val.equals(INACTIVE.type)
-                    || val.equals(ACTIVE.type)
-                    || val.equals(FROZEN.type);
+            return val.equals(DISABLE.type)
+                    || val.equals(AVAILABLE.type);
         }
         return false;
     }

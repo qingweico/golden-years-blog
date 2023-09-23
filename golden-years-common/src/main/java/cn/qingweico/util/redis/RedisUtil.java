@@ -199,7 +199,7 @@ public final class RedisUtil {
                 redisCache.del(k);
             }
         } else {
-            if (redisCache.keyIsExist(key)) {
+            if (redisCache.keyPresent(key)) {
                 redisCache.del(key);
             }
         }

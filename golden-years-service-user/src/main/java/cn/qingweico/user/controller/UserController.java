@@ -1,14 +1,10 @@
 package cn.qingweico.user.controller;
 
+import cn.qingweico.entity.User;
+import cn.qingweico.entity.model.*;
 import cn.qingweico.enums.UserStatus;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.User;
-import cn.qingweico.pojo.bo.UpdateMobileBO;
-import cn.qingweico.pojo.bo.UpdatePwdBO;
-import cn.qingweico.pojo.bo.UserInfoBO;
-import cn.qingweico.pojo.vo.UserAccountInfoVO;
-import cn.qingweico.pojo.vo.UserBasicInfoVO;
 import cn.qingweico.result.Response;
 import cn.qingweico.core.base.BaseController;
 import cn.qingweico.result.Result;
@@ -77,9 +73,9 @@ public class UserController extends BaseController {
             return Result.r(Response.USER_STATUS_ERROR);
         }
         userService.freezeUserOrNot(userId, doStatus);
-        if (doStatus.equals(UserStatus.FROZEN.type)) {
+        if (doStatus.equals(UserStatus.DISABLE.type)) {
             return Result.r(Response.FREEZE_SUCCESS);
-        } else if (doStatus.equals(UserStatus.ACTIVE.type)) {
+        } else if (doStatus.equals(UserStatus.AVAILABLE.type)) {
             return Result.r(Response.ACTIVATE_SUCCESS);
         }
         return Result.r(Response.REQUEST_PARAM_ERROR);
@@ -118,9 +114,9 @@ public class UserController extends BaseController {
         userVO.setMyFollowCounts(myFollowCounts);
 
         Integer userStatus = userVO.getActiveStatus();
-        if (userStatus.equals(UserStatus.INACTIVE.type)) {
+        if (userStatus.equals(UserStatus.AVAILABLE.type)) {
             return Result.ok(Response.WELCOME, userVO);
-        } else if (userStatus.equals(UserStatus.FROZEN.type)) {
+        } else if (userStatus.equals(UserStatus.DISABLE.type)) {
             return Result.ok(Response.ACCOUNT_ILLEGAL, userVO);
         }
         return Result.ok(userVO);

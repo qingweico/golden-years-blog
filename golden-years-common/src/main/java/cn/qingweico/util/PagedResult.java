@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 用来返回分页Grid的数据格式
+ * 用来返回分页的数据格式
  *
  * @author zqw
  * @date 2021/9/9

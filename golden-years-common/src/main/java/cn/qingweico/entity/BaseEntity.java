@@ -55,7 +55,7 @@ public class BaseEntity implements Serializable {
 
     public Map<String, Object> getParams() {
         if (params == null) {
-            params = new HashMap<>(4);
+            params = new HashMap<>(0);
         }
         return params;
     }

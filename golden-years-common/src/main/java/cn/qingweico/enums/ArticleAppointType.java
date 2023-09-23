@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 文章发布类型
@@ -9,18 +10,19 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/11
  */
 @AllArgsConstructor
+@Getter
 public enum ArticleAppointType {
 
     /**
      * 文章定时发布
      */
-    TIMING(1, "文章定时发布 - 定时"),
+    TIMING("1", "文章定时发布 - 定时"),
 
     /**
      * 文章立即发布
      */
-    IMMEDIATELY(0, "文章立即发布 - 即时");
+    IMMEDIATELY("0", "文章立即发布 - 即时");
 
-    public final Integer type;
-    public final String value;
+    private final String val;
+    private final String desc;
 }

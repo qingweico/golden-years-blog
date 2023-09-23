@@ -28,7 +28,7 @@ public class SmsInterceptor implements HandlerInterceptor {
                              @Nonnull Object handler) {
         // 获取用户的ip
         String userIp = IpUtils.getRequestIp(request);
-        boolean keyIsPresent = redisOperator.keyIsExist(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp);
+        boolean keyIsPresent = redisOperator.keyPresent(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp);
         if (keyIsPresent) {
             GraceException.error(Response.SMS_NEED_WAIT_ERROR);
             return false;

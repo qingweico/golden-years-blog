@@ -7,15 +7,13 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author zqw
  */
-public class IdUtils
-{
+public class IdUtils {
     /**
      * 获取随机UUID
      *
      * @return 随机UUID
      */
-    public static String randomUuid()
-    {
+    public static String randomUuid() {
         return UUID.randomUUID().toString();
     }
 
@@ -24,8 +22,7 @@ public class IdUtils
      *
      * @return 简化的UUID 去掉了横线
      */
-    public static String simpleUuid()
-    {
+    public static String simpleUuid() {
         return UUID.randomUUID().toString(true);
     }
 
@@ -34,8 +31,7 @@ public class IdUtils
      *
      * @return 随机UUID
      */
-    public static String fastUuid()
-    {
+    public static String fastUuid() {
         return UUID.fastUUID().toString();
     }
 
@@ -44,8 +40,7 @@ public class IdUtils
      *
      * @return 简化的UUID 去掉了横线
      */
-    public static String fastSimpleUuid()
-    {
+    public static String fastSimpleUuid() {
         return UUID.fastUUID().toString(true);
     }
 }

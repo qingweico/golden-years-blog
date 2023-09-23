@@ -1,6 +1,5 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

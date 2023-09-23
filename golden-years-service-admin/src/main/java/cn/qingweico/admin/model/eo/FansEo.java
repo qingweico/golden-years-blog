@@ -4,7 +4,6 @@ import lombok.Data;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 
-import javax.persistence.Id;
 
 /**
  * @author zqw
@@ -13,7 +12,6 @@ import javax.persistence.Id;
 @Data
 @Document(indexName = "fans", type = "_doc")
 public class FansEo {
-    @Id
     private String id;
     @Field
     private String authorId;

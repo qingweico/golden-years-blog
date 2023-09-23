@@ -1,7 +1,6 @@
 package cn.qingweico.article.service;
 
-import cn.qingweico.pojo.Tag;
-import cn.qingweico.pojo.bo.TagBO;
+import cn.qingweico.entity.Tag;
 import cn.qingweico.util.PagedResult;
 
 import java.util.List;

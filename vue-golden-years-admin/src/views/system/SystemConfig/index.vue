@@ -167,7 +167,7 @@
 </template>
 
 <script>
-import {getSystemConfig, cleanRedisByKey, alterSystemConfig} from "@/api/system/sysConfig";
+import {getSystemConfig, cleanRedisByKey, alterSystemConfig} from "@/api/system/systemConfig";
 
 export default {
   data() {

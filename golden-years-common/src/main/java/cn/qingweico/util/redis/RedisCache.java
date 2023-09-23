@@ -34,7 +34,7 @@ public class RedisCache {
      * @param key key
      * @return {@code key} exist or not
      */
-    public Boolean keyIsExist(String key) {
+    public Boolean keyPresent(String key) {
         return srt.hasKey(key);
     }
 
@@ -314,20 +314,21 @@ public class RedisCache {
     /**
      * 删除单个对象
      *
-     * @param key
+     * @param key key
      */
-    public boolean deleteObject(final String key) {
-        return Boolean.TRUE.equals(redisTemplate.delete(key));
+    public void deleteObject(final String key) {
+        redisTemplate.delete(key);
     }
 
     /**
      * 删除集合对象
      *
      * @param collection 多个对象
-     * @return
+     * @return delete true or false
      */
     public boolean deleteObject(final Collection<String> collection) {
-        return redisTemplate.delete(collection) > 0;
+        Long deleted = redisTemplate.delete(collection);
+        return deleted != null && deleted > 0;
     }
 
     /**
@@ -358,10 +359,9 @@ public class RedisCache {
      * @param key   key
      * @param value value
      * @param <T>   返回类型
-     * @return 返回类型
      */
-    public <T> T execute(RedisScript<T> rs, String key, String value) {
-        return srt.execute(rs, Collections.singletonList(key), value);
+    public <T> void execute(RedisScript<T> rs, String key, String value) {
+        srt.execute(rs, Collections.singletonList(key), value);
     }
 
 }

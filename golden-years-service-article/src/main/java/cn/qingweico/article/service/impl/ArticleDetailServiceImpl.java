@@ -3,6 +3,7 @@ package cn.qingweico.article.service.impl;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.FavoritesMapper;
 import cn.qingweico.article.service.ArticleDetailService;
+import cn.qingweico.entity.Favorites;
 import cn.qingweico.enums.FavoritesType;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConst;
@@ -11,6 +12,7 @@ import cn.qingweico.pojo.Favorites;
 import cn.qingweico.pojo.bo.CollectBO;
 import cn.qingweico.pojo.bo.FavoritesBO;
 import cn.qingweico.result.Response;
+import cn.qingweico.util.SnowflakeIdWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -104,25 +106,25 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void createFavorites(CollectBO collectBO) {
-        String id = "";
-        Favorites favorites = new Favorites();
+    public void createFavorites(Favorites params) {
+        String id = SnowflakeIdWorker.nextId();
+        Favorites favorites = Favorites.builder().build();
         favorites.setId(id);
-        String favoritesDesc = collectBO.getDescription();
+        String favoritesDesc = params.getDescription();
         if (StringUtils.isNotBlank(favoritesDesc)) {
-            favorites.setDescription(collectBO.getDescription());
+            favorites.setDescription(params.getDescription());
         } else {
             favorites.setDescription("这是一个默认的收藏夹 在创建用户时创建的。默认是公开的");
         }
-        favorites.setUserId(collectBO.getUserId());
-        String favoritesName = collectBO.getName();
+        favorites.setUserId(params.getUserId());
+        String favoritesName = params.getName();
         if (StringUtils.isNotBlank(favoritesName)) {
             favorites.setName(favoritesName);
         } else {
             favorites.setName("默认收藏夹");
         }
         favorites.setArticles(SysConst.EMPTY_STRING);
-        Integer isOpen = collectBO.getOpen();
+        Integer isOpen = params.getOpen();
         if (isOpen == null) {
             favorites.setOpen(FavoritesType.PUBLIC.type);
         } else {
@@ -145,11 +147,10 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
     }
 
     @Override
-    public void editFavorites(FavoritesBO favoritesBO) {
+    public void editFavorites(Favorites favorites) {
         Favorites favorites = new Favorites();
-        BeanUtils.copyProperties(favoritesBO, favorites);
-        favorites.setUpdateTime(new Date());
-        if (favoritesMapper.updateByPrimaryKeySelective(favorites) < 0) {
+        BeanUtils.copyProperties(favorites, favorites);
+        if (favoritesMapper(favorites) < 0) {
             log.error("update favorites error");
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
 
@@ -157,9 +158,9 @@ public class ArticleDetailServiceImpl extends BaseService implements ArticleDeta
     }
 
     @Override
-    public void deleteFavorites(CollectBO collectBO) {
-        String favoritesId = collectBO.getFavoritesId();
-        Favorites favorites = favoritesMapper.selectByPrimaryKey(favoritesId);
+    public void deleteFavorites(Favorites favorites) {
+        String favoritesId = favorites.getId();
+        Favorites favorites = favoritesMapper.sele(favoritesId);
         String userId = collectBO.getUserId();
         String articles = favorites.getArticles();
         String[] articleIds = articles.replace("[", "")

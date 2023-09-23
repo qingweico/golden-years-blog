@@ -1,7 +1,7 @@
 package cn.qingweico.user.clients;
 
-import cn.qingweico.pojo.bo.CollectBO;
 import cn.qingweico.result.Result;
+import cn.qingweico.user.entity.CollectBO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

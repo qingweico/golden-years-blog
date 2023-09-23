@@ -2,6 +2,7 @@ package cn.qingweico.article;
 
 import cn.qingweico.core.config.RabbitMqConfig;
 import cn.qingweico.article.controller.ArticleDetailController;
+import cn.qingweico.entity.Favorites;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.pojo.bo.CollectBO;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import javax.annotation.Resource;
 @Component
 public class RabbitMqConsumer {
     @Resource
-    private ArticleDetailController articleDetailRestApi;
+    private ArticleDetailController articleDetailController;
     @RabbitListener(queues = {RabbitMqConfig.QUEUE_ARTICLE})
     public void listenQueue(String payLoad, Message message) {
         log.info("payLoad: ---> {}, message: ---> {}", payLoad, message.toString());
@@ -28,9 +29,9 @@ public class RabbitMqConsumer {
         if (SysConst.ARTICLE_CREATE_FAVORITES_DO.equals(routingKey)) {
             String userId = payLoad.split(",")[0];
             try {
-                CollectBO collectBO = new CollectBO();
-                collectBO.setUserId(userId);
-                articleDetailRestApi.createFavorites(collectBO);
+                Favorites favorites = Favorites.builder().build();
+                favorites.setUserId(userId);
+                articleDetailController.createFavorites(favorites);
             } catch (Exception e) {
                 log.error("creat favorites error");
             }

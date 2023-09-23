@@ -4,6 +4,7 @@ import cn.qingweico.enums.ArticleReviewStatus;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * @author zqw
@@ -11,7 +12,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@NoArgsConstructor
 public class Article extends BaseEntity {
 
     /**

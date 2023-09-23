@@ -294,7 +294,7 @@
 </template>
 
 <script>
-import {getServerInfo} from "@/api/monitor/serverMonitor";
+import {getServer} from "@/api/monitor/server";
 
 export default {
   name: "Server",
@@ -313,7 +313,7 @@ export default {
   methods: {
     /** 查询服务器信息 */
     getList() {
-      getServerInfo().then(response => {
+      getServer().then(response => {
         this.server = response.data;
         this.loading.close();
       });

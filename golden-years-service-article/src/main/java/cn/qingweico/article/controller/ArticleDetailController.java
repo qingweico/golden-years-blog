@@ -3,6 +3,7 @@ package cn.qingweico.article.controller;
 import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticlePortalService;
+import cn.qingweico.entity.Favorites;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.pojo.Favorites;
@@ -218,8 +219,8 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("createFavorites")
     @ApiOperation(value = "创建收藏夹", notes = "创建收藏夹", httpMethod = "POST")
-    public Result createFavorites(@RequestBody CollectBO collectBO) {
-        articleDetailService.createFavorites(collectBO);
+    public Result createFavorites(@RequestBody Favorites favorites) {
+        articleDetailService.createFavorites(favorites);
         return Result.r(Response.CREATE_FAVORITES_SUCCESS);
     }
 }
