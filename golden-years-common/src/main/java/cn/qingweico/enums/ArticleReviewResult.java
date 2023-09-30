@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 文章审核结果
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/11
  */
 @AllArgsConstructor
+@Getter
 public enum ArticleReviewResult {
 
     /**
@@ -20,7 +22,6 @@ public enum ArticleReviewResult {
      * 审核不通过
      */
     FAIL("fail", "审核不通过");
-
-    public final String type;
-    public final String value;
+    private final String val;
+    private final String desc;
 }

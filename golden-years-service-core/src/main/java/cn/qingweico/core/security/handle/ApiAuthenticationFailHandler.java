@@ -9,15 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
-import java.util.Collections;
 
 /**
- * 登陆失败处理类
+ * 认证失败处理类 {@link UsernamePasswordAuthenticationFilter 登录认证失败后会调用}
  *
  * @author zqw
  * @date 2023/9/23
@@ -39,7 +39,6 @@ public class ApiAuthenticationFailHandler implements AuthenticationFailureHandle
                 .code(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .msg(exception.getMessage())
                 .data(null)
-                .errors(Collections.emptyList())
                 .build();
         log.error("onAuthenticationFailure:", exception);
         printWriter.append(objectMapper.writeValueAsString(apiResponse));

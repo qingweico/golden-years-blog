@@ -4,12 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 用户状态:
- * 0: 未激活
- * 1: 已激活: 基本信息是否完善,真实姓名,邮箱地址,性别,生日,住址等
- * 如果没有完善,则用户不能发表评论,不能点赞,不能关注
- * 2: 已冻结
- *
  * @author zqw
  * @date 2021/9/6
  */
@@ -25,8 +19,8 @@ public enum UserStatus {
      */
     AVAILABLE(1, "可用");
 
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 
     /**
      * 判断传入的用户状态是不是有效的值
@@ -36,8 +30,8 @@ public enum UserStatus {
      */
     public static boolean isUserStatusValid(Integer val) {
         if (val != null) {
-            return val.equals(DISABLE.type)
-                    || val.equals(AVAILABLE.type);
+            return val.equals(DISABLE.val)
+                    || val.equals(AVAILABLE.val);
         }
         return false;
     }

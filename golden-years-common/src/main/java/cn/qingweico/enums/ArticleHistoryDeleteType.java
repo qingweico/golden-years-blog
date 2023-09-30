@@ -1,6 +1,8 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.val;
 
 /**
  * 文章浏览历史的删除模式
@@ -8,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2022/5/6
  */
 @AllArgsConstructor
+@Getter
 public enum ArticleHistoryDeleteType {
     /**
      * 过去的一小时
@@ -27,6 +30,7 @@ public enum ArticleHistoryDeleteType {
     PAST_AN_WEEK(3, "过去的一周");
 
 
-    public final Integer type;
-    public final String value;
+
+    private final Integer val;
+    private final String desc;
 }

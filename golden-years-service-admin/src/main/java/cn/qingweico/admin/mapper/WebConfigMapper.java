@@ -1,7 +1,7 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
-import cn.qingweico.pojo.WebConfig;
+import cn.qingweico.entity.WebConfig;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/4/11
  */
 @Repository
-public interface WebConfigMapper extends CommonMapper<WebConfig> {
+public interface WebConfigMapper extends BaseMapper<WebConfig> {
 }

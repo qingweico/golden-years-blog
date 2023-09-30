@@ -1,8 +1,6 @@
 package cn.qingweico.core.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -15,12 +13,10 @@ import java.util.Objects;
  * @author zqw
  * @date 2020/10/8
  */
-@Configuration
 public class QuartzConfiguration {
     private final MethodInvokingJobDetailFactoryBean jobDetailFactory;
     private final CronTriggerFactoryBean cronTriggerFactoryBean;
 
-    @Autowired
     public QuartzConfiguration(MethodInvokingJobDetailFactoryBean jobDetailFactory, CronTriggerFactoryBean cronTriggerFactoryBean) {
         this.jobDetailFactory = jobDetailFactory;
         this.cronTriggerFactoryBean = cronTriggerFactoryBean;
@@ -47,8 +43,8 @@ public class QuartzConfiguration {
      *
      * @return CronTriggerFactoryBean
      */
-    @Bean("productSellDailyTriggerFactory")
-    public CronTriggerFactoryBean createProductSellDailyTrigger() {
+    @Bean("everyDailyTriggerFactory")
+    public CronTriggerFactoryBean createEveryDailyTrigger() {
         CronTriggerFactoryBean triggerFactory = new CronTriggerFactoryBean();
         triggerFactory.setName("");
         triggerFactory.setGroup("");

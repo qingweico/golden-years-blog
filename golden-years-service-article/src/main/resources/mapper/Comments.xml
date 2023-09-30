@@ -1,40 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.qingweico.article.mapper.CommentsMapper">
-	<resultMap id="BaseResultMap" type="cn.qingweico.pojo.Comments">
-		<id column="id" property="id" jdbcType="VARCHAR"/>
-		<result column="author" property="author" jdbcType="VARCHAR"/>
-		<result column="father_id" property="fatherId" jdbcType="VARCHAR"/>
-		<result column="article_id" property="articleId" jdbcType="VARCHAR"/>
-		<result column="article_title" property="articleTitle" jdbcType="VARCHAR"/>
-		<result column="article_cover" property="articleCover" jdbcType="VARCHAR"/>
-		<result column="comment_user_id" property="commentUserId" jdbcType="VARCHAR"/>
-		<result column="comment_user_nickname" property="commentUserNickname" jdbcType="VARCHAR"/>
-		<result column="comment_user_face" property="commentUserFace" jdbcType="VARCHAR"/>
-		<result column="content" property="content" jdbcType="VARCHAR"/>
-		<result column="likes" property="likes" jdbcType="INTEGER"/>
-		<result column="img_src" property="imgSrc" jdbcType="VARCHAR"/>
-		<result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
-	</resultMap>
+    <resultMap id="BaseResultMap" type="list">
 
-	<select id="queryArticleCommentList" resultType="cn.qingweico.pojo.vo.CommentsVO"
-	        parameterType="Map">
+    </resultMap>
 
-		SELECT c.id                    as commentId,
-		       c.comment_user_nickname as visitorName,
-		       c.comment_user_face     as visitorAvatar,
-		       c.article_id            as articleId,
-		       c.content               as content,
-		       c.create_time           as createAt,
-		       f.comment_user_nickname as replyName,
-		       f.content               as replyAvatar
-		FROM t_comment c
-			     LEFT JOIN
-		     t_comment f
-		     ON
-			     c.father_id = f.id
-		WHERE c.article_id = #{paramMap.articleId}
-		ORDER BY c.create_time
-				DESC
-	</select>
+    <select id="queryArticleCommentList" resultType="list"
+            parameterType="Map">
+
+
+    </select>
 </mapper>

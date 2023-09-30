@@ -1,7 +1,7 @@
 package cn.qingweico.user.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
-import cn.qingweico.pojo.UserLoginLog;
+import cn.qingweico.entity.UserLoginLog;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2021/9/21
  */
 @Repository
-public interface UserLoginLogMapper extends CommonMapper<UserLoginLog> {
+public interface UserLoginLogMapper extends BaseMapper<UserLoginLog> {
 }

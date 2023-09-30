@@ -1,22 +1,22 @@
 package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.SysUserMapper;
-import cn.qingweico.admin.model.bo.OperatorSysUserBO;
 import cn.qingweico.admin.service.SysUserService;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.entity.SysUser;
+import cn.qingweico.entity.User;
+import cn.qingweico.entity.model.OperatorSysUser;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
-import cn.qingweico.util.AddressUtil;
-import cn.qingweico.util.JsonUtils;
-import cn.qingweico.util.PagedResult;
-import cn.qingweico.util.SnowflakeIdWorker;
+import cn.qingweico.util.*;
+import cn.qingweico.util.redis.RedisCache;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,44 +31,47 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class SysUserServiceImpl extends BaseService implements SysUserService {
+public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService {
 
     @Resource
     private SysUserMapper sysUserMapper;
 
+    @Resource
+    private RedisCache redisCache;
+
     @Override
     public SysUser querySysUserByUsername(String username) {
-        Example ex = new Example(SysUser.class);
-        Example.Criteria criteria = ex.createCriteria();
-        criteria.andEqualTo(SysConst.USERNAME, username);
-        return sysUserMapper.selectOneByExample(ex);
+        LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysUser::getUsername, username);
+        lqw.last(SysConst.LIMIT_ONE);
+        return getOne(lqw);
     }
 
     @Override
     public SysUser querySysUserById(String id) {
-        return sysUserMapper.selectByPrimaryKey(id);
+        return getById(id);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void createSysUser(OperatorSysUserBO operatorSysUserBO) {
+    public void createSysUser(OperatorSysUser operatorSysUser) {
         String id = SnowflakeIdWorker.nextId();
         SysUser sysUser = new SysUser();
         sysUser.setId(id);
-        sysUser.setUsername(operatorSysUserBO.getUsername());
+        sysUser.setUsername(operatorSysUser.getUsername());
 
         // 如果密码不为空, 则将密码加密入库
-        if (StringUtils.isNotBlank(operatorSysUserBO.getPassword())) {
-            String encryptedPwd = BCrypt.hashpw(operatorSysUserBO.getPassword(), BCrypt.gensalt());
+        if (StringUtils.isNotBlank(operatorSysUser.getPassword())) {
+            String encryptedPwd = BCrypt.hashpw(operatorSysUser.getPassword(), BCrypt.gensalt());
             sysUser.setPassword(encryptedPwd);
         }
 
         // 如果人脸上传以后则获有FaceId, 则需要将FaceId与SysUser信息相关联
-        if (StringUtils.isNotBlank(operatorSysUserBO.getFaceId())) {
-            sysUser.setFaceId(operatorSysUserBO.getFaceId());
+        if (StringUtils.isNotBlank(operatorSysUser.getFaceId())) {
+            sysUser.setFaceId(operatorSysUser.getFaceId());
         }
-        sysUser.setCreateTime(new Date());
-        sysUser.setUpdateTime(new Date());
+        sysUser.setCreateTime(DateUtils.nowDateTime());
+        sysUser.setUpdateTime(DateUtils.nowDateTime());
         int res = sysUserMapper.insert(sysUser);
         if (res != 1) {
             GraceException.error(Response.SYS_USER_CREATE_ERROR);
@@ -77,11 +80,11 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
 
     @Override
     public PagedResult querySysUserList(Integer page, Integer pageSize) {
-        Example ex = new Example(SysUser.class);
-        ex.orderBy(SysConst.CREATE_TIME).desc();
-        PageHelper.startPage(page, pageSize);
-        List<SysUser> sysUserUserList = sysUserMapper.selectByExample(ex);
-        return setterPagedGrid(sysUserUserList, page);
+        LambdaQueryWrapper<SysUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.orderByDesc(SysUser::getCreateTime);
+        // 分页
+        List<SysUser> sysUserUserList = sysUserMapper.selectList(lambdaQueryWrapper);
+        return null;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -90,16 +93,16 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         SysUser sysUser = new SysUser();
         sysUser.setId(id);
         sysUser.setPassword(newPassword);
-        sysUserMapper.updateByPrimaryKeySelective(sysUser);
+        sysUserMapper.updateById(sysUser);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void updateSysUserProfile(OperatorSysUserBO user) {
+    public void updateSysUserProfile(OperatorSysUser user) {
         SysUser sysUser = new SysUser();
         BeanUtils.copyProperties(user, sysUser);
-        sysUser.setUpdateTime(new Date());
-        if (sysUserMapper.updateByPrimaryKeySelective(sysUser) > 0) {
+        sysUser.setUpdateTime(DateUtils.nowDateTime());
+        if (sysUserMapper.updateById(sysUser) > 0) {
             // 更新缓存
             sysUser = querySysUserByUsername(user.getUsername());
             refreshCache(sysUser);
@@ -134,7 +137,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         String address = str[1];
         sysUser.setLastLoginIp(ip);
         sysUser.setLastLoginLocation(address);
-        sysUserMapper.updateByPrimaryKeySelective(sysUser);
+        sysUserMapper.updateById(sysUser);
     }
 
     public void refreshCache(SysUser sysUser) {

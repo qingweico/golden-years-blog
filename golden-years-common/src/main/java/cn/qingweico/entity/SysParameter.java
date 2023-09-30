@@ -1,7 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 系统参数配置
@@ -9,8 +9,13 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2023/4/4
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Accessors(chain = true)
 public class SysParameter extends BaseEntity {
     /**
      * 系统参数编码;唯一

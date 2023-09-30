@@ -1,7 +1,7 @@
 package cn.qingweico.article.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
-import cn.qingweico.pojo.History;
+import cn.qingweico.entity.History;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/5/6
  */
 @Repository
-public interface HistoryMapper extends CommonMapper<History> {
+public interface HistoryMapper extends BaseMapper<History> {
 }

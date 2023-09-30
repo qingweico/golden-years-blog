@@ -1,9 +1,10 @@
 package cn.qingweico.article.service;
 
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.History;
 import cn.qingweico.enums.ArticleHistoryDeleteType;
-import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.History;
-import com.github.pagehelper.PageInfo;
+
+import java.util.List;
 
 /**
  * @author zqw
@@ -19,7 +20,7 @@ public interface ArticleHistoryService {
      * @param pageSize 每页的数量
      * @return PageInfo<History>
      */
-    PageInfo<History> getHistoryList(String userId, Integer pageNum, Integer pageSize);
+    List<History> getHistoryList(String userId, Integer pageNum, Integer pageSize);
 
 
     /**

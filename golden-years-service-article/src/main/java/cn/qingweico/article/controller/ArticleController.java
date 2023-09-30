@@ -7,8 +7,10 @@ import cn.qingweico.article.service.ArticleService;
 import cn.qingweico.entity.Article;
 import cn.qingweico.entity.Category;
 import cn.qingweico.entity.Favorites;
+import cn.qingweico.entity.model.CollectArticle;
+import cn.qingweico.entity.model.MineFavorites;
 import cn.qingweico.entity.model.NewArticleBO;
-import cn.qingweico.entity.model.UserBasicInfoVO;
+import cn.qingweico.entity.model.UserBasicInfo;
 import cn.qingweico.enums.ArticleCoverType;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
@@ -143,17 +145,17 @@ public class ArticleController extends BaseController {
     public Result doReview(String articleId, Integer passOrNot) {
         Integer pendingStatus;
         // 文章审核通过
-        if (YesOrNo.YES.type.equals(passOrNot)) {
-            pendingStatus = ArticleReviewStatus.SUCCESS.type;
+        if (YesOrNo.YES.getVal().equals(passOrNot)) {
+            pendingStatus = ArticleReviewStatus.APPROVED.getVal();
         }
         // 文章审核不通过
-        else if (YesOrNo.NO.type.equals(passOrNot)) {
-            pendingStatus = ArticleReviewStatus.FAILED.type;
+        else if (YesOrNo.NO.getVal().equals(passOrNot)) {
+            pendingStatus = ArticleReviewStatus.FAILED.getVal();
         } else {
             return Result.r(Response.ARTICLE_REVIEW_ERROR);
         }
         articleService.updateArticleStatus(articleId, pendingStatus);
-        if (YesOrNo.YES.type.equals(passOrNot)) {
+        if (YesOrNo.YES.getVal().equals(passOrNot)) {
             return Result.r(Response.ARTICLE_REVIEW_PASS);
         } else {
             return Result.r(Response.ARTICLE_REVIEW_FAIL);
@@ -200,50 +202,50 @@ public class ArticleController extends BaseController {
     @ApiOperation(value = "获取我的收藏夹", notes = "获取我的收藏夹", httpMethod = "GET")
     public Result getFavorites(@RequestParam String userId) {
         List<Favorites> favoriteList = articleDetailService.getFavoritesByUserId(userId);
-        List<FavoritesVO> result = new ArrayList<>();
+        List<MineFavorites> result = new ArrayList<>();
         for (Favorites favorite : favoriteList) {
-            FavoritesVO favoritesVO = new FavoritesVO();
-            BeanUtils.copyProperties(favorite, favoritesVO);
+            MineFavorites mf = new MineFavorites();
+            BeanUtils.copyProperties(favorite, mf);
             String favoritesId = favorite.getId();
             // 获取用户每个收藏夹收藏文章的数量
             String userFavoritesCollectCountsKey = RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
                     SysConst.SYMBOL_COLON + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId;
-            favoritesVO.setFavoritesCollectCount(getCountsFromRedis(userFavoritesCollectCountsKey));
-            result.add(favoritesVO);
+            mf.setInFavorites(getCountsFromRedis(userFavoritesCollectCountsKey));
+            result.add(mf);
         }
         return Result.ok(result);
     }
 
     @PostMapping("alterFavorites")
     @ApiOperation(value = "修改收藏夹信息", notes = "修改收藏夹信息", httpMethod = "POST")
-    public Result alterFavorites(@RequestBody @Valid FavoritesBO favoritesBO) {
-        articleDetailService.editFavorites(favoritesBO);
+    public Result alterFavorites(@RequestBody @Valid Favorites favorites) {
+        articleDetailService.editFavorites(favorites);
         return Result.r(Response.ALERT_SUCCESS);
     }
 
     @PostMapping("deleteFavorites")
     @ApiOperation(value = "删除收藏夹", notes = "删除收藏夹", httpMethod = "POST")
-    public Result deleteFavorites(@RequestBody @Valid CollectBO collectBO) {
-        String favorites = collectBO.getFavoritesId();
+    public Result deleteFavorites(@RequestBody @Valid CollectArticle collectArticle) {
+        String favorites = collectArticle.getFavoritesId();
         if (StringUtils.isBlank(favorites)) {
             return Result.error();
         }
-        articleDetailService.deleteFavorites(collectBO);
+        articleDetailService.deleteFavorites(collectArticle);
         return Result.r(Response.DELETE_SUCCESS);
     }
 
     @Resource
     private UserBaseInfoClient client;
 
-    public UserBasicInfoVO getUserBasicInfoClient(String id) {
-        UserBasicInfoVO userBasicInfo;
+    public UserBasicInfo getUserBasicInfoClient(String id) {
+        UserBasicInfo userBasicInfo;
         Result result = client.getUserBasicInfo(id);
         if (result.getData() != null) {
             String userJson = JsonUtils.objectToJson(result.getData());
-            userBasicInfo = JsonUtils.jsonToPojo(userJson, UserBasicInfoVO.class);
+            userBasicInfo = JsonUtils.jsonToPojo(userJson, UserBasicInfo.class);
         } else {
-            userBasicInfo = new UserBasicInfoVO();
+            userBasicInfo = new UserBasicInfo();
         }
         return userBasicInfo;
     }
@@ -251,7 +253,7 @@ public class ArticleController extends BaseController {
 
     public Map<String, Object> geAuthorInfo(String authorId) {
         Map<String, Object> map = new HashMap<>(4);
-        UserBasicInfoVO userBasicInfo = getUserBasicInfoClient(authorId);
+        UserBasicInfo userBasicInfo = getUserBasicInfoClient(authorId);
         if (StringUtils.isNotBlank(userBasicInfo.getId())) {
             map.put(SysConst.AUTHOR_NAME, userBasicInfo.getNickname());
             map.put(SysConst.AUTHOR_FACE, userBasicInfo.getFace());

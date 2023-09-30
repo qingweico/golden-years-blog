@@ -1,19 +1,19 @@
 package cn.qingweico.user.service.impl;
 
 import cn.qingweico.core.service.BaseService;
+import cn.qingweico.entity.UserLoginLog;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.UserLoginLog;
 import cn.qingweico.user.mapper.UserLoginLogMapper;
 import cn.qingweico.user.service.LoginLogService;
 import cn.qingweico.util.AddressUtil;
 import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.ServletReqUtils;
-import com.github.pagehelper.PageHelper;
+import cn.qingweico.util.SnowflakeIdWorker;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Calendar;
@@ -45,7 +45,7 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
         // 获取客户端浏览器
         String browser = userAgent.getBrowser().getName();
         Date timestamp = new Date();
-        String id = "";
+        String id = SnowflakeIdWorker.nextId();
         UserLoginLog userLoginLog = new UserLoginLog();
         userLoginLog.setId(id);
         userLoginLog.setUserId(userId);
@@ -61,29 +61,26 @@ public class LoginLogServiceImpl extends BaseService implements LoginLogService 
                                        Integer page,
                                        Integer pageSize) {
 
-        Example loginLogExample = new Example(UserLoginLog.class);
-        loginLogExample.orderBy(SysConst.LOGIN_TIME).desc();
-        Example.Criteria criteria = loginLogExample.createCriteria();
-        criteria.andEqualTo(SysConst.USER_ID, userId);
+        LambdaQueryWrapper<UserLoginLog> lwq = new LambdaQueryWrapper<>();
+        lwq.orderByDesc(UserLoginLog::getLoginTime);
+        lwq.eq(UserLoginLog::getUserId, userId);
         Calendar c = Calendar.getInstance();
-
         // 只展示用户最近一周的登陆日志
         c.setTime(new Date());
         c.add(Calendar.DATE, -7);
-        criteria.andGreaterThanOrEqualTo(SysConst.LOGIN_TIME, c.getTime());
-        PageHelper.startPage(page, pageSize);
-        List<UserLoginLog> userLoginLogList = userLoginLogMapper.selectByExample(loginLogExample);
+        lwq.ge(UserLoginLog::getLoginTime, c.getTime());
+        // 分页 TODO
+        List<UserLoginLog> userLoginLogList = userLoginLogMapper.selectList(lwq);
         return setterPagedGrid(userLoginLogList, page);
     }
 
     @Override
     public void cleanLoginLog() {
-        Example loginLogExample = new Example(UserLoginLog.class);
-        Example.Criteria criteria = loginLogExample.createCriteria();
+        LambdaQueryWrapper<UserLoginLog> lwq = new LambdaQueryWrapper<>();
         Calendar c = Calendar.getInstance();
         c.setTime(new Date());
         c.add(Calendar.MONTH, -1);
-        criteria.andLessThanOrEqualTo(SysConst.LOGIN_TIME, c.getTime());
-        userLoginLogMapper.deleteByExample(loginLogExample);
+        lwq.le(UserLoginLog::getLoginTime, c.getTime());
+        userLoginLogMapper.delete(lwq);
     }
 }

@@ -4,7 +4,6 @@ import cn.qingweico.core.config.RabbitMqConfig;
 import cn.qingweico.article.controller.ArticleDetailController;
 import cn.qingweico.entity.Favorites;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.bo.CollectBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,6 +20,7 @@ import javax.annotation.Resource;
 public class RabbitMqConsumer {
     @Resource
     private ArticleDetailController articleDetailController;
+
     @RabbitListener(queues = {RabbitMqConfig.QUEUE_ARTICLE})
     public void listenQueue(String payLoad, Message message) {
         log.info("payLoad: ---> {}, message: ---> {}", payLoad, message.toString());
@@ -33,10 +33,10 @@ public class RabbitMqConsumer {
                 favorites.setUserId(userId);
                 articleDetailController.createFavorites(favorites);
             } catch (Exception e) {
-                log.error("creat favorites error");
+                log.error(e.getMessage());
             }
-        }else {
-            log.error("不符合的规则: {}",routingKey);
+        } else {
+            log.error("不符合的规则: {}", routingKey);
         }
     }
 }

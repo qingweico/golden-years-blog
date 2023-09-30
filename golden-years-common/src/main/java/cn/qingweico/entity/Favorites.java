@@ -1,9 +1,8 @@
 package cn.qingweico.entity;
 
 import cn.qingweico.enums.FavoritesType;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 收藏夹
@@ -11,9 +10,13 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2022/4/15
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class Favorites extends BaseEntity {
 
     /**

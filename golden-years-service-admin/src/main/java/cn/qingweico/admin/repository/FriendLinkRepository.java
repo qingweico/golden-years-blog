@@ -18,5 +18,5 @@ public interface FriendLinkRepository extends MongoRepository<FriendLink, String
      * @param isDelete 逻辑状态 1: 未删除; 0: 已删除
      * @return 友情链接列表
      */
-    List<FriendLink> getAllByIsDelete(Integer isDelete);
+    List<FriendLink> getAllByDeleteFlag(Integer isDelete);
 }

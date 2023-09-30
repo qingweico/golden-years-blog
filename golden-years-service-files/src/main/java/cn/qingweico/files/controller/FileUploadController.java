@@ -1,19 +1,19 @@
 package cn.qingweico.files.controller;
 
+import cn.qingweico.entity.model.GridFs;
 import cn.qingweico.enums.FileUploadType;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.files.resource.FileResource;
 import cn.qingweico.files.service.UploaderService;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.bo.GridFsBO;
-import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
+import cn.qingweico.result.Result;
 import cn.qingweico.util.FileUtils;
 import cn.qingweico.util.upload.QiniuUtil;
+import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSFindIterable;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.gridfs.GridFSBucket;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,10 @@ import sun.misc.BASE64Decoder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,18 +42,12 @@ import java.util.List;
 @RequestMapping("fs")
 @RestController
 public class FileUploadController {
-
     @Resource
     private UploaderService uploaderService;
-
     @Resource
     private FileResource fileResource;
-
     @Resource
     private QiniuUtil qiniuUtil;
-
-//    @Resource
-//    private SystemConfigService systemConfigService;
     @Resource
     private GridFSBucket gridFsBucket;
 
@@ -69,9 +66,6 @@ public class FileUploadController {
     @PostMapping("/uploadFace")
     public Result uploadFace(MultipartFile file) throws IOException {
         String path = null;
-//        SystemConfig systemConfig = systemConfigService.getSystemConfig();
-
-//        Integer uploadMethod = systemConfig.getUploadMethod();
 
         Integer uploadMethod = 1;
         if (file != null) {
@@ -87,13 +81,13 @@ public class FileUploadController {
                     return Result.r(Response.FILE_FORMATTER_FAILED);
                 }
 
-                if (FileUploadType.FASTDFS.type.equals(uploadMethod)) {
+                if (FileUploadType.FAST_DFS.getVal().equals(uploadMethod)) {
                     path = uploaderService.uploadFastDfs(file, fileExtension);
-                } else if (FileUploadType.ALIYUN.type.equals(uploadMethod)) {
+                } else if (FileUploadType.ALI_YUN.getVal().equals(uploadMethod)) {
                     // TODO
                     String userId = "001";
                     path = uploaderService.uploadOss(file, userId, fileExtension);
-                } else if (FileUploadType.QINIUYUN.type.equals(uploadMethod)) {
+                } else if (FileUploadType.QI_NIU_YUN.getVal().equals(uploadMethod)) {
                     path = qiniuUtil.upload(file.getInputStream(), fileName);
                 }
 
@@ -107,31 +101,32 @@ public class FileUploadController {
 
         String finalPath;
         if (StringUtils.isNotBlank(path)) {
-            if (FileUploadType.FASTDFS.type.equals(uploadMethod)) {
+            if (FileUploadType.FAST_DFS.getVal().equals(uploadMethod)) {
                 finalPath = fileResource.getFsHost() + path;
-            } else if (FileUploadType.ALIYUN.type.equals(uploadMethod)) {
+            } else if (FileUploadType.ALI_YUN.getVal().equals(uploadMethod)) {
                 finalPath = fileResource.getOssHost() + path;
-            }else {
+            } else {
                 finalPath = path;
             }
         } else {
             return Result.r(Response.FILE_UPLOAD_FAILED);
-        } return Result.ok(Response.UPLOAD_SUCCESS, finalPath);
+        }
+        return Result.ok(Response.UPLOAD_SUCCESS, finalPath);
     }
 
 
     @ApiOperation(value = "上传文件到mongodb的GridFs中", notes = "上传文件到mongodb的GridFs中", httpMethod = "POST")
     @PostMapping("/uploadToGridFs")
-    public Result uploadToGridFs(@RequestBody GridFsBO gridFsBO) throws IOException {
+    public Result uploadToGridFs(@RequestBody GridFs gridFs) throws IOException {
 
         // 获得图片的base64字符串
-        String file64 = gridFsBO.getImg64();
+        String file64 = gridFs.getImg64();
         // 将base64字符串转换为字符数组
         byte[] bytes = new BASE64Decoder().decodeBuffer(file64);
         // 转换为输入流
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         // 上传到gridFS中
-        ObjectId id = gridFsBucket.uploadFromStream(gridFsBO.getUsername() + SysConst.SYMBOL_POINT + SysConst.FILE_SUFFIX_PNG, inputStream);
+        ObjectId id = gridFsBucket.uploadFromStream(gridFs.getUsername() + SysConst.SYMBOL_POINT + SysConst.FILE_SUFFIX_PNG, inputStream);
         // 获得文件在gridFS中的主键id
         String fileId = id.toString();
         return Result.ok(Response.UPLOAD_SUCCESS, fileId);

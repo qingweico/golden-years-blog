@@ -4,11 +4,12 @@ import cn.qingweico.admin.service.RoleService;
 import cn.qingweico.admin.service.SysMenuService;
 import cn.qingweico.admin.service.SysUserService;
 import cn.qingweico.entity.SysMenu;
+import cn.qingweico.entity.SysRole;
 import cn.qingweico.entity.SysUser;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.Role;
 import cn.qingweico.result.Response;
 import cn.qingweico.result.Result;
+import cn.qingweico.util.CollUtils;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,10 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,10 +48,10 @@ public class SysMenuController {
             return Result.fail(Response.REQUEST_PARAM_ERROR);
         }
         // 根据用户id获取对应的角色
-        Collection<Role> roles = roleService.queryRoleBySysUserId(sysUser.getId());
-        List<String> ids = roles.stream().map(Role::getId).collect(Collectors.toList());
+        Collection<SysRole> roles = roleService.queryRoleBySysUserId(sysUser.getId());
+        List<String> ids = roles.stream().map(SysRole::getId).collect(Collectors.toList());
         // 根据角色id拿到可以操作的菜单
-        List<SysMenu> sysMenuList = sysMenuService.queryMenuByRoleId(ids);
+        List<SysMenu> sysMenuList = new ArrayList<>();
         // 构建菜单树 返回前端
         HashMap<String, Object> map = new HashMap<>(1);
         map.put("treeMenu", sysMenuService.buildTreeMenu(sysMenuList));
@@ -70,7 +68,7 @@ public class SysMenuController {
     @PreAuthorize("hasAuthority('system:menu:query')")
     public Result findById(@PathVariable(value = "id") String id) {
         SysMenu sysMenu = sysMenuService.getById(id);
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(CollUtils.mapSize(1));
         map.put("sysMenu", sysMenu);
         return Result.ok(map);
     }

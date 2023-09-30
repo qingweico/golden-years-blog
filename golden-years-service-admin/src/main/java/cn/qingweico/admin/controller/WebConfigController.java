@@ -1,7 +1,7 @@
 package cn.qingweico.admin.controller;
 
 import cn.qingweico.admin.service.WebConfigService;
-import cn.qingweico.pojo.WebConfig;
+import cn.qingweico.entity.WebConfig;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
 import io.swagger.annotations.Api;

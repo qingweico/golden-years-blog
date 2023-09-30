@@ -9,14 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
-import java.util.Collections;
 
 /**
+ * 认证成功处理器 (formLogin下生效) {@link UsernamePasswordAuthenticationFilter 登录认证成功后会调用}
+ *
  * @author zqw
  * @date 2023/9/23
  */
@@ -35,7 +37,6 @@ public class ApiAuthenticationSuccessHandler implements AuthenticationSuccessHan
                 .code(HttpStatus.OK.getReasonPhrase())
                 .msg("login success")
                 .data(apiAuthenticationToken.getToken())
-                .errors(Collections.emptyList())
                 .build();
 
         response.setCharacterEncoding("utf-8");

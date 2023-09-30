@@ -10,14 +10,6 @@ import java.util.List;
  * @date 2022/3/23
  */
 public interface SysMenuService {
-
-    /**
-     * 根据角色id查询菜单分类内容
-     * @param roles 角色ids
-     * @return List<SysMenu>
-     */
-    List<SysMenu> queryMenuByRoleId(List<String> roles);
-
     /**
      * 构建菜单树
      * @param sysMenuList List<SysMenu>
@@ -28,20 +20,20 @@ public interface SysMenuService {
     /**
      * 根据菜单id获取某个菜单详情
      * @param id menu id
-     * @return
+     * @return SysMenu
      */
     SysMenu getById(String id);
 
 
     /**
      * 新建菜单
-     * @param sysMenu
+     * @param sysMenu SysMenu
      */
     void createMenu(SysMenu sysMenu);
 
     /**
      * 编辑菜单
-     * @param sysMenu
+     * @param sysMenu SysMenu
      */
     void editMenu(SysMenu sysMenu);
 }

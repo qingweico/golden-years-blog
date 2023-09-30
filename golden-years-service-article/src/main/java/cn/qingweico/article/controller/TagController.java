@@ -2,11 +2,12 @@ package cn.qingweico.article.controller;
 
 import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.TagService;
-import cn.qingweico.pojo.bo.TagBO;
+import cn.qingweico.entity.Tag;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,7 +26,7 @@ public class TagController extends BaseController {
     @Resource
     private TagService tagService;
 
-    @ApiOperation(value = "管理员查询所有的标签", notes = "管理员查询所有的标签", httpMethod = "GET")
+    @ApiOperation(value = "查询所有的标签", notes = "查询所有的标签", httpMethod = "GET")
     @GetMapping("/query")
     public Result query(@RequestParam String tagName,
                         @RequestParam Integer status,
@@ -45,9 +46,9 @@ public class TagController extends BaseController {
 
     @ApiOperation(value = "管理员添加或者更新系统标签", notes = "管理员添加或者更新系统标签", httpMethod = "POST")
     @PostMapping("/saveOrUpdate")
-    public Result saveOrUpdate(@RequestBody @Valid TagBO tagBO) {
-        tagService.saveOrUpdate(tagBO);
-        if (tagBO.getId() == null) {
+    public Result saveOrUpdate(@RequestBody @Valid Tag tag) {
+        tagService.saveOrUpdate(tag);
+        if (StringUtils.isEmpty(tag.getId())) {
             return Result.r(Response.APPEND_SUCCESS);
         } else {
             return Result.r(Response.ALERT_SUCCESS);

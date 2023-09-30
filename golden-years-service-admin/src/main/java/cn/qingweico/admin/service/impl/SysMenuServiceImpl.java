@@ -1,13 +1,10 @@
 package cn.qingweico.admin.service.impl;
 
-import cn.qingweico.admin.mapper.RoleMenuRelMapper;
 import cn.qingweico.admin.mapper.SysMenuMapper;
 import cn.qingweico.admin.service.SysMenuService;
-import cn.qingweico.entity.RoleMenuRel;
 import cn.qingweico.entity.SysMenu;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -22,32 +19,6 @@ import java.util.Objects;
 public class SysMenuServiceImpl implements SysMenuService {
     @Resource
     private SysMenuMapper sysMenuMapper;
-    @Resource
-    private RoleMenuRelMapper roleMenuRelMapper;
-
-    @Override
-    public List<SysMenu> queryMenuByRoleId(List<String> roles) {
-        RoleMenuRel roleMenuRel = new RoleMenuRel();
-        if (!CollectionUtils.isEmpty(roles)) {
-            List<String> sysMenuIds = new ArrayList<>();
-            for (String roleId : roles) {
-                roleMenuRel.setRoleId(roleId);
-                List<RoleMenuRel> roleMenuRelList = roleMenuRelMapper.select(roleMenuRel);
-                for (RoleMenuRel roleMenu : roleMenuRelList) {
-                    sysMenuIds.add(roleMenu.getMenuId());
-                }
-            }
-            List<SysMenu> sysMenuList = new ArrayList<>();
-            for (String sysMenuId : sysMenuIds) {
-                SysMenu sysMenu = sysMenuMapper.selectByPrimaryKey(sysMenuId);
-                sysMenuList.add(sysMenu);
-            }
-            return sysMenuList;
-        }
-
-
-        return new ArrayList<>(0);
-    }
 
     @Override
     public List<SysMenu> buildTreeMenu(List<SysMenu> sysMenuList) {
@@ -69,7 +40,7 @@ public class SysMenuServiceImpl implements SysMenuService {
 
     @Override
     public SysMenu getById(String id) {
-        return sysMenuMapper.selectByPrimaryKey(id);
+        return sysMenuMapper.selectById(id);
     }
 
     @Override

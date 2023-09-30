@@ -1,8 +1,8 @@
 package cn.qingweico.article.controller;
 
 import cn.qingweico.core.config.RabbitMqConfig;
+import cn.qingweico.entity.model.ArticleElastic;
 import cn.qingweico.result.Result;
-import cn.qingweico.pojo.eo.ArticleEo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,7 +45,7 @@ public class ProducerController {
 
     @GetMapping("delete/{articleId}")
     public Result delete(@PathVariable("articleId") String articleId) {
-        elasticsearchTemplate.delete(ArticleEo.class, articleId);
+        elasticsearchTemplate.delete(ArticleElastic.class, articleId);
         return Result.ok();
     }
 }

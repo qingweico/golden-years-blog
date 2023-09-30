@@ -1,6 +1,7 @@
 package cn.qingweico.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.Date;
 
@@ -10,12 +11,15 @@ import java.util.Date;
  * @author zqw
  * @date 2021/09/06
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@Builder
+@Setter
+@Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Accessors(chain = true)
 public class User extends BaseEntity {
+    private static final long serialVersionUID = -53242415098753974L;
     /**
      * 手机号
      */
@@ -30,15 +34,6 @@ public class User extends BaseEntity {
      * 头像
      */
     private String face;
-
-    /**
-     * 真实姓名
-     */
-    private String realName;
-    /**
-     * 用户账号
-     */
-    private String account;
 
     /**
      * 用户密码

@@ -1,8 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 文章标签表
@@ -10,9 +9,13 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2022/3/3
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class Tag extends BaseEntity {
     /**
      * 标签名称

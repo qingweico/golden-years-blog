@@ -1,9 +1,11 @@
 package cn.qingweico.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import cn.qingweico.global.SysConst;
+import lombok.*;
+import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * 系统用户
@@ -11,9 +13,16 @@ import java.util.Date;
  * @author zqw
  * @date 2021/09/06
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
 public class SysUser extends BaseEntity {
+    private static final long serialVersionUID = 8059511295718875912L;
     /**
      * 用户名
      */
@@ -61,7 +70,21 @@ public class SysUser extends BaseEntity {
      */
     private String lastLoginLocation;
     /**
-     * 状态 0: 禁用  1: 启用
+     * 可用状态 0: 禁用  1: 启用
      */
-    private int status;
+    private int available;
+
+    public boolean isAdmin() {
+        return isAdmin(this.getId());
+    }
+
+    public static boolean isAdmin(String userId) {
+        return StringUtils.equals(userId, SysConst.SYS_USER_ADMIN);
+    }
+
+    /**
+     * 角色对象
+     */
+    @Builder.Default
+    private List<SysRole> roles = new ArrayList<>();
 }

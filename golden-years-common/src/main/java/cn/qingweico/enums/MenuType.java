@@ -1,12 +1,14 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * @author zqw
  * @date 2022/3/23
  */
 @AllArgsConstructor
+@Getter
 public enum MenuType {
 
     /**
@@ -14,6 +16,6 @@ public enum MenuType {
      */
     MENU(0, "菜单");
 
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 }

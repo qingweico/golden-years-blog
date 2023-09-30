@@ -3,9 +3,8 @@ package cn.qingweico.entity;
 import cn.qingweico.enums.EditorModelType;
 import cn.qingweico.enums.FileUploadType;
 import cn.qingweico.enums.SearchModelType;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 
 /**
@@ -14,9 +13,13 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2022/4/12
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class SysConfig extends BaseEntity {
     /**
      * 文件上传方式 {@link FileUploadType}

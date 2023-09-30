@@ -73,9 +73,9 @@ public class UserController extends BaseController {
             return Result.r(Response.USER_STATUS_ERROR);
         }
         userService.freezeUserOrNot(userId, doStatus);
-        if (doStatus.equals(UserStatus.DISABLE.type)) {
+        if (doStatus.equals(UserStatus.DISABLE.getVal())) {
             return Result.r(Response.FREEZE_SUCCESS);
-        } else if (doStatus.equals(UserStatus.AVAILABLE.type)) {
+        } else if (doStatus.equals(UserStatus.AVAILABLE.getVal())) {
             return Result.r(Response.ACTIVATE_SUCCESS);
         }
         return Result.r(Response.REQUEST_PARAM_ERROR);
@@ -103,7 +103,7 @@ public class UserController extends BaseController {
         }
         // 根据用户id查询用户基本信息
         User user = getUser(userId);
-        UserBasicInfoVO userVO = new UserBasicInfoVO();
+        UserBasicInfo userVO = new UserBasicInfo();
         BeanUtils.copyProperties(user, userVO);
 
         // 从redis中查询用户的粉丝数和关注数
@@ -114,9 +114,9 @@ public class UserController extends BaseController {
         userVO.setMyFollowCounts(myFollowCounts);
 
         Integer userStatus = userVO.getActiveStatus();
-        if (userStatus.equals(UserStatus.AVAILABLE.type)) {
+        if (userStatus.equals(UserStatus.AVAILABLE.getVal())) {
             return Result.ok(Response.WELCOME, userVO);
-        } else if (userStatus.equals(UserStatus.DISABLE.type)) {
+        } else if (userStatus.equals(UserStatus.DISABLE.getVal())) {
             return Result.ok(Response.ACCOUNT_ILLEGAL, userVO);
         }
         return Result.ok(userVO);
@@ -137,11 +137,11 @@ public class UserController extends BaseController {
         if (StringUtils.isBlank(userIds)) {
             return Result.r(Response.USER_NOT_EXIST_ERROR);
         }
-        List<UserBasicInfoVO> userInfoList = new ArrayList<>();
+        List<UserBasicInfo> userInfoList = new ArrayList<>();
         List<String> userIdList = JsonUtils.jsonToList(userIds, String.class);
         for (String id : userIdList) {
             User user = getUser(id);
-            UserBasicInfoVO vo = new UserBasicInfoVO();
+            UserBasicInfo vo = new UserBasicInfo();
             BeanUtils.copyProperties(user, vo);
             userInfoList.add(vo);
         }

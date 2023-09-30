@@ -1,8 +1,8 @@
 package cn.qingweico.admin.mapper;
 
 
-import cn.qingweico.core.mapper.CommonMapper;
 import cn.qingweico.entity.SysMenu;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/3/23
  */
 @Repository
-public interface SysMenuMapper extends CommonMapper<SysMenu> {
+public interface SysMenuMapper extends BaseMapper<SysMenu> {
 }

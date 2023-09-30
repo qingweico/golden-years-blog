@@ -1,6 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.Category;
+import cn.qingweico.entity.Category;
 import cn.qingweico.util.PagedResult;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public interface CategoryService {
      * @param oldCategoryName 旧的文章类别名称
      * @return boolean 分类名是否已经存在
      */
-    boolean queryCategoryIsPresent(String categoryName, String oldCategoryName);
+    boolean queryCategoryHasPresent(String categoryName, String oldCategoryName);
 
     /**
      * 获得文章分类列表

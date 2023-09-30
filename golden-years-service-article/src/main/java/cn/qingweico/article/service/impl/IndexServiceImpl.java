@@ -1,19 +1,20 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.CommentsMapper;
 import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.IndexService;
+import cn.qingweico.core.service.BaseService;
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.Tag;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
-import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.Comments;
-import cn.qingweico.pojo.Tag;
+import cn.qingweico.global.SysConst;
 import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.JsonUtils;
+import cn.qingweico.util.redis.RedisCache;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -36,18 +37,20 @@ public class IndexServiceImpl extends BaseService implements IndexService {
     @Resource
     private TagMapper tagMapper;
 
+    @Resource
+    private RedisCache redisCache;
+
     @Override
     public Integer getArticleCounts() {
-        Article article = new Article();
-        article.setArticleStatus(ArticleReviewStatus.SUCCESS.type);
-        article.setIsDelete(YesOrNo.NO.type);
-        return articleMapper.selectCount(article);
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        lwq.eq(Article::getArticleStatus, ArticleReviewStatus.APPROVED.getVal());
+        lwq.eq(Article::getIsDelete, YesOrNo.NO.getVal());
+        return articleMapper.selectCount(lwq);
     }
 
     @Override
     public Integer getCommentCount() {
-        Comments comment = new Comments();
-        return commentsMapper.selectCount(comment);
+        return commentsMapper.selectCount(null);
     }
 
     @Override
@@ -97,7 +100,7 @@ public class IndexServiceImpl extends BaseService implements IndexService {
         Collection<Tag> tagCollection = new ArrayList<>();
         if (tagIds.size() > 0) {
             for (String tagId : tagIds) {
-                Tag tag = tagMapper.selectByPrimaryKey(tagId);
+                Tag tag = tagMapper.selectById(tagId);
                 tagCollection.add(tag);
             }
         }

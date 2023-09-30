@@ -10,9 +10,10 @@ import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.JwtUtils;
 import cn.qingweico.util.ServletReqUtils;
-import cn.qingweico.util.StringUtils;
+import cn.qingweico.util.pool.ThreadPoolBuilder;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -38,7 +40,7 @@ public final class RedisUtil {
     @Resource
     RedisCache redisCache;
     @Resource
-    TaskExecutor taskExecutor;
+    ExecutorService threadPool;
 
 
     /*设置数据逻辑过期*/
@@ -105,7 +107,7 @@ public final class RedisUtil {
         // avoid unpacking npe!!
         isSuccess = BooleanUtil.isTrue(isSuccess);
         if (isSuccess) {
-            taskExecutor.execute(() -> {
+            threadPool.execute(() -> {
                 try {
                     final R apply = callback.apply(id);
                     this.setLogicExpire(key, apply, timeout, unit);

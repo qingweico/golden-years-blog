@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 人脸比对类型
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/10
  */
 @AllArgsConstructor
+@Getter
 public enum FaceVerifyType {
     /**
      * 图片Base64对比
@@ -19,6 +21,6 @@ public enum FaceVerifyType {
      */
     IMAGE_URL(0, "URL图片地址对比");
 
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 }

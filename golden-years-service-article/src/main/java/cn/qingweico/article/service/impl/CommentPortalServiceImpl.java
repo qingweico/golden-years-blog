@@ -1,29 +1,25 @@
 package cn.qingweico.article.service.impl;
 
+import cn.qingweico.entity.Comments;
+import cn.qingweico.entity.model.ArticleDetail;
+import cn.qingweico.entity.model.CommentReply;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.Comments;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.CommentsMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.CommentPortalService;
-import cn.qingweico.pojo.bo.CommentReplyBO;
-import cn.qingweico.pojo.bo.Reply;
-import cn.qingweico.pojo.bo.Visitor;
-import cn.qingweico.pojo.vo.ArticleDetailVO;
-import cn.qingweico.pojo.vo.CommentVo;
-import cn.qingweico.pojo.vo.CommentsVO;
 import cn.qingweico.result.Response;
+import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.PagedResult;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import org.springframework.beans.BeanUtils;
+import cn.qingweico.util.SnowflakeIdWorker;
+import cn.qingweico.util.redis.RedisCache;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
-
 import javax.annotation.Resource;
+
 import java.util.*;
 
 /**
@@ -40,30 +36,25 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
     @Resource
     private ArticlePortalService articlePortalService;
 
+    @Resource
+    private RedisCache redisCache;
+
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void publishComment(CommentReplyBO commentReplyBO) {
-        String articleId = commentReplyBO.getArticleId();
-        String userId = commentReplyBO.getCommentUserId();
-        String nickname = commentReplyBO.getCommentUserNickname();
-        String face = commentReplyBO.getCommentUserFace();
-        String content = commentReplyBO.getContent();
-        String fatherCommentId = commentReplyBO.getParent();
-        ArticleDetailVO articleDetailVO = articlePortalService.queryDetail(articleId);
+    public void publishComment(CommentReply commentReply) {
+        String articleId = commentReply.getArticleId();
+        String userId = commentReply.getUserId();
+        String content = commentReply.getContent();
+        String pid = commentReply.getParent();
+        ArticleDetail articleDetail = articlePortalService.queryDetail(articleId);
 
         Comments comments = new Comments();
-        comments.setId("");
-        comments.setAuthor(articleDetailVO.getAuthorId());
-        comments.setArticleCover(articleDetailVO.getArticleCover());
-        comments.setArticleTitle(articleDetailVO.getTitle());
-
+        comments.setId(SnowflakeIdWorker.nextId());
+        comments.setAuthorId(articleDetail.getAuthorId());
         comments.setArticleId(articleId);
-        comments.setCommentUserId(userId);
-        comments.setCommentUserNickname(nickname);
-        comments.setCommentUserFace(face);
         comments.setContent(content);
-        comments.setFatherId(fatherCommentId);
-        comments.setCreateTime(new Date());
+        comments.setParentId(pid);
+        comments.setCreateTime(DateUtils.nowDateTime());
         if (commentsMapper.insert(comments) > 0) {
             // 评论数累加
             redisCache.increment(RedisConst.REDIS_ARTICLE_COMMENT_COUNTS + SysConst.SYMBOL_COLON + articleId, 1);
@@ -78,55 +69,24 @@ public class CommentPortalServiceImpl extends BaseService implements CommentPort
                                             Integer pageSize) {
         Map<String, Object> map = new HashMap<>(1);
         map.put(SysConst.ARTICLE_ID, articleId);
-        PageHelper.startPage(page, pageSize);
-        List<CommentsVO> commentList = commentsMapper.queryArticleCommentList(map);
-        PageInfo<CommentsVO> pageInfo = new PageInfo<>(commentList);
-        List<CommentsVO> paged = pageInfo.getList();
-        List<CommentVo> list = new ArrayList<>();
-        for (CommentsVO commentsVO : paged) {
-            CommentVo commentVo = new CommentVo();
-            BeanUtils.copyProperties(commentsVO, commentVo);
-            Reply reply = new Reply();
-            String replyAvatar = commentsVO.getReplyAvatar();
-            String replyName = commentsVO.getReplyName();
-            if (replyAvatar != null) {
-                reply.setAvatar(replyAvatar);
-            }
-            if (replyName != null) {
-                reply.setName(replyName);
-            }
-            Visitor visitor = new Visitor();
-            visitor.setAvatar(commentsVO.getVisitorAvatar());
-            visitor.setName(commentsVO.getVisitorName());
-            commentVo.setReply(reply);
-            commentVo.setVisitor(visitor);
-            list.add(commentVo);
-        }
-        PagedResult pgr = new PagedResult();
-        pgr.setRows(list);
-        pgr.setCurrentPage(pageInfo.getPageNum());
-        pgr.setRecords(pageInfo.getTotal());
-        pgr.setTotalPage(pageInfo.getPages());
-        return pgr;
+        // TODO 评论树
+        commentsMapper.queryArticleCommentList(map);
+        return new PagedResult();
     }
 
     @Override
     public PagedResult queryUserComments(String authorId,
                                          Integer page,
                                          Integer pageSize) {
-        Example example = new Example(Comments.class);
-        example.orderBy(SysConst.CREATE_TIME).desc();
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConst.AUTHOR, authorId);
-        PageHelper.startPage(page, pageSize);
-        List<Comments> res = commentsMapper.selectByExample(example);
+        LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(Comments::getCreateTime);
+        wrapper.eq(Comments::getAuthorId, authorId);
+        List<Comments> res = commentsMapper.selectList(wrapper);
         return setterPagedGrid(res, page);
     }
 
     @Override
     public void delete(String commentId) {
-        Comments comments = new Comments();
-        comments.setId(commentId);
-        commentsMapper.deleteByPrimaryKey(comments);
+        commentsMapper.deleteById(commentId);
     }
 }

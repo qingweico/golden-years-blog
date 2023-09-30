@@ -1,7 +1,7 @@
 package cn.qingweico.article.mapper;
-
-import cn.qingweico.core.mapper.CommonMapper;
-import cn.qingweico.pojo.Category;
+;
+import cn.qingweico.entity.Category;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2021/10/21
  */
 @Repository
-public interface CategoryMapper extends CommonMapper<Category> {
+public interface CategoryMapper extends BaseMapper<Category> {
 }

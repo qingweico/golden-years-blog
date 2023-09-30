@@ -1,5 +1,6 @@
 package cn.qingweico.util;
 
+import cn.qingweico.global.Symbol;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import sun.misc.BASE64Encoder;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Binder;
 import java.io.*;
 import java.net.URLDecoder;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 /**
@@ -28,7 +30,7 @@ public class FileUtils {
         String filePath = file.getPath();
         System.out.println("filePath = " + filePath);
         // 对encode过的filePath处理
-        if (filePath.contains("%")) {
+        if (filePath.contains(Symbol.PERCENT)) {
             try {
                 filePath = URLDecoder.decode(filePath, "UTF-8");
             } catch (UnsupportedEncodingException e) {
@@ -46,6 +48,8 @@ public class FileUtils {
             String fileType = array[array.length - 1].toLowerCase();
             // 设置文件ContentType类型
             // 判断图片类型
+
+            // TODO优化
             if ("jpg,jepg,gif,png".contains(fileType)) {
                 response.setContentType("image/" + fileType);
                 // 判断pdf类型
@@ -92,7 +96,7 @@ public class FileUtils {
         int read = 0;
         // 读取文件字节数组
         try {
-            in = new FileInputStream(file);
+            in = Files.newInputStream(file.toPath());
             fileData = new byte[in.available()];
             read = in.read(fileData);
             in.close();

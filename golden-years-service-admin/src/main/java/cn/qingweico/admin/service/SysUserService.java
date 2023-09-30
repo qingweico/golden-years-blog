@@ -1,14 +1,15 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.admin.model.bo.OperatorSysUserBO;
 import cn.qingweico.entity.SysUser;
+import cn.qingweico.entity.model.OperatorSysUser;
 import cn.qingweico.util.PagedResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * @author zqw
  * @date 2021/9/9
  */
-public interface SysUserService {
+public interface SysUserService extends IService<SysUser> {
 
     /**
      * 根据用户名[系统用户名唯一]查询SysUser信息
@@ -30,9 +31,9 @@ public interface SysUserService {
     /**
      * 新增SysUser用户信息
      *
-     * @param operatorSysUserBO operatorSysUserBO
+     * @param operatorSysUser OperatorSysUser
      */
-    void createSysUser(OperatorSysUserBO operatorSysUserBO);
+    void createSysUser(OperatorSysUser operatorSysUser);
 
     /**
      * 分页查询SysUser列表
@@ -55,9 +56,9 @@ public interface SysUserService {
     /**
      * 更新SysUser信息
      *
-     * @param sysUser {@link OperatorSysUserBO}
+     * @param sysUser {@link OperatorSysUser}
      */
-    void updateSysUserProfile(OperatorSysUserBO sysUser);
+    void updateSysUserProfile(OperatorSysUser sysUser);
 
     /**
      * 检查SysUser用户名的唯一性

@@ -35,21 +35,21 @@ public interface TagService {
     List<Tag> getTagList();
 
     /**
-     * 管理员添加或者更新系统标签
+     * 添加或者更新系统标签
      *
-     * @param tagBO {@link TagBO}
+     * @param tagBO {@link Tag}
      */
-    void saveOrUpdate(TagBO tagBO);
+    void saveOrUpdate(Tag tagBO);
 
     /**
-     * 管理员删除标签
+     * 删除标签
      *
      * @param tagId 标签id
      */
     void delete(String tagId);
 
     /**
-     * 管理员批量删除标签
+     * 批量删除标签
      *
      * @param ids 标签id集合
      */

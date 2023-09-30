@@ -75,7 +75,7 @@ public class FansController extends BaseController {
                              @RequestParam Integer page,
                              @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        return Result.ok(fanService.getMyFansListViaEs(userId, page, pageSize));
+        return Result.ok(fanService.getMyFansListFromElastic(userId, page, pageSize));
     }
 
     @ApiOperation(value = "查询男女粉丝的数量", notes = "查询男女粉丝的数量", httpMethod = "GET")
@@ -92,7 +92,7 @@ public class FansController extends BaseController {
     @ApiOperation(value = "查询男女粉丝的数量(es)", notes = "查询男女粉丝的数量(es)", httpMethod = "GET")
     @GetMapping("es/queryRatio")
     public Result queryRatioViaEs(@RequestParam String userId) {
-        return Result.ok(fanService.queryFansCountsViaEs(userId));
+        return Result.ok(fanService.queryFansCountsFromElastic(userId));
     }
 
     @ApiOperation(value = "根据地域分布查询粉丝的数量", notes = "根据地域分布查询粉丝的数量", httpMethod = "GET")
@@ -104,14 +104,6 @@ public class FansController extends BaseController {
     @ApiOperation(value = "根据地域分布查询粉丝的数量(es)", notes = "根据地域分布查询粉丝的数量(es)", httpMethod = "GET")
     @GetMapping("es/queryRatioByRegion")
     public Result queryRatioByRegionViaEs(@RequestParam String userId) {
-        return Result.ok(fanService.queryRatioByRegionViaEs(userId));
-    }
-
-    @ApiOperation(value = "被动更新粉丝信息", notes = "被动更新粉丝信息", httpMethod = "POST")
-    @PostMapping("/passive")
-    public Result passive(@RequestParam String relationId,
-                          @RequestParam String fanId) {
-        fanService.passive(relationId, fanId);
-        return Result.ok();
+        return Result.ok(fanService.queryRatioByRegionFromElastic(userId));
     }
 }

@@ -1,7 +1,7 @@
 package cn.qingweico.article.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
-import cn.qingweico.pojo.Article;
+import cn.qingweico.entity.Article;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @date 2021/9/11
  */
 @Repository
-public interface ArticleMapper extends CommonMapper<Article> {
+public interface ArticleMapper extends BaseMapper<Article> {
 
     /**
      * 定时发布文章(采用定时任务)

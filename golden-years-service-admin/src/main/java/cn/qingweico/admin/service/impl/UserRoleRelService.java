@@ -1,9 +1,5 @@
 package cn.qingweico.admin.service.impl;
 
-import cn.qingweico.pojo.Role;
-
-import javax.swing.*;
-import java.util.List;
 
 /**
  * @author zqw

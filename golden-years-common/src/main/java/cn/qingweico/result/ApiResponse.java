@@ -1,11 +1,9 @@
 package cn.qingweico.result;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.List;
 
 /**
  * 返回数据结构entity
@@ -28,7 +26,6 @@ public class ApiResponse<T> {
     private @Builder.Default
     Long now = Instant.now().getEpochSecond();
     private T data;
-    private @JsonInclude(JsonInclude.Include.NON_NULL) List<String> errors;
 
     public ApiResponse(T data) {
         this.data = data;

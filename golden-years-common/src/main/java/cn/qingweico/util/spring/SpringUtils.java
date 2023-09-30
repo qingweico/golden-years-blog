@@ -1,6 +1,7 @@
 package cn.qingweico.util.spring;
 
-import cn.qingweico.util.StringUtils;
+import cn.hutool.core.util.StrUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -39,7 +40,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @param name bean name
      * @return Object 一个以所给名字注册的bean的实例
-     * @throws BeansException {@link org.springframework.beans.BeansException}
+     * @throws BeansException BeansException {@link org.springframework.beans.BeansException}
      */
     @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) throws BeansException {
@@ -51,7 +52,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @param clz Bean Class Type
      * @return  ins bean of T
-     * @throws BeansException {@link org.springframework.beans.BeansException}
+     * @throws BeansException BeansException {@link org.springframework.beans.BeansException}
      */
     public static <T> T getBean(Class<T> clz) throws BeansException {
         return (T) beanFactory.getBean(clz);
@@ -72,7 +73,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @param name bean name
      * @return boolean
-     * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+     * @throws NoSuchBeanDefinitionException org.springframework.beans.factory.NoSuchBeanDefinitionException
      */
     public static boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
         return beanFactory.isSingleton(name);
@@ -81,7 +82,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
     /**
      * @param name bean name
      * @return Class 注册对象的类型
-     * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+     * @throws NoSuchBeanDefinitionException org.springframework.beans.factory.NoSuchBeanDefinitionException
      */
     public static Class<?> getType(String name) throws NoSuchBeanDefinitionException {
         return beanFactory.getType(name);
@@ -92,7 +93,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      *
      * @param name bean name
      * @return bean alias name array
-     * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+     * @throws NoSuchBeanDefinitionException org.springframework.beans.factory.NoSuchBeanDefinitionException
      */
     public static String[] getAliases(String name) throws NoSuchBeanDefinitionException {
         return beanFactory.getAliases(name);
@@ -125,7 +126,7 @@ public class SpringUtils implements BeanFactoryPostProcessor, ApplicationContext
      */
     public static String getActiveProfile() {
         final String[] activeProfiles = getActiveProfiles();
-        return StringUtils.isNotEmpty(activeProfiles) ? activeProfiles[0] : null;
+        return activeProfiles.length > 0 ? activeProfiles[0] : null;
     }
 
     /**

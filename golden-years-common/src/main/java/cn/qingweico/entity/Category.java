@@ -1,16 +1,19 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * @author zqw
  * @date 2021/9/10
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class Category extends BaseEntity {
 
     /**

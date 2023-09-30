@@ -1,18 +1,12 @@
 package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.core.security.context.AuthenticationContextHolder;
-import cn.qingweico.core.service.TokenService;
+import cn.qingweico.core.security.TokenService;
 import cn.qingweico.entity.model.LoginUser;
 import cn.qingweico.exception.ServiceException;
 import cn.qingweico.exception.user.UserNotExistsException;
 import cn.qingweico.exception.user.UserPasswordNotMatchException;
-import cn.qingweico.global.RedisConst;
-import cn.qingweico.result.Response;
-import cn.qingweico.result.Result;
-import cn.qingweico.util.IpUtils;
-import cn.qingweico.util.StringUtils;
-import cn.qingweico.util.redis.RedisCache;
-import org.springframework.core.task.TaskExecutor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,8 +28,6 @@ public class SysLoginService {
     private AuthenticationManager authenticationManager;
     @Resource
     private TokenService tokenService;
-    @Resource
-    private RedisCache redisCache;
 
 
     public void loginPreCheck(String username, String password) {
@@ -64,14 +56,16 @@ public class SysLoginService {
 
         // 登录前置校验
         loginPreCheck(username, password);
-        // 用户验证
+        // 用户认证
         Authentication authentication;
         try {
+            // AuthenticationManager authenticate 进行用户认证
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             AuthenticationContextHolder.setContext(authenticationToken);
             // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
             authentication = authenticationManager.authenticate(authenticationToken);
         } catch (Exception e) {
+            // 认证没有通过
             if (e instanceof BadCredentialsException) {
                 throw new UserPasswordNotMatchException();
             } else {
@@ -80,6 +74,7 @@ public class SysLoginService {
         } finally {
             AuthenticationContextHolder.clearContext();
         }
+        // 认证通过, 生成 jwt 返回
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         // 生成token
         return tokenService.createToken(loginUser);

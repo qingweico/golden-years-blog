@@ -1,18 +1,24 @@
 package cn.qingweico.admin.service.impl;
 
+import cn.qingweico.core.config.limit.RateLimiterHandler;
 import cn.qingweico.core.security.context.AuthenticationContextHolder;
-import cn.qingweico.entity.SysUser;
-import cn.qingweico.exception.user.UserPasswordNotMatchException;
-import cn.qingweico.exception.user.UserPasswordRetryLimitExceedException;
+import cn.qingweico.entity.model.LoginLimit;
+import cn.qingweico.entity.model.LoginUser;
+import cn.qingweico.exception.TooManyAttemptsException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.util.SecurityUtils;
 import cn.qingweico.util.redis.RedisCache;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 登录密码方法
@@ -20,58 +26,85 @@ import java.util.concurrent.TimeUnit;
  * @author zqw
  * @date 2023-04-29
  */
+@Slf4j
 @Component
 public class SysPasswordService {
     @Resource
     private RedisCache redisCache;
+    private static final String KEY = "PasswordLogin";
 
-    @Value(value = "${user.password.maxRetryCount}")
-    private int maxRetryCount;
+    @Value("${gy.token-exp:1800}")
+    public long tokenExp;
 
-    @Value(value = "${user.password.lockTime}")
-    private int lockTime;
+    @Value("${gy.login-attempts-limit-times:100}")
+    public int loginAttemptsLimitTimes;
 
-    /**
-     * 登录账户密码错误次数缓存键名
-     *
-     * @param username 用户名
-     * @return 缓存键key
-     */
-    private String getCacheKey(String username) {
-        return RedisConst.PWD_ERR_CNT_KEY + username;
-    }
+    @Value("${gy.login-attempts-limit-seconds:300}")
+    public int loginAttemptsLimitSeconds;
 
-    public void validate(SysUser user) {
+    @Setter
+    private LoginLimit loginLimit = new LoginLimit(60, 20);
+    @Setter
+    private RateLimiterHandler rateLimiterHandler;
+
+
+    public void validate(LoginUser loginUser) {
         Authentication usernamePasswordAuthenticationToken = AuthenticationContextHolder.getContext();
         String username = usernamePasswordAuthenticationToken.getName();
         String password = usernamePasswordAuthenticationToken.getCredentials().toString();
-
-        Integer retryCount = redisCache.getCacheObject(getCacheKey(username));
-
-        if (retryCount == null) {
-            retryCount = 0;
+        if (!rateLimiterHandler.limit(this.getClass().getSimpleName(), KEY, loginLimit.getLimitPeriod(), loginLimit.getLimitCount())) {
+            log.warn("{} try too many {}", username, this.getClass().getSimpleName());
+            throw new TooManyAttemptsException("Too many attempts");
         }
-
-        if (retryCount >= maxRetryCount) {
-            throw new UserPasswordRetryLimitExceedException(maxRetryCount, lockTime);
+        if (tooManyAttempts(loginUser.getUserId())) {
+            log.warn("{} try too many login", username);
+            throw new TooManyAttemptsException("Too many attempts");
         }
+        if (!matches(loginUser, password)) {
+            // TODO 记录登录日志
+            addAttempts(loginUser.getUserId());
+            throw new BadCredentialsException("invalid identifier or certificate");
+        }
+        if (!loginUser.isEnabled()) {
+            // TODO 记录登录日志
+            addAttempts(loginUser.getUserId());
+            throw new DisabledException("The user has been disabled");
+        }
+        // TODO 记录登录日志
+        // 清空尝试次数
+        deleteAttempts(loginUser.getUserId());
+    }
 
-        if (!matches(user, password)) {
-            retryCount = retryCount + 1;
-            redisCache.setCacheObject(getCacheKey(username), retryCount, lockTime, TimeUnit.MINUTES);
-            throw new UserPasswordNotMatchException();
+    private boolean matches(LoginUser loginUser, String rawPassword) {
+        return SecurityUtils.matchesPassword(rawPassword, loginUser.getPassword());
+    }
+
+    private void addAttempts(String accountId) {
+        String key = getAttemptsUserKey(accountId);
+        String attempts = redisCache.get(key);
+        if (StringUtils.isEmpty(attempts)) {
+            redisCache.set(key, "1", loginAttemptsLimitSeconds);
         } else {
-            clearLoginRecordCache(username);
+            redisCache.increment(key, 1);
         }
+        log.info("Attempts:{}", attempts);
     }
 
-    public boolean matches(SysUser user, String rawPassword) {
-        return SecurityUtils.matchesPassword(rawPassword, user.getPassword());
+    private boolean tooManyAttempts(String userId) {
+        String key = getAttemptsUserKey(userId);
+        String attempts = redisCache.get(key);
+        if (StringUtils.isEmpty(attempts)) {
+            return false;
+        }
+        return NumberUtils.toInt(attempts) >= loginAttemptsLimitSeconds;
     }
 
-    public void clearLoginRecordCache(String loginName) {
-        if (redisCache.keyPresent(getCacheKey(loginName))) {
-            redisCache.deleteObject(getCacheKey(loginName));
-        }
+    private String getAttemptsUserKey(String userId) {
+        return RedisConst.USER_ATTEMPT_LOGIN + userId;
     }
+
+    private void deleteAttempts(String userId) {
+        redisCache.del(getAttemptsUserKey(userId));
+    }
+
 }

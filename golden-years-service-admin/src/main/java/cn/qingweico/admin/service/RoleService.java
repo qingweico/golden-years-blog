@@ -1,6 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.Role;
+import cn.qingweico.entity.SysRole;
 
 import java.util.List;
 
@@ -16,5 +16,5 @@ public interface RoleService {
     * @return List<Role>
     */
 
-   List<Role> queryRoleBySysUserId(String sysUserId);
+   List<SysRole> queryRoleBySysUserId(String sysUserId);
 }

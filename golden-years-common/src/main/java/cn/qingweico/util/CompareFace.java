@@ -32,7 +32,7 @@ public class CompareFace {
         IAcsClient client = new DefaultAcsClient(profile);
 
         CompareFaceRequest request = new CompareFaceRequest();
-        if (type == FaceVerifyType.BASE64.type) {
+        if (type == FaceVerifyType.BASE64.getVal()) {
             request.setImageDataA(face1);
             request.setImageDataB(face2);
         } else {

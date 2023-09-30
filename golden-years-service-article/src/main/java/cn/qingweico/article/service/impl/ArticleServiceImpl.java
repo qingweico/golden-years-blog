@@ -1,6 +1,5 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.core.config.RabbitMqConfig;
 import cn.qingweico.core.config.RabbitMqDelayConfig;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
@@ -9,6 +8,8 @@ import cn.qingweico.article.service.ArticleService;
 import cn.qingweico.article.service.TagService;
 import cn.qingweico.entity.Article;
 import cn.qingweico.entity.Tag;
+import cn.qingweico.entity.model.ArticleElastic;
+import cn.qingweico.entity.model.CreativeCenterArticle;
 import cn.qingweico.entity.model.NewArticleBO;
 import cn.qingweico.enums.ArticleAppointType;
 import cn.qingweico.enums.ArticleReviewStatus;
@@ -17,20 +18,26 @@ import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
+import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.PagedResult;
-import com.mongodb.client.gridfs.GridFSBucket;
+import cn.qingweico.util.redis.RedisUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 
 /**
@@ -51,7 +58,13 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     private ArticlePortalService articlePortalService;
 
     @Resource
-    public GridFSBucket gridFsBucket;
+    private RedisUtil redisUtil;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private ElasticsearchTemplate esTemplate;
 
     private static final Integer ARTICLE_SUMMARY = 200;
 
@@ -66,15 +79,15 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         BeanUtils.copyProperties(newArticleBO, article);
         article.setId(articleId);
         article.setCategoryId(newArticleBO.getCategoryId());
-        article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
+        article.setArticleStatus(ArticleReviewStatus.REVIEWING.getVal());
         article.setCommentCounts(0);
         article.setReadCounts(0);
         article.setCollectCounts(0);
-        article.setIsDelete(YesOrNo.NO.type);
+        article.setIsDelete(YesOrNo.NO.getVal());
         article.setSummary(summary);
         article.setInfluence(0);
-        article.setCreateTime(new Date());
-        article.setUpdateTime(new Date());
+        article.setCreateTime(DateUtils.nowDateTime());
+        article.setUpdateTime(DateUtils.nowDateTime());
         List<Tag> tags = newArticleBO.getTags();
         StringBuilder tagsString = new StringBuilder();
         // 标签提取
@@ -97,13 +110,12 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
         article.setTags(tagsString.toString());
         // 定时发布文章
-        if (article.getIsAppoint().equals(ArticleAppointType.TIMING.type)) {
+        if (article.getIsAppoint().equals(ArticleAppointType.TIMING.getVal())) {
             article.setCreateTime(newArticleBO.getCreateTime());
             // 发送延迟消息到mq队列
-            Date willPublishTime = newArticleBO.getCreateTime();
-            Date now = new Date();
-
-            long delay = willPublishTime.getTime() - now.getTime();
+            LocalDateTime willPublishTime = newArticleBO.getCreateTime();
+            long now = LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli();
+            long delay = willPublishTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - now;
             MessagePostProcessor messagePostProcessor = (message) -> {
                 message.getMessageProperties().
                         setDeliveryMode(MessageDeliveryMode.PERSISTENT);
@@ -114,15 +126,15 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                     SysConst.ARTICLE_DELAY_PUBLISH_SUCCESS_DO,
                     articleId,
                     messagePostProcessor);
-        } else if (article.getIsAppoint().equals(ArticleAppointType.IMMEDIATELY.type)) {
-            article.setCreateTime(new Date());
+        } else if (article.getIsAppoint().equals(ArticleAppointType.IMMEDIATELY.getVal())) {
+            article.setCreateTime(DateUtils.nowDateTime());
         }
 
         int res = articleMapper.insert(article);
         if (res != 1) {
             GraceException.error(Response.ARTICLE_CREATE_ERROR);
         }
-        updateArticleStatus(articleId, ArticleReviewStatus.REVIEWING.type);
+        updateArticleStatus(articleId, ArticleReviewStatus.REVIEWING.getVal());
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -137,8 +149,8 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     public void timelyPublishArticle(String articleId) {
         Article article = new Article();
         article.setId(articleId);
-        article.setIsAppoint(ArticleAppointType.IMMEDIATELY.type);
-        if (articleMapper.updateByPrimaryKeySelective(article) < 0) {
+        article.setIsAppoint(ArticleAppointType.IMMEDIATELY.getVal());
+        if (articleMapper.updateById(article) < 0) {
             log.error("timelyPublishArticle error");
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
@@ -154,50 +166,35 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                                          Integer page,
                                          Integer pageSize) {
 
-        Example example = conditionalQueryArticle(userId, keyword, categoryId, status
-                , YesOrNo.NO.type, startDate, endDate);
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
-        PageInfo<Article> pageInfo = new PageInfo<>(list);
-        List<Article> paged = pageInfo.getList();
-        List<CenterArticleVO> result = new ArrayList<>();
-        for (Article article : paged) {
-            CenterArticleVO centerArticleVO = new CenterArticleVO();
-            BeanUtils.copyProperties(article, centerArticleVO);
+        LambdaQueryWrapper<Article> lambdaQueryWrapper = conditionalQueryArticle(userId, keyword, categoryId, status
+                , YesOrNo.NO.getVal(), startDate, endDate);
+        // 分页
+        List<Article> list = articleMapper.selectList(lambdaQueryWrapper);
+        List<CreativeCenterArticle> result = new ArrayList<>();
+        for (Article article : list) {
+            CreativeCenterArticle creativeCenterArticle = new CreativeCenterArticle();
+            BeanUtils.copyProperties(article, creativeCenterArticle);
             List<Tag> tagList = articlePortalService.getTagList(article);
-            centerArticleVO.setTagList(tagList);
-            result.add(centerArticleVO);
+            creativeCenterArticle.setTagList(tagList);
+            result.add(creativeCenterArticle);
         }
-        PagedResult pgr = new PagedResult();
-        pgr.setRows(result);
-        pgr.setCurrentPage(pageInfo.getPageNum());
-        pgr.setRecords(pageInfo.getTotal());
-        pgr.setTotalPage(pageInfo.getPages());
-        return pgr;
+        return new PagedResult();
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void updateArticleStatus(String articleId, Integer pendingStatus) {
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConst.ID, articleId);
         Article article = new Article();
+        article.setId(articleId);
         article.setArticleStatus(pendingStatus);
-
-        int res = articleMapper.updateByExampleSelective(article, example);
-
-        if (res != 1) {
-            GraceException.error(Response.ARTICLE_REVIEW_ERROR);
-        }
-
+        int res = articleMapper.updateById(article);
         // 如果审核通过, 则查询article相关的字段并放入es中
-        if (ArticleReviewStatus.SUCCESS.type.equals(pendingStatus)) {
-            Article result = articleMapper.selectByPrimaryKey(articleId);
-            if (ArticleAppointType.IMMEDIATELY.type.equals(result.getIsAppoint())) {
+        if (ArticleReviewStatus.APPROVED.getVal().equals(pendingStatus)) {
+            Article result = articleMapper.selectById(articleId);
+            if (ArticleAppointType.IMMEDIATELY.getVal().equals(result.getIsAppoint())) {
                 String summary = getArticleSummary(result.getContent());
-                ArticleEo articleEo = new ArticleEo();
-                BeanUtils.copyProperties(result, articleEo);
+                ArticleElastic articleElastic = new ArticleElastic();
+                BeanUtils.copyProperties(result, articleElastic);
                 // 获取文章标签id集合
                 String[] tagIds = result.getTags().replace("[", "")
                         .replace("]", "")
@@ -209,14 +206,14 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                     resultTag.append(" ");
                 }
                 resultTag.delete(resultTag.length() - 1, resultTag.length());
-                articleEo.setSummary(summary);
-                articleEo.setTags(resultTag.toString());
-                IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleEo).build();
+                articleElastic.setSummary(summary);
+                articleElastic.setTags(resultTag.toString());
+                IndexQuery indexQuery = new IndexQueryBuilder().withObject(articleElastic).build();
                 esTemplate.index(indexQuery);
 
                 // 更新主站带有文章数量的文展类别
                 String key = RedisConst.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
-                refreshCache(key);
+                redisUtil.clearCache(key);
             }
         }
     }
@@ -225,7 +222,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     public void updateArticle(NewArticleBO newArticleBO) {
         Article article = new Article();
         article.setId(newArticleBO.getArticleId());
-        article.setUpdateTime(new Date());
+        article.setUpdateTime(DateUtils.nowDateTime());
         BeanUtils.copyProperties(newArticleBO, article);
         List<Tag> tags = newArticleBO.getTags();
         StringBuilder tagsString = new StringBuilder();
@@ -239,12 +236,12 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         tagsString.delete(tagsString.length() - 2, tagsString.length() - 1);
         article.setTags(tagsString.toString());
         // 假如文章的状态为未通过或者为已撤回, 则修改文章后文章的状态变为审核中
-        if (ArticleReviewStatus.FAILED.type.equals(newArticleBO.getArticleStatus()) ||
-                ArticleReviewStatus.WITHDRAW.type.equals(newArticleBO.getArticleStatus()
+        if (ArticleReviewStatus.FAILED.getVal().equals(newArticleBO.getArticleStatus()) ||
+                ArticleReviewStatus.WITHDRAW.getVal().equals(newArticleBO.getArticleStatus()
                 )) {
-            article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
+            article.setArticleStatus(ArticleReviewStatus.REVIEWING.getVal());
         }
-        if (articleMapper.updateByPrimaryKeySelective(article) <= 0) {
+        if (articleMapper.updateById(article) <= 0) {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
     }
@@ -259,77 +256,61 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
                              Date endDateStr,
                              Integer page,
                              Integer pageSize) {
-        Example example = conditionalQueryArticle(null, keyword, categoryId, status
+        LambdaQueryWrapper<Article> lambdaQueryWrapper = conditionalQueryArticle(null, keyword, categoryId, status
                 , deleteStatus, startDateStr, endDateStr);
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
+        // 分页
+        List<Article> list = articleMapper.selectList(lambdaQueryWrapper);
         if (StringUtils.isNotBlank(tagId)) {
             // 标签筛选
             list = filterArticleTag(list, tagId);
         }
-        PageInfo<Article> pageInfo = new PageInfo<>(list);
-        List<Article> paged = pageInfo.getList();
-        List<ArticleAdminVO> result = new ArrayList<>();
-        for (Article article : paged) {
-            ArticleAdminVO articleAdminVO = new ArticleAdminVO();
-            BeanUtils.copyProperties(article, articleAdminVO);
-            List<Tag> tagList = articlePortalService.getTagList(article);
-            articleAdminVO.setTagList(tagList);
-            result.add(articleAdminVO);
-        }
-        PagedResult pgr = new PagedResult();
-        pgr.setRows(result);
-        pgr.setCurrentPage(pageInfo.getPageNum());
-        pgr.setRecords(pageInfo.getTotal());
-        pgr.setTotalPage(pageInfo.getPages());
-        return pgr;
+        return null;
     }
 
-    private Example conditionalQueryArticle(String userId,
-                                            String keyword,
-                                            String categoryId,
-                                            Integer status,
-                                            Integer deleteStatus,
-                                            Date startDate,
-                                            Date endDate) {
-        Example example = new Example(Article.class);
-        example.orderBy(SysConst.CREATE_TIME).desc();
-        Example.Criteria criteria = example.createCriteria();
-        if (StringUtils.isNotBlank(userId)) {
-            criteria.andEqualTo(SysConst.AUTHOR_ID, userId);
+    private LambdaQueryWrapper<Article> conditionalQueryArticle(String userId,
+                                                                String keyword,
+                                                                String categoryId,
+                                                                Integer status,
+                                                                Integer deleteStatus,
+                                                                Date startDate,
+                                                                Date endDate) {
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        lwq.orderByDesc(Article::getCreateTime);
+        if (StringUtils.isNotEmpty(userId)) {
+            lwq.eq(Article::getAuthorId, userId);
         }
-        if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike(SysConst.TITLE, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
+        if (StringUtils.isNotEmpty(keyword)) {
+            lwq.eq(Article::getTitle, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
         }
 
-        if (ArticleReviewStatus.isArticleStatusValid(status)) {
-            criteria.andEqualTo(SysConst.ARTICLE_STATUS, status);
+        if (ArticleReviewStatus.isValidArticleStatus(status)) {
+            lwq.eq(Article::getArticleStatus, status);
         }
-        if (StringUtils.isNotBlank(categoryId)) {
-            criteria.andEqualTo(SysConst.CATEGORY_ID, categoryId);
+        if (StringUtils.isNotEmpty(categoryId)) {
+            lwq.eq(Article::getCategoryId, categoryId);
         }
         if (deleteStatus != null) {
-            criteria.andEqualTo(SysConst.IS_DELETE, deleteStatus);
+            lwq.eq(Article::getIsDelete, deleteStatus);
         }
         if (startDate != null) {
-            criteria.andGreaterThanOrEqualTo(SysConst.CREATE_TIME, startDate);
+            lwq.ge(Article::getCreateTime, startDate);
         }
         if (endDate != null) {
-            criteria.andLessThanOrEqualTo(SysConst.CREATE_TIME, endDate);
+            lwq.le(Article::getCreateTime, endDate);
         }
-        return example;
+        return lwq;
 
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void deleteArticle(String articleId) {
-        // 删除已通过审核的文章, 还需删除gridFs和es中的数据
-        Integer articleStatus = articleMapper.selectByPrimaryKey(articleId).getArticleStatus();
-        if (ArticleReviewStatus.SUCCESS.type.equals(articleStatus)) {
-            esTemplate.delete(ArticleEo.class, articleId);
+        // 删除已通过审核的文章, 还需删除es中的数据
+        Integer articleStatus = articleMapper.selectById(articleId).getArticleStatus();
+        if (ArticleReviewStatus.APPROVED.getVal().equals(articleStatus)) {
+            esTemplate.delete(ArticleElastic.class, articleId);
         }
-        articleMapper.deleteByPrimaryKey(articleId);
+        articleMapper.deleteById(articleId);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -337,72 +318,42 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
     public void reReview(String articleId) {
         Article article = new Article();
         article.setId(articleId);
-        article.setArticleStatus(ArticleReviewStatus.REVIEWING.type);
-        articleMapper.updateByPrimaryKeySelective(article);
+        article.setArticleStatus(ArticleReviewStatus.REVIEWING.getVal());
+        articleMapper.updateById(article);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void withdrawDelete(String articleId) {
-        Example articleExample = new Example(Article.class);
         Article article = new Article();
         article.setId(articleId);
-        article.setIsDelete(YesOrNo.NO.type);
-        articleMapper.updateByExampleSelective(article, articleExample);
+        article.setIsDelete(YesOrNo.NO.getVal());
+        articleMapper.updateById(article);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void deleteArticle(String userId, String articleId) {
-        Example articleExample = makeExampleCriteria(userId, articleId);
-        Article pending = new Article();
-        pending.setIsDelete(YesOrNo.YES.type);
+        Article article = new Article();
+        article.setId(articleId);
+        article.setIsDelete(YesOrNo.YES.getVal());
         // 删除未审核过的文章; 直接设置is_delete = 1
-        int result = articleMapper.updateByExampleSelective(pending, articleExample);
+        int result = articleMapper.updateById(article);
         if (result != 1) {
             GraceException.error(Response.ARTICLE_DELETE_ERROR);
         }
     }
 
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void deleteArticleHtmlForGridFs(String articleId) {
-        // 查询文章的mongoId
-        Article article = articleMapper.selectByPrimaryKey(articleId);
-        String articleMongoId = article.getMongoFileId();
-
-        // 删除GridFs上文章的html文件
-        gridFsBucket.delete(new ObjectId(articleMongoId));
-
-        // 删除消费端的文章html文件
-        doDeleteArticleHtmlByMq(articleId);
-    }
-
-    private void doDeleteArticleHtmlByMq(String articleId) {
-        rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
-                "article.delete.do", articleId);
-    }
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void withdrawArticle(String userId, String articleId) {
-        Example articleExample = makeExampleCriteria(userId, articleId);
-        Article pending = new Article();
-        pending.setArticleStatus(ArticleReviewStatus.WITHDRAW.type);
-        int result = articleMapper.updateByExampleSelective(pending, articleExample);
-        if (result != 1) {
-            GraceException.error(Response.ARTICLE_WITHDRAW_ERROR);
-        }
-        esTemplate.delete(ArticleEo.class, articleId);
+        Article article = new Article();
+        article.setId(articleId);
+        article.setArticleStatus(ArticleReviewStatus.WITHDRAW.getVal());
+        articleMapper.updateById(article);
+        esTemplate.delete(ArticleElastic.class, articleId);
 
-    }
-
-    private Example makeExampleCriteria(String userId, String articleId) {
-        Example articleExample = new Example(Article.class);
-        Example.Criteria criteria = articleExample.createCriteria();
-        criteria.andEqualTo(SysConst.AUTHOR_ID, userId);
-        criteria.andEqualTo(SysConst.ID, articleId);
-        return articleExample;
     }
 
     private String filterHtmlTag(String html) {

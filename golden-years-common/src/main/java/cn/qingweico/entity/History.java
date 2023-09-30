@@ -1,8 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.Date;
 
@@ -12,9 +11,13 @@ import java.util.Date;
  * @author zqw
  * @date 2022/4/15
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class History extends BaseEntity {
 
     /**

@@ -4,13 +4,12 @@ import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.entity.Favorites;
+import cn.qingweico.entity.model.ArticleDetail;
+import cn.qingweico.entity.model.CollectArticle;
+import cn.qingweico.entity.model.MineFavorites;
+import cn.qingweico.entity.model.ArticleRelated;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.Favorites;
-import cn.qingweico.pojo.bo.CollectBO;
-import cn.qingweico.pojo.bo.IdBO;
-import cn.qingweico.pojo.vo.ArticleDetailVO;
-import cn.qingweico.pojo.vo.FavoritesVO;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.IpUtils;
@@ -49,18 +48,18 @@ public class ArticleDetailController extends BaseController {
     @GetMapping("detail")
     @ApiOperation(value = "文章详情", notes = "文章详情", httpMethod = "GET")
     public Result detail(@RequestParam String articleId) {
-        ArticleDetailVO articleVO = articlePortalService.queryDetail(articleId);
-        if (articleVO == null) {
+        ArticleDetail articleDetail = articlePortalService.queryDetail(articleId);
+        if (articleDetail == null) {
             return Result.r(Response.ARTICLE_NOT_EXIST);
         }
-        Map<String, Object> map = articleController.geAuthorInfo(articleVO.getAuthorId());
-        articleVO.setAuthorName((String) map.get(SysConst.AUTHOR_NAME));
-        articleVO.setAuthorFace((String) map.get(SysConst.AUTHOR_FACE));
-        articleVO.setStarCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId));
-        articleVO.setCollectCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId));
-        articleVO.setCommentCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_COMMENT_COUNTS + SysConst.SYMBOL_COLON + articleId));
-        articleVO.setReadCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_READ_COUNTS + SysConst.SYMBOL_COLON + articleId));
-        return Result.ok(articleVO);
+        Map<String, Object> map = articleController.geAuthorInfo(articleDetail.getAuthorId());
+        articleDetail.setAuthorName((String) map.get(SysConst.AUTHOR_NAME));
+        articleDetail.setAuthorFace((String) map.get(SysConst.AUTHOR_FACE));
+        articleDetail.setStarCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId));
+        articleDetail.setCollectCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_COLLECT_COUNTS + SysConst.SYMBOL_COLON + articleId));
+        articleDetail.setCommentCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_COMMENT_COUNTS + SysConst.SYMBOL_COLON + articleId));
+        articleDetail.setReadCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_READ_COUNTS + SysConst.SYMBOL_COLON + articleId));
+        return Result.ok(articleDetail);
 
     }
 
@@ -77,9 +76,9 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("praise")
     @ApiOperation(value = "文章点赞", notes = "文章点赞", httpMethod = "POST")
-    public Result praiseArticleById(@RequestBody IdBO idBO) {
-        String articleId = idBO.getArticleId();
-        String userId = idBO.getUserId();
+    public Result praiseArticleById(@RequestBody ArticleRelated praiseArticle) {
+        String articleId = praiseArticle.getArticleId();
+        String userId = praiseArticle.getUserId();
         // 设置用户点赞标志位(已点赞)
         redisCache.set(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
                 SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_HYPHEN + userId, "true");
@@ -90,9 +89,9 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("unstar")
     @ApiOperation(value = "取消文章点赞", notes = "取消文章点赞", httpMethod = "POST")
-    public Result cancelStar(@RequestBody IdBO idBO) {
-        String articleId = idBO.getArticleId();
-        String userId = idBO.getUserId();
+    public Result cancelStar(@RequestBody ArticleRelated praiseArticle) {
+        String articleId = praiseArticle.getArticleId();
+        String userId = praiseArticle.getUserId();
         // 设置用户点赞标志位(未点赞)
         redisCache.del(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
                 SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_HYPHEN + userId);
@@ -111,9 +110,9 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("isStar")
     @ApiOperation(value = "判断用户是否点赞了该文章", notes = "判断用户是否点赞了该文章", httpMethod = "POST")
-    public Result isStar(@RequestBody IdBO idBO) {
-        String articleId = idBO.getArticleId();
-        String userId = idBO.getUserId();
+    public Result isStar(@RequestBody ArticleRelated praiseArticle) {
+        String articleId = praiseArticle.getArticleId();
+        String userId = praiseArticle.getUserId();
         String isStar = redisCache.get(RedisConst.REDIS_ARTICLE_ALREADY_STAR +
                 SysConst.SYMBOL_COLON + articleId + SysConst.SYMBOL_HYPHEN + userId);
         return Result.ok(StringUtils.isNotBlank(isStar));
@@ -121,14 +120,14 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("collect")
     @ApiOperation(value = "文章收藏", notes = "文章收藏", httpMethod = "POST")
-    public Result collectArticleById(@RequestBody CollectBO collectBO) {
-        String articleId = collectBO.getArticleId();
-        String userId = collectBO.getUserId();
-        String favoritesId = collectBO.getFavoritesId();
+    public Result collectArticleById(@RequestBody CollectArticle collectArticle) {
+        String articleId = collectArticle.getArticleId();
+        String userId = collectArticle.getUserId();
+        String favoritesId = collectArticle.getFavoritesId();
         if (StringUtils.isBlank(favoritesId)) {
             return Result.r(Response.SYSTEM_OPERATION_ERROR);
         }
-        articleDetailService.collectArticle(collectBO);
+        articleDetailService.collectArticle(collectArticle);
         // 设置用户收藏标志位(已收藏)
         redisCache.set(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
                 SysConst.SYMBOL_COLON + articleId +
@@ -145,9 +144,9 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("isCollect")
     @ApiOperation(value = "判断用户是否收藏了该文章", notes = "判断用户是否收藏了该文章", httpMethod = "POST")
-    public Result isCollect(@RequestBody CollectBO collectBO) {
-        String articleId = collectBO.getArticleId();
-        String userId = collectBO.getUserId();
+    public Result isCollect(@RequestBody CollectArticle collectArticle) {
+        String articleId = collectArticle.getArticleId();
+        String userId = collectArticle.getUserId();
         // redis_article_already_collect:articleId-userId-*
         // 收藏夹中存在一个即为收藏;通配所有的favoritesId
         // 获取Redis中特定前缀
@@ -168,11 +167,11 @@ public class ArticleDetailController extends BaseController {
 
     @PostMapping("uncollect")
     @ApiOperation(value = "取消文章收藏", notes = "取消文章收藏", httpMethod = "POST")
-    public Result cancelCollect(@RequestBody CollectBO collectBO) {
-        String articleId = collectBO.getArticleId();
-        String userId = collectBO.getUserId();
-        String favoritesId = collectBO.getFavoritesId();
-        boolean cancelCollect = articleDetailService.cancelCollectArticle(collectBO);
+    public Result cancelCollect(@RequestBody CollectArticle collectArticle) {
+        String articleId = collectArticle.getArticleId();
+        String userId = collectArticle.getUserId();
+        String favoritesId = collectArticle.getFavoritesId();
+        boolean cancelCollect = articleDetailService.cancelCollectArticle(collectArticle);
         if (cancelCollect) {
             // 设置用户收藏标志位(未收藏)
             redisCache.del(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
@@ -195,10 +194,10 @@ public class ArticleDetailController extends BaseController {
     @ApiOperation(value = "获取我的收藏夹", notes = "获取我的收藏夹", httpMethod = "GET")
     public Result getFavorites(@RequestParam String userId, @RequestParam String articleId) {
         List<Favorites> favoriteList = articleDetailService.getFavoritesByUserId(userId);
-        List<FavoritesVO> result = new ArrayList<>();
+        List<MineFavorites> result = new ArrayList<>();
         for (Favorites favorite : favoriteList) {
-            FavoritesVO favoritesVO = new FavoritesVO();
-            BeanUtils.copyProperties(favorite, favoritesVO);
+            MineFavorites mineFavorites = new MineFavorites();
+            BeanUtils.copyProperties(favorite, mineFavorites);
             String favoritesId = favorite.getId();
             // 精确匹配favoritesId
             String isFavoritesCollect = redisCache.get(RedisConst.REDIS_ARTICLE_ALREADY_COLLECT +
@@ -206,13 +205,13 @@ public class ArticleDetailController extends BaseController {
                     SysConst.SYMBOL_HYPHEN + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId);
             // 判断用户的收藏夹是否收藏了该文章
-            favoritesVO.setIsFavoritesCollect(StringUtils.isNotBlank(isFavoritesCollect));
+            mineFavorites.setCollectedOrNot(StringUtils.isNotBlank(isFavoritesCollect));
             // 获取用户每个收藏夹收藏文章的数量
             String userFavoritesCollectCountsKey = RedisConst.REDIS_ARTICLE_COLLECT_COUNTS +
                     SysConst.SYMBOL_COLON + userId +
                     SysConst.SYMBOL_HYPHEN + favoritesId;
-            favoritesVO.setFavoritesCollectCount(getCountsFromRedis(userFavoritesCollectCountsKey));
-            result.add(favoritesVO);
+            mineFavorites.setInFavorites(getCountsFromRedis(userFavoritesCollectCountsKey));
+            result.add(mineFavorites);
         }
         return Result.ok(result);
     }

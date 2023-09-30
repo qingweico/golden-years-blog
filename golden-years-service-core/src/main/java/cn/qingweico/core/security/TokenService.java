@@ -1,4 +1,4 @@
-package cn.qingweico.core.service;
+package cn.qingweico.core.security;
 
 import cn.qingweico.entity.model.LoginUser;
 import cn.qingweico.global.RedisConst;
@@ -10,8 +10,12 @@ import eu.bitwalker.useragentutils.UserAgent;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -29,21 +33,15 @@ import java.util.concurrent.TimeUnit;
 public class TokenService {
 
     /**
-     * 令牌自定义标识
-     */
-    @Value("${token.header}")
-    private String header;
-
-    /**
      * 令牌秘钥
      */
-    @Value("${token.secret}")
+    @Value("${gy.token-secret}")
     private String secret;
 
     /**
      *  令牌有效期(默认30分钟)
      */
-    @Value("${token.expireTime}")
+    @Value("${gy.token-exp}")
     private int expireTime;
 
     protected static final long MILLIS_SECOND = 1000;
@@ -61,7 +59,6 @@ public class TokenService {
      * @return 用户信息
      */
     public LoginUser getLoginUser(HttpServletRequest request) {
-        // 获取请求携带的令牌
         String token = getToken(request);
         if (StringUtils.isNotEmpty(token)) {
             try {
@@ -81,7 +78,7 @@ public class TokenService {
      * 设置用户身份信息
      */
     public void setLoginUser(LoginUser loginUser) {
-        if (cn.qingweico.util.StringUtils.isNotNull(loginUser) && StringUtils.isNotEmpty(loginUser.getToken())) {
+        if (!ObjectUtils.isEmpty(loginUser) && StringUtils.isNotEmpty(loginUser.getToken())) {
             refreshToken(loginUser);
         }
     }
@@ -107,7 +104,6 @@ public class TokenService {
         loginUser.setToken(token);
         setUserAgent(loginUser);
         refreshToken(loginUser);
-
         Map<String, Object> claims = new HashMap<>(1);
         claims.put(RedisConst.LOGIN_USER_KEY, token);
         return createToken(claims);
@@ -133,7 +129,7 @@ public class TokenService {
      */
     public void refreshToken(LoginUser loginUser) {
         loginUser.setLoginTime(System.currentTimeMillis());
-        loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
+        loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_SECOND);
         // 根据uuid将loginUser缓存
         String userKey = getTokenKey(loginUser.getToken());
         redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
@@ -196,9 +192,11 @@ public class TokenService {
      * @return token
      */
     private String getToken(HttpServletRequest request) {
+        /*令牌标识*/
+        String header = HttpHeaders.AUTHORIZATION;
         String token = request.getHeader(header);
         if (StringUtils.isNotEmpty(token) && token.startsWith(SysConst.TOKEN_PREFIX)) {
-            token = token.replace(SysConst.TOKEN_PREFIX, "");
+            token = token.replace(SysConst.TOKEN_PREFIX, StringUtils.EMPTY);
         }
         return token;
     }

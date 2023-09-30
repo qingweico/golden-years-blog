@@ -1,11 +1,11 @@
 package cn.qingweico.admin;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
-import tk.mybatis.spring.annotation.MapperScan;
 
 /**
  * @author zqw
@@ -16,8 +16,8 @@ import tk.mybatis.spring.annotation.MapperScan;
 @ComponentScan(basePackages = {"cn.qingweico"})
 @EnableFeignClients
 @EnableAsync
-public class Application {
+public class ArticleServiceApplication {
    public static void main(String[] args) {
-      SpringApplication.run(Application.class, args);
+      SpringApplication.run(ArticleServiceApplication.class, args);
    }
 }

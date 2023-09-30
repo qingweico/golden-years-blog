@@ -1,8 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 
 /**
@@ -10,9 +9,13 @@ import lombok.EqualsAndHashCode;
  * @date 2021/9/13
  */
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class Comments extends BaseEntity {
     /**
      * 文章作者id

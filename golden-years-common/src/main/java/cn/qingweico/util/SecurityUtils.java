@@ -75,14 +75,4 @@ public class SecurityUtils {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
-
-    /**
-     * 是否为管理员
-     *
-     * @param userId 用户ID
-     * @return 结果
-     */
-    public static boolean isAdmin(Long userId) {
-        return false;
-    }
 }

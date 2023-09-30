@@ -4,11 +4,12 @@ import cn.qingweico.admin.mapper.SysConfigMapper;
 import cn.qingweico.admin.service.SystemConfigService;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.entity.SysConfig;
-import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.result.Response;
+import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.JsonUtils;
+import cn.qingweico.util.redis.RedisCache;
+import cn.qingweico.util.redis.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,11 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
 
     @Resource
     private SysConfigMapper sysConfigMapper;
+    @Resource
+    private RedisCache redisCache;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     @Override
     public SysConfig getSystemConfig() {
@@ -35,7 +41,7 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
         SysConfig sysConfig;
         final String cachedSystemConfig = redisCache.get(systemConfigRedisKey);
         if (StringUtils.isBlank(cachedSystemConfig)) {
-            sysConfig = sysConfigMapper.selectAll().get(0);
+            sysConfig = sysConfigMapper.selectList(null).get(0);
             redisCache.set(systemConfigRedisKey, JsonUtils.objectToJson(sysConfig));
             log.info("set system config cache");
         } else {
@@ -47,7 +53,6 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
     @Override
     public void cleanRedisByKey(List<String> key) {
         if (key == null) {
-            log.error("redis key is null");
             return;
         }
         key.forEach(item -> {
@@ -65,12 +70,10 @@ public class SystemConfigServiceImpl extends BaseService implements SystemConfig
 
     @Override
     public void alterSystemConfig(SysConfig sysConfig) {
-        sysConfig.setUpdateTime(new Date());
-        if (sysConfigMapper.updateByPrimaryKeySelective(sysConfig) > 0) {
+        sysConfig.setUpdateTime(DateUtils.nowDateTime());
+        if (sysConfigMapper.updateById(sysConfig) > 0) {
             String key = RedisConst.REDIS_SYSTEM_CONFIG;
-            refreshCache(key);
-        } else {
-            GraceException.error(Response.SYSTEM_OPERATION_ERROR);
+            redisUtil.clearCache(key);
         }
     }
 }

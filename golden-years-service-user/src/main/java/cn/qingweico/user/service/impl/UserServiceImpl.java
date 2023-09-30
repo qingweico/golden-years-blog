@@ -78,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             lwq.like(User::getNickname, SysConst.DELIMITER_PERCENT + nickname + SysConst.DELIMITER_PERCENT);
         }
         if (StringUtils.isNotBlank(mobile)) {
-            lwq.like(User::getMobile ,SysConst.DELIMITER_PERCENT + mobile + SysConst.DELIMITER_PERCENT);
+            lwq.like(User::getMobile, SysConst.DELIMITER_PERCENT + mobile + SysConst.DELIMITER_PERCENT);
         }
         if (UserStatus.isUserStatusValid(status)) {
             lwq.eq(User::getAvailable, status);
@@ -125,10 +125,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setFace(randomFace);
         user.setPassword(DEFAULT_PASSWORD);
         user.setBirthday(DateUtils.stringToDate("1990-07-01"));
-        user.setAvailable(UserStatus.AVAILABLE.type);
-        user.setSex(Sex.SECRET.type);
-        user.setCreateTime(new Date());
-        user.setUpdateTime(new Date());
+        user.setAvailable(UserStatus.AVAILABLE.getVal());
+        user.setSex(Sex.SECRET.getVal());
+        user.setCreateTime(DateUtils.nowDateTime());
+        user.setUpdateTime(DateUtils.nowDateTime());
         // 放 rabbitmq 中, 为用户创建默认的收藏夹
         rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
                 SysConst.ARTICLE_CREATE_FAVORITES_DO, userId);
@@ -153,8 +153,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         BeanUtils.copyProperties(userInfoBO, userInfo);
 
-        userInfo.setUpdateTime(new Date());
-        userInfo.setAvailable(UserStatus.AVAILABLE.type);
+        userInfo.setUpdateTime(DateUtils.nowDateTime());
+        userInfo.setAvailable(UserStatus.AVAILABLE.getVal());
 
         // 保证缓存数据双写一致性
         Lock lock = new ReentrantLock();
@@ -239,7 +239,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Integer queryUserCounts() {
         LambdaQueryWrapper<User> lwq = new LambdaQueryWrapper<>();
-        lwq.eq(User::getAvailable, UserStatus.AVAILABLE.getValue());
+        lwq.eq(User::getAvailable, UserStatus.AVAILABLE.getVal());
         return userMapper.selectCount(lwq);
     }
 }

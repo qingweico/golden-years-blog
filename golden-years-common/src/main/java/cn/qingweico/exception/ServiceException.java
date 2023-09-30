@@ -4,6 +4,7 @@ package cn.qingweico.exception;
  * 业务异常
  *
  * @author zqw
+ * @data 2023-09-24
  */
 public final class ServiceException extends RuntimeException {
     private static final long serialVersionUID = 1L;

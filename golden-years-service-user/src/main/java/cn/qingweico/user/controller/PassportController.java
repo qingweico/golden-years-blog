@@ -79,7 +79,7 @@ public class PassportController extends BaseController {
         if (user == null) {
             // 如果用户没有注册过, 则为null, 需要注册信息入库
             user = userService.createUser(mobile);
-        } else if (UserStatus.DISABLE.type.equals(user.getAvailable())) {
+        } else if (UserStatus.DISABLE.getVal().equals(user.getAvailable())) {
             // 如果用户不为空且状态为冻结则禁止该用户登陆
             return Result.r(Response.USER_FROZEN);
         }
@@ -92,9 +92,9 @@ public class PassportController extends BaseController {
         HashMap<String, Object> map = new HashMap<>(2);
         map.put(SysConst.TOKEN, jsonWebToken);
         map.put(SysConst.USER_STATUS, user.getAvailable());
-        if (userStatus == UserStatus.DISABLE.type) {
+        if (userStatus == UserStatus.DISABLE.getVal()) {
             return Result.ok(Response.WELCOME, map);
-        } else if (userStatus == UserStatus.AVAILABLE.type) {
+        } else if (userStatus == UserStatus.AVAILABLE.getVal()) {
             return Result.ok(Response.LOGIN_SUCCESS, map);
         }
         return Result.r(Response.SYSTEM_ERROR);
@@ -111,7 +111,7 @@ public class PassportController extends BaseController {
         User user = userService.queryUserByAuth(auth);
         if (user == null) {
             return Result.r(Response.USER_NOT_EXIST_ERROR);
-        } else if (UserStatus.DISABLE.type.equals(user.getAvailable())) {
+        } else if (UserStatus.DISABLE.getVal().equals(user.getAvailable())) {
             return Result.r(Response.USER_FROZEN);
         }
         int userStatus = user.getAvailable();
@@ -119,10 +119,10 @@ public class PassportController extends BaseController {
                 || user.getNickname().equals(auth)
                 || user.getEmail().equals(auth)) {
             if (Objects.equals(user.getPassword(), password)) {
-                if (userStatus == UserStatus.DISABLE.type) {
+                if (userStatus == UserStatus.DISABLE.getVal()) {
                     return Result.ok(Response.WELCOME, user.getAvailable());
                 }
-                if (userStatus == UserStatus.AVAILABLE.type) {
+                if (userStatus == UserStatus.AVAILABLE.getVal()) {
                     String jsonWebToken = JwtUtils.createJwt(user.getId());
                     userService.doSaveUserAuthToken(user, jsonWebToken);
                     userService.doSaveLoginLog(user.getId());

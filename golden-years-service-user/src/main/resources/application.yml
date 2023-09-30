@@ -18,12 +18,28 @@ server:
 # 配置项目信息   数据源的相关配置
 #
 ############################################################
+gy:
+  # token 密钥
+  token-secret: MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+  # 登录用户信息保存时间(s)
+  token-exp: 1800
+  # 登录错误尝试次数
+  login-attempts-limit-times: 20
+  # 登录错误尝试时间(s)
+  login-attempts-limit-seconds: 600
+  rate-limit:
+    enable: true
+    period: 10
+    count: 1000
+  login-limit:
+    period: 10
+    count: 10
+
 spring:
   application:
     name: service-user
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver          # mysql驱动
-    # 公网ip: 本地部署使用本地SQL(119.29.35.129)
     # time_zone : 设置  set global time_zone = "+8:00";
     masterUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
     slaveUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
@@ -93,9 +109,16 @@ spring:
     time-zone: GMT+8
   profiles:
     active: dev
+    # db.createUser(
+    #  {
+    #    user: "gy",
+    #    pwd: "gy",
+    #    roles: [ { role: "readWrite", db: "golden-years" } ]
+    #  }
+    #)
   data:
     mongodb:
-      uri: mongodb://root:root@106.12.136.221:27017
+      uri: mongodb://gy:gy@106.12.136.221:27017
       database: golden-years
     elasticsearch:
       cluster-name: golden-years-es
@@ -151,12 +174,3 @@ spring:
 # mybatis mapper 配置
 #
 ############################################################
-# 通用 Mapper 配置
-mapper:
-  mappers: cn.qingweico.core.mapper.CommonMapper
-  not-empty: false    # 在进行数据库操作的的时候, 判断表达式 username != null, 是否追加 username != ''
-  identity: MYSQL
-# 分页插件配置
-pagehelper:
-  helperDialect: mysql
-  supportMethodsArguments: true

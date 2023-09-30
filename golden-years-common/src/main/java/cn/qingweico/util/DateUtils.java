@@ -7,6 +7,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -173,7 +175,7 @@ public final class DateUtils {
      */
     public static String dateTimeToStr(Date dateTime) {
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat format = new SimpleDateFormat(DATETIME_PATTERN);
         return format.format(dateTime);
     }
 
@@ -487,7 +489,7 @@ public final class DateUtils {
      * @return static
      */
     public static Date getDate(String date, int day) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat(DATETIME_PATTERN);
         Calendar cal = Calendar.getInstance();
         try {
             Date beforeDate = formatter.parse(date);
@@ -802,5 +804,10 @@ public final class DateUtils {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static LocalDateTime nowDateTime() {
+        String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATETIME_PATTERN));
+        return LocalDateTime.parse(format, DateTimeFormatter.ofPattern(DATETIME_PATTERN));
     }
 }

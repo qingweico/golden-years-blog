@@ -1,6 +1,7 @@
 package cn.qingweico.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 
 /**
@@ -9,12 +10,15 @@ import lombok.*;
  * @author zqw
  * @date 2021/9/13
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@Builder
+@Setter
+@Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Accessors(chain = true)
 public class Fans extends BaseEntity {
+    private static final long serialVersionUID = -135137388555108580L;
     /**
      * 关注的作者
      */

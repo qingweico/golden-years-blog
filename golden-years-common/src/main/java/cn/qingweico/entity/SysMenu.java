@@ -1,8 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -12,9 +11,13 @@ import java.util.List;
  * @author zqw
  * @date 2022/3/23
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class SysMenu extends BaseEntity implements Comparable<SysMenu> {
     /**
      * 菜单名称

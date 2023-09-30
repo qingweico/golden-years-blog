@@ -1,6 +1,8 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.val;
 
 /**
  * 文章编辑器模式
@@ -8,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2022/4/12
  */
 @AllArgsConstructor
+@Getter
 public enum EditorModelType {
     /**
      * 富文本编辑器模式
@@ -17,6 +20,6 @@ public enum EditorModelType {
      * MarkDown模式
      */
     MARKDOWN_TEXT(1, "MarkDown");
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 }

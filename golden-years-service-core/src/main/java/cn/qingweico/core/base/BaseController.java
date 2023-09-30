@@ -24,11 +24,8 @@ import javax.annotation.Resource;
 @EnableFeignClients
 public class BaseController {
 
-    @Resource(name = "rt")
+    @Resource
     public RedisCache redisCache;
-
-    @Autowired
-    public ElasticsearchTemplate elasticsearchTemplate;
 
     public Integer getCountsFromRedis(String key) {
         String counts = redisCache.get(key);

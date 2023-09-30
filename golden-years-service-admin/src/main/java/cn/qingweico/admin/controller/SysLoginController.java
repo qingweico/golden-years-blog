@@ -62,7 +62,7 @@ public class SysLoginController extends BaseController {
     public Result login(@RequestBody LoginBody loginBody) {
         String ip = IpUtils.getIpAddr();
         String limitCount = redisCache.get(RedisConst.LOGIN_LIMIT + ip);
-        if (cn.qingweico.util.StringUtils.isNotEmpty(limitCount)) {
+        if (StringUtils.isNotEmpty(limitCount)) {
             int tempLimitCount = Integer.parseInt(limitCount);
             // TODO 使用系统变量
             if (tempLimitCount >= 5) {
@@ -71,22 +71,7 @@ public class SysLoginController extends BaseController {
         }
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getUuid());
-        SysUser sysUser = sysUserService.querySysUserByUsername(loginBody.getUsername());
-        if (sysUser == null) {
-            return Result.r(Response.SYS_USER_NOT_EXIT);
-        }
-        // 对密码进行加盐加密验证，采用SHA-256 + 随机盐【动态加盐】 + 密钥对密码进行加密
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        boolean isPassword = encoder.matches(loginBody.getPassword(), sysUser.getPassword());
-        if (isPassword) {
-            String adminId = sysUser.getId();
-            String jsonWebToken = JwtUtils.createJwt(adminId);
-            sysUserService.doSaveLoginLog(adminId);
-            sysUserService.doSaveToken(sysUser, jsonWebToken);
-            return Result.ok(Response.LOGIN_SUCCESS, jsonWebToken);
-        } else {
-            return Result.r(Response.SYS_USER_NOT_EXIT);
-        }
+        return Result.ok(Response.LOGIN_SUCCESS, token);
     }
 
 
@@ -144,7 +129,7 @@ public class SysLoginController extends BaseController {
             base64Db = (String) result.getData();
         }
         // 调用阿里AI进行人脸对比识别, 判断可行度, 从而实现人脸登陆
-        boolean pass = faceVerify.faceVerify(FaceVerifyType.BASE64.type, base64, base64Db, 60.0f);
+        boolean pass = faceVerify.faceVerify(FaceVerifyType.BASE64.getVal(), base64, base64Db, 60.0f);
 
         if (!pass) {
             return Result.r(Response.FACE_LOGIN_ERROR);

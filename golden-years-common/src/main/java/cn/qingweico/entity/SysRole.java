@@ -1,8 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 角色相关
@@ -10,11 +9,17 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2022/3/23
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
 public class SysRole extends BaseEntity {
 
+    private static final long serialVersionUID = -5308132468007786411L;
     /**
      * 角色编码
      */

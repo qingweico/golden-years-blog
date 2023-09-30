@@ -1,9 +1,9 @@
 package cn.qingweico.admin.controller;
 
-import cn.qingweico.admin.model.bo.SaveFriendLinkBO;
 import cn.qingweico.admin.model.mo.FriendLink;
 import cn.qingweico.admin.service.FriendLinkService;
 import cn.qingweico.core.base.BaseController;
+import cn.qingweico.entity.model.SaveOrUpdateFriendLink;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
@@ -33,10 +33,10 @@ public class FriendLinkController extends BaseController {
 
     @ApiOperation(value = "新增或者修改友情链接", notes = "新增或者修改友情链接", httpMethod = "POST")
     @PostMapping("/saveOrUpdate")
-    public Result saveOrUpdateFriendLink(@RequestBody @Valid SaveFriendLinkBO saveFriendLinkBO) {
+    public Result saveOrUpdateFriendLink(@RequestBody @Valid SaveOrUpdateFriendLink saveOrUpdateFriendLink) {
         FriendLink friendLink = new FriendLink();
-        String pendingFriendLinkId = saveFriendLinkBO.getId();
-        BeanUtils.copyProperties(saveFriendLinkBO, friendLink);
+        String pendingFriendLinkId = saveOrUpdateFriendLink.getId();
+        BeanUtils.copyProperties(saveOrUpdateFriendLink, friendLink);
         if (StringUtils.isEmpty(pendingFriendLinkId)) {
             friendLink.setCreateTime(new Date());
         }
@@ -49,7 +49,7 @@ public class FriendLinkController extends BaseController {
         }
     }
 
-    @ApiOperation(value = "管理员查询友情链接列表", notes = "管理员查询友情链接列表", httpMethod = "GET")
+    @ApiOperation(value = "系统用户查询友情链接列表", notes = "系统用户查询友情链接列表", httpMethod = "GET")
     @GetMapping("/list")
     public Result getFriendLinkList(@RequestParam String linkName,
                                     @RequestParam Integer isDelete,
@@ -77,6 +77,6 @@ public class FriendLinkController extends BaseController {
     @ApiOperation(value = "首页友情链接列表", notes = "查询友情链接列表", httpMethod = "GET")
     @GetMapping("/portal/list")
     public Result getIndexFriendLinkList() {
-        return Result.ok(friendLinkService.queryIndexFriendLinkList(YesOrNo.NO.type));
+        return Result.ok(friendLinkService.queryIndexFriendLinkList(YesOrNo.NO.getVal()));
     }
 }

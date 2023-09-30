@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 主站搜索模式
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2022/4/12
  */
 @AllArgsConstructor
+@Getter
 public enum SearchModelType {
     /**
      * SQL搜索

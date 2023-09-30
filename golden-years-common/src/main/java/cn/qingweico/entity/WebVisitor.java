@@ -1,8 +1,7 @@
 package cn.qingweico.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * web访客(包括后台和主站)
@@ -10,13 +9,14 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2022/4/18
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class WebVisitor extends BaseEntity {
-
-    private String id;
-
     /**
      * 用户ID
      */

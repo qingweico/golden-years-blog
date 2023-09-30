@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
+ * 认证失败处理器
  * @author zqw
  * @date 2023/9/23
  */
@@ -28,7 +29,6 @@ public class ApiAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 .code(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .msg(e.getMessage())
                 .data(null)
-                .errors(Collections.emptyList())
                 .build();
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

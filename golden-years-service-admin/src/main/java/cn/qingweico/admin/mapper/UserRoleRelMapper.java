@@ -1,7 +1,7 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
 import cn.qingweico.entity.SysUserRoleRel;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2023/2/19
  */
 @Repository
-public interface UserRoleRelMapper extends CommonMapper<SysUserRoleRel> {
+public interface UserRoleRelMapper extends BaseMapper<SysUserRoleRel> {
 }

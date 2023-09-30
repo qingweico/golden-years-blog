@@ -1,10 +1,9 @@
 package cn.qingweico.article.service;
 
-import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.Category;
-import cn.qingweico.pojo.Tag;
-import cn.qingweico.pojo.vo.ArticleDetailVO;
-import cn.qingweico.pojo.vo.CategoryVO;
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.Category;
+import cn.qingweico.entity.Tag;
+import cn.qingweico.entity.model.ArticleDetail;
 import cn.qingweico.util.PagedResult;
 
 import java.util.List;
@@ -67,7 +66,7 @@ public interface ArticlePortalService {
      * @param articleId 文章id
      * @return ArticleDetailVO
      */
-    ArticleDetailVO queryDetail(String articleId);
+    ArticleDetail queryDetail(String articleId);
 
     /**
      * 查询首页每个类别下文章的数目
@@ -83,14 +82,6 @@ public interface ArticlePortalService {
      * @return List<Category>
      */
     List<Category> queryCategoryList();
-
-    /**
-     * 首页查询带有文章数量的文章类别列表
-     *
-     * @return List<CategoryVO>
-     */
-
-    List<CategoryVO> getCategoryListWithArticleCount();
 
     /**
      * 根据时间范围归类文章

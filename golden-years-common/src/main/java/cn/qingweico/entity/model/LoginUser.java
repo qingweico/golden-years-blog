@@ -3,16 +3,15 @@ package cn.qingweico.entity.model;
 
 import cn.qingweico.entity.SysUser;
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 登录用户身份权限
@@ -30,7 +29,7 @@ public class LoginUser implements UserDetails, Serializable {
     /**
      * 用户ID
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 用户唯一标识
@@ -76,7 +75,7 @@ public class LoginUser implements UserDetails, Serializable {
      * 用户信息
      */
     private SysUser user;
-
+    private @Getter Set<SimpleGrantedAuthority> roles;
 
     @JSONField(serialize = false)
     @Override
@@ -128,11 +127,18 @@ public class LoginUser implements UserDetails, Serializable {
     @JSONField(serialize = false)
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.getAvailable() == 1;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        roles = permissions.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+        return roles;
     }
+
+    public LoginUser(SysUser user, Set<String> permissions) {
+        this.user = user;
+        this.permissions = permissions;
+    }
+
 }

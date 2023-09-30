@@ -1,9 +1,8 @@
 package cn.qingweico.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -14,10 +13,15 @@ import java.util.Date;
  * @author zqw
  * @date 2023/2/19
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class Permission extends BaseEntity {
+    private static final long serialVersionUID = -8416480349215544838L;
     /**
      * 权限编码
      */

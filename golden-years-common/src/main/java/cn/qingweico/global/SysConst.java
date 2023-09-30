@@ -212,6 +212,8 @@ public final class SysConst {
 
     public final static String DATE_FORMAT_MM_DD = "MM-dd";
 
+
+    public final static String LIMIT_ONE = "LIMIT 1";
     public final static String DATE_FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
     public static final String IP = "ip";
     public static final String EMPTY_STRING = "";
@@ -236,7 +238,7 @@ public final class SysConst {
     /**
      * TOKEN_PREFIX
      */
-    public static final String TOKEN_PREFIX = "GoldenYears";
+    public static final String TOKEN_PREFIX = "Bearer";
 
     /**
      * 注销
@@ -247,5 +249,15 @@ public final class SysConst {
      * 验证码有效期（分钟）
      */
     public static final Integer CAPTCHA_EXPIRATION = 2;
+
+    /**
+     * admin
+     */
+    public static final String SYS_USER_ADMIN = "1";
+
+    /**
+     * role_admin
+     */
+    public static final String ROLE_ADMIN = "role_admin";
 
 }

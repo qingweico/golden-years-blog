@@ -1,9 +1,7 @@
 package cn.qingweico.entity;
 
-import cn.qingweico.enums.LoginType;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 主站配置
@@ -11,11 +9,16 @@ import lombok.EqualsAndHashCode;
  * @author zqw
  * @date 2022/4/11
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Accessors(chain = true)
 public class WebConfig extends BaseEntity {
 
+    private static final long serialVersionUID = 2722316933931523496L;
     /**
      * 网站logo
      */
@@ -44,8 +47,4 @@ public class WebConfig extends BaseEntity {
      * 网站标题
      */
     private String title;
-    /**
-     * 登录方式 {@link LoginType}
-     */
-    private String loginTypeList;
 }

@@ -1,6 +1,5 @@
 package cn.qingweico.core.security.token;
 
-import cn.qingweico.entity.SysUser;
 import cn.qingweico.entity.model.LoginUser;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,7 +39,7 @@ public class ApiAuthenticationToken implements Authentication {
 
     @Override
     public Object getDetails() {
-        return user;
+        return loginUser;
     }
 
     @Override
@@ -62,6 +61,6 @@ public class ApiAuthenticationToken implements Authentication {
 
     @Override
     public String getName() {
-        return user.getUsername();
+        return loginUser.getUsername();
     }
 }

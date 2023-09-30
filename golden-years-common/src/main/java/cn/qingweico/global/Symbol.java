@@ -54,4 +54,9 @@ public interface Symbol {
      * WHITE_SPACE: " "
      */
     String WHITE_SPACE = " ";
+
+    /**
+     * PERCENT: "%"
+     */
+    String PERCENT = "%";
 }

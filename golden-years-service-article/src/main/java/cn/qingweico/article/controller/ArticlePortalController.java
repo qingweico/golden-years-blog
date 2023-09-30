@@ -4,12 +4,14 @@ import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.IndexService;
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.model.ArticleElastic;
+import cn.qingweico.entity.model.IndexArticle;
+import cn.qingweico.entity.model.UserArticleRank;
+import cn.qingweico.entity.model.UserBasicInfo;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.pojo.vo.*;
 import cn.qingweico.result.Result;
-import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.eo.ArticleEo;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
@@ -25,6 +27,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.SearchResultMapper;
 import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.aggregation.impl.AggregatedPageImpl;
@@ -46,10 +49,13 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class ArticlePortalController extends BaseController {
 
-    // ########################################### 主站文章API ###########################################
+    // 主站文章API
 
     @Resource
     private ArticlePortalService articlePortalService;
+
+    @Resource
+    private ElasticsearchTemplate elasticsearchTemplate;
 
     @ApiOperation(value = "首页查询文章列表(elasticSearch)", notes = "首页查询文章列表(elasticSearch)", httpMethod = "GET")
     @GetMapping("es/search")
@@ -62,7 +68,7 @@ public class ArticlePortalController extends BaseController {
         Pageable pageable = PageRequest.of(page, pageSize);
 
         SearchQuery searchQuery;
-        AggregatedPage<ArticleEo> pagedArticle =
+        AggregatedPage<ArticleElastic> pagedArticle =
                 new AggregatedPageImpl<>(new ArrayList<>(0));
 
         // 首页默认查询不带参数
@@ -72,7 +78,7 @@ public class ArticlePortalController extends BaseController {
                     .withPageable(pageable)
                     .build();
 
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleEo.class);
+            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleElastic.class);
         }
 
         // 按照文章类别查询
@@ -82,7 +88,7 @@ public class ArticlePortalController extends BaseController {
                     .withPageable(pageable)
                     .build();
 
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleEo.class);
+            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleElastic.class);
         }
         // 按照文章标签查询
         if (StringUtils.isBlank(keyword) && !StringUtils.isBlank(tag)) {
@@ -92,7 +98,7 @@ public class ArticlePortalController extends BaseController {
                     .withPageable(pageable)
                     .build();
 
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleEo.class);
+            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleElastic.class);
         }
 
         // 按照关键字查询, 并且高亮显示关键字
@@ -100,11 +106,11 @@ public class ArticlePortalController extends BaseController {
             pagedArticle = queryByKeyword(keyword, pageable);
         }
 
-        List<ArticleEo> articleEoList = pagedArticle.getContent();
+        List<ArticleElastic> articleEoList = pagedArticle.getContent();
         List<Article> res = new ArrayList<>();
-        for (ArticleEo articleEo : articleEoList) {
+        for (ArticleElastic articleElastic : articleEoList) {
             Article article = new Article();
-            BeanUtils.copyProperties(articleEo, article);
+            BeanUtils.copyProperties(articleElastic, article);
             res.add(article);
         }
         PagedResult gridResult = new PagedResult();
@@ -115,7 +121,7 @@ public class ArticlePortalController extends BaseController {
         return Result.ok(rebuildArticleGrid(gridResult));
     }
 
-    private AggregatedPage<ArticleEo> queryByKeyword(String keyword, Pageable pageable) {
+    private AggregatedPage<ArticleElastic> queryByKeyword(String keyword, Pageable pageable) {
         String preTag = "<font color='red'>";
         String postTag = "</font>";
         String searchTitleField = SysConst.TITLE;
@@ -128,13 +134,13 @@ public class ArticlePortalController extends BaseController {
                 .build();
 
         return elasticsearchTemplate.queryForPage(searchQuery,
-                ArticleEo.class,
+                ArticleElastic.class,
                 new SearchResultMapper() {
                     @Override
                     public <T> AggregatedPage<T> mapResults(SearchResponse searchResponse,
                                                             Class<T> aClass,
                                                             Pageable pageable) {
-                        List<ArticleEo> articleHighLightList = new ArrayList<>();
+                        List<ArticleElastic> articleHighLightList = new ArrayList<>();
                         SearchHits searchHits = searchResponse.getHits();
                         for (SearchHit hit : searchHits) {
                             HighlightField highlightField = hit.getHighlightFields().get(searchTitleField);
@@ -149,16 +155,16 @@ public class ArticlePortalController extends BaseController {
                             Long dateLong = (Long) hit.getSourceAsMap().get(SysConst.CREATE_TIME);
                             Date createTime = new Date(dateLong);
 
-                            ArticleEo articleEo = new ArticleEo();
-                            articleEo.setId(articleId);
-                            articleEo.setCategoryId(categoryId);
-                            articleEo.setTitle(title);
-                            articleEo.setArticleType(articleType);
-                            articleEo.setArticleCover(articleCover);
-                            articleEo.setSummary(summary);
-                            articleEo.setAuthorId(authorId);
-                            articleEo.setCreateTime(createTime);
-                            articleHighLightList.add(articleEo);
+                            ArticleElastic articleElastic = new ArticleElastic();
+                            articleElastic.setId(articleId);
+                            articleElastic.setCategoryId(categoryId);
+                            articleElastic.setTitle(title);
+                            articleElastic.setArticleType(articleType);
+                            articleElastic.setArticleCover(articleCover);
+                            articleElastic.setSummary(summary);
+                            articleElastic.setAuthorId(authorId);
+                            articleElastic.setCreateTime(createTime);
+                            articleHighLightList.add(articleElastic);
                         }
                         @SuppressWarnings("unchecked")
                         AggregatedPageImpl<T> ts = new AggregatedPageImpl<>((List<T>) articleHighLightList,
@@ -258,11 +264,7 @@ public class ArticlePortalController extends BaseController {
         for (String json : articleJson) {
             Article article = JsonUtils.jsonToPojo(json, Article.class);
             UserArticleRank userArticleRank = new UserArticleRank();
-            if(article == null) {
-                log.error("queryGoodArticleListOfAuthor: article is null");
-                return Result.error();
-            }
-            BeanUtils.copyProperties(article, userArticleRank);
+            BeanUtils.copyProperties(article == null ? new Article() : article, userArticleRank);
             result.add(userArticleRank);
         }
         return Result.ok(result);
@@ -305,7 +307,7 @@ public class ArticlePortalController extends BaseController {
                 page, pageSize));
     }
 
-    // ########################################### 文章全局状态 ###########################################
+    // 文章全局状态
 
     @Resource
     private IndexService indexService;
@@ -334,13 +336,7 @@ public class ArticlePortalController extends BaseController {
         return Result.ok(indexService.getBlogContributeCount());
     }
 
-    @ApiOperation(value = "首页查询带有文章数量的文章类别列表", notes = "首页查询带有文章数量的文章类别列表", httpMethod = "GET")
-    @GetMapping("category/getCategoryListWithArticleCount")
-    public Result queryEachCategoryArticleCount() {
-        return Result.ok(articlePortalService.getCategoryListWithArticleCount());
-    }
-
-    // ########################################### 辅助函数 ###########################################
+    // private methods
 
     private PagedResult rebuildArticleGrid(PagedResult gridResult) {
         String articleListJson = JsonUtils.objectToJson(gridResult.getRows());
@@ -360,14 +356,14 @@ public class ArticlePortalController extends BaseController {
         // redis multi get
         List<String> countsRedisList = redisCache.mGet(idList);
 
-        List<UserBasicInfoVO> authorList = getUserInfoListByIdsClient(idSet);
-        List<IndexArticleVO> indexArticleList = new ArrayList<>();
+        List<UserBasicInfo> authorList = getUserInfoListByIdsClient(idSet);
+        List<IndexArticle> indexArticleList = new ArrayList<>();
         int j = 0;
         for (Article article : rows) {
-            IndexArticleVO indexArticleVO = new IndexArticleVO();
-            BeanUtils.copyProperties(article, indexArticleVO);
-            UserBasicInfoVO authorInfo = getAuthorInfoIfPresent(article.getAuthorId(), authorList);
-            indexArticleVO.setAuthorVO(authorInfo);
+            IndexArticle indexArticle = new IndexArticle();
+            BeanUtils.copyProperties(article, indexArticle);
+            UserBasicInfo authorInfo = getAuthorInfoIfPresent(article.getAuthorId(), authorList);
+            indexArticle.setAuthorVO(authorInfo);
             String readCountsStr;
             String starCountsStr;
             String collectCountsStr;
@@ -392,11 +388,11 @@ public class ArticlePortalController extends BaseController {
             if (StringUtils.isNotBlank(commentCountsStr)) {
                 commentCounts = Integer.parseInt(commentCountsStr);
             }
-            indexArticleVO.setReadCounts(readCounts);
-            indexArticleVO.setStarCounts(starCounts);
-            indexArticleVO.setCommentCounts(commentCounts);
-            indexArticleVO.setCollectCounts(collectCounts);
-            indexArticleList.add(indexArticleVO);
+            indexArticle.setReadCounts(readCounts);
+            indexArticle.setStarCounts(starCounts);
+            indexArticle.setCommentCounts(commentCounts);
+            indexArticle.setCollectCounts(collectCounts);
+            indexArticleList.add(indexArticle);
         }
         gridResult.setRows(indexArticleList);
         return gridResult;
@@ -415,29 +411,29 @@ public class ArticlePortalController extends BaseController {
         return (int) result * 1000;
     }
 
-    private UserBasicInfoVO getAuthorInfoIfPresent(String author,
-                                                   List<UserBasicInfoVO> authorList) {
+    private UserBasicInfo getAuthorInfoIfPresent(String author,
+                                                 List<UserBasicInfo> authorList) {
         if (authorList == null) {
             return null;
         }
-        for (UserBasicInfoVO userVO : authorList) {
+        for (UserBasicInfo userVO : authorList) {
             if (userVO.getId().equals(author)) {
                 return userVO;
             }
         }
         return null;
     }
-    // ########################################### 远程调用 ###########################################
+    // 远程调用
 
     @Resource
     private UserBaseInfoClient client;
 
-    public List<UserBasicInfoVO> getUserInfoListByIdsClient(Set<?> idSet) {
-        List<UserBasicInfoVO> userBasicInfoVOList;
+    public List<UserBasicInfo> getUserInfoListByIdsClient(Set<?> idSet) {
+        List<UserBasicInfo> userBasicInfoVOList;
         Result result = client.queryByIds(JsonUtils.objectToJson(idSet));
         if (result != null) {
             String userJson = JsonUtils.objectToJson(result.getData());
-            userBasicInfoVOList = JsonUtils.jsonToList(userJson, UserBasicInfoVO.class);
+            userBasicInfoVOList = JsonUtils.jsonToList(userJson, UserBasicInfo.class);
         } else {
             return new ArrayList<>(0);
         }

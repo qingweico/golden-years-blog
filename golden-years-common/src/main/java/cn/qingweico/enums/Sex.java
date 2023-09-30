@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 用户性别
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/6
  */
 @AllArgsConstructor
+@Getter
 public enum Sex {
     /**
      * 女
@@ -23,6 +25,6 @@ public enum Sex {
      */
     SECRET(2, "保密");
 
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 }

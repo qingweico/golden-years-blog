@@ -1,7 +1,7 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
-import cn.qingweico.pojo.WebVisit;
+import cn.qingweico.entity.WebVisitor;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @date 2022/4/18
  */
 @Repository
-public interface WebVisitMapper extends CommonMapper<WebVisit> {
+public interface WebVisitMapper extends BaseMapper<WebVisitor> {
     /**
      * 获取IP数目
      *

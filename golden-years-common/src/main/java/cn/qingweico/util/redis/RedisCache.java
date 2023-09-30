@@ -352,6 +352,7 @@ public class RedisCache {
     public <T> void setCacheObject(final String key, final T value, final Integer timeout, final TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
     }
+
     /**
      * 调用 lua 脚本
      *
@@ -364,4 +365,15 @@ public class RedisCache {
         srt.execute(rs, Collections.singletonList(key), value);
     }
 
+    /**
+     * 调用 lua 脚本
+     *
+     * @param rs    RedisScript
+     * @param key   key(多个)
+     * @param value value(多个)
+     * @param <T>   返回类型
+     */
+    public <T> T execute(RedisScript<T> rs, List<String> key, Object... value) {
+        return srt.execute(rs, key, value);
+    }
 }

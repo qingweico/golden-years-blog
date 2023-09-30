@@ -8,7 +8,7 @@ import lombok.Data;
  * @date 2021/9/7
  */
 @Data
-public class UserBasicInfoVO {
+public class UserBasicInfo {
     private String id;
     private String nickname;
     private String face;

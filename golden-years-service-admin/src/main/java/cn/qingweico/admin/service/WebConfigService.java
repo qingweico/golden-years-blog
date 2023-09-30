@@ -1,6 +1,6 @@
 package cn.qingweico.admin.service;
 
-import cn.qingweico.pojo.WebConfig;
+import cn.qingweico.entity.WebConfig;
 
 /**
  * @author zqw

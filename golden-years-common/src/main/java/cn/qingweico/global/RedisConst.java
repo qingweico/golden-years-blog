@@ -58,7 +58,7 @@ public class RedisConst {
     /**
      * 登录账户密码错误次数 redis key
      */
-    public static final String PWD_ERR_CNT_KEY = "pwd_err_cnt:";
+    public static final String USER_ATTEMPT_LOGIN = "user_attempt_login:";
 
     /**
      * 验证码 redis key

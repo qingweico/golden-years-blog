@@ -5,23 +5,25 @@ import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.CategoryMapper;
 import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.ArticlePortalService;
+import cn.qingweico.entity.Article;
+import cn.qingweico.entity.Category;
+import cn.qingweico.entity.Tag;
+import cn.qingweico.entity.model.ArticleArchive;
+import cn.qingweico.entity.model.ArticleClassify;
+import cn.qingweico.entity.model.ArticleDetail;
 import cn.qingweico.enums.ArticleReviewStatus;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.Article;
-import cn.qingweico.pojo.Category;
-import cn.qingweico.pojo.Tag;
-import cn.qingweico.pojo.vo.*;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import cn.qingweico.util.redis.RedisCache;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.annotation.Id;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -44,6 +46,9 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     @Resource
     private TagMapper tagMapper;
 
+    @Resource
+    private RedisCache redisCache;
+
     @Override
     public PagedResult queryPortalArticleList(String keyword,
                                               String category,
@@ -51,33 +56,29 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
                                               Integer page,
                                               Integer pageSize) {
 
-
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = setDefaultArticleExample(example);
-
-        if (StringUtils.isNotBlank(keyword)) {
-            criteria.andLike(SysConst.TITLE, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        setDefaultArticleCondition(lwq);
+        if (StringUtils.isNotEmpty(keyword)) {
+            lwq.like(Article::getTitle, SysConst.DELIMITER_PERCENT + keyword + SysConst.DELIMITER_PERCENT);
         }
-        if (StringUtils.isNotBlank(category)) {
-            criteria.andEqualTo(SysConst.CATEGORY_ID, category);
+        if (StringUtils.isNotEmpty(category)) {
+            lwq.eq(Article::getCategoryId, category);
         }
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
+        List<Article> list = articleMapper.selectList(lwq);
         if (StringUtils.isNotBlank(tag)) {
             // 标签筛选
-            list = filterArticleTag(list, tag);;
+            list = filterArticleTag(list, tag);
         }
         return setterPagedGrid(list, page);
     }
 
     @Override
     public List<Article> queryHotArticle() {
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConst.IS_DELETE, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConst.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
-        PageHelper.startPage(SysConst.NUM_ONE, SysConst.NUM_100);
-        return articleMapper.selectByExample(example);
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        lwq.eq(Article::getIsDelete, YesOrNo.NO.getVal());
+        lwq.eq(Article::getArticleType, ArticleReviewStatus.APPROVED.getVal());
+        // TODO 分页
+        return articleMapper.selectList(lwq);
     }
 
     @Override
@@ -89,44 +90,42 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     private PagedResult getPagedGridResult(String author, Integer page, Integer pageSize) {
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo(SysConst.AUTHOR_ID, author);
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        setDefaultArticleCondition(lwq);
+        lwq.eq(Article::getAuthorId, author);
+        // TODO 分页
+        List<Article> list = articleMapper.selectList(lwq);
         return setterPagedGrid(list, page);
     }
 
     @Override
     public List<Article> queryGoodArticleListOfAuthor(String author) {
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConst.IS_DELETE, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConst.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
-        criteria.andEqualTo(SysConst.AUTHOR_ID, author);
-        return articleMapper.selectByExample(example);
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        lwq.eq(Article::getIsDelete, YesOrNo.NO.getVal());
+        lwq.eq(Article::getArticleType, ArticleReviewStatus.APPROVED.getVal());
+        lwq.eq(Article::getAuthorId, author);
+        return articleMapper.selectList(lwq);
     }
 
     @Override
-    public ArticleDetailVO queryDetail(String articleId) {
+    public ArticleDetail queryDetail(String articleId) {
         String cachedArticleDetail = redisCache.get(RedisConst.REDIS_ARTICLE_DETAIL + SysConst.SYMBOL_COLON + articleId);
-        ArticleDetailVO articleDetail = null;
+        ArticleDetail articleDetail = null;
         if (StringUtils.isNotBlank(cachedArticleDetail)) {
-            articleDetail = JsonUtils.jsonToPojo(cachedArticleDetail, ArticleDetailVO.class);
+            articleDetail = JsonUtils.jsonToPojo(cachedArticleDetail, ArticleDetail.class);
         } else {
-            Article article = new Article();
-            article.setId(articleId);
-            article.setIsAppoint(YesOrNo.NO.type);
-            article.setIsDelete(YesOrNo.NO.type);
-            article.setArticleStatus(ArticleReviewStatus.SUCCESS.type);
-            Article result = articleMapper.selectOne(article);
+            LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+            lwq.eq(Article::getId, articleId);
+            lwq.eq(Article::getIsDelete, YesOrNo.NO.getVal());
+            lwq.eq(Article::getIsAppoint, YesOrNo.NO.getVal());
+            lwq.eq(Article::getArticleStatus, ArticleReviewStatus.APPROVED.getVal());
+            Article result = articleMapper.selectOne(lwq);
             if (result != null) {
                 List<Tag> tagList = getTagList(result);
-                articleDetail = new ArticleDetailVO();
+                articleDetail = new ArticleDetail();
                 articleDetail.setTagList(tagList);
                 BeanUtils.copyProperties(result, articleDetail);
                 redisCache.set(RedisConst.REDIS_ARTICLE_DETAIL + SysConst.SYMBOL_COLON + articleId, JsonUtils.objectToJson(articleDetail));
-                log.info("article detail has been cached, articleId: {}", articleId);
             }
         }
         return articleDetail;
@@ -143,7 +142,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
                 .split(",");
 
         for (String id : tagIds) {
-            Tag tag = tagMapper.selectByPrimaryKey(id);
+            Tag tag = tagMapper.selectById(id);
             tagList.add(tag);
         }
         return tagList;
@@ -151,19 +150,16 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
     @Override
     public Integer queryEachCategoryArticleCount(String categoryId) {
-        Article article = new Article();
-        article.setCategoryId(categoryId);
-        articleMapper.select(article);
-        return articleMapper.selectCount(article);
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        lwq.eq(Article::getCategoryId, categoryId);
+        return articleMapper.selectCount(lwq);
     }
 
-    private Example.Criteria setDefaultArticleExample(Example example) {
-        example.orderBy(SysConst.CREATE_TIME).desc();
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(SysConst.IS_DELETE, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConst.IS_APPOINT, YesOrNo.NO.type);
-        criteria.andEqualTo(SysConst.ARTICLE_STATUS, ArticleReviewStatus.SUCCESS.type);
-        return criteria;
+    private void setDefaultArticleCondition(LambdaQueryWrapper<Article> lwq) {
+        lwq.orderByDesc(Article::getCreateTime);
+        lwq.eq(Article::getIsDelete, YesOrNo.NO.getVal());
+        lwq.eq(Article::getIsAppoint, YesOrNo.NO.getVal());
+        lwq.eq(Article::getArticleStatus, ArticleReviewStatus.APPROVED.getVal());
     }
 
     @Override
@@ -172,9 +168,8 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         String categoriesJson = redisCache.get(RedisConst.REDIS_ARTICLE_CATEGORY);
         List<Category> categories;
         if (StringUtils.isBlank(categoriesJson)) {
-            categories = categoryMapper.selectAll();
+            categories = categoryMapper.selectList(null);
             redisCache.set(RedisConst.REDIS_ARTICLE_CATEGORY, JsonUtils.objectToJson(categories));
-            log.info("article category has been cached");
         } else {
             categories = JsonUtils.jsonToList(categoriesJson, Category.class);
         }
@@ -182,49 +177,20 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public List<CategoryVO> getCategoryListWithArticleCount() {
-
-        List<CategoryVO> results = new ArrayList<>();
-        String cacheKey = RedisConst.REDIS_ARTICLE_CATEGORY_WITH_ARTICLE_COUNT;
-        String cache = redisCache.get(cacheKey);
-        if (StringUtils.isNotBlank(cache)) {
-            results = JsonUtils.jsonToList(cache, CategoryVO.class);
-        } else {
-            List<Category> categories = queryCategoryList();
-            // 查询每个类别下文章的数量
-            for (Category category : categories) {
-                CategoryVO categoryVO = new CategoryVO();
-                BeanUtils.copyProperties(category, categoryVO);
-                int categoryCount = queryEachCategoryArticleCount(category.getId());
-                categoryVO.setEachCategoryArticleCount(categoryCount);
-                results.add(categoryVO);
-            }
-            redisCache.set(cacheKey, JsonUtils.objectToJson(results));
-        }
-        return results;
-    }
-
-    @Override
     public PagedResult getArticleListByTime(String yearAndMonth, Integer page, Integer pageSize) {
-        PageHelper.startPage(page, pageSize);
+        // 分页
         List<Article> articleList = articleMapper.getArticleByTime(yearAndMonth);
-        PageInfo<Article> pageInfo = new PageInfo<>(articleList);
-        List<Article> paged = pageInfo.getList();
-        List<ArticleArchiveVO> archiveVOList = new ArrayList<>();
-        for (Article article : paged) {
-            ArticleArchiveVO articleArchiveVO = new ArticleArchiveVO();
-            articleArchiveVO.setArticleId(article.getId());
-            BeanUtils.copyProperties(article, articleArchiveVO);
+        List<ArticleArchive> result = new ArrayList<>();
+        for (Article article : articleList) {
+            ArticleArchive articleArchive = new ArticleArchive();
+            articleArchive.setArticleId(article.getId());
+            BeanUtils.copyProperties(article, articleArchive);
             List<Tag> tagList = getTagList(article);
-            articleArchiveVO.setTagList(tagList);
-            archiveVOList.add(articleArchiveVO);
+            articleArchive.setTagList(tagList);
+            result.add(articleArchive);
         }
-        PagedResult pgr = new PagedResult();
-        pgr.setRows(archiveVOList);
-        pgr.setCurrentPage(pageInfo.getPageNum());
-        pgr.setRecords(pageInfo.getTotal());
-        pgr.setTotalPage(pageInfo.getPages());
-        return pgr;
+        System.out.println(result);
+        return new PagedResult();
     }
 
     @Override
@@ -239,28 +205,22 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
 
     @Override
     public PagedResult queryArticleListByCategoryId(String userId, String categoryId, Integer page, Integer pageSize) {
-        Example example = new Example(Article.class);
-        Example.Criteria criteria = setDefaultArticleExample(example);
-        criteria.andEqualTo(SysConst.AUTHOR_ID, userId);
-        criteria.andEqualTo(SysConst.CATEGORY_ID, categoryId);
-        PageHelper.startPage(page, pageSize);
-        List<Article> list = articleMapper.selectByExample(example);
-        PageInfo<Article> pageInfo = new PageInfo<>(list);
-        List<Article> paged = pageInfo.getList();
-        List<ArticleClassifyVO> articleClassifyVOList = new ArrayList<>();
-        for (Article article : paged) {
-            ArticleClassifyVO articleClassifyVO = new ArticleClassifyVO();
+        LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
+        setDefaultArticleCondition(lwq);
+        lwq.eq(Article::getAuthorId, userId);
+        lwq.eq(Article::getCategoryId, categoryId);
+        // 分页
+        List<Article> list = articleMapper.selectList(lwq);
+        List<ArticleClassify> articleClassifies = new ArrayList<>();
+        for (Article article : list) {
+            ArticleClassify articleClassify = new ArticleClassify();
             List<Tag> tagList = getTagList(article);
-            BeanUtils.copyProperties(article, articleClassifyVO);
-            articleClassifyVO.setTagList(tagList);
-            articleClassifyVO.setArticleId(article.getId());
-            articleClassifyVOList.add(articleClassifyVO);
+            BeanUtils.copyProperties(article, articleClassify);
+            articleClassify.setTagList(tagList);
+            articleClassify.setArticleId(article.getId());
+            articleClassifies.add(articleClassify);
         }
-        PagedResult pgr = new PagedResult();
-        pgr.setRows(articleClassifyVOList);
-        pgr.setCurrentPage(pageInfo.getPageNum());
-        pgr.setRecords(pageInfo.getTotal());
-        pgr.setTotalPage(pageInfo.getPages());
-        return pgr;
+        System.out.println(articleClassifies);
+        return new PagedResult();
     }
 }

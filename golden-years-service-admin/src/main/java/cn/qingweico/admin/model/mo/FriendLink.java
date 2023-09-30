@@ -20,8 +20,8 @@ public class FriendLink {
     private String linkName;
     @Field("link_url")
     private String linkUrl;
-    @Field("is_delete")
-    private Integer isDelete;
+    @Field("delete_flag")
+    private Integer deleteFlag;
     @Field("create_time")
     private Date createTime;
     @Field("update_time")

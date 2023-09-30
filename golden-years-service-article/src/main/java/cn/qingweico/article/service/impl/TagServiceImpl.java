@@ -1,22 +1,24 @@
 package cn.qingweico.article.service.impl;
 
-import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.TagService;
+import cn.qingweico.core.service.BaseService;
+import cn.qingweico.entity.Tag;
 import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.global.SysConst;
-import cn.qingweico.pojo.Tag;
-import cn.qingweico.pojo.bo.TagBO;
+import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
-import com.github.pagehelper.PageHelper;
+import cn.qingweico.util.SnowflakeIdWorker;
+import cn.qingweico.util.redis.RedisCache;
+import cn.qingweico.util.redis.RedisUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -33,25 +35,30 @@ public class TagServiceImpl extends BaseService implements TagService {
     @Resource
     private TagMapper tagMapper;
 
+    @Resource
+    private RedisUtil redisUtil;
+
+    @Resource
+    private RedisCache redisCache;
+
     @Override
     public PagedResult getTagList(String tagName,
                                   Integer status,
                                   Integer sys,
                                   Integer page, Integer pageSize) {
-        Example example = new Example(Tag.class);
-        example.orderBy(SysConst.CREATE_TIME).desc();
-        Example.Criteria criteria = example.createCriteria();
-        if (StringUtils.isNotBlank(tagName)) {
-            criteria.andLike(SysConst.NAME, SysConst.DELIMITER_PERCENT + tagName + SysConst.DELIMITER_PERCENT);
+        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(Tag::getCreateTime);
+        if (StringUtils.isNotEmpty(tagName)) {
+            wrapper.like(Tag::getName, SysConst.DELIMITER_PERCENT + tagName + SysConst.DELIMITER_PERCENT);
         }
         if (status != null) {
-            criteria.andEqualTo(SysConst.STATUS, status);
+            wrapper.eq(Tag::getStatus, status);
         }
         if (sys != null) {
-            criteria.andEqualTo(SysConst.SYS, sys);
+            wrapper.eq(Tag::getSys, sys);
         }
-        PageHelper.startPage(page, pageSize);
-        List<Tag> tags = tagMapper.selectByExample(example);
+        // TODO 分页
+        List<Tag> tags = tagMapper.selectList(wrapper);
         return setterPagedGrid(tags, page);
     }
 
@@ -59,13 +66,11 @@ public class TagServiceImpl extends BaseService implements TagService {
     public List<Tag> getTagList() {
         String tagJson = redisCache.get(RedisConst.REDIS_ARTICLE_TAG);
         List<Tag> tags;
-        if (StringUtils.isBlank(tagJson)) {
-            Example example = new Example(Tag.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(SysConst.STATUS, YesOrNo.YES.type);
-            tags = tagMapper.selectByExample(example);
+        if (StringUtils.isEmpty(tagJson)) {
+            LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Tag::getStatus, YesOrNo.YES.getVal());
+            tags = tagMapper.selectList(wrapper);
             redisCache.set(RedisConst.REDIS_ARTICLE_TAG, JsonUtils.objectToJson(tags));
-            log.info("tag list has been cached");
         } else {
             tags = JsonUtils.jsonToList(tagJson, Tag.class);
         }
@@ -74,44 +79,36 @@ public class TagServiceImpl extends BaseService implements TagService {
 
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
-    public void saveOrUpdate(TagBO tagBO) {
+    public void saveOrUpdate(Tag param) {
         Tag tag = new Tag();
-        if (tagBO.getId() != null) {
+        if (StringUtils.isNotEmpty(param.getId())) {
             // 修改操作
-            BeanUtils.copyProperties(tagBO, tag);
-            tag.setId(tagBO.getId());
-            tag.setUpdateTime(new Date());
-            if (tagMapper.updateByPrimaryKeySelective(tag) > 0) {
+            BeanUtils.copyProperties(param, tag);
+            tag.setId(param.getId());
+            tag.setUpdateTime(DateUtils.nowDateTime());
+            if (tagMapper.updateById(tag) > 0) {
                 String keys = RedisConst.REDIS_ARTICLE_TAG;
-                refreshCache(keys);
-                log.info("save or update(refreshCache): {}", keys);
-            } else {
-                log.error("update tag error");
+                redisUtil.clearCache(keys);
             }
         } else {
             // 添加操作
-            String id = "";
-            BeanUtils.copyProperties(tagBO, tag);
+            String id = SnowflakeIdWorker.nextId();
+            BeanUtils.copyProperties(param, tag);
             tag.setId(id);
-            tag.setSys(YesOrNo.YES.type);
+            tag.setSys(YesOrNo.YES.getVal());
             setDefault(tag);
             if (tagMapper.insert(tag) > 0) {
                 String keys = RedisConst.REDIS_ARTICLE_TAG;
-                refreshCache(keys);
-                log.info("insert(refreshCache): {}", keys);
-            } else {
-                log.error("add tag error");
+                redisUtil.clearCache(keys);
             }
         }
     }
 
     @Override
     public void delete(String tagId) {
-        if (tagMapper.deleteByPrimaryKey(tagId) > 0) {
+        if (tagMapper.deleteById(tagId) > 0) {
             String keys = RedisConst.REDIS_ARTICLE_TAG;
-            refreshCache(keys);
-        } else {
-            log.error("delete tag error");
+            redisUtil.clearCache(keys);
         }
     }
 
@@ -119,10 +116,10 @@ public class TagServiceImpl extends BaseService implements TagService {
     @Transactional(rollbackFor = RuntimeException.class)
     public void batchDelete(List<String> ids) {
         for (String id : ids) {
-            tagMapper.deleteByPrimaryKey(id);
+            tagMapper.deleteById(id);
         }
         String keys = RedisConst.REDIS_ARTICLE_TAG;
-        refreshCache(keys);
+        redisUtil.clearCache(keys);
     }
 
     @Override
@@ -134,26 +131,23 @@ public class TagServiceImpl extends BaseService implements TagService {
     @Override
     public String addPersonalTag(Tag tag, String userId) {
         Tag personalTag = new Tag();
-        String tagId = "";
+        String tagId = SnowflakeIdWorker.nextId();
         personalTag.setId(tagId);
         personalTag.setUserId(userId);
         personalTag.setName(tag.getName());
-        personalTag.setStatus(YesOrNo.YES.type);
-        personalTag.setSys(YesOrNo.NO.type);
+        personalTag.setStatus(YesOrNo.YES.getVal());
+        personalTag.setSys(YesOrNo.NO.getVal());
         personalTag.setColor(tag.getColor());
         setDefault(personalTag);
         if (tagMapper.insert(personalTag) > 0) {
             String keys = RedisConst.REDIS_ARTICLE_TAG;
-            refreshCache(keys);
-            log.info("insert personal tag(refreshCache): {}", keys);
-        } else {
-            log.error("addPersonalTag error");
+            redisUtil.clearCache(keys);
         }
         return tagId;
     }
 
     private void setDefault(Tag tag) {
-        tag.setCreateTime(new Date());
-        tag.setUpdateTime(new Date());
+        tag.setCreateTime(DateUtils.nowDateTime());
+        tag.setUpdateTime(DateUtils.nowDateTime());
     }
 }

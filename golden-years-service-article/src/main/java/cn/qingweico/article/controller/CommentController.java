@@ -2,9 +2,9 @@ package cn.qingweico.article.controller;
 
 import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.CommentPortalService;
+import cn.qingweico.entity.model.CommentReply;
+import cn.qingweico.entity.model.UserBasicInfo;
 import cn.qingweico.result.Result;
-import cn.qingweico.pojo.bo.CommentReplyBO;
-import cn.qingweico.pojo.vo.UserBasicInfoVO;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
@@ -33,19 +33,13 @@ public class CommentController extends BaseController {
 
     @ApiOperation(value = "发布新评论", notes = "发布新评论", httpMethod = "POST")
     @PostMapping("/publish")
-    public Result publish(@RequestBody @Valid CommentReplyBO commentReplyBO) {
+    public Result publish(@RequestBody @Valid CommentReply commentReply) {
 
-        String userId = commentReplyBO.getCommentUserId();
+        String userId = commentReply.getUserId();
         Set<String> set = new HashSet<>();
         set.add(userId);
-        UserBasicInfoVO userVO = articlePortalController.getUserInfoListByIdsClient(set).get(0);
-        // 获得发表评论的用户昵称
-        String nickname = userVO.getNickname();
-        // 获得发表评论的用户头像
-        String face = userVO.getFace();
-        commentReplyBO.setCommentUserNickname(nickname);
-        commentReplyBO.setCommentUserFace(face);
-        commentPortalService.publishComment(commentReplyBO);
+        UserBasicInfo ubi = articlePortalController.getUserInfoListByIdsClient(set).get(0);
+        commentPortalService.publishComment(commentReply);
         return Result.r(Response.COMMENT_SUCCESS);
     }
 

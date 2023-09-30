@@ -1,6 +1,6 @@
 package cn.qingweico.article.service;
 
-import cn.qingweico.pojo.bo.CommentReplyBO;
+import cn.qingweico.entity.model.CommentReply;
 import cn.qingweico.util.PagedResult;
 
 /**
@@ -14,9 +14,9 @@ public interface CommentPortalService {
     /**
      * 发表评论
      *
-     * @param commentReplyBO {@link CommentReplyBO}
+     * @param commentReply {@link CommentReply}
      */
-    void publishComment(CommentReplyBO commentReplyBO);
+    void publishComment(CommentReply commentReply);
 
 
     /**

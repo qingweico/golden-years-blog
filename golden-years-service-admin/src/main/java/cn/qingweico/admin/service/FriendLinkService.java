@@ -21,6 +21,8 @@ public interface FriendLinkService {
     /**
      * 查询所有的友情链接
      *
+     * @param linkName 链接名称
+     * @param isDelete 删除逻辑标志
      * @param page     起始分页
      * @param pageSize 每页的数量
      * @return PagedGridResult 友情链接列表

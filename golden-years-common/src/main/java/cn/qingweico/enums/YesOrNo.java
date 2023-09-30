@@ -1,6 +1,7 @@
 package cn.qingweico.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 是否
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
  * @date 2021/9/11
  */
 @AllArgsConstructor
+@Getter
 public enum YesOrNo {
     /**
      * 否
@@ -19,6 +21,6 @@ public enum YesOrNo {
      */
     YES(1, "是");
 
-    public final Integer type;
-    public final String value;
+    private final Integer val;
+    private final String desc;
 }

@@ -1,7 +1,7 @@
 package cn.qingweico.admin.mapper;
 
-import cn.qingweico.core.mapper.CommonMapper;
 import cn.qingweico.entity.SysConfig;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * @date 2022/4/12
  */
 @Repository
-public interface SysConfigMapper extends CommonMapper<SysConfig> {
+public interface SysConfigMapper extends BaseMapper<SysConfig> {
 }

@@ -1,20 +1,23 @@
 package cn.qingweico.entity;
 
 import cn.qingweico.enums.ArticleReviewStatus;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * @author zqw
  * @date 2021/9/11
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Setter
+@Getter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Accessors(chain = true)
 public class Article extends BaseEntity {
 
+    private static final long serialVersionUID = 6642236376138355674L;
     /**
      * 文章标题
      */

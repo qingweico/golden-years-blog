@@ -63,7 +63,7 @@ public interface FanService extends IService<Fans> {
      * @param pageSize 每页显示的条数
      * @return PagedGridResult
      */
-    PagedResult getMyFansListViaEs(String authorId,
+    PagedResult getMyFansListFromElastic(String authorId,
                                    Integer page,
                                    Integer pageSize);
 
@@ -84,7 +84,7 @@ public interface FanService extends IService<Fans> {
      * @param authorId 作者id
      * @return FansCountsVO
      */
-    FansCountsVO queryFansCountsViaEs(String authorId);
+    FansCountsVO queryFansCountsFromElastic(String authorId);
 
     /**
      * 根据地域分布查询粉丝数量
@@ -101,15 +101,5 @@ public interface FanService extends IService<Fans> {
      * @param authorId 作者id
      * @return List<RegionRatioVO>
      */
-    List<RegionRatioVO> queryRatioByRegionViaEs(String authorId);
-
-
-
-    /**
-     * 被动更新粉丝信息 ---> 点击粉丝头像时
-     *
-     * @param relationId 粉丝信息相关主键id
-     * @param fanId      粉丝id
-     */
-    void passive(String relationId, String fanId);
+    List<RegionRatioVO> queryRatioByRegionFromElastic(String authorId);
 }

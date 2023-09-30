@@ -7,6 +7,7 @@ import cn.qingweico.global.SysConst;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.util.DateUtils;
 import cn.qingweico.util.JsonUtils;
+import cn.qingweico.util.redis.RedisCache;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 public class WebVisitServiceImpl extends BaseService implements WebVisitService {
     @Resource
     private WebVisitMapper webVisitMapper;
+
+    @Resource
+    private RedisCache redisCache;
 
     @Override
     public int getWebVisitCount() {

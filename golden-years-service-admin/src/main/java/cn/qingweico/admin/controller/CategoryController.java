@@ -2,10 +2,10 @@ package cn.qingweico.admin.controller;
 
 import cn.qingweico.admin.service.CategoryService;
 import cn.qingweico.core.base.BaseController;
+import cn.qingweico.entity.Category;
+import cn.qingweico.entity.model.SaveOrUpdateCategory;
 import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
-import cn.qingweico.pojo.Category;
-import cn.qingweico.pojo.bo.SaveCategoryBO;
 import cn.qingweico.util.PagedResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,16 +38,16 @@ public class CategoryController extends BaseController {
 
     @ApiOperation(value = "新增或者修改文章分类", notes = "新增或者修改文章分类", httpMethod = "POST")
     @PostMapping("/saveOrUpdateCategory")
-    public Result saveOrUpdateCategory(@RequestBody SaveCategoryBO saveCategoryBO) {
+    public Result saveOrUpdateCategory(@RequestBody SaveOrUpdateCategory saveOrUpdateCategory) {
 
         boolean isExist;
         Category pendingCategory = new Category();
-        BeanUtils.copyProperties(saveCategoryBO, pendingCategory);
+        BeanUtils.copyProperties(saveOrUpdateCategory, pendingCategory);
         String pendingCategoryId = pendingCategory.getId();
 
         // id为空; 新增类别
         if (pendingCategoryId == null) {
-            isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
+            isExist = categoryService.queryCategoryHasPresent(pendingCategory.getName(),
                     null);
             if (isExist) {
                 return Result.r(Response.CATEGORY_EXIST_ERROR);
@@ -57,8 +57,8 @@ public class CategoryController extends BaseController {
         }
         // id不为空; 修改类别
         else {
-            isExist = categoryService.queryCategoryIsPresent(pendingCategory.getName(),
-                    saveCategoryBO.getOldName());
+            isExist = categoryService.queryCategoryHasPresent(pendingCategory.getName(),
+                    saveOrUpdateCategory.getOldName());
             if (isExist) {
                 return Result.r(Response.CATEGORY_EXIST_ERROR);
             } else {

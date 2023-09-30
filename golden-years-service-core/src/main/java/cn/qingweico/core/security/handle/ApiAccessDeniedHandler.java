@@ -12,9 +12,10 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 
 /**
+ * 授权失败处理器
+ *
  * @author zqw
  * @date 2023/9/23
  */
@@ -30,7 +31,6 @@ public class ApiAccessDeniedHandler implements AccessDeniedHandler {
                 .code(HttpStatus.FORBIDDEN.getReasonPhrase())
                 .msg(HttpStatus.FORBIDDEN.getReasonPhrase())
                 .data(exception.getMessage())
-                .errors(Collections.emptyList())
                 .build();
         log.error("ApiAccessDeniedHandler: {}", exception.getMessage());
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
