@@ -21,6 +21,7 @@ import cn.qingweico.result.Result;
 import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.PagedResult;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -233,36 +234,5 @@ public class ArticleController extends BaseController {
         }
         articleDetailService.deleteFavorites(collectArticle);
         return Result.r(Response.DELETE_SUCCESS);
-    }
-
-    @Resource
-    private UserBaseInfoClient client;
-
-    public UserBasicInfo getUserBasicInfoClient(String id) {
-        UserBasicInfo userBasicInfo;
-        Result result = client.getUserBasicInfo(id);
-        if (result.getData() != null) {
-            String userJson = JsonUtils.objectToJson(result.getData());
-            userBasicInfo = JsonUtils.jsonToPojo(userJson, UserBasicInfo.class);
-        } else {
-            userBasicInfo = new UserBasicInfo();
-        }
-        return userBasicInfo;
-    }
-
-
-    public Map<String, Object> geAuthorInfo(String authorId) {
-        Map<String, Object> map = new HashMap<>(4);
-        UserBasicInfo userBasicInfo = getUserBasicInfoClient(authorId);
-        if (StringUtils.isNotBlank(userBasicInfo.getId())) {
-            map.put(SysConst.AUTHOR_NAME, userBasicInfo.getNickname());
-            map.put(SysConst.AUTHOR_FACE, userBasicInfo.getFace());
-            map.put(SysConst.FOLLOW_COUNTS, userBasicInfo.getMyFollowCounts());
-            map.put(SysConst.FANS_COUNTS, userBasicInfo.getMyFansCounts());
-        } else {
-            GraceException.error(Response.SYSTEM_ERROR);
-            log.error("用户服务不可用");
-        }
-        return map;
     }
 }

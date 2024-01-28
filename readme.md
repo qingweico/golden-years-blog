@@ -14,10 +14,7 @@
 - MyBatis
 - MySQL
 - Redis
-- RabbitMQ
-- ElasticSearch
 - MySQL主从复制技术
-- 阿里云API(人脸识别)
 
 #### 前端技术栈
 

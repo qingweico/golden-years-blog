@@ -77,20 +77,6 @@ spring:
     time-zone: GMT+8
   profiles:
     active: dev
-    # db.createUser(
-    #  {
-    #    user: "gy",
-    #    pwd: "gy",
-    #    roles: [ { role: "readWrite", db: "golden-years" } ]
-    #  }
-    #)
-  data:
-    mongodb:
-      uri: mongodb://gy:gy@106.12.136.221:27017
-      database: golden-years
-    elasticsearch:
-      cluster-name: golden-years-es
-      cluster-nodes: 106.12.136.221:9300
   redis:
     database: 0
     host: 106.12.136.221
@@ -119,20 +105,27 @@ spring:
         dashboard: 106.12.136.221:8888
         port: 8719
 
-############################################################
-#
-# mybatis 配置
-#
-############################################################
-# SqlSessionFactoryBean配置; 多数据源已转移到cn.qingweico.api.config.DruidDataSourceConfig
-# mybatis:
+  ############################################################
+  #
+  # mybatis 配置(fix : 使用mybatis-plus 代替 mybatis)
+  #
+  ############################################################
+  # SqlSessionFactoryBean配置; 多数据源已转移到cn.qingweico.api.config.DruidDataSourceConfig
+  # mybatis:
   # type-aliases-package: cn.qingweico.pojo          # 所有POJO类所在包路径
   # mapper-locations: classpath:mapper/*.xml         # mapper映射文件
   # config-location: classpath:/mybatis-config.xml   # mybatis配置文件
 
 
-############################################################
-#
-# mybatis mapper 配置
-#
-############################################################
+  ############################################################
+  #
+  # mybatis-plus 配置
+  #
+  ############################################################
+mybatis-plus:
+  # 其他配置请看 cn.qingweico.api.config.DruidDataSourceConfig
+  global-config:
+    banner: false
+    db-config:
+      id-type: ASSIGN_ID
+      table-underline: true

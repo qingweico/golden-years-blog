@@ -4,13 +4,4 @@
     <resultMap id="PermissionResult" type="cn.qingweico.entity.Permission">
         <id column="id" property="id" jdbcType="VARCHAR"/>
     </resultMap>
-
-    <select id="selectPermsByUserId" parameterType="Long" resultType="String">
-        SELECT DISTINCT (t0.name)
-        FROM gy_permission t0
-                 LEFT JOIN gy_role_permission t1 ON t0.id = t1.perm_id
-                 LEFT JOIN gy_role t2 ON t1.role_id = t2.id
-                 LEFT JOIN gy_sys_user_role t3 ON t3.role_id = t2.id
-        WHERE t3.user_id = #{userId}
-    </select>
 </mapper>

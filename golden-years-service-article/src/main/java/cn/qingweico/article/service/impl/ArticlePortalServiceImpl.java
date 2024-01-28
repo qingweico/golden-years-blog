@@ -3,11 +3,9 @@ package cn.qingweico.article.service.impl;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.article.mapper.ArticleMapper;
 import cn.qingweico.article.mapper.CategoryMapper;
-import cn.qingweico.article.mapper.TagMapper;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.entity.Article;
 import cn.qingweico.entity.Category;
-import cn.qingweico.entity.Tag;
 import cn.qingweico.entity.model.ArticleArchive;
 import cn.qingweico.entity.model.ArticleClassify;
 import cn.qingweico.entity.model.ArticleDetail;
@@ -22,7 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.annotation.Id;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -44,17 +41,10 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     private CategoryMapper categoryMapper;
 
     @Resource
-    private TagMapper tagMapper;
-
-    @Resource
     private RedisCache redisCache;
 
     @Override
-    public PagedResult queryPortalArticleList(String keyword,
-                                              String category,
-                                              String tag,
-                                              Integer page,
-                                              Integer pageSize) {
+    public PagedResult queryPortalArticleList(String keyword, String category, String tag, Integer page, Integer pageSize) {
 
         LambdaQueryWrapper<Article> lwq = new LambdaQueryWrapper<>();
         setDefaultArticleCondition(lwq);
@@ -65,10 +55,6 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
             lwq.eq(Article::getCategoryId, category);
         }
         List<Article> list = articleMapper.selectList(lwq);
-        if (StringUtils.isNotBlank(tag)) {
-            // 标签筛选
-            list = filterArticleTag(list, tag);
-        }
         return setterPagedGrid(list, page);
     }
 
@@ -82,9 +68,7 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
     }
 
     @Override
-    public PagedResult queryArticleListOfAuthor(String author,
-                                                Integer page,
-                                                Integer pageSize) {
+    public PagedResult queryArticleListOfAuthor(String author, Integer page, Integer pageSize) {
 
         return getPagedGridResult(author, page, pageSize);
     }
@@ -121,31 +105,12 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
             lwq.eq(Article::getArticleStatus, ArticleReviewStatus.APPROVED.getVal());
             Article result = articleMapper.selectOne(lwq);
             if (result != null) {
-                List<Tag> tagList = getTagList(result);
                 articleDetail = new ArticleDetail();
-                articleDetail.setTagList(tagList);
                 BeanUtils.copyProperties(result, articleDetail);
                 redisCache.set(RedisConst.REDIS_ARTICLE_DETAIL + SysConst.SYMBOL_COLON + articleId, JsonUtils.objectToJson(articleDetail));
             }
         }
         return articleDetail;
-    }
-
-    @Override
-    public List<Tag> getTagList(Article article) {
-        // 获取文章标签
-        String tags = article.getTags();
-        List<Tag> tagList = new ArrayList<>();
-        String[] tagIds = tags.replace("[", "")
-                .replace("]", "")
-                .replace("\"", "")
-                .split(",");
-
-        for (String id : tagIds) {
-            Tag tag = tagMapper.selectById(id);
-            tagList.add(tag);
-        }
-        return tagList;
     }
 
     @Override
@@ -185,8 +150,6 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
             ArticleArchive articleArchive = new ArticleArchive();
             articleArchive.setArticleId(article.getId());
             BeanUtils.copyProperties(article, articleArchive);
-            List<Tag> tagList = getTagList(article);
-            articleArchive.setTagList(tagList);
             result.add(articleArchive);
         }
         System.out.println(result);
@@ -214,13 +177,10 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         List<ArticleClassify> articleClassifies = new ArrayList<>();
         for (Article article : list) {
             ArticleClassify articleClassify = new ArticleClassify();
-            List<Tag> tagList = getTagList(article);
             BeanUtils.copyProperties(article, articleClassify);
-            articleClassify.setTagList(tagList);
             articleClassify.setArticleId(article.getId());
             articleClassifies.add(articleClassify);
         }
-        System.out.println(articleClassifies);
         return new PagedResult();
     }
 }

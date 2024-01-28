@@ -24,12 +24,13 @@ public class ServiceLogAspect {
                 proceedingJoinPoint.getSignature().getName());
 
         long start = System.currentTimeMillis();
-        Object proceed = null;
+        Object proceed;
 
         try {
             proceed = proceedingJoinPoint.proceed();
         } catch (Throwable t) {
             log.error(t.getMessage());
+            throw new RuntimeException(t);
         }
 
         long end = System.currentTimeMillis();

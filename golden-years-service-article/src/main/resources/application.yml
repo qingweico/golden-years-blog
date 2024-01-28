@@ -65,13 +65,6 @@ spring:
     time-zone: GMT+8
   profiles:
     active: dev
-  data:
-    mongodb:
-      uri: mongodb://root:root@106.12.136.221:27017
-      database: golden-years
-    elasticsearch:
-      cluster-name: golden-years-es
-      cluster-nodes: 106.12.136.221:9300
   redis:
     database: 0
     host: 106.12.136.221
@@ -91,12 +84,6 @@ spring:
     # content-type: text/html
     # suffix: .ftl
     # template-loader-path: classpath:/templates/
-  rabbitmq:
-    host: 106.12.136.221
-    port: 5672
-    username: admin
-    password: admin
-    virtual-host: golden-years
   cloud:
     nacos:
       discovery:
@@ -123,19 +110,3 @@ feign:
   # type-aliases-package: cn.qingweico.pojo          # 所有POJO类所在包路径
   # mapper-locations: classpath:mapper/*.xml         # mapper映射文件
   # config-location: classpath:/mybatis-config.xml   # mybatis配置文件
-
-
-############################################################
-#
-# mybatis mapper 配置
-#
-############################################################
-# 通用 Mapper 配置
-mapper:
-  mappers: cn.qingweico.core.mapper.CommonMapper
-  not-empty: false    # 在进行数据库操作的的时候, 判断表达式 username != null, 是否追加 username != ''
-  identity: MYSQL
-# 分页插件配置
-pagehelper:
-  helperDialect: mysql
-  supportMethodsArguments: true

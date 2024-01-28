@@ -10,9 +10,7 @@ import cn.qingweico.util.ServletReqUtils;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 
 import javax.annotation.Resource;
 
@@ -38,12 +36,12 @@ public class BaseController {
     public void checkPagingParams(Integer page, Integer pageSize) {
         if (page == null || page <= 0) {
             log.error("page: {}", page);
-            GraceException.error(Response.FAILED);
+            GraceException.error(Response.REQUEST_PARAM_ERROR);
         }
 
         if (pageSize == null || pageSize <= 0) {
             log.error("pageSize: {}", pageSize);
-            GraceException.error(Response.FAILED);
+            GraceException.error(Response.REQUEST_PARAM_ERROR);
         }
     }
 

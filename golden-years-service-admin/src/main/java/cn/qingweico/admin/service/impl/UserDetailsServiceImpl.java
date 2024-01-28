@@ -1,11 +1,9 @@
 package cn.qingweico.admin.service.impl;
 
+import cn.qingweico.admin.service.SysPermissionService;
 import cn.qingweico.admin.service.SysUserService;
-import cn.qingweico.core.security.AuthService;
 import cn.qingweico.entity.SysUser;
 import cn.qingweico.entity.model.LoginUser;
-import cn.qingweico.enums.UserStatus;
-import cn.qingweico.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,18 +29,26 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Resource
     private SysPasswordService passwordService;
 
+    @Resource
+    private SysPermissionService permissionService;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         SysUser user = userService.querySysUserByUsername(username);
         if (ObjectUtils.isEmpty(user)) {
-            log.info("登录用户 : {} 不存在.", username);
-            throw new ServiceException("登录用户 : " + username + " 不存在");
+            log.info("登录用户 : {} 不存在", username);
+            throw new UsernameNotFoundException("登录用户 : " + username + " 不存在");
         }
         LoginUser loginUser = LoginUser.builder()
                 .user(user)
+                .userId(user.getId())
                 .build();
         passwordService.validate(loginUser);
-        return loginUser;
+        return createLoginUser(user);
+    }
+
+    public UserDetails createLoginUser(SysUser user) {
+        return new LoginUser(user.getId(), user, permissionService.getMenuPermission(user));
     }
 }

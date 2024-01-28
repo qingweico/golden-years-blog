@@ -15,7 +15,7 @@ public class PagedResult {
     /**
      * 当前页数
      */
-    private int currentPage;
+    private long currentPage;
     /**
      * 总页数
      */
@@ -23,7 +23,7 @@ public class PagedResult {
     /**
      * 总记录数
      */
-    private long records;
+    private long totalNumber;
     /**
      * 每行显示的内容
      */

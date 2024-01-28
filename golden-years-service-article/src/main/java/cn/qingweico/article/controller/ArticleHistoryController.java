@@ -55,19 +55,9 @@ public class ArticleHistoryController extends BaseController {
     public Result getUserHistory(@RequestParam String userId, @RequestParam Integer pageNum,
                                  @RequestParam Integer pageSize) {
         checkPagingParams(pageNum, pageSize);
-        List<History> histories = historyService.getHistoryList(userId, pageNum, pageSize);
-        List<ArticleHistory> result = new ArrayList<>();
-        for (History history : histories) {
-            String articleId = history.getArticleId();
-            Article article = historyService.queryArticleById(articleId);
-            ArticleHistory articleHistory = new ArticleHistory();
-            articleHistory.setArticleName(article.getTitle());
-            articleHistory.setArticleId(articleId);
-            result.add(articleHistory);
-        }
-        PagedResult pgr = new PagedResult();
+        PagedResult histories = historyService.getHistoryList(userId, pageNum, pageSize);
         // TODO 按照时间线 滚动 倒叙
-        return Result.ok(pgr);
+        return Result.ok(histories);
     }
 
     @PostMapping("delete")

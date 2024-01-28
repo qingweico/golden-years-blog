@@ -801,7 +801,6 @@ public final class DateUtils {
                 return pos.getIndex() <= sdf.format(date).length();
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }

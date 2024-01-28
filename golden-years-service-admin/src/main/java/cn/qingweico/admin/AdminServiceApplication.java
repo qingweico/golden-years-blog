@@ -16,8 +16,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @ComponentScan(basePackages = {"cn.qingweico"})
 @EnableFeignClients
 @EnableAsync
-public class ArticleServiceApplication {
+public class AdminServiceApplication {
    public static void main(String[] args) {
-      SpringApplication.run(ArticleServiceApplication.class, args);
+      SpringApplication.run(AdminServiceApplication.class, args);
    }
 }

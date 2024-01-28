@@ -3,6 +3,7 @@ package cn.qingweico.article.service;
 import cn.qingweico.entity.Article;
 import cn.qingweico.entity.History;
 import cn.qingweico.enums.ArticleHistoryDeleteType;
+import cn.qingweico.util.PagedResult;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ public interface ArticleHistoryService {
      * @param userId   用户id
      * @param pageNum  起始分页
      * @param pageSize 每页的数量
-     * @return PageInfo<History>
+     * @return PagedResult<History>
      */
-    List<History> getHistoryList(String userId, Integer pageNum, Integer pageSize);
+    PagedResult getHistoryList(String userId, Integer pageNum, Integer pageSize);
 
 
     /**

@@ -6,13 +6,14 @@ import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
 import cn.qingweico.result.Result;
 import cn.qingweico.user.entity.FansBO;
-import cn.qingweico.user.entity.FansCountsVO;
 import cn.qingweico.user.service.FanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -30,8 +31,7 @@ public class FansController extends BaseController {
 
     @ApiOperation(value = "查询当前用户是否关注作者", notes = "查询当前用户是否关注作者", httpMethod = "GET")
     @GetMapping("/hasFollowThisAuthorOrNot")
-    public Result hasFollowThisAuthorOrNot(@RequestParam String userId,
-                                           @RequestParam String fanId) {
+    public Result hasFollowThisAuthorOrNot(@RequestParam String userId, @RequestParam String fanId) {
         boolean res = fanService.isMeFollowThisAuthor(userId, fanId);
         return Result.ok(res);
     }
@@ -62,48 +62,26 @@ public class FansController extends BaseController {
 
     @ApiOperation(value = "查询我的粉丝列表", notes = "查询我的粉丝列表", httpMethod = "GET")
     @GetMapping("/query")
-    public Result query(@RequestParam String userId,
-                        @RequestParam Integer page,
-                        @RequestParam Integer pageSize) {
+    public Result query(@RequestParam String userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
         return Result.ok(fanService.getMyFansList(userId, page, pageSize));
     }
 
-    @ApiOperation(value = "查询我的粉丝列表(es)", notes = "查询我的粉丝列表(es)", httpMethod = "GET")
-    @GetMapping("es/query")
-    public Result queryViaEs(@RequestParam String userId,
-                             @RequestParam Integer page,
-                             @RequestParam Integer pageSize) {
-        checkPagingParams(page, pageSize);
-        return Result.ok(fanService.getMyFansListFromElastic(userId, page, pageSize));
-    }
 
     @ApiOperation(value = "查询男女粉丝的数量", notes = "查询男女粉丝的数量", httpMethod = "GET")
     @GetMapping("/queryRatio")
     public Result queryRatio(@RequestParam String userId) {
         int manCounts = fanService.queryFansCounts(userId, Sex.MAN);
         int womanCounts = fanService.queryFansCounts(userId, Sex.WOMAN);
-        FansCountsVO fanCountsVO = new FansCountsVO();
-        fanCountsVO.setManCounts(manCounts);
-        fanCountsVO.setWomanCounts(womanCounts);
-        return Result.ok(fanCountsVO);
-    }
-
-    @ApiOperation(value = "查询男女粉丝的数量(es)", notes = "查询男女粉丝的数量(es)", httpMethod = "GET")
-    @GetMapping("es/queryRatio")
-    public Result queryRatioViaEs(@RequestParam String userId) {
-        return Result.ok(fanService.queryFansCountsFromElastic(userId));
+        Map<String, Object> result = new HashMap<>();
+        result.put("man", manCounts);
+        result.put("woman", womanCounts);
+        return Result.ok(result);
     }
 
     @ApiOperation(value = "根据地域分布查询粉丝的数量", notes = "根据地域分布查询粉丝的数量", httpMethod = "GET")
     @GetMapping("/queryRatioByRegion")
     public Result queryRatioByRegion(@RequestParam String userId) {
         return Result.ok(fanService.queryRatioByRegion(userId));
-    }
-
-    @ApiOperation(value = "根据地域分布查询粉丝的数量(es)", notes = "根据地域分布查询粉丝的数量(es)", httpMethod = "GET")
-    @GetMapping("es/queryRatioByRegion")
-    public Result queryRatioByRegionViaEs(@RequestParam String userId) {
-        return Result.ok(fanService.queryRatioByRegionFromElastic(userId));
     }
 }

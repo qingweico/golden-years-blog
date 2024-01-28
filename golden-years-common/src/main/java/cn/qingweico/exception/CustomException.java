@@ -9,6 +9,7 @@ import cn.qingweico.result.Response;
  * @date 2021/9/6
  */
 public class CustomException extends RuntimeException {
+    private static final long serialVersionUID = -2269489213453670291L;
     private final Response responseStatus;
 
     public CustomException(Response responseStatus) {

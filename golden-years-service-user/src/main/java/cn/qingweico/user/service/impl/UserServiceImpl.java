@@ -1,6 +1,5 @@
 package cn.qingweico.user.service.impl;
 
-import cn.qingweico.core.config.RabbitMqConfig;
 import cn.qingweico.entity.User;
 import cn.qingweico.entity.model.UserInfoBO;
 import cn.qingweico.enums.Sex;
@@ -23,7 +22,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +48,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private RedisCache redisCache;
     @Resource
     private UserMapper userMapper;
-    @Resource
-    private RabbitTemplate rabbitTemplate;
 
     private final static String[] FACE = {
             "https://cdn.qingweico.cn/blog/274080b281e5f0d31b7390207d78f591.jpeg",
@@ -93,7 +89,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void freezeUserOrNot(String userId, Integer doStatus) {
+    public void changeUserStatus(String userId, Integer doStatus) {
         User user = new User();
         user.setId(userId);
         user.setAvailable(doStatus);
@@ -129,11 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setSex(Sex.SECRET.getVal());
         user.setCreateTime(DateUtils.nowDateTime());
         user.setUpdateTime(DateUtils.nowDateTime());
-        // 放 rabbitmq 中, 为用户创建默认的收藏夹
-        rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_ARTICLE,
-                SysConst.ARTICLE_CREATE_FAVORITES_DO, userId);
         if (userMapper.insert(user) < 0) {
-            log.error("create user error");
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
         return user;
@@ -174,7 +166,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 查询数据库中最新的数据放入缓存中
         User user = queryUserById(userId);
         redisCache.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + userId, JsonUtils.objectToJson(user));
-        log.info("update user info : cache has been updated");
     }
 
     @Override
@@ -231,8 +222,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (userMapper.updateById(user) > 0) {
             String cachedUserKey = RedisConst.REDIS_USER_INFO + SysConst.DELIMITER_COLON + user.getId();
             redisUtil.clearCache(cachedUserKey);
-        } else {
-            log.error("update user mobile error");
         }
     }
 

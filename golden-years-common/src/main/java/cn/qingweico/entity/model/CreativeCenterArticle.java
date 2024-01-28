@@ -25,5 +25,4 @@ public class CreativeCenterArticle {
     private Integer readCounts;
     private Integer collectCounts;
     private Integer commentCounts;
-    private List<Tag> tagList;
 }

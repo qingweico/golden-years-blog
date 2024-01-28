@@ -15,7 +15,6 @@
 		<result column="collect_counts" jdbcType="INTEGER" property="collectCounts"/>
 		<result column="star_counts" jdbcType="INTEGER" property="starCounts"/>
 		<result column="comment_counts" jdbcType="INTEGER" property="commentCounts"/>
-		<result column="mongo_file_id" jdbcType="VARCHAR" property="mongoFileId"/>
 		<result column="is_delete" jdbcType="INTEGER" property="isDelete"/>
 		<result column="tags" jdbcType="CLOB" property="tags"/>
 		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>

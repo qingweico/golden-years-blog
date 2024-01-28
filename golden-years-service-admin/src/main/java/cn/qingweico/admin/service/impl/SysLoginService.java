@@ -9,8 +9,10 @@ import cn.qingweico.exception.user.UserPasswordNotMatchException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -69,7 +71,7 @@ public class SysLoginService {
             if (e instanceof BadCredentialsException) {
                 throw new UserPasswordNotMatchException();
             } else {
-                throw new ServiceException(e.getMessage());
+                throw new InternalAuthenticationServiceException(e.getMessage());
             }
         } finally {
             AuthenticationContextHolder.clearContext();

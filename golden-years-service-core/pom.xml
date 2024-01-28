@@ -23,22 +23,11 @@
 			<artifactId>UserAgentUtils</artifactId>
 			<version>1.19</version>
 		</dependency>
-		<!-- 消息队列 -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
-		</dependency>
 		<!-- Swagger 配置 -->
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-boot-starter</artifactId>
 			<version>${swagger.starter.version}</version>
-		</dependency>
-		<!-- Fast DFS -->
-		<dependency>
-			<groupId>com.github.tobato</groupId>
-			<artifactId>fastdfs-client</artifactId>
-			<version>${fastdfs.version}</version>
 		</dependency>
 		<!-- Nacos -->
 		<dependency>
@@ -59,7 +48,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid-spring-boot-starter</artifactId>
-			<version>1.1.10</version>
+			<version>1.2.8</version>
 		</dependency>
 		<!-- Quartz任务调度 -->
 		<dependency>

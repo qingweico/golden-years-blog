@@ -132,13 +132,13 @@ public class LoginUser implements UserDetails, Serializable {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        roles = permissions.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
-        return roles;
+        return null;
     }
 
-    public LoginUser(SysUser user, Set<String> permissions) {
+    public LoginUser(String userId, SysUser user, Set<String> permissions)
+    {
+        this.userId = userId;
         this.user = user;
         this.permissions = permissions;
     }
-
 }

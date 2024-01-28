@@ -37,16 +37,10 @@ public class RateLimiterHandler {
         try {
             List<String> keys = new ArrayList<>();
             keys.add(StringUtils.join(key));
-
-            List<Object> args = new ArrayList<>();
-            args.add(limitCount);
-            args.add(limitPeriod);
-
             String luaScript = getLuaScript();
-            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript);
-            redisScript.setResultType(Long.class);
-            Long count = redisCache.execute(redisScript, keys, args);
-            log.info("Access try count is {} for name={} and key = {}", count, name, key);
+            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
+            Long count = redisCache.execute(redisScript, keys, String.valueOf(limitCount), String.valueOf(limitPeriod));
+            log.info("Try access {} count is {} and key = {}", count, name, key);
             if (count != null && count <= limitCount) {
                 return true;
             } else {
@@ -54,7 +48,7 @@ public class RateLimiterHandler {
                         HttpHeaders.EMPTY, new byte[0], Charset.defaultCharset());
             }
         } catch (Throwable e) {
-            handleException(e, "RateLimiterHandler.limit:");
+            handleException(e, "RateLimiterHandler.limit: {}");
             return false;
         }
     }

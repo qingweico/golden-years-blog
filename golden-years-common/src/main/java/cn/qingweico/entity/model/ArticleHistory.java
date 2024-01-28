@@ -10,4 +10,6 @@ import lombok.Data;
 public class ArticleHistory {
     private String articleId;
     private String articleName;
+    private String userId;
+    private String username;
 }

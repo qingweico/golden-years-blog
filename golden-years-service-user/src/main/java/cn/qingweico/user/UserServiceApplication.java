@@ -3,8 +3,6 @@ package cn.qingweico.user;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -14,8 +12,7 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
  * @author zqw
  * @date 2021/9/5
  */
-@SpringBootApplication(exclude = {MongoAutoConfiguration.class,
-        MongoDataAutoConfiguration.class})
+@SpringBootApplication
 @EnableOpenApi
 @EnableAsync
 @MapperScan(basePackages = "cn.qingweico.user.mapper")

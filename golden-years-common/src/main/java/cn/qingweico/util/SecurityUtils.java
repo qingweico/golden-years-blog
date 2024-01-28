@@ -16,7 +16,7 @@ public class SecurityUtils {
     /**
      * 用户ID
      **/
-    public static Long getUserId() {
+    public static String getUserId() {
         try {
             return getLoginUser().getUserId();
         } catch (Exception e) {

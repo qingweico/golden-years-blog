@@ -55,17 +55,6 @@ public interface FanService extends IService<Fans> {
                               Integer page,
                               Integer pageSize);
 
-    /**
-     * 作者查询我的所有粉丝(elasticSearch)
-     *
-     * @param authorId 作者id
-     * @param page     起始分页
-     * @param pageSize 每页显示的条数
-     * @return PagedGridResult
-     */
-    PagedResult getMyFansListFromElastic(String authorId,
-                                   Integer page,
-                                   Integer pageSize);
 
 
     /**
@@ -77,15 +66,6 @@ public interface FanService extends IService<Fans> {
      */
     Integer queryFansCounts(String authorId, Sex sex);
 
-
-    /**
-     * 查询男女粉丝的数量(es)
-     *
-     * @param authorId 作者id
-     * @return FansCountsVO
-     */
-    FansCountsVO queryFansCountsFromElastic(String authorId);
-
     /**
      * 根据地域分布查询粉丝数量
      *
@@ -95,11 +75,4 @@ public interface FanService extends IService<Fans> {
     List<RegionRatioVO> queryRatioByRegion(String authorId);
 
 
-    /**
-     * 根据地域分布查询粉丝数量(es)
-     *
-     * @param authorId 作者id
-     * @return List<RegionRatioVO>
-     */
-    List<RegionRatioVO> queryRatioByRegionFromElastic(String authorId);
 }

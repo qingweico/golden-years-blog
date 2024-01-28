@@ -8,6 +8,7 @@ import cn.qingweico.exception.TooManyAttemptsException;
 import cn.qingweico.global.RedisConst;
 import cn.qingweico.util.SecurityUtils;
 import cn.qingweico.util.redis.RedisCache;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SysPasswordService {
     @Resource
     private RedisCache redisCache;
@@ -41,12 +43,9 @@ public class SysPasswordService {
 
     @Value("${gy.login-attempts-limit-seconds:300}")
     public int loginAttemptsLimitSeconds;
-
-    @Setter
-    private LoginLimit loginLimit = new LoginLimit(60, 20);
-    @Setter
+    private final LoginLimit loginLimit = new LoginLimit(60, 20);
+    @Resource
     private RateLimiterHandler rateLimiterHandler;
-
 
     public void validate(LoginUser loginUser) {
         Authentication usernamePasswordAuthenticationToken = AuthenticationContextHolder.getContext();

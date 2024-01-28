@@ -1,35 +1,23 @@
 package cn.qingweico.files.controller;
 
-import cn.qingweico.entity.model.GridFs;
 import cn.qingweico.enums.FileUploadType;
-import cn.qingweico.exception.GraceException;
 import cn.qingweico.files.resource.FileResource;
 import cn.qingweico.files.service.UploaderService;
 import cn.qingweico.global.SysConst;
 import cn.qingweico.result.Response;
 import cn.qingweico.result.Result;
-import cn.qingweico.util.FileUtils;
 import cn.qingweico.util.upload.QiniuUtil;
-import com.mongodb.client.gridfs.GridFSBucket;
-import com.mongodb.client.gridfs.GridFSFindIterable;
-import com.mongodb.client.gridfs.model.GridFSFile;
-import com.mongodb.client.model.Filters;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import sun.misc.BASE64Decoder;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,19 +36,7 @@ public class FileUploadController {
     private FileResource fileResource;
     @Resource
     private QiniuUtil qiniuUtil;
-    @Resource
-    private GridFSBucket gridFsBucket;
 
-    private static final String FACE_PIC_PATH;
-
-    static {
-        String os = System.getProperty("os.name");
-        if (SysConst.OS.equals(os)) {
-            FACE_PIC_PATH = SysConst.WINDOWS_FACE_PIC_PATH;
-        } else {
-            FACE_PIC_PATH = SysConst.LINUX_FACE_PIC_PATH;
-        }
-    }
 
     @ApiOperation(value = "上传用户头像", notes = "上传用户头像", httpMethod = "POST")
     @PostMapping("/uploadFace")
@@ -115,49 +91,6 @@ public class FileUploadController {
     }
 
 
-    @ApiOperation(value = "上传文件到mongodb的GridFs中", notes = "上传文件到mongodb的GridFs中", httpMethod = "POST")
-    @PostMapping("/uploadToGridFs")
-    public Result uploadToGridFs(@RequestBody GridFs gridFs) throws IOException {
-
-        // 获得图片的base64字符串
-        String file64 = gridFs.getImg64();
-        // 将base64字符串转换为字符数组
-        byte[] bytes = new BASE64Decoder().decodeBuffer(file64);
-        // 转换为输入流
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        // 上传到gridFS中
-        ObjectId id = gridFsBucket.uploadFromStream(gridFs.getUsername() + SysConst.SYMBOL_POINT + SysConst.FILE_SUFFIX_PNG, inputStream);
-        // 获得文件在gridFS中的主键id
-        String fileId = id.toString();
-        return Result.ok(Response.UPLOAD_SUCCESS, fileId);
-    }
-
-    @ApiOperation(value = "从mongodb的GridFS中读取图片内容", notes = "从mongodb的GridFS中读取图片内容", httpMethod = "GET")
-    @GetMapping("/readInGridFS")
-    public void readInGridFs(String faceId, HttpServletResponse resp) throws IOException {
-
-        if (StringUtils.isBlank(faceId)) {
-            GraceException.error(Response.FILE_NOT_EXIST_ERROR);
-        }
-
-        // 从gridFS中读取文件
-        File adminFace = readGridFsByFaceId(faceId);
-
-        // 把人脸图片输出到浏览器
-        FileUtils.downloadFileByStream(resp, adminFace);
-    }
-
-    @ApiOperation(value = "从mongodb的GridFS中读取图片内容, 并且返回base64", notes = "从mongodb的GridFS中读取图片内容, 并且返回base64", httpMethod = "GET")
-    @GetMapping("/readFace64InGridFS")
-    public Result readFace64InGridFs(String faceId) throws IOException {
-
-        // 获得GridFs中人脸数据文件
-        File face = readGridFsByFaceId(faceId);
-
-        // 转换人脸为base64
-        String base64Face = FileUtils.fileToBase64(face);
-        return Result.ok(base64Face);
-    }
 
     @ApiOperation(value = "上传多个文件", notes = "上传多个文件", httpMethod = "POST")
     @PostMapping("/uploadSomeFiles")
@@ -199,30 +132,6 @@ public class FileUploadController {
             }
         }
         return Result.ok(Response.UPLOAD_SUCCESS, imageUrlList);
-    }
-
-    private File readGridFsByFaceId(String faceId) throws IOException {
-
-        GridFSFindIterable gridFsFiles = gridFsBucket.find(Filters.eq(SysConst.MONGO_ID, new ObjectId((faceId))));
-        GridFSFile gridFs = gridFsFiles.first();
-        if (gridFs == null) {
-            GraceException.error(Response.FILE_NOT_EXIST_ERROR);
-        }
-        String fileName = gridFs.getFilename();
-        // 获取文件流; 保存到本地或者服务器的临时目录
-        File picFile = new File(FACE_PIC_PATH + SysConst.SYMBOL_LEFT_OBLIQUE_LINE + fileName);
-        // 创建文件输出流
-        OutputStream os = Files.newOutputStream(picFile.toPath());
-        // 下载到服务器或者本地
-        gridFsBucket.downloadToStream(new ObjectId(faceId), os);
-        return picFile;
-    }
-
-    @ApiOperation(value = "根据faceId删除GridFs中的人脸信息", notes = "根据faceId删除GridFs中的人脸信息", httpMethod = "GET")
-    @GetMapping("/removeGridFsFile")
-    public Result removeGridFsFile(String faceId) {
-        gridFsBucket.delete(new ObjectId(faceId));
-        return Result.ok();
     }
 }
 

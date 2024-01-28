@@ -20,6 +20,7 @@ import java.util.Date;
 @Accessors(chain = true)
 public class History extends BaseEntity {
 
+    private static final long serialVersionUID = -2819567046658213973L;
     /**
      * 用户id
      */

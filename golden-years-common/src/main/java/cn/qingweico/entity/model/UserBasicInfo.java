@@ -11,8 +11,7 @@ import lombok.Data;
 public class UserBasicInfo {
     private String id;
     private String nickname;
-    private String face;
-    private Integer activeStatus;
+    private String face;;
     private Integer myFollowCounts;
     private Integer myFansCounts;
 }

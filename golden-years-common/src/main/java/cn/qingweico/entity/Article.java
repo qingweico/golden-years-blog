@@ -86,13 +86,6 @@ public class Article extends BaseEntity {
      * 文章点赞数; - 放redis
      */
     private Integer starCounts;
-
-    /**
-     * 文章静态化与mongo关联id
-     */
-    @Deprecated
-    private String mongoFileId;
-
     /**
      * 逻辑删除状态; 1: 非物理删除; 0: 未删除
      */

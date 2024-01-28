@@ -5,7 +5,6 @@ import cn.qingweico.article.clients.UserBaseInfoClient;
 import cn.qingweico.article.service.ArticlePortalService;
 import cn.qingweico.article.service.IndexService;
 import cn.qingweico.entity.Article;
-import cn.qingweico.entity.model.ArticleElastic;
 import cn.qingweico.entity.model.IndexArticle;
 import cn.qingweico.entity.model.UserArticleRank;
 import cn.qingweico.entity.model.UserBasicInfo;
@@ -18,21 +17,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
-import org.springframework.data.elasticsearch.core.SearchResultMapper;
-import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
-import org.springframework.data.elasticsearch.core.aggregation.impl.AggregatedPageImpl;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.SearchQuery;
+
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -54,144 +41,11 @@ public class ArticlePortalController extends BaseController {
     @Resource
     private ArticlePortalService articlePortalService;
 
-    @Resource
-    private ElasticsearchTemplate elasticsearchTemplate;
-
-    @ApiOperation(value = "首页查询文章列表(elasticSearch)", notes = "首页查询文章列表(elasticSearch)", httpMethod = "GET")
-    @GetMapping("es/search")
-    public Result articleListByElasticSearch(@RequestParam String keyword,
-                                             @RequestParam String category,
-                                             @RequestParam String tag,
-                                             @RequestParam Integer page,
-                                             @RequestParam Integer pageSize) {
-        page--;
-        Pageable pageable = PageRequest.of(page, pageSize);
-
-        SearchQuery searchQuery;
-        AggregatedPage<ArticleElastic> pagedArticle =
-                new AggregatedPageImpl<>(new ArrayList<>(0));
-
-        // 首页默认查询不带参数
-        if (StringUtils.isBlank(keyword) && StringUtils.isBlank(category) && StringUtils.isBlank(tag)) {
-            searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(QueryBuilders.matchAllQuery())
-                    .withPageable(pageable)
-                    .build();
-
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleElastic.class);
-        }
-
-        // 按照文章类别查询
-        if (StringUtils.isBlank(keyword) && !StringUtils.isBlank(category)) {
-            searchQuery = new NativeSearchQueryBuilder()
-                    .withQuery(QueryBuilders.termQuery(SysConst.CATEGORY_ID, category))
-                    .withPageable(pageable)
-                    .build();
-
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleElastic.class);
-        }
-        // 按照文章标签查询
-        if (StringUtils.isBlank(keyword) && !StringUtils.isBlank(tag)) {
-            searchQuery = new NativeSearchQueryBuilder()
-                    // tags: "" (string 空格隔开)
-                    .withQuery(QueryBuilders.matchQuery(SysConst.TAGS, tag))
-                    .withPageable(pageable)
-                    .build();
-
-            pagedArticle = elasticsearchTemplate.queryForPage(searchQuery, ArticleElastic.class);
-        }
-
-        // 按照关键字查询, 并且高亮显示关键字
-        if (StringUtils.isNotBlank(keyword) && StringUtils.isBlank(category) && StringUtils.isBlank(tag)) {
-            pagedArticle = queryByKeyword(keyword, pageable);
-        }
-
-        List<ArticleElastic> articleEoList = pagedArticle.getContent();
-        List<Article> res = new ArrayList<>();
-        for (ArticleElastic articleElastic : articleEoList) {
-            Article article = new Article();
-            BeanUtils.copyProperties(articleElastic, article);
-            res.add(article);
-        }
-        PagedResult gridResult = new PagedResult();
-        gridResult.setRows(res);
-        gridResult.setCurrentPage(page + 1);
-        gridResult.setTotalPage(pagedArticle.getTotalPages());
-        gridResult.setRecords(pagedArticle.getTotalElements());
-        return Result.ok(rebuildArticleGrid(gridResult));
-    }
-
-    private AggregatedPage<ArticleElastic> queryByKeyword(String keyword, Pageable pageable) {
-        String preTag = "<font color='red'>";
-        String postTag = "</font>";
-        String searchTitleField = SysConst.TITLE;
-        SearchQuery searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(QueryBuilders.matchQuery(searchTitleField, keyword))
-                .withHighlightFields(new HighlightBuilder.Field(searchTitleField)
-                        .preTags(preTag)
-                        .postTags(postTag))
-                .withPageable(pageable)
-                .build();
-
-        return elasticsearchTemplate.queryForPage(searchQuery,
-                ArticleElastic.class,
-                new SearchResultMapper() {
-                    @Override
-                    public <T> AggregatedPage<T> mapResults(SearchResponse searchResponse,
-                                                            Class<T> aClass,
-                                                            Pageable pageable) {
-                        List<ArticleElastic> articleHighLightList = new ArrayList<>();
-                        SearchHits searchHits = searchResponse.getHits();
-                        for (SearchHit hit : searchHits) {
-                            HighlightField highlightField = hit.getHighlightFields().get(searchTitleField);
-                            String title = highlightField.getFragments()[0].toString();
-
-                            String articleId = (String) hit.getSourceAsMap().get(SysConst.ID);
-                            String categoryId = (String) hit.getSourceAsMap().get(SysConst.CATEGORY_ID);
-                            Integer articleType = (Integer) hit.getSourceAsMap().get(SysConst.ARTICLE_TYPE);
-                            String articleCover = (String) hit.getSourceAsMap().get(SysConst.ARTICLE_COVER);
-                            String summary = (String) hit.getSourceAsMap().get(SysConst.SUMMARY);
-                            String authorId = (String) hit.getSourceAsMap().get(SysConst.AUTHOR_ID);
-                            Long dateLong = (Long) hit.getSourceAsMap().get(SysConst.CREATE_TIME);
-                            Date createTime = new Date(dateLong);
-
-                            ArticleElastic articleElastic = new ArticleElastic();
-                            articleElastic.setId(articleId);
-                            articleElastic.setCategoryId(categoryId);
-                            articleElastic.setTitle(title);
-                            articleElastic.setArticleType(articleType);
-                            articleElastic.setArticleCover(articleCover);
-                            articleElastic.setSummary(summary);
-                            articleElastic.setAuthorId(authorId);
-                            articleElastic.setCreateTime(createTime);
-                            articleHighLightList.add(articleElastic);
-                        }
-                        @SuppressWarnings("unchecked")
-                        AggregatedPageImpl<T> ts = new AggregatedPageImpl<>((List<T>) articleHighLightList,
-                                pageable, searchResponse.getHits().totalHits);
-                        return ts;
-                    }
-
-                    @Override
-                    public <T> T mapSearchHit(SearchHit searchHit, Class<T> aClass) {
-                        return null;
-                    }
-                });
-    }
-
     @ApiOperation(value = "首页查询文章列表(sql)", notes = "首页查询文章列表(sql)", httpMethod = "GET")
     @GetMapping("search")
-    public Result articleListBySql(@RequestParam String keyword,
-                                   @RequestParam String category,
-                                   @RequestParam String tag,
-                                   @RequestParam Integer page,
-                                   @RequestParam Integer pageSize) {
+    public Result articleListBySql(@RequestParam String keyword, @RequestParam String category, @RequestParam String tag, @RequestParam Integer page, @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
-        PagedResult res = articlePortalService.queryPortalArticleList(keyword,
-                category,
-                tag,
-                page,
-                pageSize);
+        PagedResult res = articlePortalService.queryPortalArticleList(keyword, category, tag, page, pageSize);
         return Result.ok(rebuildArticleGrid(res));
     }
 
@@ -203,8 +57,7 @@ public class ArticlePortalController extends BaseController {
 
     @ApiOperation(value = "首页文章排行", notes = "首页文章排行", httpMethod = "GET")
     @GetMapping("/rank")
-    public Result hotList(@RequestParam Integer page,
-                          @RequestParam Integer pageSize) {
+    public Result hotList(@RequestParam Integer page, @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
         long size = redisCache.zSetSize(RedisConst.Z_SET_ARTICLE_RANK);
         // 如果zset key不存在则返回0
@@ -219,8 +72,7 @@ public class ArticlePortalController extends BaseController {
                 redisCache.expire(RedisConst.Z_SET_ARTICLE_RANK, 5, TimeUnit.MINUTES);
             }
         }
-        Set<String> articleJson = redisCache.zSetRevRange(RedisConst.Z_SET_ARTICLE_RANK, (long) (page - 1) * pageSize,
-                (pageSize - 1) + (long) (page - 1) * pageSize);
+        Set<String> articleJson = redisCache.zSetRevRange(RedisConst.Z_SET_ARTICLE_RANK, (long) (page - 1) * pageSize, (pageSize - 1) + (long) (page - 1) * pageSize);
 
         List<Article> result = new ArrayList<>();
         for (String json : articleJson) {
@@ -229,7 +81,7 @@ public class ArticlePortalController extends BaseController {
         }
         PagedResult pgr = new PagedResult();
         pgr.setCurrentPage(page);
-        pgr.setRecords(size);
+        pgr.setTotalNumber(size);
         pgr.setTotalPage((size / pageSize) + 1);
         pgr.setRows(result);
         return Result.ok(rebuildArticleGrid(pgr));
@@ -237,9 +89,7 @@ public class ArticlePortalController extends BaseController {
 
     @GetMapping("/homepage")
     @ApiOperation(value = "查询作者发布的所有文章列表", notes = "查询作者发布的所有文章列表", httpMethod = "GET")
-    public Result queryArticleListByAuthorId(@RequestParam String authorId,
-                                             @RequestParam Integer page,
-                                             @RequestParam Integer pageSize) {
+    public Result queryArticleListByAuthorId(@RequestParam String authorId, @RequestParam Integer page, @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
         PagedResult gridResult = articlePortalService.queryArticleListOfAuthor(authorId, page, pageSize);
         return Result.ok(rebuildArticleGrid(gridResult));
@@ -272,9 +122,7 @@ public class ArticlePortalController extends BaseController {
 
     @GetMapping("getArticleByTime")
     @ApiOperation(value = "通过时间归类文章", notes = "通过时间归类文章", httpMethod = "GET")
-    public Result queryArticleByTime(@RequestParam Integer page,
-                                     @RequestParam Integer pageSize,
-                                     @RequestParam String monthAndYear) {
+    public Result queryArticleByTime(@RequestParam Integer page, @RequestParam Integer pageSize, @RequestParam String monthAndYear) {
         checkPagingParams(page, pageSize);
         PagedResult articleArchiveVOList = articlePortalService.getArticleListByTime(monthAndYear, page, pageSize);
         return Result.ok(articleArchiveVOList);
@@ -288,9 +136,7 @@ public class ArticlePortalController extends BaseController {
 
     @GetMapping("timeline")
     @ApiOperation(value = "主页文章时间线功能", notes = "主页文章时间线功能", httpMethod = "GET")
-    public Result timeline(@RequestParam String userId,
-                           @RequestParam Integer page,
-                           @RequestParam Integer pageSize) {
+    public Result timeline(@RequestParam String userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
         checkPagingParams(page, pageSize);
         PagedResult result = articlePortalService.timeline(userId, page, pageSize);
         return Result.ok(result);
@@ -298,13 +144,8 @@ public class ArticlePortalController extends BaseController {
 
     @GetMapping("getArticleListByCategoryId")
     @ApiOperation(value = "主页分类功能", notes = "主页分类功能", httpMethod = "GET")
-    public Result getArticleListByCategoryId(@RequestParam String userId,
-                                             @RequestParam String categoryId,
-                                             @RequestParam Integer page,
-                                             @RequestParam Integer pageSize) {
-        return Result.ok(articlePortalService.queryArticleListByCategoryId(userId,
-                categoryId,
-                page, pageSize));
+    public Result getArticleListByCategoryId(@RequestParam String userId, @RequestParam String categoryId, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        return Result.ok(articlePortalService.queryArticleListByCategoryId(userId, categoryId, page, pageSize));
     }
 
     // 文章全局状态
@@ -411,8 +252,7 @@ public class ArticlePortalController extends BaseController {
         return (int) result * 1000;
     }
 
-    private UserBasicInfo getAuthorInfoIfPresent(String author,
-                                                 List<UserBasicInfo> authorList) {
+    private UserBasicInfo getAuthorInfoIfPresent(String author, List<UserBasicInfo> authorList) {
         if (authorList == null) {
             return null;
         }

@@ -74,7 +74,7 @@ public class LimitInterceptor {
                         HttpHeaders.EMPTY, new byte[0], Charset.defaultCharset());
             }
         } catch (Throwable e) {
-            rateLimiterHandler.handleException(e, "LimitInterceptor.interceptor:");
+            rateLimiterHandler.handleException(e, "LimitInterceptor.interceptor: {}");
             return false;
         }
 

@@ -91,19 +91,6 @@ public interface ArticleService {
     void withdrawArticle(String userId, String articleId);
 
     /**
-     * 关联文章和GridFS的html文件的id
-     *
-     * @param articleId      文章id
-     * @param articleMongoId 上传至mongodb中文章的mongoid
-     */
-    @Deprecated
-    default void updateArticleToGridFs(String articleId, String articleMongoId) {
-        Article article = new Article();
-        article.setId(articleId);
-        article.setMongoFileId(articleMongoId);
-    }
-
-    /**
      * 管理员查询所有的文章列表
      *
      * @param keyword      文章标题

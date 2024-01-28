@@ -6,15 +6,23 @@ import cn.qingweico.article.service.ArticleHistoryService;
 import cn.qingweico.core.service.BaseService;
 import cn.qingweico.entity.Article;
 import cn.qingweico.entity.History;
+import cn.qingweico.entity.model.ArticleHistory;
+import cn.qingweico.entity.model.UserBasicInfo;
 import cn.qingweico.enums.ArticleHistoryDeleteType;
 import cn.qingweico.util.DateUtils;
+import cn.qingweico.util.PagedResult;
 import cn.qingweico.util.SnowflakeIdWorker;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -32,15 +40,33 @@ public class ArticleHistoryServiceImpl extends BaseService implements ArticleHis
     @Resource
     private ArticleMapper articleMapper;
 
+    @Resource
+    private GenericUserChannel guc;
     @Override
-    public List<History> getHistoryList(String userId, Integer pageNum, Integer pageSize) {
-
+    public PagedResult getHistoryList(String userId, Integer pageNum, Integer pageSize) {
         LambdaQueryWrapper<History> lwq = new LambdaQueryWrapper<>();
         lwq.orderByDesc(History::getCreateTime);
         lwq.eq(History::getUserId, userId);
-        // TODO 分页
-        List<History> list = historyMapper.selectList(lwq);
-        return null;
+        Page<History> page = new Page<>(pageNum,pageSize);
+        // 分页查询
+        IPage<History> iPage = historyMapper.selectPage(page, lwq);
+        PagedResult pagedResult = new PagedResult();
+        pagedResult.setTotalPage(iPage.getPages());
+        pagedResult.setTotalNumber(iPage.getTotal());
+        pagedResult.setCurrentPage(iPage.getCurrent());
+        List<History> records = iPage.getRecords();
+        List<ArticleHistory> result = new ArrayList<>();
+        for(History history : records) {
+            String articleId = history.getArticleId();
+            Article article = queryArticleById(articleId);
+            ArticleHistory articleHistory = new ArticleHistory();
+            articleHistory.setArticleName(article.getTitle());
+            BeanUtils.copyProperties(history, articleHistory);
+            UserBasicInfo userBasicInfo = guc.getUserBasicInfoClient(history.getUserId());
+            articleHistory.setUsername(userBasicInfo.getNickname());
+        }
+        pagedResult.setRows(result);
+        return pagedResult;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

@@ -66,17 +66,17 @@ public class UserController extends BaseController {
         return Result.ok(userService.queryUserById(userId));
     }
 
-    @ApiOperation(value = "冻结或者解冻用户", notes = "冻结或者解冻用户", httpMethod = "POST")
-    @PostMapping("/freezeOrNot")
-    public Result freezeUserOrNot(String userId, Integer doStatus) {
+    @ApiOperation(value = "更改用户状态", notes = "更改用户状态", httpMethod = "POST")
+    @PostMapping("/changeUserStatus")
+    public Result changeUserStatus(String userId, Integer doStatus) {
         if (!UserStatus.isUserStatusValid(doStatus)) {
-            return Result.r(Response.USER_STATUS_ERROR);
+            return Result.r(Response.REQUEST_PARAM_ERROR);
         }
-        userService.freezeUserOrNot(userId, doStatus);
+        userService.changeUserStatus(userId, doStatus);
         if (doStatus.equals(UserStatus.DISABLE.getVal())) {
-            return Result.r(Response.FREEZE_SUCCESS);
+            return Result.r(Response.DISABLE_SUCCESS);
         } else if (doStatus.equals(UserStatus.AVAILABLE.getVal())) {
-            return Result.r(Response.ACTIVATE_SUCCESS);
+            return Result.r(Response.AVAILABLE_SUCCESS);
         }
         return Result.r(Response.REQUEST_PARAM_ERROR);
     }
@@ -103,23 +103,21 @@ public class UserController extends BaseController {
         }
         // 根据用户id查询用户基本信息
         User user = getUser(userId);
-        UserBasicInfo userVO = new UserBasicInfo();
-        BeanUtils.copyProperties(user, userVO);
+        UserBasicInfo ubi = new UserBasicInfo();
+        BeanUtils.copyProperties(user, ubi);
 
         // 从redis中查询用户的粉丝数和关注数
         Integer myFollowCounts = getCountsFromRedis(RedisConst.REDIS_MY_FOLLOW_COUNTS + SysConst.SYMBOL_COLON + userId);
         Integer myFanCounts = getCountsFromRedis(RedisConst.REDIS_AUTHOR_FANS_COUNTS + SysConst.SYMBOL_COLON + userId);
 
-        userVO.setMyFansCounts(myFanCounts);
-        userVO.setMyFollowCounts(myFollowCounts);
+        ubi.setMyFansCounts(myFanCounts);
+        ubi.setMyFollowCounts(myFollowCounts);
 
-        Integer userStatus = userVO.getActiveStatus();
-        if (userStatus.equals(UserStatus.AVAILABLE.getVal())) {
-            return Result.ok(Response.WELCOME, userVO);
-        } else if (userStatus.equals(UserStatus.DISABLE.getVal())) {
-            return Result.ok(Response.ACCOUNT_ILLEGAL, userVO);
+        Integer available = user.getAvailable();
+        if (UserStatus.AVAILABLE.getVal().equals(available)) {
+            return Result.error(Response.DISABLE_USER.msg());
         }
-        return Result.ok(userVO);
+        return Result.ok(ubi);
     }
 
     @ApiOperation(value = "更新用户信息", notes = "更新用户信息", httpMethod = "POST")

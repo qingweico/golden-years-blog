@@ -65,10 +65,6 @@ spring:
     multipart:
       max-file-size: 2MB
       max-request-size: 2MB
-  data:
-    mongodb:
-      uri: mongodb://root:root@106.12.136.221:27017
-      database: golden-years
   cloud:
     nacos:
       discovery:
@@ -82,12 +78,3 @@ spring:
       transport:
         dashboard: 106.12.136.221:8888
         port: 8719
-############################################################
-#
-#  fastDFS配置信息
-#
-############################################################
-fdfs:
-  connect-timeout: 300
-  so-timeout: 300
-  tracker-list: xxx:22122

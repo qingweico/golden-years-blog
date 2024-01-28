@@ -54,7 +54,6 @@ public class SysMenuController {
         List<SysMenu> sysMenuList = new ArrayList<>();
         // 构建菜单树 返回前端
         HashMap<String, Object> map = new HashMap<>(1);
-        map.put("treeMenu", sysMenuService.buildTreeMenu(sysMenuList));
         return Result.ok(map);
     }
 
@@ -67,7 +66,7 @@ public class SysMenuController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('system:menu:query')")
     public Result findById(@PathVariable(value = "id") String id) {
-        SysMenu sysMenu = sysMenuService.getById(id);
+        SysMenu sysMenu = sysMenuService.selectMenuById(id);
         Map<String, Object> map = new HashMap<>(CollUtils.mapSize(1));
         map.put("sysMenu", sysMenu);
         return Result.ok(map);
@@ -83,9 +82,7 @@ public class SysMenuController {
     @PreAuthorize("hasAuthority('system:menu:add')" + "||" + "hasAuthority('system:menu:edit')")
     public Result save(SysMenu sysMenu) {
         if (StringUtils.isEmpty(sysMenu.getId())) {
-            sysMenuService.createMenu(sysMenu);
         } else {
-            sysMenuService.editMenu(sysMenu);
         }
         // 清除cache
         return Result.ok();

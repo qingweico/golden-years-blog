@@ -1,6 +1,8 @@
 package cn.qingweico.entity;
 
 import cn.qingweico.global.SysConst;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import java.util.*;
 @Builder
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+@TableName("gy_sys_user")
 public class SysUser extends BaseEntity {
     private static final long serialVersionUID = 8059511295718875912L;
     /**
@@ -31,11 +34,6 @@ public class SysUser extends BaseEntity {
      * 密码
      */
     private String password;
-    /**
-     * 人脸入库图片信息, 该信息保存到mongoDB的gridFS中, 为空string则表示未开启人脸登录
-     */
-    private String faceId;
-
     /**
      * 性别 (0: 女 1: 男)
      */
@@ -85,6 +83,7 @@ public class SysUser extends BaseEntity {
     /**
      * 角色对象
      */
+    @TableField(exist = false)
     @Builder.Default
     private List<SysRole> roles = new ArrayList<>();
 }

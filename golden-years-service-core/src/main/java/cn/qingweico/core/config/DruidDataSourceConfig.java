@@ -4,6 +4,8 @@ import cn.qingweico.core.config.split.DynamicDataSource;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,12 @@ import java.util.Map;
 @EnableTransactionManagement
 public class DruidDataSourceConfig {
 
-    DruidConstant druidConstant;
+    private DruidConstant druidConstant;
+
+    private static final String CONFIG_LOCATION = "classpath:mybatis-config.xml";
+    private static final String MAPPER_LOCATION = "classpath:mapper/*.xml";
+    private static final String TYPE_ALIASES_PACKAGE = "cn.qingweico.entity";
+
 
     @Autowired
     public void setDruidConstant(DruidConstant druidConstant) {
@@ -106,11 +113,16 @@ public class DruidDataSourceConfig {
 
     @Bean
     public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
-        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        // 不要使用原生的SqlSessionFactoryBean
+        // fix 20230930
+        MybatisSqlSessionFactoryBean sqlSessionFactoryBean = new MybatisSqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSource);
-        sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource("classpath:mybatis-config.xml"));
-        sqlSessionFactoryBean.setTypeAliasesPackage("cn.qingweico.pojo");
-        sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mapper/*.xml"));
+        sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource(CONFIG_LOCATION));
+        sqlSessionFactoryBean.setTypeAliasesPackage(TYPE_ALIASES_PACKAGE);
+        sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(MAPPER_LOCATION));
+        GlobalConfig gc = new GlobalConfig();
+        gc.setBanner(false);
+        sqlSessionFactoryBean.setGlobalConfig(gc);
         return sqlSessionFactoryBean.getObject();
     }
 
@@ -130,7 +142,7 @@ public class DruidDataSourceConfig {
         ServletRegistrationBean<StatViewServlet> bean = new ServletRegistrationBean<>(new StatViewServlet(), "/druid/*");
         Map<String, String> maps = new HashMap<>(5);
         maps.put("loginUsername", "admin");
-        maps.put("loginPassword", "990712");
+        maps.put("loginPassword", "admin");
         maps.put("allow", "");
         maps.put("deny", "");
         bean.setInitParameters(maps);

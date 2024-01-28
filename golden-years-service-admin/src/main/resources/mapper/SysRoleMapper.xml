@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qingweico.admin.mapper.RoleMapper">
+
+    <resultMap type="cn.qingweico.entity.SysRole" id="SysRoleResult">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="menuCheckStrictly" column="menu_check_strictly"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <sql id="selectRole">
+        select distinct r.id,
+                        r.name,
+                        r.code,
+                        r.menu_check_strictly,
+                        r.create_time,
+                        r.description
+        from gy_sys_role r
+                 left join gy_sys_user_role ur on ur.role_id = r.id
+                 left join gy_sys_user u on u.id = ur.user_id
+    </sql>
+
+    <select id="selectRoleList" parameterType="cn.qingweico.entity.SysRole" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+        where 1 = 1
+        <if test="id != null and id != 0">
+            AND r.id = #{roleId}
+        </if>
+        <if test="name != null and name != ''">
+            AND r.name like concat('%', #{name}, '%')
+        </if>
+        <if test="code != null and code != ''">
+            AND r.code like concat('%', #{code}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            and date_format(r.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            and date_format(r.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+    </select>
+
+    <select id="selectRolePermissionByUserId" parameterType="String" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <select id="selectRoleAll" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+    </select>
+
+    <select id="selectRoleListByUserId" parameterType="String" resultType="String">
+        select r.id
+        from gy_sys_role r
+                 left join gy_sys_user_role ur on ur.role_id = r.id
+                 left join gy_sys_user u on u.id = ur.user_id
+        where u.id = #{userId}
+    </select>
+
+    <select id="selectRoleById" parameterType="String" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+        where r.id = #{roleId}
+    </select>
+
+    <select id="selectRolesByUserName" parameterType="String" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+        WHERE u.username = #{username}
+    </select>
+
+    <select id="checkRoleNameUnique" parameterType="String" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+        where r.name=#{roleName} limit 1
+    </select>
+
+    <select id="checkRoleKeyUnique" parameterType="String" resultMap="SysRoleResult">
+        <include refid="selectRole"/>
+        where r.code =#{code} limit 1
+    </select>
+
+    <insert id="insertRole" parameterType="cn.qingweico.entity.SysRole">
+        insert into gy_sys_role(
+        <if test="name != null and name != ''">name,</if>
+        <if test="code != null and code != ''">code,</if>
+        <if test="menuCheckStrictly != null">menu_check_strictly,</if>
+        <if test="description != null and description != ''">description,</if>
+        )values(
+        <if test="name != null and name != ''">#{name},</if>
+        <if test="code != null and code != ''">#{code},</if>
+        <if test="menuCheckStrictly != null">#{menuCheckStrictly},</if>
+        <if test="description != null and description != ''">#{description},</if>
+        )
+    </insert>
+
+    <update id="updateRole" parameterType="cn.qingweico.entity.SysRole">
+        update gy_sys_role
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="menuCheckStrictly != null">menu_check_strictly = #{menuCheckStrictly},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        where id = #{roleId}
+    </update>
+
+    <delete id="deleteRoleById" parameterType="String">
+        delete gy_sys_role
+        where id = #{roleId}
+    </delete>
+
+    <delete id="deleteRoleByIds" parameterType="Long">
+        delete gy_sys_role where id in
+        <foreach collection="array" item="roleId" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+    </delete>
+
+</mapper>

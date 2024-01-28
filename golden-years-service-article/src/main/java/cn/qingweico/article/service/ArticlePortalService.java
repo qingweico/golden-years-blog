@@ -127,12 +127,4 @@ public interface ArticlePortalService {
                                              String categoryId,
                                              Integer page,
                                              Integer pageSize);
-
-    /**
-     * 获取文章的标签
-     *
-     * @param article Article
-     * @return List<Tag>
-     */
-    List<Tag> getTagList(Article article);
 }

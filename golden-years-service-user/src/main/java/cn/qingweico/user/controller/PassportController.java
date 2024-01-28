@@ -53,7 +53,7 @@ public class PassportController extends BaseController {
         String userIp = IpUtils.getRequestIp(request);
         // 根据用户的ip进行限制, 限制用户在60s内只能获得一次验证码
         redisCache.setNx60s(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp, userIp);
-        String random = RandomStringUtils.random(6,false,true);
+        String random = RandomStringUtils.random(6, false, true);
         smsUtil.sendSms(mobile, random);
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
         redisCache.set(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile, random, 2 * 60);
@@ -93,7 +93,7 @@ public class PassportController extends BaseController {
         map.put(SysConst.TOKEN, jsonWebToken);
         map.put(SysConst.USER_STATUS, user.getAvailable());
         if (userStatus == UserStatus.DISABLE.getVal()) {
-            return Result.ok(Response.WELCOME, map);
+            return Result.ok(map);
         } else if (userStatus == UserStatus.AVAILABLE.getVal()) {
             return Result.ok(Response.LOGIN_SUCCESS, map);
         }
@@ -120,7 +120,7 @@ public class PassportController extends BaseController {
                 || user.getEmail().equals(auth)) {
             if (Objects.equals(user.getPassword(), password)) {
                 if (userStatus == UserStatus.DISABLE.getVal()) {
-                    return Result.ok(Response.WELCOME, user.getAvailable());
+                    return Result.ok(user.getAvailable());
                 }
                 if (userStatus == UserStatus.AVAILABLE.getVal()) {
                     String jsonWebToken = JwtUtils.createJwt(user.getId());

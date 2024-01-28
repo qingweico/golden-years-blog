@@ -1,5 +1,6 @@
 package cn.qingweico.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -18,22 +19,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Accessors(chain = true)
-public class SysMenu extends BaseEntity implements Comparable<SysMenu> {
+public class SysMenu extends BaseEntity {
+    private static final long serialVersionUID = -4469622809393783319L;
     /**
      * 菜单名称
      */
     private String name;
 
     /**
-     * 菜单级别(一级分类, 二级分类)
+     * 类型(M目录 C菜单 F按钮)
      */
-    private Integer level;
-
-    /**
-     * 菜单类型(0: 菜单, 1: 按钮)
-     */
-    private Integer type;
-
+    private String type;
     /**
      * 菜单描述
      */
@@ -50,6 +46,15 @@ public class SysMenu extends BaseEntity implements Comparable<SysMenu> {
     private String parentId;
 
     /**
+     * 父菜单名称
+     */
+    @TableField(exist = false)
+    private String parentName;
+
+    /** 组件路径 */
+    private String component;
+
+    /**
      * path
      */
     private String path;
@@ -57,40 +62,34 @@ public class SysMenu extends BaseEntity implements Comparable<SysMenu> {
     /**
      * 排序字段(越大越靠前)
      */
-    private Integer sort;
+    private Integer sequence;
 
     /**
      * 是否隐藏  1: 是  0: 否
      */
     private Integer hidden;
 
+    /** 是否为外链(0是 1否) */
+    private String isFrame;
     /**
-     * 是否跳转外部URL
+     * 是否缓存(0缓存 1不缓存)
      */
-    private Integer external;
-
-    /**
-     * 父菜单
-     */
-    private SysMenu parent;
+    private String isCache;
 
     /**
      * 子菜单
      */
     private List<SysMenu> children;
+
+
     /**
-     * 状态 0: 禁用  1: 启用
+     * 路由参数
      */
-    private int status;
+    private String query;
+    /**
+     * 权限字符串
+     */
+    private String perms;
 
-    @Override
-    public int compareTo(SysMenu o) {
 
-        if (this.sort > o.getSort()) {
-            return -1;
-        }else if(this.sort.equals(o.getSort())) {
-            return 0;
-        }
-        return 1;
-    }
 }

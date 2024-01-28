@@ -36,12 +36,12 @@ public interface UserService extends IService<User> {
 
 
     /**
-     * 冻结或者解冻用户
+     * 更改用户状态
      *
      * @param userId   用户id
      * @param doStatus doStatus
      */
-    void freezeUserOrNot(String userId, Integer doStatus);
+    void changeUserStatus(String userId, Integer doStatus);
 
     /**
      * 判断手机是否存在

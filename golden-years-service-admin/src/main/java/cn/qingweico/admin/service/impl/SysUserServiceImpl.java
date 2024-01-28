@@ -2,9 +2,7 @@ package cn.qingweico.admin.service.impl;
 
 import cn.qingweico.admin.mapper.SysUserMapper;
 import cn.qingweico.admin.service.SysUserService;
-import cn.qingweico.core.service.BaseService;
 import cn.qingweico.entity.SysUser;
-import cn.qingweico.entity.User;
 import cn.qingweico.entity.model.OperatorSysUser;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
@@ -43,8 +41,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public SysUser querySysUserByUsername(String username) {
         LambdaQueryWrapper<SysUser> lqw = new LambdaQueryWrapper<>();
         lqw.eq(SysUser::getUsername, username);
-        lqw.last(SysConst.LIMIT_ONE);
-        return getOne(lqw);
+        return sysUserMapper.selectOne(lqw);
     }
 
     @Override

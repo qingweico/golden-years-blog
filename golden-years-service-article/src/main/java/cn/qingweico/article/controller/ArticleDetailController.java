@@ -1,5 +1,6 @@
 package cn.qingweico.article.controller;
 
+import cn.qingweico.article.service.impl.GenericUserChannel;
 import cn.qingweico.core.base.BaseController;
 import cn.qingweico.article.service.ArticleDetailService;
 import cn.qingweico.article.service.ArticlePortalService;
@@ -41,9 +42,8 @@ public class ArticleDetailController extends BaseController {
     private ArticlePortalService articlePortalService;
     @Resource
     private ArticleDetailService articleDetailService;
-
     @Resource
-    private ArticleController articleController;
+    private GenericUserChannel guc;
 
     @GetMapping("detail")
     @ApiOperation(value = "文章详情", notes = "文章详情", httpMethod = "GET")
@@ -52,7 +52,7 @@ public class ArticleDetailController extends BaseController {
         if (articleDetail == null) {
             return Result.r(Response.ARTICLE_NOT_EXIST);
         }
-        Map<String, Object> map = articleController.geAuthorInfo(articleDetail.getAuthorId());
+        Map<String, Object> map = guc.geAuthorInfo(articleDetail.getAuthorId());
         articleDetail.setAuthorName((String) map.get(SysConst.AUTHOR_NAME));
         articleDetail.setAuthorFace((String) map.get(SysConst.AUTHOR_FACE));
         articleDetail.setStarCounts(getCountsFromRedis(RedisConst.REDIS_ARTICLE_STAR_COUNTS + SysConst.SYMBOL_COLON + articleId));

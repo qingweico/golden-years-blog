@@ -75,7 +75,6 @@ CREATE TABLE `t_article` (
   `read_counts` int NOT NULL DEFAULT '0',
   `collect_counts` int NOT NULL,
   `comment_counts` int NOT NULL DEFAULT '0',
-  `mongo_file_id` varchar(64) DEFAULT NULL,
   `is_delete` int NOT NULL DEFAULT '0',
   `influence` int NOT NULL,
   `create_time` datetime NOT NULL,

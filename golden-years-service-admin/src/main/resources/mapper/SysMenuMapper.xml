@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.qingweico.admin.mapper.SysMenuMapper">
+
+    <resultMap type="cn.qingweico.entity.SysMenu" id="SysMenuResult">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="sequence" column="sequence"/>
+        <result property="path" column="path"/>
+        <result property="component" column="component"/>
+        <result property="query" column="query"/>
+        <result property="isFrame" column="is_frame"/>
+        <result property="isCache" column="is_cache"/>
+        <result property="type" column="type"/>
+        <result property="hidden" column="hidden"/>
+        <result property="perms" column="perms"/>
+        <result property="icon" column="icon"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="desc" column="desc"/>
+    </resultMap>
+
+    <sql id="selectMenu">
+        select id,
+               name,
+               parent_id,
+               sequence,
+               path,
+               component,
+               `query`,
+               is_frame,
+               is_cache,
+               type,
+               hidden,
+               ifnull(perms, '') as perms,
+               icon,
+               create_time
+        from sys_menu
+    </sql>
+
+    <select id="selectMenuList" parameterType="cn.qingweico.entity.SysMenu" resultMap="SysMenuResult">
+        <include refid="selectMenu"/>
+        <where>
+            <if test="name != null and name != ''">
+                AND `name` like concat('%', #{name}, '%')
+            </if>
+            <if test="hidden != null and hidden != ''">
+                AND hidden = #{hidden}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        order by parent_id, order_num
+    </select>
+
+    <select id="selectMenuTreeAll" resultMap="SysMenuResult">
+        select distinct m.id,
+                        m.parent_id,
+                        m.name,
+                        m.path,
+                        m.component,
+                        m.`query`,
+                        m.hidden,
+                        ifnull(m.perms, '') as perms,
+                        m.is_frame,
+                        m.is_cache,
+                        m.type,
+                        m.icon,
+                        m.sequence,
+                        m.create_time
+        from gy_sys_menu m
+        where m.type in ('M', 'C')
+        order by m.parent_id, m.sequence
+    </select>
+
+    <select id="selectMenuListByUserId" parameterType="cn.qingweico.entity.SysMenu" resultMap="SysMenuResult">
+        select distinct m.id, m.parent_id, m.name, m.path, m.component, m.`query`, m.hidden,
+        ifnull(m.perms,'') as perms, m.is_frame, m.is_cache, m.type, m.icon, m.sequence, m.create_time
+        from gy_sys_menu m
+        left join gy_sys_role_menu rm on m.id = rm.menu_id
+        left join gy_sys_user_role ur on rm.role_id = ur.role_id
+        left join gy_role ro on ur.role_id = ro.id
+        where ur.user_id = #{params.userId}
+        <if test="name != null and name != ''">
+            AND m.name like concat('%', #{name}, '%')
+        </if>
+        <if test="hidden != null and hidden != ''">
+            AND m.hidden = #{hidden}
+        </if>
+        order by m.parent_id, m.sequence
+    </select>
+
+    <select id="selectMenuTreeByUserId" parameterType="String" resultMap="SysMenuResult">
+        select distinct m.id,
+                        m.parent_id,
+                        m.name,
+                        m.path,
+                        m.component,
+                        m.`query`,
+                        m.hidden,
+                        ifnull(m.perms, '') as perms,
+                        m.is_frame,
+                        m.is_cache,
+                        m.type,
+                        m.icon,
+                        m.sequence,
+                        m.create_time
+        from gy_sys_menu m
+                 left join gy_sys_role_menu rm on m.id = rm.menu_id
+                 left join gy_sys_user_role ur on rm.role_id = ur.role_id
+                 left join gy_role ro on ur.role_id = ro.id
+                 left join gy_sys_user u on ur.user_id = u.id
+        where u.id = #{userId}
+          and m.type in ('M', 'C')
+        order by m.parent_id, m.sequence
+    </select>
+
+    <select id="selectMenuListByRoleId" resultType="String">
+        select m.id
+        from gy_sys_menu m
+        left join gy_sys_role_menu rm on m.id = rm.menu_id
+        where rm.role_id = #{roleId}
+        <if test="menuCheckStrictly">
+            and m.menu_id not in (select m.parent_id from sys_menu m inner join sys_role_menu rm on m.menu_id =
+            rm.menu_id and rm.role_id = #{roleId})
+        </if>
+        order by m.parent_id, m.order_num
+    </select>
+
+    <select id="selectMenuPerms" resultType="String">
+        select distinct m.perms
+        from sys_menu m
+                 left join sys_role_menu rm on m.menu_id = rm.menu_id
+                 left join sys_user_role ur on rm.role_id = ur.role_id
+    </select>
+
+    <select id="selectMenuPermsByUserId" parameterType="String" resultType="String">
+        select distinct m.perms
+        from sys_menu m
+                 left join sys_role_menu rm on m.menu_id = rm.menu_id
+                 left join sys_user_role ur on rm.role_id = ur.role_id
+                 left join sys_role r on r.role_id = ur.role_id
+        where m.status = '0'
+          and r.status = '0'
+          and ur.user_id = #{userId}
+    </select>
+
+    <select id="selectMenuPermsByRoleId" parameterType="String" resultType="String">
+        select distinct m.perms
+        from sys_menu m
+                 left join sys_role_menu rm on m.menu_id = rm.menu_id
+        where m.status = '0'
+          and rm.role_id = #{roleId}
+    </select>
+
+    <select id="selectMenuById" parameterType="String" resultMap="SysMenuResult">
+        <include refid="selectMenu"/>
+        where menu_id = #{menuId}
+    </select>
+
+    <select id="hasChildByMenuId" resultType="Integer">
+        select count(1)
+        from sys_menu
+        where parent_id = #{menuId}
+    </select>
+
+    <select id="checkMenuNameUnique" parameterType="cn.qingweico.entity.SysMenu" resultMap="SysMenuResult">
+        <include refid="selectMenu"/>
+        where menu_name=#{menuName} and parent_id = #{parentId} limit 1
+    </select>
+
+    <update id="updateMenu" parameterType="cn.qingweico.entity.SysMenu">
+        update sys_menu
+        <set>
+            <if test="menuName != null and menuName != ''">menu_name = #{menuName},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            <if test="path != null and path != ''">path = #{path},</if>
+            <if test="component != null">component = #{component},</if>
+            <if test="query != null">`query` = #{query},</if>
+            <if test="isFrame != null and isFrame != ''">is_frame = #{isFrame},</if>
+            <if test="isCache != null and isCache != ''">is_cache = #{isCache},</if>
+            <if test="menuType != null and menuType != ''">menu_type = #{menuType},</if>
+            <if test="visible != null">visible = #{visible},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="perms !=null">perms = #{perms},</if>
+            <if test="icon !=null and icon != ''">icon = #{icon},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where menu_id = #{menuId}
+    </update>
+
+    <insert id="insertMenu" parameterType="cn.qingweico.entity.SysMenu">
+        insert into sys_menu(
+        <if test="menuId != null and menuId != 0">menu_id,</if>
+        <if test="parentId != null and parentId != 0">parent_id,</if>
+        <if test="menuName != null and menuName != ''">menu_name,</if>
+        <if test="orderNum != null">order_num,</if>
+        <if test="path != null and path != ''">path,</if>
+        <if test="component != null and component != ''">component,</if>
+        <if test="query != null and query != ''">`query`,</if>
+        <if test="isFrame != null and isFrame != ''">is_frame,</if>
+        <if test="isCache != null and isCache != ''">is_cache,</if>
+        <if test="menuType != null and menuType != ''">menu_type,</if>
+        <if test="visible != null">visible,</if>
+        <if test="status != null">status,</if>
+        <if test="perms !=null and perms != ''">perms,</if>
+        <if test="icon != null and icon != ''">icon,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="menuId != null and menuId != 0">#{menuId},</if>
+        <if test="parentId != null and parentId != 0">#{parentId},</if>
+        <if test="menuName != null and menuName != ''">#{menuName},</if>
+        <if test="orderNum != null">#{orderNum},</if>
+        <if test="path != null and path != ''">#{path},</if>
+        <if test="component != null and component != ''">#{component},</if>
+        <if test="query != null and query != ''">#{query},</if>
+        <if test="isFrame != null and isFrame != ''">#{isFrame},</if>
+        <if test="isCache != null and isCache != ''">#{isCache},</if>
+        <if test="menuType != null and menuType != ''">#{menuType},</if>
+        <if test="visible != null">#{visible},</if>
+        <if test="status != null">#{status},</if>
+        <if test="perms !=null and perms != ''">#{perms},</if>
+        <if test="icon != null and icon != ''">#{icon},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <delete id="deleteMenuById" parameterType="Long">
+        delete
+        from gy_sys_menu
+        where menu_id = #{menuId}
+    </delete>
+
+</mapper>

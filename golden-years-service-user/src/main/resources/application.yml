@@ -109,20 +109,6 @@ spring:
     time-zone: GMT+8
   profiles:
     active: dev
-    # db.createUser(
-    #  {
-    #    user: "gy",
-    #    pwd: "gy",
-    #    roles: [ { role: "readWrite", db: "golden-years" } ]
-    #  }
-    #)
-  data:
-    mongodb:
-      uri: mongodb://gy:gy@106.12.136.221:27017
-      database: golden-years
-    elasticsearch:
-      cluster-name: golden-years-es
-      cluster-nodes: 106.12.136.221:9300
   redis:
     database: 0
     host: 106.12.136.221
@@ -137,17 +123,11 @@ spring:
         max-idle: 20
         # 最大等待时间:当没有可用连接时, 连接池等待连接被归还的最大时间(以毫秒计数), 超过时间则抛出异常
         max-wait: 300
-  rabbitmq:
-    host: 106.12.136.221
-    port: 5672
-    username: admin
-    password: admin
-    virtual-host: golden-years
   cloud:
     nacos:
       discovery:
         # 配置 Nacos 地址
-        server-addr: 127.0.0.1:8848
+        server-addr: 106.12.136.221:8848
         # server-addr: 106.12.136.221:8848
         # 配置 service-user 公网ip 本地部署不用开启
         # ip: 106.12.136.221
@@ -167,10 +147,3 @@ spring:
   # type-aliases-package: cn.qingweico.pojo          # 所有POJO类所在包路径
   # mapper-locations: classpath:mapper/*.xml         # mapper映射文件
   # config-location: classpath:/mybatis-config.xml   # mybatis配置文件
-
-
-############################################################
-#
-# mybatis mapper 配置
-#
-############################################################

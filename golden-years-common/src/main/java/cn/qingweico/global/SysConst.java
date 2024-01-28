@@ -12,7 +12,6 @@ public final class SysConst {
      * db column
      */
     public final static String ID = "id";
-    public final static String MONGO_ID = "_id";
     public final static String TITLE = "title";
     public final static String NAME = "name";
     public final static String VALUE = "value";
@@ -220,15 +219,6 @@ public final class SysConst {
     public static final String OS = "Windows 10";
     public final static String CONTRIBUTE_DATE = "contributeDate";
     public final static String BLOG_CONTRIBUTE_COUNT = "blogContributeCount";
-    /**
-     * rabbit mq (article.*.do) routingKey
-     */
-    public static final String ARTICLE_CREATE_FAVORITES_DO = "article.create_favorites.do";
-
-    /**
-     * rabbit mq (delay queue) (article.delay.publish.*.do) routingKey
-     */
-    public static final String ARTICLE_DELAY_PUBLISH_SUCCESS_DO = "article.delay.publish.success.do";
 
 
     public static final String WINDOWS_FACE_PIC_PATH = "C://facePic";
@@ -259,5 +249,60 @@ public final class SysConst {
      * role_admin
      */
     public static final String ROLE_ADMIN = "role_admin";
+
+    /**
+     * 菜单类型（目录）
+     */
+    public static final String TYPE_DIR = "M";
+
+    /**
+     * 菜单类型（菜单）
+     */
+    public static final String TYPE_MENU = "C";
+
+    /**
+     * 菜单类型（按钮）
+     */
+    public static final String TYPE_BUTTON = "F";
+
+    /**
+     * 是否菜单外链(否)
+     */
+    public static final String NO_FRAME = "1";
+
+    /**
+     * http请求
+     */
+    public static final String HTTP = "http://";
+
+    /**
+     * https请求
+     */
+    public static final String HTTPS = "https://";
+
+    /**
+     * www主域
+     */
+    public static final String WWW = "www.";
+
+    /**
+     * Layout组件标识
+     */
+    public final static String LAYOUT = "Layout";
+
+    /**
+     * ParentView组件标识
+     */
+    public final static String PARENT_VIEW = "ParentView";
+
+    /**
+     * InnerLink组件标识
+     */
+    public final static String INNER_LINK = "InnerLink";
+
+    /** 校验是否唯一的返回标识 */
+    public final static boolean UNIQUE = true;
+    public final static boolean NOT_UNIQUE = false;
+
 
 }

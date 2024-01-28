@@ -53,7 +53,7 @@ public class GraceExceptionHandle {
     }
 
     /**
-     * 获取BO中的错误信息
+     * 获取 @Valid 标注实体的错误信息
      *
      * @param result BindingResult
      */

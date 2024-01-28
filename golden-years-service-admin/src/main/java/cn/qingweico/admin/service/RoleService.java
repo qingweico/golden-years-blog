@@ -3,6 +3,7 @@ package cn.qingweico.admin.service;
 import cn.qingweico.entity.SysRole;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zqw
@@ -17,4 +18,12 @@ public interface RoleService {
     */
 
    List<SysRole> queryRoleBySysUserId(String sysUserId);
+
+   /**
+    * 根据用户ID查询角色权限
+    *
+    * @param userId 用户ID
+    * @return 权限列表
+    */
+   Set<String> selectRolePermissionByUserId(String userId);
 }
