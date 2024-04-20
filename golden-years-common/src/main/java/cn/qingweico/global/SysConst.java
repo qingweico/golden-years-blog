@@ -221,10 +221,6 @@ public final class SysConst {
     public final static String BLOG_CONTRIBUTE_COUNT = "blogContributeCount";
 
 
-    public static final String WINDOWS_FACE_PIC_PATH = "C://facePic";
-
-    public static final String LINUX_FACE_PIC_PATH = "/home/java/facePic";
-
     /**
      * TOKEN_PREFIX
      */

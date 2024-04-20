@@ -43,7 +43,7 @@ export const constantRoutes = [
   },
   {
     path: '/login',
-    component: () => import('@/views/login'),
+    component: () => import('@/views/login/index.vue'),
     hidden: true
   },
   {

@@ -15,8 +15,6 @@ public class OperatorSysUser {
     private String username;
     private String password;
     private String confirmPassword;
-    private String img64;
-    private String faceId;
     private String avatar;
     private String mobile;
     private String email;

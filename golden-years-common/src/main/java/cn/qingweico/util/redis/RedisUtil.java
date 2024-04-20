@@ -10,12 +10,10 @@ import cn.qingweico.result.Response;
 import cn.qingweico.util.JsonUtils;
 import cn.qingweico.util.JwtUtils;
 import cn.qingweico.util.ServletReqUtils;
-import cn.qingweico.util.pool.ThreadPoolBuilder;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
