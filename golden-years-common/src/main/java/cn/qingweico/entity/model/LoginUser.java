@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 登录用户身份权限
@@ -135,8 +134,7 @@ public class LoginUser implements UserDetails, Serializable {
         return null;
     }
 
-    public LoginUser(String userId, SysUser user, Set<String> permissions)
-    {
+    public LoginUser(String userId, SysUser user, Set<String> permissions) {
         this.userId = userId;
         this.user = user;
         this.permissions = permissions;

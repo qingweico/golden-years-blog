@@ -142,12 +142,6 @@
 			<artifactId>aliyun-java-sdk-dysmsapi</artifactId>
 			<version>2.2.1</version>
 		</dependency>
-		<!-- 人脸比对1:1 -->
-		<dependency>
-			<groupId>com.aliyun</groupId>
-			<artifactId>aliyun-java-sdk-facebody</artifactId>
-			<version>1.2.28</version>
-		</dependency>
 		<!-- 验证码 -->
 		<dependency>
 			<groupId>com.github.penggle</groupId>

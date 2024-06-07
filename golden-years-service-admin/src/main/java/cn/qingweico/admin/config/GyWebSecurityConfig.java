@@ -5,7 +5,6 @@ import cn.qingweico.core.security.handle.ApiAccessDeniedHandler;
 import cn.qingweico.core.security.handle.ApiAuthenticationEntryPoint;
 import cn.qingweico.core.security.handle.LogoutSuccessHandlerImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

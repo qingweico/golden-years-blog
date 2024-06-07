@@ -3,7 +3,6 @@ package cn.qingweico.user.service;
 
 import cn.qingweico.entity.Fans;
 import cn.qingweico.enums.Sex;
-import cn.qingweico.user.entity.FansCountsVO;
 import cn.qingweico.user.entity.RegionRatioVO;
 import cn.qingweico.util.PagedResult;
 import com.baomidou.mybatisplus.extension.service.IService;

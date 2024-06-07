@@ -12,17 +12,6 @@ import java.io.IOException;
  */
 public interface UploaderService {
     /**
-     * 使用fastDFS上传文件
-     *
-     * @param file        MultipartFile
-     * @param fileExtName 文件扩展名
-     * @return String
-     * @throws IOException IOException
-     */
-
-    String uploadFastDfs(MultipartFile file, String fileExtName) throws IOException;
-
-    /**
      * 使用阿里OSS上传文件
      *
      * @param file        MultipartFile

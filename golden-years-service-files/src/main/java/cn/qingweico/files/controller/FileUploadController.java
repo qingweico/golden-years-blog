@@ -56,17 +56,13 @@ public class FileUploadController {
                 if (!fileExtension.equalsIgnoreCase(SysConst.FILE_SUFFIX_JPG) && !fileExtension.equalsIgnoreCase(SysConst.FILE_SUFFIX_JPEG) && !fileExtension.equalsIgnoreCase(SysConst.FILE_SUFFIX_PNG) && !fileExtension.equalsIgnoreCase(SysConst.FILE_SUFFIX_BLOB)) {
                     return Result.r(Response.FILE_FORMATTER_FAILED);
                 }
-
-                if (FileUploadType.FAST_DFS.getVal().equals(uploadMethod)) {
-                    path = uploaderService.uploadFastDfs(file, fileExtension);
-                } else if (FileUploadType.ALI_YUN.getVal().equals(uploadMethod)) {
+                if (FileUploadType.ALI_YUN.getVal().equals(uploadMethod)) {
                     // TODO
                     String userId = "001";
                     path = uploaderService.uploadOss(file, userId, fileExtension);
                 } else if (FileUploadType.QI_NIU_YUN.getVal().equals(uploadMethod)) {
                     path = qiniuUtil.upload(file.getInputStream(), fileName);
                 }
-
             } else {
                 return Result.r(Response.FILE_UPLOAD_NULL_ERROR);
             }
@@ -100,12 +96,11 @@ public class FileUploadController {
 
         if (files != null) {
             for (MultipartFile file : files) {
-                String path;
+                String path = null;
 
                 if (file != null) {
                     // 获得上传文件名称
                     String fileName = file.getOriginalFilename();
-
                     // 判断文件名不能为空
                     if (StringUtils.isNotBlank(fileName)) {
                         // 获得文件扩展名
@@ -115,7 +110,6 @@ public class FileUploadController {
                             continue;
                         }
                         // 执行文件上传
-                        path = uploaderService.uploadFastDfs(file, fileExtension);
                     } else {
                         continue;
                     }
@@ -125,9 +119,6 @@ public class FileUploadController {
                 log.info("path = {}", path);
 
                 String finalPath = "";
-                if (StringUtils.isNotBlank(path)) {
-                    finalPath = fileResource.getFsHost() + path;
-                }
                 imageUrlList.add(finalPath);
             }
         }

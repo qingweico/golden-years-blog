@@ -61,7 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public PagedResult queryUserList(String nickname,
-                                     Integer status,
+                                     String status,
                                      String mobile,
                                      Date startDate,
                                      Date endDate,
@@ -89,7 +89,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
-    public void changeUserStatus(String userId, Integer doStatus) {
+    public void changeUserStatus(String userId, String doStatus) {
         User user = new User();
         user.setId(userId);
         user.setAvailable(doStatus);
@@ -99,7 +99,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else {
             GraceException.error(Response.SYSTEM_OPERATION_ERROR);
         }
-
     }
 
     @Override

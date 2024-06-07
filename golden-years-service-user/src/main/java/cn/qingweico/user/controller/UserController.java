@@ -42,7 +42,7 @@ public class UserController extends BaseController {
     @ApiOperation(value = "查询网站的所有注册用户", notes = "查询网站的所有注册用户", httpMethod = "POST")
     @GetMapping("/query")
     public Result query(@RequestParam String nickname,
-                        @RequestParam Integer status,
+                        @RequestParam String status,
                         @RequestParam String mobile,
                         @RequestParam Date startDate,
                         @RequestParam Date endDate,
@@ -68,7 +68,7 @@ public class UserController extends BaseController {
 
     @ApiOperation(value = "更改用户状态", notes = "更改用户状态", httpMethod = "POST")
     @PostMapping("/changeUserStatus")
-    public Result changeUserStatus(String userId, Integer doStatus) {
+    public Result changeUserStatus(String userId, String doStatus) {
         if (!UserStatus.isUserStatusValid(doStatus)) {
             return Result.r(Response.REQUEST_PARAM_ERROR);
         }
@@ -113,7 +113,7 @@ public class UserController extends BaseController {
         ubi.setMyFansCounts(myFanCounts);
         ubi.setMyFollowCounts(myFollowCounts);
 
-        Integer available = user.getAvailable();
+        String available = user.getAvailable();
         if (UserStatus.AVAILABLE.getVal().equals(available)) {
             return Result.error(Response.DISABLE_USER.msg());
         }

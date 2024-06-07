@@ -8,8 +8,6 @@ import cn.qingweico.entity.model.OperatorSysUser;
 import cn.qingweico.entity.model.UpdatePassword;
 import cn.qingweico.exception.GraceException;
 import cn.qingweico.global.RedisConst;
-import cn.qingweico.global.SysConst;
-
 import cn.qingweico.result.Response;
 import cn.qingweico.result.Result;
 import cn.qingweico.util.PagedResult;
@@ -17,7 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,20 +44,12 @@ public class SysUserController extends BaseController {
     @ApiOperation(value = "创建新的系统用户", notes = "创建新的系统用户", httpMethod = "POST")
     @PostMapping("/add")
     public Result add(@RequestBody OperatorSysUser operatorSysUser) {
-        // 若BO中base64不为空, 则代表人脸识别登陆, 否则需要用户名和密码
-        if (StringUtils.isBlank(operatorSysUser.getImg64())) {
-            if (StringUtils.isBlank(operatorSysUser.getPassword()) ||
-                    StringUtils.isBlank(operatorSysUser.getConfirmPassword())) {
-                return Result.r(Response.ADMIN_PASSWORD_NULL_ERROR);
-            }
+        if (StringUtils.isBlank(operatorSysUser.getPassword()) || StringUtils.isBlank(operatorSysUser.getConfirmPassword())) {
+            return Result.r(Response.ADMIN_PASSWORD_NULL_ERROR);
         }
-
-        // 若密码不为空, 则必须验证两次输入的密码是否一致
         if (StringUtils.isNotBlank(operatorSysUser.getPassword())) {
-            if (!operatorSysUser.getPassword().
-                    equals(operatorSysUser.getConfirmPassword())) {
+            if (!operatorSysUser.getPassword().equals(operatorSysUser.getConfirmPassword())) {
                 return Result.r(Response.ADMIN_PASSWORD_ERROR);
-
             }
         }
         // 校验用户名唯一性
@@ -102,19 +91,7 @@ public class SysUserController extends BaseController {
         SysUser loginUser = getLoginUser(SysUser.class, tokenKey, infoKey);
         String id = loginUser.getId();
         user.setId(id);
-        // TODO 检擦手机号码和邮箱是否唯一
         sysUserService.updateSysUserProfile(user);
         return Result.r(Response.UPDATE_SUCCESS);
-    }
-    @ApiOperation(value = "删除系统用户人脸信息", notes = "删除系统用户人脸信息", httpMethod = "POST")
-    @PostMapping("/deleteFaceInfo/{id}")
-    public Result deleteFaceInfo(@PathVariable("id") String id){
-        SysUser sysUser = sysUserService.querySysUserById(id);
-        client.removeGridFsFile(sysUser.getFaceId());
-        sysUser.setFaceId(SysConst.EMPTY_STRING);
-        OperatorSysUser operatorSysUserBO = new OperatorSysUser();
-        BeanUtils.copyProperties(sysUser, operatorSysUserBO);
-        sysUserService.updateSysUserProfile(operatorSysUserBO);
-        return Result.ok();
     }
 }

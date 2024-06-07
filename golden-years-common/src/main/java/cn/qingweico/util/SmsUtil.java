@@ -8,6 +8,7 @@ import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.google.gson.Gson;
 import com.aliyuncs.dysmsapi.model.v20170525.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -21,7 +22,9 @@ import javax.annotation.Resource;
  * @author zqw
  * @date 2021/9/5
  */
+@Slf4j
 @Component
+@Deprecated
 public class SmsUtil {
 
     @Resource
@@ -31,11 +34,10 @@ public class SmsUtil {
      * 原版 SDK
      *
      * @param mobile 手机号
-     * @param code 验证码
+     * @param code   验证码
      */
     public void sendSms(String mobile, String code) {
-        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou",
-                aliResource.getAccessKeyId(), aliResource.getAccessKeySecret());
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", aliResource.getAccessKeyId(), aliResource.getAccessKeySecret());
         /* use STS Token
          DefaultProfile profile = DefaultProfile.getProfile(
          "<your-region-id>",           // The region ID
@@ -58,17 +60,11 @@ public class SmsUtil {
             SendSmsResponse response = client.getAcsResponse(request);
             System.out.println(new Gson().toJson(response));
         } catch (ServerException e) {
-            e.printStackTrace();
+            log.error("ServerException: {}", e.getMessage());
         } catch (ClientException e) {
-            System.out.println("ErrCode:" + e.getErrCode());
-            System.out.println("ErrMsg:" + e.getErrMsg());
-            System.out.println("RequestId:" + e.getRequestId());
+            log.error("ErrCode: {}", e.getErrCode());
+            log.error("ErrMsg: {}", e.getErrMsg());
+            log.error("RequestId: {}", e.getRequestId());
         }
-    }
-
-    public static void main(String[] args) {
-        SmsUtil smsUtil = new SmsUtil();
-        smsUtil.
-                sendSms("17796706221", "956745");
     }
 }

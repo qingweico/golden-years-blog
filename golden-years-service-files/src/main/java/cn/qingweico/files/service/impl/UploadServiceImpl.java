@@ -6,8 +6,6 @@ import cn.qingweico.global.SysConst;
 import cn.qingweico.util.aliyun.AliResource;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
-import com.github.tobato.fastdfs.domain.fdfs.StorePath;
-import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,17 +20,11 @@ import java.io.InputStream;
 @Service
 public class UploadServiceImpl implements UploaderService {
     @Resource
-    private FastFileStorageClient fastFileStorageClient;
-    @Resource
     private FileResource fileResource;
     @Resource
     private AliResource aliResource;
 
-    @Override
-    public String uploadFastDfs(MultipartFile file, String fileExtName) throws IOException {
-        StorePath storePath = fastFileStorageClient.uploadFile(file.getInputStream(), file.getSize(), fileExtName, null);
-        return storePath.getFullPath();
-    }
+
 
     @Override
     public String uploadOss(MultipartFile file, String userId, String fileExtName) throws IOException {

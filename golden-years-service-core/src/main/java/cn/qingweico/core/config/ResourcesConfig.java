@@ -16,8 +16,7 @@ public class ResourcesConfig {
      * 跨域配置
      */
     @Bean
-    public CorsFilter corsFilter()
-    {
+    public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         // 设置访问源地址

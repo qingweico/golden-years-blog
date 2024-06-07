@@ -1,11 +1,9 @@
 package cn.qingweico.entity.model;
 
-import cn.qingweico.entity.Tag;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author zqw
@@ -27,5 +25,4 @@ public class ArticleDetail {
     private Integer collectCounts;
     private Integer commentCounts;
     private Integer starCounts;
-    private List<Tag> tagList;
 }

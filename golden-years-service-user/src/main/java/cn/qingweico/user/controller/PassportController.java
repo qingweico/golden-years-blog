@@ -35,13 +35,11 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @Api(value = "用户注册登陆相关的接口定义", tags = {"用户注册登陆相关的接口定义"})
-@RequestMapping("/u/auth")
+@RequestMapping("/u")
 public class PassportController extends BaseController {
 
     @Resource
     private UserService userService;
-    @Resource
-    private SmsUtil smsUtil;
 
     @ApiOperation(value = "获得短信验证码", notes = "获得短信验证码", httpMethod = "GET")
     @GetMapping("/getSmsCode")
@@ -54,7 +52,6 @@ public class PassportController extends BaseController {
         // 根据用户的ip进行限制, 限制用户在60s内只能获得一次验证码
         redisCache.setNx60s(RedisConst.REDIS_IP + SysConst.SYMBOL_COLON + userIp, userIp);
         String random = RandomStringUtils.random(6, false, true);
-        smsUtil.sendSms(mobile, random);
         // 把验证码存入redis中, 用于后续验证; 验证码两分钟内有效
         redisCache.set(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile, random, 2 * 60);
         return Result.r(Response.SMS_SEND_SUCCESS);
@@ -62,8 +59,7 @@ public class PassportController extends BaseController {
 
     @ApiOperation(value = "手机号码登陆", notes = "手机号码登陆", httpMethod = "POST")
     @PostMapping("/mobile")
-    @SentinelResource(value = "freePwdAuth", blockHandler = "reqFrequentError",
-            blockHandlerClass = DefaultHandler.class)
+    @SentinelResource(value = "freePwdAuth", blockHandler = "reqFrequentError", blockHandlerClass = DefaultHandler.class)
     public Result freePwdAuth(@RequestBody SmsMobileBO registerBO) {
 
         String mobile = registerBO.getMobile();
@@ -86,15 +82,15 @@ public class PassportController extends BaseController {
         String jsonWebToken = JwtUtils.createJwt(user.getId());
         userService.doSaveUserAuthToken(user, jsonWebToken);
         userService.doSaveLoginLog(user.getId());
-        int userStatus = user.getAvailable();
+        String userStatus = user.getAvailable();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
         redisCache.del(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
         HashMap<String, Object> map = new HashMap<>(2);
         map.put(SysConst.TOKEN, jsonWebToken);
         map.put(SysConst.USER_STATUS, user.getAvailable());
-        if (userStatus == UserStatus.DISABLE.getVal()) {
+        if (Objects.equals(userStatus, UserStatus.DISABLE.getVal())) {
             return Result.ok(map);
-        } else if (userStatus == UserStatus.AVAILABLE.getVal()) {
+        } else if (Objects.equals(userStatus, UserStatus.AVAILABLE.getVal())) {
             return Result.ok(Response.LOGIN_SUCCESS, map);
         }
         return Result.r(Response.SYSTEM_ERROR);
@@ -103,8 +99,7 @@ public class PassportController extends BaseController {
 
     @ApiOperation(value = "密码认证登陆", notes = "密码认证登陆", httpMethod = "POST")
     @PostMapping("/passwd")
-    @SentinelResource(value = "withPwdAuth", blockHandler = "reqFrequentError",
-            blockHandlerClass = DefaultHandler.class)
+    @SentinelResource(value = "withPwdAuth", blockHandler = "reqFrequentError", blockHandlerClass = DefaultHandler.class)
     public Result withPwdAuth(@RequestBody PasswordAuthBO passwordAuthBO) {
         String auth = passwordAuthBO.getAuth();
         String password = passwordAuthBO.getPassword();
@@ -114,10 +109,8 @@ public class PassportController extends BaseController {
         } else if (UserStatus.DISABLE.getVal().equals(user.getAvailable())) {
             return Result.r(Response.USER_FROZEN);
         }
-        int userStatus = user.getAvailable();
-        if (user.getMobile().equals(auth)
-                || user.getNickname().equals(auth)
-                || user.getEmail().equals(auth)) {
+        String userStatus = user.getAvailable();
+        if (user.getMobile().equals(auth) || user.getNickname().equals(auth) || user.getEmail().equals(auth)) {
             if (Objects.equals(user.getPassword(), password)) {
                 if (userStatus == UserStatus.DISABLE.getVal()) {
                     return Result.ok(user.getAvailable());

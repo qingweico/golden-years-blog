@@ -13,18 +13,18 @@ import java.util.Collection;
  * @author zqw
  * @date 2023/9/23
  */
+@Getter
 @Builder
 public class ApiAuthenticationToken implements Authentication {
 
 
     private static final long serialVersionUID = 6712621209562892992L;
 
-    private @Getter
+    private
     LoginUser loginUser;
 
-    private @Getter String token;
+    private String token;
 
-    @Getter
     private Serializable data;
 
     @Override

@@ -44,10 +44,10 @@ public class DynamicDataSourceInterceptor implements Interceptor {
         boolean synchronizationActive = TransactionSynchronizationManager.isSynchronizationActive();
         MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
         String sqlId = mappedStatement.getId();
-        log.debug("------sqlId------" + sqlId);
+        log.debug("------sqlId------{}", sqlId);
         SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
         Object parameter = invocation.getArgs()[1];
-        log.debug("------sqlCommandType------" + sqlCommandType);
+        log.debug("------sqlCommandType------{}", sqlCommandType);
         if (parameter == null) {
             return invocation.proceed();
         }
@@ -55,7 +55,6 @@ public class DynamicDataSourceInterceptor implements Interceptor {
         if (SqlCommandType.INSERT == sqlCommandType) {
             Field[] fields = ClassUtils.getAllFields(parameter);
             for (Field field : fields) {
-                log.debug("------field.name------" + field.getName());
                 try {
                     if ("CREATE_BY".equals(field.getName())) {
                         LoginUser sysUser = SecurityUtils.getLoginUser();
@@ -98,7 +97,6 @@ public class DynamicDataSourceInterceptor implements Interceptor {
         if (SqlCommandType.UPDATE == sqlCommandType) {
             Field[] fields = ClassUtils.getAllFields(parameter);
             for (Field field : fields) {
-                log.debug("------field.name------" + field.getName());
                 try {
                     if ("UPDATE_BY".equals(field.getName())) {
                         field.setAccessible(true);

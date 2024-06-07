@@ -27,7 +27,7 @@ public interface UserService extends IService<User> {
      * @return 用户列表
      */
     PagedResult queryUserList(String nickname,
-                              Integer status,
+                              String status,
                               String mobile,
                               Date startDate,
                               Date endDate,
@@ -41,7 +41,7 @@ public interface UserService extends IService<User> {
      * @param userId   用户id
      * @param doStatus doStatus
      */
-    void changeUserStatus(String userId, Integer doStatus);
+    void changeUserStatus(String userId, String doStatus);
 
     /**
      * 判断手机是否存在

@@ -1,11 +1,9 @@
 package cn.qingweico.entity.model;
 
 
-import cn.qingweico.entity.Tag;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author zqw
@@ -17,5 +15,4 @@ public class ArticleClassify {
     private String title;
     private String categoryId;
     private Date createTime;
-    private List<Tag> tagList;
 }

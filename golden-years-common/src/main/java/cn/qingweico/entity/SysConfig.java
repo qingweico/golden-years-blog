@@ -2,7 +2,6 @@ package cn.qingweico.entity;
 
 import cn.qingweico.enums.EditorModelType;
 import cn.qingweico.enums.FileUploadType;
-import cn.qingweico.enums.SearchModelType;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -21,6 +20,7 @@ import lombok.experimental.Accessors;
 @Builder
 @Accessors(chain = true)
 public class SysConfig extends BaseEntity {
+    private static final long serialVersionUID = 7978868592680200717L;
     /**
      * 文件上传方式 {@link FileUploadType}
      */
@@ -34,10 +34,6 @@ public class SysConfig extends BaseEntity {
      * 主题颜色
      */
     private String themeColor;
-    /**
-     * 主站文章搜索模式 {@link SearchModelType}
-     */
-    private Integer searchModel;
 
     /**
      * 本地图片上传路径

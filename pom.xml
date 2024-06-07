@@ -36,7 +36,7 @@
 		<pagehelper-spring-boot-starter.version>1.2.12</pagehelper-spring-boot-starter.version>
 		<spring-boot-starter-freemarker>2.2.5.RELEASE</spring-boot-starter-freemarker>
 		<okhttp.version>4.2.2</okhttp.version>
-		<lombok.version>1.18.10</lombok.version>
+		<lombok.version>1.18.20</lombok.version>
 		<jackson.version>2.10.2</jackson.version>
 		<commons-codec.version>1.11</commons-codec.version>
 		<commons-lang3.version>3.4</commons-lang3.version>
