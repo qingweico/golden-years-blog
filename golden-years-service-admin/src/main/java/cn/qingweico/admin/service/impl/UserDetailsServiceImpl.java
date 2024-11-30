@@ -3,7 +3,7 @@ package cn.qingweico.admin.service.impl;
 import cn.qingweico.admin.service.SysPermissionService;
 import cn.qingweico.admin.service.SysUserService;
 import cn.qingweico.entity.SysUser;
-import cn.qingweico.entity.model.LoginUser;
+import cn.qingweico.security.entity.LoginUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

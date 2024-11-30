@@ -14,7 +14,6 @@ import cn.qingweico.enums.YesOrNo;
 import cn.qingweico.global.SysConst;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -443,7 +442,7 @@ public class SysMenuServiceImpl implements SysMenuService {
      * 判断是否有子节点
      */
     private boolean hasChild(List<SysMenu> list, SysMenu t) {
-        return getChildList(list, t).size() > 0;
+        return !getChildList(list, t).isEmpty();
     }
 
     /**

@@ -227,4 +227,9 @@ public class UserController extends BaseController {
     public Integer getUserCounts() {
         return userService.queryUserCounts();
     }
+
+    @GetMapping("/queryAllUser")
+    public List<User> queryAllUser() {
+        return userService.queryAllUser();
+    }
 }

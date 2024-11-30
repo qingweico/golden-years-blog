@@ -12,7 +12,7 @@ server:
 
 ############################################################
 #
-# 配置项目信息   数据源的相关配置
+# 数据源的相关配置
 #
 ############################################################
 spring:
@@ -40,7 +40,7 @@ spring:
         - id: user-route
           uri: lb://service-user
           predicates:
-            - Path=/user/**, /fans/**, /u/auth/**
+            - Path=/user/**, /fans/**, /u/auth/**, /druid/**
         - id: admin-route
           uri: lb://service-admin
           predicates:
@@ -62,7 +62,7 @@ spring:
         # ip: 127.0.0.1
         # port: 7000
 # ip请求限制的参数配置
-blackIp:
-  continueCounts: ${counts:50}     # ip连续请求的次数
-  timeInterval: ${interval:1}      # ip判断的事件间隔, 单位: 秒
-  limitTimes: ${times:15}          # 限制的时间, 单位: 秒
+black-ip:
+  continue-counts: ${counts:50}     # ip连续请求的次数
+  time-interval: ${interval:1}      # ip判断的事件间隔, 单位: 秒
+  limit-times: ${times:15}          # 限制的时间, 单位: 秒

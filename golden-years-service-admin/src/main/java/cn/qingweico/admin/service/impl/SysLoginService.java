@@ -1,18 +1,17 @@
 package cn.qingweico.admin.service.impl;
 
-import cn.qingweico.core.security.context.AuthenticationContextHolder;
-import cn.qingweico.core.security.TokenService;
-import cn.qingweico.entity.model.LoginUser;
-import cn.qingweico.exception.ServiceException;
+import cn.qingweico.security.context.AuthenticationContextHolder;
+
 import cn.qingweico.exception.user.UserNotExistsException;
 import cn.qingweico.exception.user.UserPasswordNotMatchException;
+import cn.qingweico.security.entity.LoginUser;
+import cn.qingweico.security.token.TokenService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,7 +54,6 @@ public class SysLoginService {
      * @return token
      */
     public String login(String username, String password, String uuid) {
-
         // 登录前置校验
         loginPreCheck(username, password);
         // 用户认证

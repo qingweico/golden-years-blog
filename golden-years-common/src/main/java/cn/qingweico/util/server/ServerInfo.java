@@ -25,7 +25,7 @@ import java.util.Properties;
 /**
  * 服务器相关信息
  *
- * @author ruoyi
+ * @author zqw
  */
 @Slf4j
 @Data

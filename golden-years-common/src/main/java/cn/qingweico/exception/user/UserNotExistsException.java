@@ -2,7 +2,7 @@ package cn.qingweico.exception.user;
 /**
  * 用户不存在异常类
  *
- * @author ruoyi
+ * @author zqw
  */
 public class UserNotExistsException extends UserException
 {

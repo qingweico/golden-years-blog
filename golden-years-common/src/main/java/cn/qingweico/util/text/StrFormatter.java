@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * 字符串格式化
  *
- * @author ruoyi
+ * @author zqw
  */
 public class StrFormatter {
     public static final String EMPTY_JSON = "{}";

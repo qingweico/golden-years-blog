@@ -34,44 +34,83 @@ spring:
   application:
     name: service-admin
   datasource:
-    # mysql驱动
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    # Linux xxx
-    masterUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
-    slaveUrl: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
-    username: root
-    password: 990712
-    initialization-mode: always
-    # 数据源其他配置
-    # 初始化连接池的大小
-    initialSize: 5
-    # 连接池中的最小空闲连接数
-    minIdle: 5
-    # 连接池中的最大的连接数
-    maxActive: 20
-    # 配置获取连接等待超时的时间
-    maxWait: 60000
-    # 配置获取连接等待超时的时间
-    timeBetweenEvictionRunsMillis: 60000
-    # 配置一个连接在池中最小生存的时间,单位是毫秒
-    minEvictableIdleTimeMillis: 300000
-    # 验证数据库连接的查询语句
-    validationQuery: SELECT 1 FROM DUAL
-    # 获取连接的时候测试连接的有效性
-    testWhileIdle: true
-    testOnBorrow: false
-    testOnReturn: false
-    # 是否缓存preparedStatement,
-    poolPreparedStatements: true
-    # 配置监控统计拦截的filters,去掉后监控界面sql无法统计,wall用于防火墙
-    filters: stat,wall,log4j2
-    maxPoolPreparedStatementPerConnectionSize: 20
-    # 合并多个DruidDataSource的监控数据
-    useGlobalDataSourceStat: true
-    # 通过connectProperties属性来打开mergeSql功能; 慢SQL记录
-    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
-    # 设置数据源
-    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      db-type: mysql
+      # 设置数据源
+      type: com.alibaba.druid.pool.DruidDataSource
+      master:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        # time_zone : 设置  set global time_zone = "+8:00";
+        url: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+        username: root
+        password: 990712
+        initialization-mode: always
+        # 初始化连接池的大小
+        initialSize: 5
+        # 连接池中的最小空闲连接数
+        minIdle: 5
+        # 连接池中的最大的连接数
+        maxActive: 20
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置获取连接等待超时的时间
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间,单位是毫秒
+        minEvictableIdleTimeMillis: 300000
+        # 验证数据库连接的查询语句
+        validationQuery: SELECT 1 FROM DUAL
+        # 获取连接的时候测试连接的有效性
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        # 是否缓存preparedStatement,
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        # 合并多个DruidDataSource的监控数据
+        useGlobalDataSourceStat: true
+        # 通过connectProperties属性来打开mergeSql功能; 慢SQL记录
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+      slave:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://127.0.0.1:3306/golden-years?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=GMT%2b8
+        username: root
+        password: 990712
+        initialization-mode: always
+        initialSize: 5
+        minIdle: 5
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        useGlobalDataSourceStat: true
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+      # 配置监控统计拦截的filters,去掉后监控界面sql无法统计,wall用于防火墙
+      filters: stat,wall,slf4j
+      filter:
+        stat:
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 10000
+          mergeSql: true
+        slf4j:
+          enabled: true
+          statement-create-after-log-enabled: false
+          statement-log-enabled: true
+          statement-executable-sql-log-enable: true
+          statement-log-error-enabled: true
+          result-set-log-enabled: true
+        wall:
+          enabled: true
+          config:
+            # 设置 SELECT 查询最大返回行数为 1000
+            select-limit: 1000
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8

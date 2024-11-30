@@ -27,7 +27,7 @@ public interface RoleMapper extends BaseMapper<SysRole> {
      * @param userId 用户ID
      * @return 角色列表
      */
-    List<SysRole> selectRolePermissionByUserId(Long userId);
+    List<SysRole> selectRolePermissionByUserId(String userId);
 
     /**
      * 查询所有角色

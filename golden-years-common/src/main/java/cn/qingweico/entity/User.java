@@ -1,5 +1,6 @@
 package cn.qingweico.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -18,6 +19,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @Accessors(chain = true)
+@TableName("gy_user")
 public class User extends BaseEntity {
     private static final long serialVersionUID = -53242415098753974L;
     /**

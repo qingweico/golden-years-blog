@@ -7,6 +7,7 @@ import cn.qingweico.util.PagedResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author zqw
@@ -89,14 +90,14 @@ public interface UserService extends IService<User> {
      * @param user  user
      * @param token token
      */
-    void doSaveUserAuthToken(User user, String token);
+    void saveUserToken(User user, String token);
 
     /**
      * 保存用户登录日志
      *
      * @param userId 用户id
      */
-    void doSaveLoginLog(String userId);
+    void saveLoginLog(String userId);
 
     /**
      * 重置用户密码
@@ -127,4 +128,7 @@ public interface UserService extends IService<User> {
      * @return {@code Integer} 全站用户的数量
      */
     Integer queryUserCounts();
+
+
+    List<User> queryAllUser();
 }

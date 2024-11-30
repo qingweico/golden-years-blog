@@ -1,20 +1,23 @@
 package cn.qingweico.core.config;
 
 import cn.qingweico.core.config.split.DynamicDataSource;
-import com.alibaba.druid.pool.DruidDataSource;
+import cn.qingweico.core.config.split.DynamicDataSourceHolder;
+import cn.qingweico.core.config.split.DynamicDataSourceInterceptor;
+import cn.qingweico.global.DataAccessConstant;
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.*;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -22,7 +25,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,71 +32,44 @@ import java.util.Map;
 /**
  * @author zqw
  * @date 2022/4/4
+ * @see com.alibaba.druid.wall.WallConfig
+ * @see com.alibaba.druid.pool.DruidAbstractDataSource
  */
 @Configuration
 @EnableTransactionManagement
 public class DruidDataSourceConfig {
 
-    private DruidConstant druidConstant;
 
     private static final String CONFIG_LOCATION = "classpath:mybatis-config.xml";
     private static final String MAPPER_LOCATION = "classpath:mapper/*.xml";
     private static final String TYPE_ALIASES_PACKAGE = "cn.qingweico.entity";
 
 
-    @Autowired
-    public void setDruidConstant(DruidConstant druidConstant) {
-        this.druidConstant = druidConstant;
-    }
-
+    @ConfigurationProperties(prefix = "spring.datasource.druid.master")
     @Bean(name = "masterDataSource")
-    @Primary
-    public DataSource masterDataSource() throws SQLException {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setUrl(druidConstant.getMasterUrl());
-        return getDataSource(druidDataSource);
+    @Qualifier("masterDataSource")
+    public DataSource masterDataSource() {
+        return DruidDataSourceBuilder.create().build();
     }
 
+    @ConfigurationProperties(prefix = "spring.datasource.druid.slave")
     @Bean(name = "slaveDataSource")
-    public DataSource slaveDataSource() throws SQLException {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setUrl(druidConstant.getSlaveUrl());
-        return getDataSource(druidDataSource);
+    @Qualifier("slaveDataSource")
+    public DataSource slaveDataSource() {
+        return DruidDataSourceBuilder.create().build();
     }
 
-
-    private DataSource getDataSource(DruidDataSource druidDataSource) throws SQLException {
-        druidDataSource.setDriverClassName(druidConstant.getDriverClassName());
-        druidDataSource.setUsername(druidConstant.getUsername());
-        druidDataSource.setPassword(druidConstant.getPassword());
-        druidDataSource.setInitialSize(druidConstant.getInitialSize());
-        druidDataSource.setMinIdle(druidConstant.getMinIdle());
-        druidDataSource.setMaxActive(druidConstant.getMaxActive());
-        druidDataSource.setMaxWait(druidConstant.getMaxWait());
-        druidDataSource.setTimeBetweenEvictionRunsMillis(druidConstant.getTimeBetweenEvictionRunsMillis());
-        druidDataSource.setMinEvictableIdleTimeMillis(druidConstant.getMinEvictableIdleTimeMillis());
-        druidDataSource.setValidationQuery(druidConstant.getValidationQuery());
-        druidDataSource.setTestWhileIdle(druidConstant.isTestWhileIdle());
-        druidDataSource.setTestOnBorrow(druidConstant.isTestOnBorrow());
-        druidDataSource.setTestOnReturn(druidConstant.isTestOnReturn());
-        druidDataSource.setPoolPreparedStatements(druidConstant.isPoolPreparedStatements());
-        druidDataSource.setFilters(druidConstant.getFilters());
-        druidDataSource.setMaxPoolPreparedStatementPerConnectionSize(druidConstant.getMaxPoolPreparedStatementPerConnectionSize());
-        druidDataSource.setUseGlobalDataSourceStat(druidConstant.isUseGlobalDataSourceStat());
-        druidDataSource.setConnectionProperties(druidConstant.getConnectionProperties());
-        return druidDataSource;
-    }
-
+    @DependsOn({"masterDataSource", "slaveDataSource"})
+    @Primary
     @Bean
-    public DynamicDataSource dynamicDataSource(@Qualifier("masterDataSource") DataSource masterDataSource,
-                                               @Qualifier("slaveDataSource") DataSource slaveDataSource) {
+    public DynamicDataSource dynamicDataSource() {
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
         Map<Object, Object> map = new HashMap<>(2);
         // 与DynamicDataSourceHolder中的DB_MASTER, DB_SLAVE保持一致
-        map.put("master", masterDataSource);
-        map.put("slave", slaveDataSource);
+        map.put(DynamicDataSourceHolder.DB_MASTER, masterDataSource());
+        map.put(DynamicDataSourceHolder.DB_SLAVE, slaveDataSource());
         dynamicDataSource.setTargetDataSources(map);
-        dynamicDataSource.setDefaultTargetDataSource(masterDataSource);
+        dynamicDataSource.setDefaultTargetDataSource(masterDataSource());
         return dynamicDataSource;
     }
 
@@ -112,9 +87,8 @@ public class DruidDataSourceConfig {
     }
 
     @Bean
-    public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
+    public SqlSessionFactory sqlSessionFactory(@Qualifier("dynamicDataSource") DynamicDataSource dataSource) throws Exception {
         // 不要使用原生的SqlSessionFactoryBean
-        // fix 20230930
         MybatisSqlSessionFactoryBean sqlSessionFactoryBean = new MybatisSqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSource);
         sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource(CONFIG_LOCATION));
@@ -133,7 +107,7 @@ public class DruidDataSourceConfig {
      * @return PlatformTransactionManager
      */
     @Bean
-    public PlatformTransactionManager createTransactionManager(@Qualifier("dataSource") DataSource dataSource) {
+    public PlatformTransactionManager createTransactionManager(@Qualifier("dynamicDataSource") DynamicDataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 

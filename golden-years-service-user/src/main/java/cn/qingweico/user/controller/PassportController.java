@@ -80,8 +80,8 @@ public class PassportController extends BaseController {
             return Result.r(Response.USER_FROZEN);
         }
         String jsonWebToken = JwtUtils.createJwt(user.getId());
-        userService.doSaveUserAuthToken(user, jsonWebToken);
-        userService.doSaveLoginLog(user.getId());
+        userService.saveUserToken(user, jsonWebToken);
+        userService.saveLoginLog(user.getId());
         String userStatus = user.getAvailable();
         // 用户登录或者注册成功后, 需要删除redis中的短信验证码, 验证码只能在使用一次
         redisCache.del(RedisConst.MOBILE_SMS_CODE + SysConst.SYMBOL_COLON + mobile);
@@ -112,13 +112,13 @@ public class PassportController extends BaseController {
         String userStatus = user.getAvailable();
         if (user.getMobile().equals(auth) || user.getNickname().equals(auth) || user.getEmail().equals(auth)) {
             if (Objects.equals(user.getPassword(), password)) {
-                if (userStatus == UserStatus.DISABLE.getVal()) {
+                if (UserStatus.DISABLE.getVal().equals(userStatus)) {
                     return Result.ok(user.getAvailable());
                 }
-                if (userStatus == UserStatus.AVAILABLE.getVal()) {
+                if (UserStatus.AVAILABLE.getVal().equals(userStatus)) {
                     String jsonWebToken = JwtUtils.createJwt(user.getId());
-                    userService.doSaveUserAuthToken(user, jsonWebToken);
-                    userService.doSaveLoginLog(user.getId());
+                    userService.saveUserToken(user, jsonWebToken);
+                    userService.saveLoginLog(user.getId());
                     return Result.ok(Response.LOGIN_SUCCESS, jsonWebToken);
                 }
             }

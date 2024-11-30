@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -177,7 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void doSaveUserAuthToken(User user, String token) {
+    public void saveUserToken(User user, String token) {
         // 保存token以及用户信息到redis中
         redisCache.set(RedisConst.REDIS_USER_TOKEN + SysConst.SYMBOL_COLON + user.getId(), token);
         redisCache.set(RedisConst.REDIS_USER_INFO + SysConst.SYMBOL_COLON + user.getId(), JsonUtils.objectToJson(user));
@@ -185,7 +186,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
-    public void doSaveLoginLog(String userId) {
+    public void saveLoginLog(String userId) {
         // 保存用户登陆日志信息
         loginLogService.saveUserLoginLog(userId);
     }
@@ -229,5 +230,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaQueryWrapper<User> lwq = new LambdaQueryWrapper<>();
         lwq.eq(User::getAvailable, UserStatus.AVAILABLE.getVal());
         return userMapper.selectCount(lwq);
+    }
+    @Override
+    public List<User> queryAllUser() {
+        return userMapper.selectList(null);
     }
 }

@@ -62,11 +62,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             String encryptedPwd = BCrypt.hashpw(operatorSysUser.getPassword(), BCrypt.gensalt());
             sysUser.setPassword(encryptedPwd);
         }
-
-        // 如果人脸上传以后则获有FaceId, 则需要将FaceId与SysUser信息相关联
-        if (StringUtils.isNotBlank(operatorSysUser.getFaceId())) {
-            sysUser.setFaceId(operatorSysUser.getFaceId());
-        }
         sysUser.setCreateTime(DateUtils.nowDateTime());
         sysUser.setUpdateTime(DateUtils.nowDateTime());
         int res = sysUserMapper.insert(sysUser);

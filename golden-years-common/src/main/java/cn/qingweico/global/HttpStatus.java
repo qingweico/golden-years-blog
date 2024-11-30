@@ -5,8 +5,7 @@ package cn.qingweico.global;
  *
  * @author zqw
  */
-public class HttpStatus
-{
+public class HttpStatus {
     /**
      * 操作成功
      */

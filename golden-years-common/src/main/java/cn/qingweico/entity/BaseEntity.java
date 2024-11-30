@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"createdBy", "created", "lastUpdBy", "lastUpd"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"createBy", "createTime", "updateBy", "updateTime"})
 public class BaseEntity implements Serializable {
 
     private static final long serialVersionUID = -3748314123956389002L;

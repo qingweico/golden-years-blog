@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * JVM相关信息
  *
- * @author ruoyi
+ * @author zqw
  */
 @Data
 public class Jvm {

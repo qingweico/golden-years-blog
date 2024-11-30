@@ -1,9 +1,9 @@
 package cn.qingweico.admin.config;
 
-import cn.qingweico.core.security.filter.JwtAuthenticationTokenFilter;
-import cn.qingweico.core.security.handle.ApiAccessDeniedHandler;
-import cn.qingweico.core.security.handle.ApiAuthenticationEntryPoint;
-import cn.qingweico.core.security.handle.LogoutSuccessHandlerImpl;
+import cn.qingweico.security.filter.JwtAuthenticationTokenFilter;
+import cn.qingweico.security.handle.ApiAccessDeniedHandler;
+import cn.qingweico.security.handle.ApiAuthenticationEntryPoint;
+import cn.qingweico.security.handle.LogoutSuccessHandlerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

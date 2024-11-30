@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * 內存相关信息
  *
- * @author ruoyi
+ * @author zqw
  */
 @Data
 public class Mem {

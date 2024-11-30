@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * 系统文件相关信息
  *
- * @author ruoyi
+ * @author zqw
  */
 @Data
 public class SysFile {
